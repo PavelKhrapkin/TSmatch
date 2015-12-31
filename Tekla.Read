@@ -1,0 +1,82 @@
+/*-----------------------------------------------------------------------
+ * TS_OpenAPI -- класс. предназначенный для взаимодействия с Tekla Structure Open API
+ * 
+ *  21.12.2015  П.Храпкин, А.Бобцов
+ *  
+ * -------------------------------------------
+ * TSmodelRead(name)    - читает из Tekla текущую модель, возвращает список из наборов атрибутов AttSet,
+ *                        относящихсяк каждому отдельному компоненту.
+ *                        Сейчас AttSet содержит только пары <материал> и <профиль>
+ */
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Tekla.Structures.Model;
+using TSD = Tekla.Structures.Dialog;
+using TSM = Tekla.Structures.Model;
+//using Log = match.Lib.Log;
+//using Docs = TSmatch.Document.Document;
+//using TSmatch;
+
+namespace TSmatch.Tekla
+{
+    class Tekla
+    {
+        public struct AttSet
+        {
+            public string mat, prf;
+            public AttSet(string m, string p) { mat = m; prf = p; }
+        }
+        private static List<AttSet> ModAtr = new List<AttSet>();
+        public static TSM.ModelInfo ModInfo;
+
+        public static List<AttSet> Read()
+        {
+//-- PKhrapkin 26.12.2015: Silent code; No dialog in this module
+//--            Log.set("TS_OpenAPI.Read");
+            TSM.Model model = new TSM.Model();
+            List<Part> parts = new List<Part>();
+            if (!model.GetConnectionStatus())
+            {
+//--                TSD.ErrorDialog.Show("Tekla Model does not connected to C#", "", TSD.ErrorDialog.Severity.ERROR);
+                return null;
+            }
+            ModInfo = model.GetInfo();
+            TSM.ModelObjectSelector selector = model.GetModelObjectSelector();
+            System.Type[] Types = new System.Type[1];
+            Types.SetValue(typeof(Part),0);
+
+            TSM.ModelObjectEnumerator objectList = selector.GetAllObjectsWithType(Types);
+            int totalCnt = objectList.GetSize();
+//--          new Log("\n\ttotalCnt =" + totalCnt);
+            var progress = new TSM.Operations.Operation.ProgressBar();
+            bool displayResult = progress.Display(100, "TSmatch", "Reading model. Pass component records:", "Cancel", " ");
+            int ii = 0;
+            while (objectList.MoveNext())
+            {
+                TSM.Part myPart = objectList.Current as TSM.Part;
+                if (myPart != null)
+                {
+                    ii++;
+                    ModAtr.Add(new AttSet(myPart.Material.MaterialString,
+                                          myPart.Profile.ProfileString)   );
+                    if (ii % 100 == 0) // progress update every 100th item
+                    {
+                        if (progress.Canceled())
+                        {
+//--                        new Log("\n\n======= TSmatch pass model CANCEL!! =======  ii=" + ii);
+                            break;
+                        }
+                        progress.SetProgress(ii.ToString(), 100 * ii / totalCnt);
+                    }
+                }
+            } //Read
+            progress.Close();
+//--            Log.exit();
+            return ModAtr;
+        } // Read
+    } //class Tekla
+} //namespace
