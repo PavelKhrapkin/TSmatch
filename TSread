@@ -1,0 +1,101 @@
+using System;
+using System.Collections.Generic;
+using System.Data;
+using Excel = Microsoft.Office.Interop.Excel;
+using TS = TSmatch.Tekla.Tekla;
+
+namespace TSmatch.Handler
+{
+    class Handler
+    {
+        public static void TSread()
+        {
+//--            Log.set("TSread");
+            List<TS.AttSet> ModelAttributes =  TS.Read();    // Получим атрибуты из модели в Tekla
+
+            // проход по найденным элементам - группировка по парам <материал, профиль>
+            List<Group> Groups = new List<Group>();
+            foreach (var att in ModelAttributes)
+            {
+                bool isGrp = false;
+                foreach (Group gr in Groups)
+                {
+                    isGrp = (att.mat == gr._mat) && (att.prf == gr._prf);
+                    if (isGrp)
+                    {
+                        Groups[Groups.IndexOf(gr)]._qty++;
+                        break;
+                    }
+                }
+                if (!isGrp) Groups.Add(new Group(att.mat, att.prf));
+            }
+
+            //Запись в Excel
+            var excelApp = new Excel.Application();                   
+            excelApp.Visible = true;    // Make the object visible.
+            Excel.Workbook wb = excelApp.Workbooks.Add();
+            Excel.Worksheet sumSheet = wb.Worksheets.Add();
+            sumSheet.Name = "ModelInfo";
+            sumSheet.Cells[1, "A"] = "Model Name =";
+            sumSheet.Cells[1, "B"] = TS.ModInfo.ModelName;
+            sumSheet.Cells[2, "A"] = "Model Directory =";
+            sumSheet.Cells[2, "B"] = TS.ModInfo.ModelPath;
+            sumSheet.Cells[3, "A"] = "Current Phase =";
+            sumSheet.Cells[3, "B"] = TS.ModInfo.CurrentPhase;
+            sumSheet.Cells[4, "A"] = "Date =";
+            sumSheet.Cells[4, "B"] = DateTime.Now.ToString("dd.MM.yyyy HH:mm");
+            sumSheet.Columns[1].AutoFit();
+            sumSheet.Columns[2].AutoFit();
+
+            Excel.Worksheet workSheet = wb.Worksheets.Add();
+            workSheet.Name = "MaterialSummary";
+            workSheet.Cells[1, "A"] = "Material";
+            workSheet.Cells[1, "B"] = "Profile";
+            workSheet.Cells[1, "C"] = "Quantity";
+            var row = 1;
+            foreach (var gr in Groups)
+            {
+                row++;
+                workSheet.Cells[row, "A"] = gr._mat;
+                workSheet.Cells[row, "B"] = gr._prf;
+                workSheet.Cells[row, "C"] = gr._qty;
+            }
+            workSheet.Columns[1].AutoFit();
+            workSheet.Columns[2].AutoFit();
+            wb.SaveAs(TS.ModInfo.ModelPath + @"TSmodelSum.xlsx");
+        }
+    }
+    /// <summary>
+    /// Group - public класс для работы с группой элементов модели.
+    ///         Группируются элементы, одинаковые, с точки зрения ведомости покупных деталей.
+    ///         Так, в одну и ту же группу могут входить несколько элементов, которые нарезают
+    ///         из одной и той же заготовки. Например, если в группе "Уголок  75х6  6м Ст3пс/сп5"
+    ///         есть 9 деталей по 3м длинной, то закупить надо 4 уголка и разрезать их пополам.
+    /// </summary>
+    /// * Group(mat,prf)    - формирует элемент данных типа Group из материала, профили и количества таких элементов в группе
+    /// * Inc()             - увеличивает счетчик - количество элементов в группе
+    /// * isSameGroup(grp,mat,prf) - return true, если mat и prf соответствуют группе grp
+    /// --------------------------
+    /// УЛУЧШАЛКИ :) 22.12.15 :
+    /// (!) хорошо бы нижеследующую структуру struct Grp сделать private и перенести внутрь TSread
+    //struct Grp
+    //{
+    //    TS.AttSet attributes;
+    //    int quantity = 1;
+    //    Grp(TS.AttSet a, int q) { attributes = a; quantity = q; }
+    //}
+    //List<Grp> Grps = new List<Grp>();
+            
+    public class Group
+    {
+        public string _mat, _prf;
+        public int _qty;
+
+        public Group(string mat, string prf)
+        {
+            _mat = mat;
+            _prf = prf;
+            _qty = 1;
+        }
+    } // class Group
+} // namespace Handler
