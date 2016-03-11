@@ -90,6 +90,10 @@ namespace match.FileOp
             finally { Log.exit(); }
             return result;
         }
+        public static bool isFileExist(string dir, string name)
+        {
+            return isFileExist(dir + "\\" + name);
+        }
         public static bool isSheetExist(Excel.Workbook Wb, string name)
         {
             try { Excel.Worksheet Sh = Wb.Worksheets[name]; return true; }

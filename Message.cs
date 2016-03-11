@@ -1,0 +1,90 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Globalization;
+
+using Docs = TSmatch.Document.Document;
+using Decl = TSmatch.Declaration.Declaration;
+using Log = match.Lib.Log;
+
+namespace TSmatch.Message
+{
+    public class Message
+    {
+        public enum Severity { INFO = 0, WARNING, FATAL };
+
+        readonly string MessageID;
+        readonly string text;
+
+        public static List<Message> Messages = new List<Message>();
+
+        public static string Language = "en-US";
+        static int iLanguage = 3;   //iLanguage =2 - ru-Ru; iLanguage = 3 - en-US
+
+        Message(string _MessageID, string _text)
+        {
+            MessageID = _MessageID;
+            text = _text;
+        }
+        /// <summary>
+        /// Start() - Multilanguage Message system initialize from TSmatch.xlsx/Messages
+        /// </summary>
+        /// <journal> 7.3.2016 P.Khrapkin</journal>
+        public static void Start()
+        {
+            CultureInfo ci = CultureInfo.InstalledUICulture;
+            Language = ci.CompareInfo.Name;
+            if (ci.CompareInfo.Name == "ru-RU") iLanguage = 2;
+
+            Docs doc = Docs.getDoc(Decl.MESSAGES);
+            for (int i = doc.i0; i <= doc.il; i++)
+            {
+                string id = doc.Body.Strng(i, 1);
+                if (string.IsNullOrWhiteSpace(id)) continue;    // ignore messages without ID
+                string txt = doc.Body.Strng(i, iLanguage);
+                while (i < doc.il)
+                {                                               // multiline messages
+                    if (!string.IsNullOrWhiteSpace(doc.Body.Strng(i + 1, 1).ToString())) break;
+                    string line = doc.Body.Strng(++i, iLanguage);
+                    if (string.IsNullOrWhiteSpace(line)) continue;  //skip empty lines
+                    txt += "\n" + line;
+                }
+                foreach (var v in Messages)                     // healthchech for unique MessageID
+                    if (id == v.MessageID) F("ERR_02_START_FAULT", id);
+                Messages.Add(new Message(id, txt));
+            }
+        } // end Start()
+        public static void mes(string str, int severity = 0)
+        {
+            if (severity == (int)Severity.FATAL) Log.FATAL(str);
+            if (severity == (int)Severity.WARNING
+                || severity == (int)Severity.INFO) new Log(str);
+            return;
+        }
+        public static void txt(Severity type, string msgcode, object p0=null, object p1=null, object p2=null)
+        {
+            bool ok = false;
+            foreach (var v in Messages)
+            {
+                if (v.MessageID == msgcode)
+                {
+                    string s = String.Format(v.text, p0, p1, p2);
+                    mes(s, (int)type);
+                    ok = true;
+                    break;
+                }
+            }
+            if (!ok) F("ERR_03_NOMSG", msgcode);
+        }
+        public static void txt(string str, object p0= null, object p1 = null, object p2 = null)
+        { txt(Severity.FATAL, str, p0, p1, p2); }
+        public static void F(string str, object p0=null, object p1=null, object p2=null)
+        { txt(Severity.FATAL, str, p0, p1, p2); }
+        public static void W(string str, object p0 = null, object p1 = null, object p2 = null)
+        { txt(Severity.WARNING, str, p0, p1, p2); }
+        public static void I(string str, object p0 = null, object p1 = null, object p2 = null)
+        { txt(Severity.INFO, str, p0, p1, p2); }
+    } // end class
+} // end namespace

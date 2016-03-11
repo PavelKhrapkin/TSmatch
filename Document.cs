@@ -1,17 +1,19 @@
 ﻿/*-------------------------------------------------------------------------------------------------------
  * Document -- класс Документов содержит таблицу параметров всех Документов, известных приложению match
  * 
- *  19.2.2016  П.Храпкин, А.Пасс, А.Бобцов
+ *  8.3.2016  П.Храпкин, А.Пасс, А.Бобцов
  *  
  * 2013-2015 заложена система управления документами на основе TOC и Штампов
  * 22.1.16 - из статического конструктора начало работы Document перенесено в Start
  * 17.2.16 - в Documents добавлены - строки границы таблицы I0 и IN и их обработка
  * 19.2.16 - getDoc, getDocDir распознавание шаблонов в doc.FileDirectory
+ *  5.3.16 - null if Document not found or exist
+ *  8.3.16 - ErrorMessage system use; setDocTemplate
  * -------------------------------------------
  *      МЕТОДЫ:
  * Start(FileDir)       - загружает из FileDir TOC (Table of Content)- атрибуты всех Документов, а также сам ТОС
- * getDoc(name)         - возвращает Документ с именем name; при необходимости - открывает его или созает заново
- * getDocDir(name, template, dir) - каталог в TOC - #шаблон. Уточняем его из Models или из Tekla потом извлекаем 
+ * setDocTemplate(dirTemplate, val) - уточняет значение dirTemlate, заменяет его на val 
+ * getDoc(name[,fatal]) - возвращает Документ с именем name; открывает его или создает заново для типа 'N'
  * NewSheet(name)       - создает новый Лист для документа name и копирует в него шапку
  * loadDoc(name, wb)    - загружает Документ name или его обновления из файла wb, запускает Handler Документа
  * isDocChanged(name)   - проверяет, что Документ name открыт
@@ -32,6 +34,7 @@ using Decl = TSmatch.Declaration.Declaration;
 using Mtr = match.Matrix.Matr;  // класс для работы с внутренними структурами данных
 using Lib = match.Lib.MatchLib;
 using Log = match.Lib.Log;
+using Msg = TSmatch.Message.Message;
 
 namespace TSmatch.Document
 {
@@ -40,7 +43,7 @@ namespace TSmatch.Document
         private static Dictionary<string, Document> Documents = new Dictionary<string, Document>();   //коллекция Документов
 
         private static string[] FileDirTemplate;   // пары #шаблоны - значения каталогов..
-        private static string[] FileDirValues;     //..распознаваемых в getDoc
+        private static string[] FileDirValue;      //..распознаваемых в getDoc
 
         public string name;
         private bool isOpen = false;
@@ -92,12 +95,12 @@ namespace TSmatch.Document
             this.HDR_name = d.HDR_name;
         }
 
-        public static void Start(string[] DirTemplates, string[] DirValues )
+        public static void Start(string[] _DirTemplate, string[] _DirValue )
         {
-            Log.set("Start(ListCount=" + DirTemplates.Length + ")");
+            Log.set("Start(ListCount=" + _DirTemplate.Length + ")");
             // считываем листы служебного файла TSmatch: TOC, Process, Header
-            FileDirTemplate = DirTemplates; FileDirValues = DirValues;
-            string FileDir = DirValues[0];
+            FileDirTemplate = _DirTemplate; FileDirValue = _DirValue;
+            string FileDir = _DirValue[0];
             if (string.IsNullOrEmpty(FileDir))
             {
                 FileDir = Decl.DIR_MATCH;
@@ -138,7 +141,7 @@ namespace TSmatch.Document
                     if (ptrnName != "") doc.ptrn = new Mtr(hdrSht.Range[ptrnName].get_Value());
                     doc.Loader = mtr.Strng(i, Decl.DOC_LOADER);
                     doc.type = mtr.Strng(i, Decl.DOC_TYPE);
-                    doc.isNewDoc = (doc.type == Decl.STAMP_TYPE_N);
+                    doc.isNewDoc = (doc.type == Decl.DOC_TYPE_N);
                     int j;
                     for (j = i + 1; j <= mtr.iEOL() && mtr.Strng(j, Decl.DOC_NAME) == ""; j++) ;
                     doc.stamp = new Stamp(i, j - 1);
@@ -177,12 +180,37 @@ namespace TSmatch.Document
             //            doc.isOpen = true;
             //            doc.saveDoc();
 #endif //not_ready
-            Log.exit();
+                Log.exit();
         } // end Start
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="_dirTemplate"></param>
+        /// <param name="_dirValue"></param>
+        public static void setDocTemplate(string _dirTemplate, string _dirValue)
+        {
+            Log.set("setDocTemplate");
+            bool existingTemplate = false;
+            int index = 0;
+            foreach (string t in FileDirTemplate)
+            {
+                if (_dirTemplate == t)
+                {
+                    FileDirValue[index] = _dirValue;
+                    existingTemplate = true;
+                    break;
+                }
+                index++;
+            }
+            if (!existingTemplate) Msg.F("ERR_05.2_setDocTMP_NOTMP", _dirTemplate);
+            Log.exit();
+        }
         /// <summary>
         /// getDoc(name) - извлечение Документа name. Если еще не прочтен - из файла. При необхоимости - новый лист
         /// </summary>
         /// <param name="name">имя извлекаемого документа</param>
+        /// <param name="fatal">log.FATAL if this flag = true</param>
+        /// <returns>Document or null</returns>
         /// <returns>Document</returns>
         /// <journal> 25.12.2013 отлажено
         /// 25.12.2013 - чтение из файла, формирование Range Body
@@ -196,13 +224,15 @@ namespace TSmatch.Document
         /// 2.1.16 - полностью переписано для TSmach: не отделяем пятку от Body; закводим новый Лист и шапкой 
         /// 6.1.16 - NOP если FiliDirectory содержит # - каталог Документа еще будет разворачиваться позже
         /// 19.2.16 - распознавание шаблонов в doc.FileDirectory
+        ///  5.3.16 - null if Document not found or exist
         /// </journal>
-        public static Document getDoc(string name)
+        public static Document getDoc(string name, bool fatal = true)
         {
             Log.set("getDoc(" + name + ")");
+            Document doc = null;
             try
             {
-                Document doc = Documents[name];
+                doc = Documents[name];
                 if (!doc.isOpen)
                 {
                     if (doc.FileDirectory.Contains("#"))
@@ -211,7 +241,7 @@ namespace TSmatch.Document
                         foreach (string str in FileDirTemplate)
                         {
                             if (str == doc.FileDirectory)
-                                doc.FileDirectory = FileDirValues[i];
+                                doc.FileDirectory = FileDirValue[i];
                             i++;
                         }
                     }
@@ -220,9 +250,7 @@ namespace TSmatch.Document
                     doc.Wb = FileOp.fileOpen(doc.FileDirectory, doc.FileName, create);
                     switch (doc.type)
                     {
-                        case Decl.STAMP_TYPE_N1:
-                        case Decl.STAMP_TYPE_N2:
-                        case Decl.STAMP_TYPE_N:
+                        case Decl.DOC_TYPE_N:
                             doc.Reset();
                             break;
                         default:
@@ -254,15 +282,19 @@ namespace TSmatch.Document
                     if (rng != null && !doc.stamp.Check(rng)) Log.FATAL(doc.stamp.Trace(doc));
                         doc.isOpen = true;
                 } // end if(!doc.isOpen)
-                Log.exit();
-                return doc;
-            }
+            } // ent try
             catch (Exception e)
             {
-                string msg = (Documents.ContainsKey(name)) ? "не существует" : " не удалось открыть";
-                Log.FATAL("Документ \"" + name + "\" " + msg);
-                return null;    // нужно только при обработке Event File Open для неизвестного файла
+                if (fatal)
+                {
+                    string msg = (Documents.ContainsKey(name)) ? "не существует" : " не удалось открыть";
+                    msg += "\nERROR: " + e;
+                    Log.FATAL("Документ \"" + name + "\" " + msg);
+                }
+                doc = null;
             }
+            Log.exit();
+            return doc;
         }
         /// <summary>
         /// NewSheet(name)  - создание нового листа с заголовком для Документа name
@@ -465,8 +497,7 @@ namespace TSmatch.Document
                     }
                     else
                     {
-                        if (MD5.Length < 20 || EOL == 0)
-                            Log.FATAL("Internal error: MD5 and EOL is a must with BodySave=false");
+                        if (MD5.Length < 20 || EOL == 0) Msg.F("ERR_05.8_saveDoc_NOMD5");
                         else { doc.chkSum = MD5; doc.EOLinTOC = EOLinTOC; }
                     }
                     for (int n = 4; n < toc.Body.iEOL(); n++)
@@ -629,7 +660,7 @@ namespace TSmatch.Document
             public Stamp(int i0, int i1)
             {
                 Document doc_toc = getDoc(Decl.DOC_TOC);
-                if (doc_toc.Body.Strng(i0, Decl.DOC_STMPTYPE) != Decl.STAMP_TYPE_N)
+                if (doc_toc.Body.Strng(i0, Decl.DOC_STMPTYPE) != Decl.DOC_TYPE_N)
                 {
                     for (int i = i0; i <= i1; i++) stamps.Add(new OneStamp(doc_toc, i));
                 }

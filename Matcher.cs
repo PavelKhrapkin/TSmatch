@@ -2,13 +2,14 @@
  * Matcher -- находит соответствия входным компонентам в документах дазы данных
  *            в соответствии с правилами Match Rules
  *
- * 2.3.2016 П.Храпкин, А.Пасс, А.Бобцов
+ * 6.3.2016 П.Храпкин, А.Пасс, А.Бобцов
  *
  *--- журнал ---
  * 18.1.2016 заложено П.Храпкин, А.Пасс, А.Бобцов
- *  22.1.2016  П.Храпкин, А.Бобцов
- *  16.2.2016 ревизия
- *  27.2.2016 PKh перенес фрагменты в модуль Components
+ * 22.1.2016  П.Храпкин, А.Бобцов
+ * 16.2.2016 ревизия
+ * 27.2.2016 PKh перенес фрагменты в модуль Components
+ *  6.3.2016 Rule Constructor correction; Start check if Tekla is active
  * -----------------------------------------------------------------------------------------
  *      КОНСТРУКТОРЫ Правил - загружают Правила из листа Правил в TSmatch или из журнала моделей
  * Rule(дата, тип, текст Правила, документ-база сортаментов)    - простая инициализация из TSmatch
@@ -32,21 +33,17 @@
  * isOKexist(n) - возвращает true, если для группы n уже найдено соответствие в OKs
  */
 
-using System.Linq;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using System.IO;    //низкоуровневый ввод-вывод Windows используется только для Log в Start
 
 using Lib = match.Lib.MatchLib;
 using Log = match.Lib.Log;
+using Msg = TSmatch.Message.Message;
 using Decl = TSmatch.Declaration.Declaration;
 using TS = TSmatch.Tekla.Tekla;
 using Docs = TSmatch.Document.Document;
 using Mod = TSmatch.Model.Model;
 using Cmp = TSmatch.Component.Component;
-using TSmatch.Document;
-
-using Mtr = match.Matrix.Matr;
 
 namespace TSmatch.Matcher
 {
@@ -118,13 +115,17 @@ namespace TSmatch.Matcher
         /// </journal>
         public static void Start()
         {
+            const string ERR_TEKLA_INACTIVE = "Tekla Application is not active. "
+                + "Try to run Tekla, check if model is available and restart TSmatch";
             Log.set("Matcher.Start");
-            string[] FileDirTemplates = {"#TOC", "#Model", "#Components"};
-            string TOCdir =TS.GetTeklaDir();
+            string[] FileDirTemplates = Decl.TOC_DIR_TEMPLATES;  //{"#TOC", "#Model", "#Components", "#TMP"};
+            if (!TS.isTeklaActive()) Log.FATAL(ERR_TEKLA_INACTIVE);
+            string TOCdir = TS.GetTeklaDir();
             string ModelDir = TS.GetTeklaDir((int)TS.ModelDir.model);
             string ComponentsDir = TOCdir + @"\База комплектующих";
-            string[] FileDirValues = {TOCdir, ModelDir, ComponentsDir};
+            string[] FileDirValues = {TOCdir, ModelDir, ComponentsDir, ""};
             Docs.Start(FileDirTemplates, FileDirValues);    // инициируем Документы из TSmatch.xlsx
+            Msg.Start();                                    // инициируем Сообщения из TSmatch.xlsx
             Mod.Start();                                    // инициируем список Моделей, известных TSmatch
             Docs rule = Docs.getDoc(Decl.MATCHING_RULES);   // инициируем список Правил Matcher'a
             for (int i = 4; i<=rule.Body.iEOL(); i++)
@@ -134,7 +135,7 @@ namespace TSmatch.Matcher
         public static void UseRules()
         {
             Log.set("UseRules");
-            Docs Report = Docs.getDoc(Decl.SH3_REPORT);
+            Docs Report = Docs.getDoc(Decl.REPORT);
             int nstr = 0;
             foreach(var gr in Mod.Groups)
             {

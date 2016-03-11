@@ -19,6 +19,9 @@ namespace TSmatch.Declaration
     /// 24.1.16     - константы Matching_Rules, регулярнае выражения
     /// 17.2.16     - в Documents добавлены - строки границы таблицы I0 и IL и их обработка
     /// 19.2.16     - шаблоны каталогов в doc.FileDirectory
+    ///  6.3.16     - измененил STAMP_TYPE_N, заменил на DOC_TYPE_N
+    ///  7.3.16     - заложена система сообщений с языком из Windows Culture.Info
+    ///  8.3.16     - #шаблоны
     /// </journal>
     class Declaration
     {
@@ -72,15 +75,19 @@ namespace TSmatch.Declaration
         public const int CREATEOROPEN = 21;   // Мода Документа - если не найден - создать
 
         //----------- # шаблоны каталогов документов (поле doc.FileDirectory) --------------------
-        public const string DOC_DIR_COMPONENTS = "#Components"; // каталог файлов комплектующих - базы поставщиков
-        public const string DOC_DIR_MODEL = TS_PATH;            // каталог модели Tekla - получают из Tekla.Read
+        public static readonly string[] TOC_DIR_TEMPLATES
+            = { TOC_TEMPL_TOC, TOC_TEMPL_MODEL, TOC_TEMPL_COMP, TOC_TEMPL_TMP };
+        public const string TOC_TEMPL_TOC   = "#TOC";           //каталог TSmatch.xlsx 
+        public const string TOC_TEMPL_MODEL = "#Model";         //каталоги Моделей
+        public const string TOC_TEMPL_COMP  = "#Components";    //каталог файлов комплектующих - базы поставщиков
+        public const string TOC_TEMPL_TMP   = "#TMP";           //каталог временного файла
 
         //----------- ТИПЫ ШТАМПОВ / ТИПЫ ДОКУМЕНТОВ ----------------------
-        public const string STAMP_TYPE_EQ = "=";  // точное соответствие
-        public const string STAMP_TYPE_INC = "I"; // Includes
-        public const string STAMP_TYPE_N = "N";   // New Doc без Штампа или No Stamp
-        public const string STAMP_TYPE_N1 = "N1"; // New Doc, создавать новый Лист в самой левой позиции, если его нет; для Summary
-        public const string STAMP_TYPE_N2 = "N2"; // New Doc, если нет, создавать в Листе2
+        ////public const string STAMP_TYPE_EQ = "=";  // точное соответствие
+        ////public const string STAMP_TYPE_INC = "I"; // Includes
+        public const string DOC_TYPE_N = "N";   // New Doc без Штампа или No Stamp
+        ////public const string DOC_TYPE_N1 = "N1"; // New Doc, создавать новый Лист в самой левой позиции, если его нет; для Summary
+        ////public const string STAMP_TYPE_N2 = "N2"; // New Doc, если нет, создавать в Листе2
 
         //-----------константы таблицы Процессов -----------------
         public const string PROCESS = "Process";
@@ -119,12 +126,13 @@ namespace TSmatch.Declaration
         public const string ATT_PARAM = @"(?<param>(\$|p|р|п|P|Р|П)\w*\d)"; //параметры в Правилах
 
         //------------ Файл TSmatchINFO.xlsx - записывается в каталог модели ----------
-        public const string SH1_MODELINFO = "ModelINFO"; //Лист общей информации по модели
-        public const string SH2_RAW = "Raw";        //Лист необработанных данных по компонентам модели
-        public const string SH3_REPORT = "Report";     //Лист - отчет по модели
+        public const string MODELINFO = "ModelINFO";    //Лист общей информации по модели
+        public const string RAW = "Raw";                //Лист необработанных данных по компонентам модели
+        public const string REPORT = "Report";          //Лист - отчет по модели
 
-        public const string TS_PATH = "#TS.ModInfo.ModePath";   //#template в TOC- вместо ссылки
-                                                                //на каталог модели
+        public const string TMP_MODELINFO = "TMP_" + MODELINFO;
+        public const string TMP_RAW       = "TMP_" + RAW;
+        public const string TMP_REPORT    = "TMP_" + REPORT;
 
         //-----------константы Шаблонов -----------------
         public const string PTRN_HDR = "A1";     // заголовки колонок   
@@ -132,5 +140,11 @@ namespace TSmatch.Declaration
         public const int PTRN_FETCH = 6;    // Fetch запрос
 
         public const string PTRN_COPYHDR = "CopyHdr"; // указание копировать заголовок из Шаблона
+
+        //----------- Language Adaptel strings sets for ru-RU and en-US ----------------
+        public const string MESSAGES = "Messages";      // Multilanguage Message doc in TSmatch
+        public const int MSG_ID = 1;
+        public const int MSG_TXT_RU = 2;
+        public const int MSG_TXT_EN = 3;
     }
 }
