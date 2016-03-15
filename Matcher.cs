@@ -108,7 +108,7 @@ namespace TSmatch.Matcher
         static List<OK> OKs = new List<OK>();  // список найденных соответствий
 
         /// <summary>
-        /// Start - инициализация модулей Models, Reule, Documents
+        /// Start - bootstrap modules Models, Rule, Documents, Messages
         /// </summary>
         /// <journal> Jan-2016
         /// 19.2.16 - переписано обращение к Documents.Start с инициализацией массивов FileDir
@@ -118,12 +118,14 @@ namespace TSmatch.Matcher
             const string ERR_TEKLA_INACTIVE = "Tekla Application is not active. "
                 + "Try to run Tekla, check if model is available and restart TSmatch";
             Log.set("Matcher.Start");
-            string[] FileDirTemplates = Decl.TOC_DIR_TEMPLATES;  //{"#TOC", "#Model", "#Components", "#TMP"};
+            //-- set #templates - Path values
+            string[] FileDirTemplates = Decl.TOC_DIR_TEMPLATES; 
             if (!TS.isTeklaActive()) Log.FATAL(ERR_TEKLA_INACTIVE);
             string TOCdir = TS.GetTeklaDir();
             string ModelDir = TS.GetTeklaDir((int)TS.ModelDir.model);
             string ComponentsDir = TOCdir + @"\База комплектующих";
             string[] FileDirValues = {TOCdir, ModelDir, ComponentsDir, ""};
+
             Docs.Start(FileDirTemplates, FileDirValues);    // инициируем Документы из TSmatch.xlsx
             Msg.Start();                                    // инициируем Сообщения из TSmatch.xlsx
             Mod.Start();                                    // инициируем список Моделей, известных TSmatch

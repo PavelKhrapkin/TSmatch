@@ -74,6 +74,10 @@ namespace TSmatch.Model
         public Model(string _name, string _dir, string _made, string _md5)
             : this(DateTime.Now, _name, _dir, _made, _md5, new List<Mtch.Rule>(), "")
         { }
+        public Model(string _name, string _dir, string _made, string _md5
+            , List<Mtch.Rule> _rules, string _strRuleList)
+           : this(DateTime.Now, _name, _dir, _made, _md5, _rules, _strRuleList)
+        { }
         public Model(Docs doc, int i)
         {
             this.date = Lib.getDateTime(doc.Body[i, Decl.MODEL_DATE]);
@@ -159,8 +163,14 @@ namespace TSmatch.Model
                             || TS.MyName != mod.Made || TS.ModelMD5 != mod.MD5)
             {
                 new Log("=== Это новая или измененная модель. Запишем ее в файл. ===");
-                Models.Remove(mod);
-//!!                Models.Add(new Model(TS.ModInfo.ModelName, TS.ModInfo.ModelPath, TS.MyName, TS.ModelMD5, modRules));
+                if (mod == null)
+                    Models.Add(new Model(TS.ModInfo.ModelName, TS.ModInfo.ModelPath, TS.MyName, TS.ModelMD5));
+                else
+                {
+                    Models.Remove(mod);
+                    Models.Add(new Model(TS.ModInfo.ModelName, TS.ModInfo.ModelPath
+                        , TS.MyName, TS.ModelMD5, mod.Rules, mod.strListRules));
+                }
                 mod = getModel(TS.ModInfo.ModelName);
                 Docs raw = Docs.getDoc(Decl.RAW);
 
@@ -182,6 +192,7 @@ namespace TSmatch.Model
                 FileOp.saveRngValue(raw.Body, tostr);
                 new Log("Время записи в файл (помимо чтения из Tekla) t=" + (DateTime.Now - t0).ToString() + " сек");
                 raw.isChanged = true;
+
                 Docs.saveDoc(raw, BodySave:false, MD5:mod.MD5, EOL:Elements.Count+1);
                 //--- запишем ModelINFO
                 Docs modInfo = Docs.getDoc(Decl.MODELINFO);

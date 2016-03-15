@@ -22,10 +22,14 @@ namespace TSmatch.Declaration
     ///  6.3.16     - измененил STAMP_TYPE_N, заменил на DOC_TYPE_N
     ///  7.3.16     - заложена система сообщений с языком из Windows Culture.Info
     ///  8.3.16     - #шаблоны
+    /// 12.3.16     - multilanguage support
     /// </journal>
     class Declaration
     {
-        //------------ КОНСТАНТЫ ОБЩЕГОНАЗНАЧЕНИЯ -----------------
+        //------------ GENERAL PURPASE CONSTANTS -----------------
+        public const string ENGLISH = "en-US";
+        public const string RUSSIAN = "ru-RU";
+
         public const char STR_DELIMITER = ';';  // знак - резделитель в списке в строках
         /// <summary>
         /// F_MATCH = "TSmatch.xlsx" - имя файла таблиц приложения TSmatch
@@ -37,7 +41,7 @@ namespace TSmatch.Declaration
 
         //--------- листы TSmatch.xlsm --------------
         public const string CONST = "Const";
-        public const string HEADER = "Header";
+        public const string FORMS = "Forms";
         public const string LOG = "Log";
 
         //-----------константы таблицы Документов -----------------
@@ -58,8 +62,8 @@ namespace TSmatch.Declaration
         public const int DOC_STMPROW  = 13; // строка Штампа
         public const int DOC_STMPCOL  = 14; // колонка Штампа
         public const int DOC_CREATED  = 15; // дата создания Документа
-        public const int DOC_PATTERN  = 17; // основной шаблон Документа. Помимо заголовков Шапки,
-                                            //..он содержит описания колонок данных
+        public const int DOC_FORMS    = 17; // основной шаблон Документа. Помимо заголовков Шапки, он может иметь 
+                                            //..имя другой формы - для данных, или имена двух форм с подформами _F 
         public const int DOC_HYPERLINK = 18; //гиперссылка на источник в Интернете
         public const int DOC_TEL = 19;    // телефон поставщика
         public const int DOC_ADR = 20;    // адрес поставщика

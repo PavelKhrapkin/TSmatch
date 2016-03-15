@@ -13,15 +13,14 @@ namespace TSmatch.Message
 {
     public class Message
     {
-        public enum Severity { INFO = 0, WARNING, FATAL };
+        public enum Severity { INFO = 0, WARNING, FATAL};
+
+        public static bool Trace = false;  // For TRACE mode chage to "true";
 
         readonly string MessageID;
         readonly string text;
 
         public static List<Message> Messages = new List<Message>();
-
-        public static string Language = "en-US";
-        static int iLanguage = 3;   //iLanguage =2 - ru-Ru; iLanguage = 3 - en-US
 
         Message(string _MessageID, string _text)
         {
@@ -31,12 +30,12 @@ namespace TSmatch.Message
         /// <summary>
         /// Start() - Multilanguage Message system initialize from TSmatch.xlsx/Messages
         /// </summary>
-        /// <journal> 7.3.2016 P.Khrapkin</journal>
+        /// <journal> 7.3.2016 P.Khrapkin
+        /// 12.3.16 - bootstrap error handling</journal>
         public static void Start()
         {
-            CultureInfo ci = CultureInfo.InstalledUICulture;
-            Language = ci.CompareInfo.Name;
-            if (ci.CompareInfo.Name == "ru-RU") iLanguage = 2;
+            int iLanguage = 3;   //iLanguage =2 - ru-Ru; iLanguage = 3 - en-US
+            if ( getLanguage() == Decl.RUSSIAN) iLanguage = 2;
 
             Docs doc = Docs.getDoc(Decl.MESSAGES);
             for (int i = doc.i0; i <= doc.il; i++)
@@ -56,6 +55,15 @@ namespace TSmatch.Message
                 Messages.Add(new Message(id, txt));
             }
         } // end Start()
+        /// <summary>
+        /// getLanguage() - return Windows system language
+        /// </summary>
+        /// <returns></returns>
+        public static string getLanguage()
+        {
+            CultureInfo ci = CultureInfo.InstalledUICulture;
+            return ci.CompareInfo.Name;
+        }
         public static void mes(string str, int severity = 0)
         {
             if (severity == (int)Severity.FATAL) Log.FATAL(str);
@@ -76,7 +84,9 @@ namespace TSmatch.Message
                     break;
                 }
             }
-            if (!ok) F("ERR_03_NOMSG", msgcode);
+            if (!ok)
+                if (Messages.Count > 0) F("ERR_03_NOMSG", msgcode);
+                else Log.FATAL("Internal ERROR: Message system is not initiated");
         }
         public static void txt(string str, object p0= null, object p1 = null, object p2 = null)
         { txt(Severity.FATAL, str, p0, p1, p2); }

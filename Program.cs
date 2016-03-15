@@ -12,10 +12,10 @@ namespace TSmatch
         [STAThread]
         static void Main(string[] args)
         {     
-            Log.START("TSmatch v07.03.2016");
+            Log.START("TSmatch v12.03.2016");
             Mtch.Start();
 
-            Mod.openModel();
+//            Mod.openModel();
             //Docs doc = Docs.getDoc("Уголок Стальхолдинг??");
             //Cmp.UpgradeFrExcel(doc, "DelEqPar1");
 
