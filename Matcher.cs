@@ -2,7 +2,7 @@
  * Matcher -- находит соответствия входным компонентам в документах дазы данных
  *            в соответствии с правилами Match Rules
  *
- * 6.3.2016 П.Храпкин, А.Пасс, А.Бобцов
+ * 15.3.2016 П.Храпкин, А.Пасс, А.Бобцов
  *
  *--- журнал ---
  * 18.1.2016 заложено П.Храпкин, А.Пасс, А.Бобцов
@@ -10,6 +10,7 @@
  * 16.2.2016 ревизия
  * 27.2.2016 PKh перенес фрагменты в модуль Components
  *  6.3.2016 Rule Constructor correction; Start check if Tekla is active
+ * 15.3.2016 Use Model Rule list -- UseRules
  * -----------------------------------------------------------------------------------------
  *      КОНСТРУКТОРЫ Правил - загружают Правила из листа Правил в TSmatch или из журнала моделей
  * Rule(дата, тип, текст Правила, документ-база сортаментов)    - простая инициализация из TSmatch
@@ -134,9 +135,17 @@ namespace TSmatch.Matcher
                 { if (rule.Body[i, Decl.RULE_NAME] != null) Rules.Add(new Rule(rule, i)); }
             Log.exit();
         }
-        public static void UseRules()
+        /// <summary>
+        /// UserRules(mod) - Apply Model mod Rules to create TSmatchINFO.xlsx/Report
+        /// </summary>
+        /// <param name="mod">Model to de handled</param>
+        /// <journal>10.3.2016
+        /// 15.3.2016 get Rule list (Rules) from the Model mod
+        /// </journal>
+        public static void UseRules(Mod mod)
         {
-            Log.set("UseRules");
+            Log.set("UseRules(" + mod.name + ")");
+            Rules = mod.Rules;
             Docs Report = Docs.getDoc(Decl.REPORT);
             int nstr = 0;
             foreach(var gr in Mod.Groups)

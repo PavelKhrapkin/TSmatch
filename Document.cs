@@ -152,9 +152,9 @@ namespace TSmatch.Document
                     doc.creationDate = Lib.getDateTime(mtr[i, Decl.DOC_CREATED]);
                     doc.LoadDescription = mtr.Strng(i, Decl.DOC_STRUCTURE_DESCRIPTION);
                     //.... working with Document Form .....
-                    doc.form = new Form(mtr.Strng(i, Decl.DOC_FORMS)
-                                      , mtr.Strng(i, Decl.DOC_FORMS +1)
-                                      , mtr.Strng(i, Decl.DOC_FORMS +2));
+///// 15.3.2016 //////////doc.form = new Form(mtr.Strng(i, Decl.DOC_FORMS)
+/////temporary stop Form /                  , mtr.Strng(i, Decl.DOC_FORMS +1)
+//////////////////////////                  , mtr.Strng(i, Decl.DOC_FORMS +2));
                     string hdrName = mtr.Strng(i, Decl.DOC_FORMS);
                     doc.HDR_name = hdrName;
 
