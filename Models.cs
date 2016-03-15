@@ -1,12 +1,13 @@
 ﻿/*------------------------------------------------------------------------------------------
  * Model -- класс управления моделями, ведет Журнал Моделей и управляет их сохранением
  * 
- *  7.3.2016 П.Храпкин
+ *  15.3.2016 П.Храпкин
  *  
  *--- журнал ---
  * 18.1.2016 заложено П.Храпкин, А.Пасс, А.Бобцов
  * 29.2.2016 bug fix in getGroup
  *  6.3.2016 список Правил в стрке Модели, setModel(name); openModel,readModel
+ * 15.3.2016 flag wrToFile in Model class - if true-> we must write down it to file
  * -----------------------------------------------------------------------------------------
  *      КОНСТРУКТОРЫ: загружают Журнал Моделей из листа Models в TSmatch или из параметров
  * Model(DateTime, string, string, string, string md5, List<Mtch.Rule> r)   - простая инициализация
@@ -58,6 +59,7 @@ namespace TSmatch.Model
         private string MD5;         // контрольная сумма отчета по модели
         public readonly List<Mtch.Rule> Rules;  // список Правил, используемых с данной моделью
         private string strListRules;            // список Правил в виде текста вида "5,6,8"
+        private bool wrToFile = true;   // when true - we should write into the file
 
         public int CompareTo(Model mod) { return mod.date.CompareTo(date); }    //to Sort Models by time
 
@@ -146,12 +148,13 @@ namespace TSmatch.Model
             return getModel(name);
         }
         /// <summary>
-        /// UpdateFrTekla() - обновление модели из данных из C# в файловую систему
-        /// </summary>
+        /// UpdateFrTekla() - update/read model from Tekla, save into File system
+        /// <returns>Model, updated in the list of models and written in file TSmatchINFO.xlsx</returns>
         /// <journal>13.2.2016
-        ///  5.3.16 setComp in UpgradeFrTekla
-        ///  <\journal>
-        public static void UpdateFrTekla()
+        ///   5.3.16 setComp in UpgradeFrTekla
+        ///  15.3.16 return Model; handle mod.wrToFile
+        ///  </journal>
+        public static Model UpdateFrTekla()
         {
             Log.set(@"UpdateFrTekla()");
             Elements = TS.Read();
@@ -159,19 +162,9 @@ namespace TSmatch.Model
 
             Model mod = modelListUpdate(TS.ModInfo.ModelName, TS.ModInfo.ModelPath, TS.MyName, TS.ModAtrMD5());
 
-            if (mod == null || !FileOp.isFileExist(mod.dir + "\\" + mod.name) 
-                            || TS.MyName != mod.Made || TS.ModelMD5 != mod.MD5)
+            if (mod.wrToFile)
             {
                 new Log("=== Это новая или измененная модель. Запишем ее в файл. ===");
-                if (mod == null)
-                    Models.Add(new Model(TS.ModInfo.ModelName, TS.ModInfo.ModelPath, TS.MyName, TS.ModelMD5));
-                else
-                {
-                    Models.Remove(mod);
-                    Models.Add(new Model(TS.ModInfo.ModelName, TS.ModInfo.ModelPath
-                        , TS.MyName, TS.ModelMD5, mod.Rules, mod.strListRules));
-                }
-                mod = getModel(TS.ModInfo.ModelName);
                 Docs raw = Docs.getDoc(Decl.RAW);
 
                 int B = 1000, ii = 0, tostr = 1; DateTime t0 = DateTime.Now;
@@ -192,7 +185,7 @@ namespace TSmatch.Model
                 FileOp.saveRngValue(raw.Body, tostr);
                 new Log("Время записи в файл (помимо чтения из Tekla) t=" + (DateTime.Now - t0).ToString() + " сек");
                 raw.isChanged = true;
-
+                mod = getModel(TS.ModInfo.ModelName);
                 Docs.saveDoc(raw, BodySave:false, MD5:mod.MD5, EOL:Elements.Count+1);
                 //--- запишем ModelINFO
                 Docs modInfo = Docs.getDoc(Decl.MODELINFO);
@@ -210,7 +203,9 @@ namespace TSmatch.Model
             }
             else new Log("------- Эта модель уже есть в TSmatch. Ничего не записываем --------");
             Elements.Clear();
+            mod.wrToFile = false;
             Log.exit();
+            return mod;
         } // end update
         /// <summary>
         /// modelListUpdate(name, dir, Made, MD5) - update list of models in TSmatch.xlsx/Models
@@ -220,28 +215,35 @@ namespace TSmatch.Model
         /// <param name="Made">version name of TS.Read - important as AttSet field list identifier</param>
         /// <param name="MD5">checksum of all Model parts</param>
         /// <returns>Model, updated in the list of models in TSmatch</returns>
-        /// <journal> 6.3.2016 PKh </journal>
+        /// <journal> 6.3.2016 PKh
+        /// 15.3.16 return Model instead of null in case of completely new model; wrToFile handle
+        /// </journal>
         static Model modelListUpdate(string name, string dir=null, string Made=null, string MD5=null, string str=null)
         {
             Log.set("modelListUpdate");
             Models.Clear();  Start();        // renowate Models list from TSmatch.xlsx
             Model mod = getModel(name);
             if (mod == null)    // mod==null - means this is completely new model
+            {
                 Models.Add(new Model(name, dir, Made, MD5));
+                mod = getModel(name);
+                mod.wrToFile = true;
+            }
             else
             {
-                if (dir  != null) mod.dir  = dir;
+                if (dir != null) mod.dir = dir;
                 if (Made != null) mod.Made = Made;
-                if (MD5  != null) mod.MD5  = MD5;
+                if (MD5 != null) mod.MD5 = MD5;
                 if (str != null)
                 {
                     mod.strListRules = str;
                     foreach (int n in Mtch.GetPars(str))
                         mod.Rules.Add(new Mtch.Rule(n));
                 }
-//!!!!!!!!!!!!!!!!!!!!!!!!!!!! ЗДЕСЬ
-// 1) проверить, доступен ли каталог dir? Если нет -> запустить FileWindowsDialog, потом рекурсивно вызвать modelListUpdate
-// 2) проверить, изменился ли MD5 и список Правил str? Если нет -> список моделей не переписываем, оставляем прежднюю дату
+                //!!!!!!!!!!!!!!!!!!!!!!!!!!!! ЗДЕСЬ
+                // 1) проверить, доступен ли каталог dir? Если нет -> запустить FileWindowsDialog, потом рекурсивно вызвать modelListUpdate
+                // 2) проверить, изменился ли MD5 и список Правил str? Если нет -> список моделей не переписываем, оставляем прежднюю дату
+                // 3) читать ModelINFO / MD5 в файле, чтобы понять, нужно ли в него переписать модель (установить флаг wrToFile)
 
             }
             Log.exit();

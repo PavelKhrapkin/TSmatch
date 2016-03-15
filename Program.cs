@@ -19,8 +19,8 @@ namespace TSmatch
             //Docs doc = Docs.getDoc("Уголок Стальхолдинг??");
             //Cmp.UpgradeFrExcel(doc, "DelEqPar1");
 
-            Mod.UpdateFrTekla();
-            Mtch.UseRules();
+            Mod mod = Mod.UpdateFrTekla();
+            Mtch.UseRules(mod);
 //            Console.ReadLine();
         }
     } // end class
