@@ -4,6 +4,7 @@ using System.Windows.Forms;
 using Log = match.Lib.Log;
 using Mod = TSmatch.Model.Model;
 using Mtch = TSmatch.Matcher.Matcher;
+using Boot = TSmatch.Startup.Bootstrap;
 
 namespace TSmatch
 {
@@ -12,7 +13,8 @@ namespace TSmatch
         [STAThread]
         static void Main(string[] args)
         {     
-            Log.START("TSmatch v12.03.2016");
+            Log.START("TSmatch v19.03.2016");
+//!!            Boot.Bootsrap();
             Mtch.Start();
 
 //            Mod.openModel();

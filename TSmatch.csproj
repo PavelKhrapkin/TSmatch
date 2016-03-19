@@ -61,6 +61,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Bootstrap.cs" />
     <Compile Include="Message.cs" />
     <Compile Include="Components.cs" />
     <Compile Include="Declaration.cs" />
@@ -72,6 +73,7 @@
     <Compile Include="Models.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Suppliers.cs" />
     <Compile Include="TS_OpenAPI.cs" />
   </ItemGroup>
   <ItemGroup>

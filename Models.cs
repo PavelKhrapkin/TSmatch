@@ -1,13 +1,14 @@
 ﻿/*------------------------------------------------------------------------------------------
  * Model -- класс управления моделями, ведет Журнал Моделей и управляет их сохранением
  * 
- *  15.3.2016 П.Храпкин
+ *  19.3.2016 П.Храпкин
  *  
  *--- журнал ---
  * 18.1.2016 заложено П.Храпкин, А.Пасс, А.Бобцов
  * 29.2.2016 bug fix in getGroup
  *  6.3.2016 список Правил в стрке Модели, setModel(name); openModel,readModel
  * 15.3.2016 flag wrToFile in Model class - if true-> we must write down it to file
+ * 19.3.2016 use Suppliers and Components classes
  * -----------------------------------------------------------------------------------------
  *      КОНСТРУКТОРЫ: загружают Журнал Моделей из листа Models в TSmatch или из параметров
  * Model(DateTime, string, string, string, string md5, List<Mtch.Rule> r)   - простая инициализация
@@ -38,10 +39,12 @@ using Decl = TSmatch.Declaration.Declaration;
 using Lib = match.Lib.MatchLib;
 using Docs = TSmatch.Document.Document;
 using Mtch = TSmatch.Matcher.Matcher;
-using Cmp = TSmatch.Component.Component;
 using TS = TSmatch.Tekla.Tekla;
 using Log = match.Lib.Log;
 using Msg = TSmatch.Message.Message;
+using Supplier = TSmatch.Suppliers.Supplier;
+using Component = TSmatch.Components.Component;
+using CmpSet = TSmatch.Components.CompSet;
 
 using FileOp = match.FileOp.FileOp;
 
@@ -51,6 +54,9 @@ namespace TSmatch.Model
     {
         static List<Model> Models = new List<Model>();
         static List<TS.AttSet> Elements = new List<TS.AttSet>();    //stored in TSmatchINFO.xlsx/Models
+        private static List<CmpSet> Comps = new List<CmpSet>();     //List of Component Sets used with the model
+        private static List<Supplier> Suppliers = new List<Supplier>();
+
         //-- stored in TSmatch.xlsx/Models fields; Rules as line number list f.e."6,7,8,11"
         private DateTime date;      // дата и время последнего обновления модели
         public string name;         // название модели
@@ -189,12 +195,13 @@ namespace TSmatch.Model
                 Docs.saveDoc(raw, BodySave:false, MD5:mod.MD5, EOL:Elements.Count+1);
                 //--- запишем ModelINFO
                 Docs modInfo = Docs.getDoc(Decl.MODELINFO);
-                modInfo.Body.AddRow(new object[] { "Model Name =", mod.name });
-                modInfo.Body.AddRow(new object[] { "Model Directory =", mod.dir });
-                modInfo.Body.AddRow(new object[] { "Current Phase =", TS.ModInfo.CurrentPhase });
-                modInfo.Body.AddRow(new object[] { "Date =", Lib.timeStr(mod.date) });
-                modInfo.Body.AddRow(new object[] { mod.Made, mod.MD5 });
-                modInfo.Body.AddRow(new object[] { "Total elements=", Elements.Count });
+                mod.wrModel(modInfo);
+                //////////////////modInfo.Body.AddRow(new object[] { "Model Name =", mod.name });
+                //////////////////modInfo.Body.AddRow(new object[] { "Model Directory =", mod.dir });
+                //////////////////modInfo.Body.AddRow(new object[] { "Current Phase =", TS.ModInfo.CurrentPhase });
+                //////////////////modInfo.Body.AddRow(new object[] { "Date =", Lib.timeStr(mod.date) });
+                //////////////////modInfo.Body.AddRow(new object[] { mod.Made, mod.MD5 });
+                //////////////////modInfo.Body.AddRow(new object[] { "Total elements=", Elements.Count });
                 modInfo.isChanged = true;
                 Docs.saveDoc(modInfo);
                 saveModel(mod.name);    // а теперь запишем в Журнал Моделей обновленную информацию
@@ -257,10 +264,19 @@ namespace TSmatch.Model
         {
             Log.set(@"setModel(" + name + ")");
             Model mod = getModel(name);
+            Comps.Clear(); Suppliers.Clear();
             //-- setComp for all Rules of the Model
             foreach (var r in mod.Rules)
             {
-                Cmp.setComp(Docs.getDoc(r.doc));
+                Docs doc = Docs.getDoc(r.doc);
+                CmpSet cmp = Component.setComp(doc);
+                if(!Comps.Contains(cmp)) Comps.Add(cmp);
+                if(!Suppliers.Contains(cmp.Supplier)) Suppliers.Add(cmp.Supplier);
+            }
+            foreach (var v in Comps)
+            {
+                Docs doc = v.doc;
+                doc.Wb.Close();
             }
             Log.exit();
         }
@@ -292,15 +308,6 @@ namespace TSmatch.Model
             } while (!ok);
             Log.exit();
         }
-        /// <summary>
-        /// readModel(dir, FileName) - чтение модели из файла в Документ TMP в Elements
-        ///                            список компонентов, отличающихся от одноименной модели,
-        ///                            записывается к List<TS.AttSet>Elements.
-        /// </summary>
-        /// <param name="dir">каталог модели</param>
-        /// <param name="FileName">имя файла для чтения</param>
-        /// <returns>true - модель загружена в Elements</returns>
-        /// <journal> 8.3.2016 </journal>
         private static bool readModel(out List<TS.AttSet> elm, string dir = null, string FileName = "TSmatchINFO.xlsx")
         {
             Log.set("readModel(" + dir + ", " + FileName + ")");
@@ -315,46 +322,33 @@ namespace TSmatch.Model
             Log.exit();
             return ok;
         }
-        //private List<TS.AttSet> Diff(List<TS.AttSet> lst1, List<TS.AttSet> lst2)
-        //{
-        //    Log.set("Diff");
-        //    //bool y = lst1.Equals(lst2);
-        //    //List<TS.AttSet> diff = new List<TS.AttSet>();
-        //    //diff = lst1.Except(lst2);
-        //    IEnumerable<TS.AttSet> dif = lst1.Except(lst2);
-        //    //int c1 = lst1.Count;
-        //    //int maxCnt = Math.Max(lst1.Count, lst2.Count);
-        //    //for (int i1 = 0, i2 = 0, i = 0; i < maxCnt; i++, i1++, i2++)
-        //    //{
-        //    //    if (lst1[i].Equals(lst2[i])) continue;
-        //    //    // try to skip elements in lst1
-        //    //    int d1 = 0, d2 = 0, n1 = i1 + d1, n2 = i2 + d2;
-        //    //    do
-        //    //    {
-        //    //        n1 = i1 + d1++;
-        //    //        if (n1 == lst1.Count) break;
-        //    //    } while (!lst1[n1].Equals(lst2[n2]));
-        //    //    int dif1 = --d1;
-        //    //    // try to skip elements in lst2
-        //    //    d1 = 0; d2 = 0; n1 = i1 + d1; n2 = i2 + d2;
-        //    //    do
-        //    //    {
-        //    //        n2 = i2 + d2++;
-        //    //        if (n2 == lst2.Count) break;
-        //    //    } while (!lst1[n1].Equals(lst2[n2]));
-        //    //    int dif2 = --n2;
-
-        //    //    if (dif1 <= dif2)
-        //    //    {
-        //    //        for(int j1 = 0; j1 < dif1; j1++) diff
-        //    //        i1 += dif1; 
-
-        //    //    diff.Add(lst1[i]);
-        //    //}
-
-        //    Log.exit();
-        //    return diff;
-        //}
+        /// <summary>
+        /// wrModel(iForm, object[]) - write formatted data from mod to Excel file
+        /// </summary>
+        /// <param name="iForm">integer form number in this Document</param>
+        /// <param name="mod">Model to write. Data taken from Total fields in Model list</param>
+        /// <journal>16.3.2016
+        /// 18.3.2016 - write in Excel list of Rules in FORM_RULE
+        /// </journal>
+        public void wrModel(Docs doc, int iForm = 1)
+        {
+            Log.set("wrModel");
+            string str = doc.forms[iForm].name;
+            object[] obj = { name, dir, "фаза", date, MD5, Elements.Count, strListRules };
+            doc.wrDoc(str, obj);
+            if (doc.name == Decl.MODELINFO)
+            {
+                foreach (var rule in this.Rules)
+                {
+                    string s2 = doc.forms[2].name;
+                    Docs doccc = Docs.getDoc(rule.doc);     //!!
+                    string supplier = Docs.getDoc(rule.doc).Supplier;
+                    object[] ob = { supplier, rule.doc, rule.text };
+                    doc.wrDoc(doc.forms[2].name, ob);
+                }
+            }
+            Log.exit();
+        }
         /// <summary>
         /// ReсentModel(List<Model> models) -- return most recent model in list
         /// </summary>

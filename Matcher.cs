@@ -44,7 +44,7 @@ using Decl = TSmatch.Declaration.Declaration;
 using TS = TSmatch.Tekla.Tekla;
 using Docs = TSmatch.Document.Document;
 using Mod = TSmatch.Model.Model;
-using Cmp = TSmatch.Component.Component;
+using Cmp = TSmatch.Components.Component;
 
 namespace TSmatch.Matcher
 {

@@ -242,6 +242,19 @@ namespace match.FileOp
         {
             Wb.Names.Item(NamedRange).RefersToRange.Copy(rng);
         }
+        public static bool CopyFile(string FrDir, string FileName, string ToDir)
+        {
+            bool result = false;
+            if (!isFileExist(FrDir, FileName)) Msg.F("ERR_");
+            string From = FrDir + "\\" + FileName;
+            try
+            {
+                File.Copy(From, ToDir);
+                result = true;
+            }
+            catch { }
+            return result;
+        }
         public static void FormCol(char col, int dig = 0)
         {
         }

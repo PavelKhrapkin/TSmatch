@@ -23,6 +23,7 @@ namespace TSmatch.Declaration
     ///  7.3.16     - заложена система сообщений с языком из Windows Culture.Info
     ///  8.3.16     - #шаблоны
     /// 12.3.16     - multilanguage support
+    /// 19.3.16     - bootstrap support - copy from current Path to Tekla directories
     /// </journal>
     class Declaration
     {
@@ -36,6 +37,9 @@ namespace TSmatch.Declaration
         /// !!временно разместил вместе с Tekla Structures\версия\Environments, но надо будет уточнить в Tekla!!
         /// </summary>
         public const string F_MATCH = "TSmatch.xlsx";
+        public const string BUTTON_DIR = @"Environments\common\macros\modeling";
+        public const string BUTTON_CS  = "TSmatch.cs";
+        public const string BUTTON_BMP = "TSmatch.BMP";
         public const string DIR_MATCH = @"C:\ProgramData\Tekla Structures\21.1\Environments\common\exceldesign";
         public const string DOC_TOC = "TOC";    // Table Of Content - Лист - таблица-содержание всех Документов в TSmatch
 
@@ -65,7 +69,7 @@ namespace TSmatch.Declaration
         public const int DOC_FORMS    = 17; // основной шаблон Документа. Помимо заголовков Шапки, он может иметь 
                                             //..имя другой формы - для данных, или имена двух форм с подформами _F 
         public const int DOC_HYPERLINK = 18; //гиперссылка на источник в Интернете
-        public const int DOC_TEL = 19;    // телефон поставщика
+        public const int DOC_SUPPLIER  = 19; // Организация- поставщика сортамента
         public const int DOC_ADR = 20;    // адрес поставщика
         public const int DOC_LOADER = 21; // Loader Документа
         public const int DOC_STRUCTURE_DESCRIPTION = 22;    // строка - описание структуры документа

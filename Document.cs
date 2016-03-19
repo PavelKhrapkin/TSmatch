@@ -1,7 +1,7 @@
 ﻿/*-------------------------------------------------------------------------------------------------------
  * Document -- works with all Documents in the system basing on TOC - Table Of Content
  * 
- *  14.3.2016  Pavel Khrapkin, Alex Pass, Alex Bobtsov
+ *  19.3.2016  Pavel Khrapkin, Alex Pass, Alex Bobtsov
  *
  *--------- JOURNAL ----------------  
  * 2013-2015 заложена система управления документами на основе TOC и Штампов
@@ -11,13 +11,15 @@
  *  5.3.16 - null if Document not found or exist
  *  8.3.16 - ErrorMessage system use; setDocTemplate
  * 12.3.16 - module comments in English; minor corrects in getDoc; multilanguage Forms support
- * 14.3.16 - Document Format support in Documents class data structures, Start, etc. Created class Form
+ * 16.3.16 - Document Format support in Documents class data structures, Start, etc. Created class Form
+ * 19.3.16 - use EOL() method 
  * -------------------------------------------
  *      METHODS:
  * Start(FileDir)       - Load from directory FileDir of TOC all known Document attributes, prepare everithing
  * setDocTemplate(dirTemplate, val) - set #dirTtemplate value as val in list of #templates  
  * getDoc(name[,fatal]) - return Document doc named in TOC name or create it. Flag fatal is to try to open only
-?* NewSheet(name)       - создает новый Лист для документа name и копирует в него шапку
+ * Reset()              - "Reset" of the Document. All contents of hes Excel Sheet erased, write Header form
+ * wrDoc(str, object[]) - write data from obj to the Excel file in format of Form and Form_F
 ?* loadDoc(name, wb)    - загружает Документ name или его обновления из файла wb, запускает Handler Документа
 ?* isDocChanged(name)   - проверяет, что Документ name открыт
 ?* recognizeDoc(wb)     - распознает первый лист файла wb по таблице Штампов
@@ -25,6 +27,9 @@
  * internal sub-class Stamp chech the Stamps of Document - "signature" strings in the defined rows and columns 
  * Stamp(Range rng)     - constructor - set Stamp exemple from Excel Range rng
  * Check(doc.Body.Mtr)  - return true after checking Document Body if it contans right Stamps
+ * 
+ * internal sub-class Form - handle document Forms
+ * Init(int toc_line)   - save all Form names for Document from string in toc_line in the list
  */
 using System;
 using System.Data;
@@ -52,7 +57,8 @@ namespace TSmatch.Document
         public bool isChanged = false;
         public bool isNewDoc = false;   // признак вновь создаваемого Документа
         public string type;
-        public int i0, il;              // номера началной и конечной строк оснвной таблицы Документа
+        private int EOLinTOC;
+        public int i0, il;              // номера началной и конечной строк основной таблицы Документа
         public Excel.Workbook Wb;
         public Excel.Worksheet Sheet;
         private string FileName;
@@ -60,22 +66,19 @@ namespace TSmatch.Document
         private string SheetN;
         public string MadeStep;
         private DateTime MadeTime;
-        private string chkSum;  //контрольная сумма документа MD5 в виде стоки из 32 знаков
-        private int EOLinTOC;
-        private List<int> ResLines; //число строк в пятке -- возможны альтернативные значения
-        private Stamp stamp;        //каждый документ ссылается на цепочку сигнатур или Штамп
+        private string chkSum;          //контрольная сумма документа MD5 в виде стоки из 32 знаков
+        public string Supplier = "";    //имя организации - поставщика сортамента 
+        private List<int> ResLines;     //число строк в пятке -- возможны альтернативные значения
+        private Stamp stamp;            //каждый документ ссылается на цепочку сигнатур или Штамп
         private DateTime creationDate;  // дата создания Документа
         private string Loader;
         public string LoadDescription;  // строка - описание структуры документа
         private string LastUpdateFromFile;
-        public int MyCol;           // количесто колонок, добавляемых слева в Документ в loadDoc
-        public int usedColumns;     // общее кол-во использованных колонок в Body Документа
-        private string HDR_name;    // Named Range Шапки
         public Mtr ptrn;
         public Mtr Body;
         public DataTable dt;
         public Mtr Summary;
-        public Form form = null;     // Document's Format description - Document sub-class 
+        public List<Form> forms = new List<Form>(); // Document's Format descriptions
         public Dictionary<string, Dictionary<string, string>> docDic = new Dictionary<string, Dictionary<string, string>>();
 
 //        private const int TOC_DIRDBS_COL = 10;  //в первой строке в колонке TOC_DIRDBS_COL записан путь к dirDBs
@@ -84,19 +87,18 @@ namespace TSmatch.Document
         { this.name = name; }
         public Document(Document d)     // конструктор - перегрузка для копирования Документа
         {
-            this.name = d.name;
-            this.Body = d.Body;
-            this.type = d.type;
-            this.i0 = d.i0; this.il = d.il;
-            this.isOpen = d.isOpen; this.isChanged = d.isChanged; this.isNewDoc = d.isNewDoc;
-            this.Wb = d.Wb; this.Sheet = d.Sheet; this.SheetN = d.SheetN;
-            this.FileName = d.FileName; this.FileDirectory = d.FileDirectory;
-            this.MadeStep = d.MadeStep; this.MadeTime = d.MadeTime;
-            this.chkSum = d.chkSum;
-            this.stamp = d.stamp;
-            this.creationDate = d.creationDate;
-            this.HDR_name = d.HDR_name;
-            this.form = d.form;
+            name = d.name;
+            Body = d.Body;
+            type = d.type;
+            i0 = d.i0; il = d.il;
+            isOpen = d.isOpen; isChanged = d.isChanged; isNewDoc = d.isNewDoc;
+            Wb = d.Wb; Sheet = d.Sheet; SheetN = d.SheetN;
+            FileName = d.FileName; FileDirectory = d.FileDirectory;
+            MadeStep = d.MadeStep; MadeTime = d.MadeTime;
+            chkSum = d.chkSum;
+            stamp = d.stamp;
+            creationDate = d.creationDate;
+            forms = d.forms;
         }
 
         /// <summary>
@@ -107,27 +109,24 @@ namespace TSmatch.Document
         /// <journal> 22.1.2016
         /// 12.3.2016 - multilanguage Heders support
         /// 14.3.2016 - Form class support
+        /// 19.3.2016 - use EOL method
         /// </journal>
         public static void Start(string[] _DirTemplate, string[] _DirValue )
         {
             Log.set("Start(Document #Templates ListCount=" + _DirTemplate.Length + ")");
-            bool language = Msg.getLanguage() == Decl.ENGLISH;
-            // считываем листы служебного файла TSmatch: TOC, Process, Forms
             FileDirTemplate = _DirTemplate; FileDirValue = _DirValue;
             string FileDir = _DirValue[0];
             if (string.IsNullOrEmpty(FileDir))
             {
                 FileDir = Decl.DIR_MATCH;
             }
-            //--------- обрабатываем ТОС -------------
+            //--------- handle ТОС -------------
             Document toc = new Document(Decl.DOC_TOC);
             toc.Wb = FileOp.fileOpen(FileDir, Decl.F_MATCH);
             toc.Sheet = toc.Wb.Worksheets[Decl.DOC_TOC];
-            Form.setWb(toc.Wb);
-            Excel.Worksheet hdrSht = toc.Wb.Worksheets[Decl.FORMS]; // All Forms stored as Named Ranges of TSmatch.xls pointed to Forms
             Mtr mtr = toc.Body = FileOp.getSheetValue(toc.Sheet);
-            toc.i0 = mtr.Int(Decl.TOC_I0, Decl.DOC_I0);
-            toc.il = mtr.Int(Decl.TOC_I0, Decl.DOC_IL);
+            toc.EOL(Decl.TOC_I0);
+            Form.setWb(toc.Wb, mtr);
             toc.isOpen = true;
             for (int i = toc.i0; i <= toc.il; i++)
             {
@@ -139,28 +138,17 @@ namespace TSmatch.Document
                     //.. то есть реально загружаем ТОС, а остальные Документы- потом
                     if (doc.name == Decl.DOC_TOC) doc = toc;
                     Documents.Add(docName, doc);
-                    doc.i0 = mtr.Int(i, Decl.DOC_I0, "не распознан i0 в строке " + i);
-                    doc.il = mtr.Int(i, Decl.DOC_IL, "не распознан il в строке " + i);
+                    doc.EOL(i);
                     doc.MadeTime = Lib.getDateTime(mtr[i, Decl.DOC_TIME]);
-                    doc.EOLinTOC = mtr.Int(i, Decl.DOC_EOL, "не распознан EOL в строке " + i);
                     doc.ResLines = Lib.ToIntList(mtr.Strng(i, Decl.DOC_TYPE), '/');
-                    doc.MyCol = mtr.Int(i, Decl.DOC_I0, "не распознан MyCol в строке " + i);
                     doc.MadeStep = mtr.Strng(i, Decl.DOC_MADESTEP);
                     doc.FileName = mtr.Strng(i, Decl.DOC_FILE);
                     doc.FileDirectory = mtr.Strng(i, Decl.DOC_DIR);
                     doc.SheetN = mtr.Strng(i, Decl.DOC_SHEET);
                     doc.creationDate = Lib.getDateTime(mtr[i, Decl.DOC_CREATED]);
+                    doc.Supplier = mtr.Strng(i, Decl.DOC_SUPPLIER);
                     doc.LoadDescription = mtr.Strng(i, Decl.DOC_STRUCTURE_DESCRIPTION);
-                    //.... working with Document Form .....
-///// 15.3.2016 //////////doc.form = new Form(mtr.Strng(i, Decl.DOC_FORMS)
-/////temporary stop Form /                  , mtr.Strng(i, Decl.DOC_FORMS +1)
-//////////////////////////                  , mtr.Strng(i, Decl.DOC_FORMS +2));
-                    string hdrName = mtr.Strng(i, Decl.DOC_FORMS);
-                    doc.HDR_name = hdrName;
-
-                    string ptrnName = mtr.Strng(i, Decl.DOC_FORMS);
-                    if (ptrnName != "") doc.ptrn = new Mtr(hdrSht.Range[ptrnName].get_Value());
-                    //......................................
+                    doc.forms = Form.Init(i);
                     doc.Loader = mtr.Strng(i, Decl.DOC_LOADER);
                     doc.type = mtr.Strng(i, Decl.DOC_TYPE);
                     doc.isNewDoc = (doc.type == Decl.DOC_TYPE_N);
@@ -280,49 +268,85 @@ namespace TSmatch.Document
             {
                 if (fatal)
                 {
+                    if (!Documents.ContainsKey(name)) Msg.F("ERR_05.6_getDoc_NO_IN_Dictionary", e, name);
                     string msg = (Documents.ContainsKey(name)) ? "не существует" : " не удалось открыть";
-                    msg += "\nERROR: " + e;
-                    Msg.F("ERR_05.5_getDoc_NOT_OPEN", name, msg);
+                    Msg.F("ERR_05.5_getDoc_NOT_OPEN", e, name, msg);
                 }
                 doc = null;
             }
             Log.exit();
             return doc;
         }
-        /////////////// <summary>
-        /////////////// NewSheet(name)  - создание нового листа с заголовком для Документа name
-        /////////////// NewSheet()   - создание нового листа для Документа this с именем doc.SheetN
-        /////////////// </summary>
-        /////////////// <param name="name">имя создаваемого Листа</param>
-        /////////////// <returns>вновь созданный Документ name</returns>
-        /////////////// <journal>6.4.2014
-        /////////////// 22.12.2015 - overload NewSheet(doc)
-        /////////////// 4.1.2016 - убрал overload NewSheet(), переписал создание шапки
-        /////////////// 17.1.2016 - Шапка целиком копируется из Named Range листа Forms
-        /////////////// </journal>
-        ////////////public static Document NewSheet(string name)
-        ////////////{
-        ////////////    Log.set("NewSheet(" + name + ")");
-        ////////////    Document doc = Documents[name];
-        ////////////    try
-        ////////////    {
-        ////////////        Excel.Workbook wb = doc.Wb;
-        ////////////        wb.Sheets.Add();
-        ////////////        wb.ActiveSheet.Name = doc.SheetN;   //создаем Лист по имени в TOC
-        ////////////        doc.Sheet = wb.ActiveSheet;
-        ////////////        // ---- запись шапки ---
-        ////////////        if (doc.HDR_name != "")
-        ////////////        {
-        ////////////            Document toc = getDoc(Decl.DOC_TOC);
-        ////////////            Excel.Range rng = FileOp.setRange(doc.Sheet);
-        ////////////            FileOp.CopyRng(toc.Wb, doc.HDR_name, rng);
-        ////////////            doc.Body = FileOp.getSheetValue(doc.Sheet);
-        ////////////        }     
-        ////////////    }
-        ////////////    catch (Exception e) { Log.FATAL("ошибка NewSheet(" + name + ")"); }
-        ////////////    finally { Log.exit(); }
-        ////////////    return doc;
-        ////////////}
+        /// <summary>
+        /// Reset() - "Reset" of the Document. All contents of hes Excel Sheet erased, write Header form
+        /// </summary>
+        /// <journal>9.1.2014
+        /// 17.1.16 - полностью переписано с записью Шапки
+        /// 16.3.16 - header name get from doc.forms[0]
+        /// </journal>
+        public void Reset()
+        {
+            Log.set("Reset(" + this.name + ")");
+            Document toc = getDoc(Decl.DOC_TOC);
+            this.Sheet = FileOp.SheetReset(this.Wb, this.name);
+            Excel.Range rng = FileOp.setRange(this.Sheet);
+            string myHDR_name = this.forms[0].name;
+            FileOp.CopyRng(toc.Wb, myHDR_name, rng);
+            this.Body = FileOp.getSheetValue(this.Sheet);
+            Log.exit();
+        }
+        /// <summary>
+        /// wrDoc(str, obect[] obj) -- write data from array of objects to the Document in Excel
+        /// </summary>
+        /// <param name="str">form name; "str_F" format is also accounted</param>
+        /// <param name="obg">data array to be written</param>
+        /// <journal>16.3.2016</journal>>
+        public void wrDoc(string str, object[] obj)
+        {
+            Log.set("wrDoc(" + str + ")");
+            Document toc = getDoc(Decl.DOC_TOC);
+            int i0 = Body.iEOL() + 1;
+            Excel.Range rng = FileOp.setRange(Sheet, i0);
+            FileOp.CopyRng(toc.Wb, str, rng);
+            Body = FileOp.getSheetValue(Sheet);
+            FileOp.saveRngValue(Body);
+            Form frm = forms.Find(x => x.name == str);
+            int i = 0;
+            foreach (var v in obj)
+            {
+                int r = frm.row[i] + i0 - 1;
+                int c = frm.col[i++];
+                Body[r, c] = v;
+            }
+            FileOp.saveRngValue(Body);
+            Log.exit();
+        }
+        /// <summary>
+        /// EOLstr(str) - return parsed string str into Int32, or return EOLinTOC, when str is EOL
+        /// </summary>
+        /// <returns>Int32 or EOLinTOC</returns>
+        /// <journal>19.3.2016</journal>
+        int EOLstr(string str)
+        {
+            Log.set("Document.Int(" + str + ")");
+            int x = 0;
+            if (str.Contains("EOL")) x = this.EOLinTOC;
+            else Int32.TryParse(str, out x);
+            Log.exit();
+            return x;
+        }
+        /// <summary>
+        /// EOL(int tocRow) - setup this Document int numbers EndEOLinTOC, i0, and il - main table borders
+        /// </summary>
+        /// <param name="tocRow">line number of this Document in TOC</param>
+        /// <journal>19.3.2016</journal>
+        void EOL(int tocRow)
+        {
+            Document toc = (name == Decl.DOC_TOC)? this: getDoc(Decl.DOC_TOC);
+            EOLinTOC = EOLstr(toc.Body.Strng(tocRow, Decl.DOC_EOL));
+            this.i0  = EOLstr(toc.Body.Strng(tocRow, Decl.DOC_I0));
+            this.il  = EOLstr(toc.Body.Strng(tocRow, Decl.DOC_IL));
+        }
         /// <summary>
         /// отделение основной части Документа (doc.Body) от пятки (doc.Summary)
         /// </summary>
@@ -397,71 +421,6 @@ namespace TSmatch.Document
             return doc;
         }
         /// <summary>
-        /// Reset() - "сброс" Документа приводит к тому, что его содержимое выбрасывается, шапка переписывается
-        /// </summary>
-        /// <journal>9.1.2014
-        /// 17.1.16 - полностью переписано с записью Шапки
-        /// </journal>
-        public void Reset()
-        {
-            Log.set("Reset(" + this.name + ")");
-            Document toc = getDoc(Decl.DOC_TOC);
-            this.Sheet = FileOp.SheetReset(this.Wb, this.name);
-            Excel.Range rng = FileOp.setRange(this.Sheet);
-            FileOp.CopyRng(toc.Wb, this.HDR_name, rng);
-            this.Body = FileOp.getSheetValue(this.Sheet);
-            Log.exit();
-        }
-        /* PK       /// <summary>
-               /// добавляет строку к Body Документа
-               /// </summary>
-               /// <journal>9.1.2014</journal>
-               public Excel.Range AddRow()
-               {
-                   Log.set("AddRow");
-                   try
-                   {
-                       Body.Range["A" + (int)(Body.Rows.Count + 1)].EntireRow.Insert();
-       //                Body.Rows[Body.Rows.Count].Insert(Excel.XlInsertShiftDirection.xlShiftDown);
-       //                return Body.Rows[Body.Rows.Count];
-                       return Body;
-                   }
-                   catch
-                   { 
-                       Log.FATAL("Ошибка при добавлении строки Документа \"" + name + "\"");
-                       return null;
-                   }
-                   finally { Log.exit(); }
-               }
-
-               /// <summary>
-               /// подсчет контрольной суммы Документа, как суммы ASCII кодов всех знаков во всех ячейках Body 
-               /// </summary>
-               /// <returns></returns>
-               /// <journal>17.1.2014 PKh</journal>
-               public long CheckSum()
-               {
-                   DateTime t0 = DateTime.Now;
-                   long checkSum = 0;
-
-                   int maxRow = Body.iEOL();
-                   int maxCol = Body.iEOC();
-                   for (int i=1; i <= maxRow; i++)
-                       for (int j=1; j <= maxCol; j++)
-                       {
-                           string str = Body.Strng(i, j);
-                           if (str.Length == 0) continue;
-                           byte[] bt = Encoding.ASCII.GetBytes(str);
-                           foreach (var h in bt) checkSum += h;
-                       }
-
-                   DateTime t1 = DateTime.Now;
-                   new Log("-> " + (t1 - t0) + "\tChechSum=" + checkSum);
-
-                   return checkSum;
-               }
-        PK */
-        /// <summary>
         /// saveDoc(doc [,BodySave, string MD5]) - сохраняет Документ в Excel файл, если он изменялся
         /// </summary>
         /// <param name="name">имя документа</param>
@@ -503,7 +462,7 @@ namespace TSmatch.Document
                             toc.Body[n, Decl.DOC_CREATED] = Lib.timeStr();
                         toc.Body[n, Decl.DOC_EOL] = doc.EOLinTOC;
                         FileOp.setRange(toc.Sheet);
-                        FileOp.saveRngValue(toc.Body, AutoFit:false);  //======= save TAC in TSmatch.xlsx
+                        FileOp.saveRngValue(toc.Body, AutoFit:false);  //======= save TОC in TSmatch.xlsx
                         break;
                     }
                 }  
@@ -780,68 +739,64 @@ namespace TSmatch.Document
             }
         }   // end class OneStamp
         /// <summary>
-        /// Form - Document's Format description - Document sub-class. Forms get from TSmatch.xlsx/Forms Sheet
+        /// Form - Document's Format description - Document sub-class. Forms get from TSmatch.xlsx/Forms
         /// </summary>
-        /// <journal>14.3.2016</journal>
+        /// <journal>16.3.2016</journal>
         public class Form
         {
             private static Excel.Workbook Wb;
+            private static Mtr tocMtr;
 
-            public string name
+            public string name;
+            public List<int> row = new List<int>();
+            public List<int> col = new List<int>();
+
+            public Form(string _name, List<int> _row, List<int> _col)  // constructor Form
             {
-                get { return Forms.Count == 0? null : Forms[name].name; }
-                set
-                {
-                    if (Forms.ContainsKey(name)) return;
-                    Forms.Add(name, new Form(name, Wb.Names.Item(name).RefersToRange));
-                }
-            }
-            public Excel.Range rep
-            {
-                get { return rep; }
-                set
-                {
-                    rep = value;
-                    if (!Forms.ContainsKey(name)) Msg.F("ERR_05.4_FORM_NO_RNG", name);
-                    Forms[name].rep = value;
-                }
-            }
-            private Dictionary<string, Form> Forms = new Dictionary<string, Form>(); //sub-Forms
-            public Form(string _name, Excel.Range _rep = null)
-            {
-                this.name = _name;
-                this.rep = _rep;
-            }
-            public Form(string frm, string f1 = "", string f2 = "")
-            {
-                if (frm == "") return;
-                bool language = Msg.getLanguage() == Decl.ENGLISH;
-language = true; //en-US
-                setForm(language, frm);
-                setForm(language, f1);
-                setForm(language, f2);
+                name = _name; row = _row; col = _col;
             }
             /// <summary>
-            /// lngName(lng, s) - set Form s, when lng=true->"EN_"s, check if it defined, Add Form, and try s"_F"
+            /// List<Form> Init(int toc_line) - initiate all Forms for Document in toc_line.
             /// </summary>
-            /// <param name="lng">bool English Language flag</param>
-            /// <param name="s">string to handle</param>
-            /// <returns></returns>
-            private void setForm(bool lng, string s)
+            /// <param name="toc_line">line number in TOC</param>
+            /// <returns>form list</returns>
+            public static List<Form> Init(int toc_line)
             {
-                if (string.IsNullOrEmpty(s)) return;
-                if (lng)
+                Log.set("Init(" + toc_line + ")");
+                bool language = Msg.getLanguage() == Decl.ENGLISH;
+                //------------------------------------------------------------------------------
+                language = true; //en-US for Englisg Debug. Remove or comment this line later  !
+                //------------------------------------------------------------------------------
+                List<Form> Forms = new List<Form>();
+                for (int col = Decl.DOC_FORMS, i = 0; i < 10; i++)
                 {
-                    s = "EN_" + s;
-                    if (!FileOp.isNamedRangeExist(Wb, s)) Msg.F("ERR_05.4_FORM_NO_RNG", s);
+                    string s = tocMtr.Strng(toc_line, col++);
+                    if (string.IsNullOrEmpty(s)) continue;                 
+                    if (language) s = "EN_" + s;
+                    if (FileOp.isNamedRangeExist(Wb, s))
+                    {
+                        List<int> _r = new List<int>();
+                        List<int> _c = new List<int>();
+                        string sf = s + "_F";
+                        if (FileOp.isNamedRangeExist(Wb, sf))
+                        {
+                            Mtr format = new Mtr(Wb.Names.Item(sf).RefersToRange.Value);
+                            for (int c = 1; c <= format.iEOC(); c++)
+                                for (int r = 1; r <= format.iEOL(); r++)
+                                {
+                                    string f = format.Strng(r, c);
+                                    if ( f.Contains("{") & f.Contains("}")) { _r.Add(r); _c.Add(c); }
+                                }
+                        }
+                        Forms.Add(new Form(s, _r, _c));
+                    }                 
                 }
-                if (FileOp.isNamedRangeExist(Wb, s)) Forms.Add(s, new Form(s, Wb.Names.Item(s).RefersToRange));
-                s = s + "_F";
-                if (FileOp.isNamedRangeExist(Wb, s)) Forms.Add(s, new Form(s, Wb.Names.Item(s).RefersToRange));
+                Log.exit();
+                return Forms;
             }
-            public static void setWb(Excel.Workbook _Wb)
+            public static void setWb(Excel.Workbook _Wb, Mtr _tocMtr)
             {
-                Wb = _Wb;
+                Wb = _Wb; tocMtr = _tocMtr;
             }
         } // end class Form
     } // end class Document

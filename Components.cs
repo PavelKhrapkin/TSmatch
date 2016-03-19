@@ -1,7 +1,7 @@
 ﻿/*----------------------------------------------------------------------------
  * Components -- работа с документами - прайс-листами поставщиков компонентов
  * 
- *  5.3.2016  П.Храпкин
+ *  19.3.2016  П.Храпкин
  *
  *--- журнал ---
  * 28.2.2016 выделено из модуля Matcher
@@ -26,10 +26,11 @@ using TS = TSmatch.Tekla.Tekla;
 using Docs = TSmatch.Document.Document;
 using Mod = TSmatch.Model.Model;
 using Mtch = TSmatch.Matcher.Matcher;
+using Supl = TSmatch.Suppliers.Supplier;
 
-namespace TSmatch.Component
+namespace TSmatch.Components
 {
-    class Component
+    public class Component
     {
         private static Dictionary<string, Component> CompSet = new Dictionary<string, Component>();   //коллекция баз компонентов
 
@@ -47,7 +48,7 @@ namespace TSmatch.Component
         }
         public static List<Component> Comps = new List<Component>();
 
-        public static void setComp(Docs doc)
+        public static CompSet setComp(Docs doc)
         {
             Log.set("setComp(" + doc.name + ")");
             List<int> docCompPars = Mtch.GetPars(doc.LoadDescription);
@@ -77,7 +78,12 @@ namespace TSmatch.Component
                 double wgt = 0.0;   //!!! времянка -- пока вес будем брать из Tekla 
                 Comps.Add(new Component(str, lng, wgt, price));
             }
+            CompSet result = new CompSet();
+            result.name = doc.name;
+            result.Comps = Comps;
+            result.Supplier = Supl.getSupplier(doc.Supplier);
             Log.exit();
+            return result; 
         }
         /// <summary>
         /// getComp(doc) - загружает Документ - прайс-лист комплектующих
@@ -160,4 +166,19 @@ namespace TSmatch.Component
             return doc;
         }
     } // end class components
+    public class CompSet   
+    {
+        List<Component> Components = new List<Component>(); // набор однотипных компонентов одного поставщика
+                                                            //..например, "Пластины" 
+        public string name;                 // название сортамента, например, "Уголок"
+        public List<Component> Comps = new List<Component>();
+        public Supl Supplier;               // организация - поставщик сортамента
+        public Docs doc;                    // Документ, содержащий набор компонентов, прайс-лист поставщика 
+
+        public static void dd()
+        {
+            Docs doc = Docs.getDoc("Уголок");
+ //!!           CompSet angle = setComp(doc);
+        }
+    } // end class CompSet
 } // end namespace
