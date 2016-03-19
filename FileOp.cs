@@ -1,24 +1,29 @@
 /*--------------------------------------------
- * FileOp - работа с файловой системой
+ * FileOp - File System primitives
  * 
- *  13.02.2016  ѕ.’рапкин, ј.ѕасс
- *  
+ *  12.03.2016  Pavel Khrapkin, Alex Pass
+ *
+ *--- JOURNAL ---
+ * 2013 - 2013 - created
+ * 12.3.2016 - isNamedRangeExist(name)  
  * -------------------------------------------        
- * fileOpen(dir,name[,create])  - открывает или создает новый файл Excel по имени name
- * isFileExist(name)            - возвращает true, если файл существует
- * IsSheetExist(Wb, name)       - возвращает true, если Worksheet name есть в книге Wb
- * getRngValue(Sheet,r0c0, r1c1, msg)   - возвращает Mtr из листа Sheet из диапазона [r0c0r1c1]
- * getSheetValue(Sheet,msg)             - возвращает Mtr из листа Sheet UsedRange или Log.FATAL(msg)
- * saveRngValue(Body [,row_to_ins) - запись в Excel из Body 
- * setRange(..)                 - группа перегруженных методов дл€ сохранени€ Range в Exchel
- * CopyRng(Wb,NamedRange,rng)   - копирует именованный диапазон NamedRange в книге Wb в Range rng
- * FormCol(char col[, dig])     - форматирует колонку col с dig знаков после зап€той
+ * fileOpen(dir,name[,create])  - Open or Create file name in dir catalog
+ * isFileExist(name)            - return true if file name exists
+ * isSheetExist(Wb, name)       - return true if Worksheet name exists in Workbook Wb
+ * isNamedRangeExist(Wb, name)  - return true when named range name exists in Wb 
+ * getRngValue(Sheet,r0c0, r1c1, msg)   - return Mtr-Range content from Sheet in Range [r0c0r1c1]
+ * getSheetValue(Sheet,msg)             - return Mtr-Range from UsedRange in Sheet
+ * saveRngValue(Body [,row_to_ins) - write Document Body content to Excel file 
+ * setRange(..)                 - few overloaded methods to set Renge -- preparation for saveRngValue(..)
+ * CopyRng(Wb,NamedRange,rng)   - copy named range NamedRange into rng in Workbook Wb
+?* FormCol(char col[, dig])     - format column col in Excel file as a Number with dig decimal digits
  */
 using System;
 using System.IO;
 using Excel = Microsoft.Office.Interop.Excel;
 using match.Lib;
 using Mtr = match.Matrix.Matr;
+using Msg = TSmatch.Message.Message;
 
 namespace match.FileOp
 {
@@ -56,7 +61,6 @@ namespace match.FileOp
             if (!found)
             {
                 string file = dir + "\\" + name;
-                //!!                bool create = (OpenMode == (int)Decl.DOC_RW_TYPE.CREATEOROPEN) && !isFileExist(file);
                 try
                 {       // -- пробуем открть или создать файл --
                     if (create_ifnotexist)
@@ -90,10 +94,28 @@ namespace match.FileOp
             finally { Log.exit(); }
             return result;
         }
+        public static bool isFileExist(string dir, string name)
+        {
+            return isFileExist(dir + "\\" + name);
+        }
         public static bool isSheetExist(Excel.Workbook Wb, string name)
         {
             try { Excel.Worksheet Sh = Wb.Worksheets[name]; return true; }
             catch { return false; }
+        }
+        public static bool isNamedRangeExist(Excel.Workbook Wb, string name)
+        {
+            bool result = true;
+            try
+            {
+                result = Wb.Names.Item(name) != null;
+            }
+            catch ( Exception e)
+            {
+                if (Msg.Trace) Msg.I("TRACE_33.1_IsNameRangeExist", e, name);
+                result = false;
+            }
+            return result;
         }
         public static Excel.Worksheet SheetReset(Excel.Workbook Wb, string name, bool QuietMode = false)
         {

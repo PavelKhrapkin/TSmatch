@@ -51,12 +51,17 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\2016-Jan\TSmatch 22.01.2016\TSmatch\TSmatch\bin\Debug\Tekla.Structures.dll</HintPath>
     </Reference>
+    <Reference Include="Tekla.Structures.Dialog, Version=21.1.0.0, Culture=neutral, PublicKeyToken=2f04dbe497b71114, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\..\..\Program Files\Tekla Structures\21.1\nt\bin\plugins\Tekla.Structures.Dialog.dll</HintPath>
+    </Reference>
     <Reference Include="Tekla.Structures.Model, Version=21.1.0.0, Culture=neutral, PublicKeyToken=2f04dbe497b71114, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\2016-Jan\TSmatch 22.01.2016\TSmatch\TSmatch\bin\Debug\Tekla.Structures.Model.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Message.cs" />
     <Compile Include="Components.cs" />
     <Compile Include="Declaration.cs" />
     <Compile Include="Document.cs" />

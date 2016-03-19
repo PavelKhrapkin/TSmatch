@@ -1,27 +1,31 @@
 ﻿/*-------------------------------------------------------------------------------------------------------
- * Document -- класс Документов содержит таблицу параметров всех Документов, известных приложению match
+ * Document -- works with all Documents in the system basing on TOC - Table Of Content
  * 
- *  19.2.2016  П.Храпкин, А.Пасс, А.Бобцов
- *  
+ *  14.3.2016  Pavel Khrapkin, Alex Pass, Alex Bobtsov
+ *
+ *--------- JOURNAL ----------------  
  * 2013-2015 заложена система управления документами на основе TOC и Штампов
  * 22.1.16 - из статического конструктора начало работы Document перенесено в Start
  * 17.2.16 - в Documents добавлены - строки границы таблицы I0 и IN и их обработка
  * 19.2.16 - getDoc, getDocDir распознавание шаблонов в doc.FileDirectory
+ *  5.3.16 - null if Document not found or exist
+ *  8.3.16 - ErrorMessage system use; setDocTemplate
+ * 12.3.16 - module comments in English; minor corrects in getDoc; multilanguage Forms support
+ * 14.3.16 - Document Format support in Documents class data structures, Start, etc. Created class Form
  * -------------------------------------------
- *      МЕТОДЫ:
- * Start(FileDir)       - загружает из FileDir TOC (Table of Content)- атрибуты всех Документов, а также сам ТОС
- * getDoc(name)         - возвращает Документ с именем name; при необходимости - открывает его или созает заново
- * getDocDir(name, template, dir) - каталог в TOC - #шаблон. Уточняем его из Models или из Tekla потом извлекаем 
- * NewSheet(name)       - создает новый Лист для документа name и копирует в него шапку
- * loadDoc(name, wb)    - загружает Документ name или его обновления из файла wb, запускает Handler Документа
- * isDocChanged(name)   - проверяет, что Документ name открыт
- * recognizeDoc(wb)     - распознает первый лист файла wb по таблице Штампов
+ *      METHODS:
+ * Start(FileDir)       - Load from directory FileDir of TOC all known Document attributes, prepare everithing
+ * setDocTemplate(dirTemplate, val) - set #dirTtemplate value as val in list of #templates  
+ * getDoc(name[,fatal]) - return Document doc named in TOC name or create it. Flag fatal is to try to open only
+?* NewSheet(name)       - создает новый Лист для документа name и копирует в него шапку
+?* loadDoc(name, wb)    - загружает Документ name или его обновления из файла wb, запускает Handler Документа
+?* isDocChanged(name)   - проверяет, что Документ name открыт
+?* recognizeDoc(wb)     - распознает первый лист файла wb по таблице Штампов
  * 
- * внутренний класс Stamp предназначен для заполнения списков Штампов
- * каждый Штамп содержит сигнатуру, то есть проверяемый текст, и пары координат - его положений
- * Stamp(Range rng)     - разбирает rng, помещая из таблицы TOCmatch Штамп в List Штампов в Документе
- * Check(rng,stampList) - проверка Штампов stampList в Range rng
-  */
+ * internal sub-class Stamp chech the Stamps of Document - "signature" strings in the defined rows and columns 
+ * Stamp(Range rng)     - constructor - set Stamp exemple from Excel Range rng
+ * Check(doc.Body.Mtr)  - return true after checking Document Body if it contans right Stamps
+ */
 using System;
 using System.Data;
 using System.Collections.Generic;
@@ -32,6 +36,7 @@ using Decl = TSmatch.Declaration.Declaration;
 using Mtr = match.Matrix.Matr;  // класс для работы с внутренними структурами данных
 using Lib = match.Lib.MatchLib;
 using Log = match.Lib.Log;
+using Msg = TSmatch.Message.Message;
 
 namespace TSmatch.Document
 {
@@ -40,7 +45,7 @@ namespace TSmatch.Document
         private static Dictionary<string, Document> Documents = new Dictionary<string, Document>();   //коллекция Документов
 
         private static string[] FileDirTemplate;   // пары #шаблоны - значения каталогов..
-        private static string[] FileDirValues;     //..распознаваемых в getDoc
+        private static string[] FileDirValue;      //..распознаваемых в getDoc
 
         public string name;
         private bool isOpen = false;
@@ -70,6 +75,7 @@ namespace TSmatch.Document
         public Mtr Body;
         public DataTable dt;
         public Mtr Summary;
+        public Form form = null;     // Document's Format description - Document sub-class 
         public Dictionary<string, Dictionary<string, string>> docDic = new Dictionary<string, Dictionary<string, string>>();
 
 //        private const int TOC_DIRDBS_COL = 10;  //в первой строке в колонке TOC_DIRDBS_COL записан путь к dirDBs
@@ -90,14 +96,25 @@ namespace TSmatch.Document
             this.stamp = d.stamp;
             this.creationDate = d.creationDate;
             this.HDR_name = d.HDR_name;
+            this.form = d.form;
         }
 
-        public static void Start(string[] DirTemplates, string[] DirValues )
+        /// <summary>
+        /// Start(DirTemplates, DirValuue) - prepare further works with the Documents; setup data from TOC, set #Templates
+        /// </summary>
+        /// <param name="_DirTemplate">#Template string</param>
+        /// <param name="_DirValue">#template value to setup</param>
+        /// <journal> 22.1.2016
+        /// 12.3.2016 - multilanguage Heders support
+        /// 14.3.2016 - Form class support
+        /// </journal>
+        public static void Start(string[] _DirTemplate, string[] _DirValue )
         {
-            Log.set("Start(ListCount=" + DirTemplates.Length + ")");
-            // считываем листы служебного файла TSmatch: TOC, Process, Header
-            FileDirTemplate = DirTemplates; FileDirValues = DirValues;
-            string FileDir = DirValues[0];
+            Log.set("Start(Document #Templates ListCount=" + _DirTemplate.Length + ")");
+            bool language = Msg.getLanguage() == Decl.ENGLISH;
+            // считываем листы служебного файла TSmatch: TOC, Process, Forms
+            FileDirTemplate = _DirTemplate; FileDirValue = _DirValue;
+            string FileDir = _DirValue[0];
             if (string.IsNullOrEmpty(FileDir))
             {
                 FileDir = Decl.DIR_MATCH;
@@ -106,7 +123,8 @@ namespace TSmatch.Document
             Document toc = new Document(Decl.DOC_TOC);
             toc.Wb = FileOp.fileOpen(FileDir, Decl.F_MATCH);
             toc.Sheet = toc.Wb.Worksheets[Decl.DOC_TOC];
-            Excel.Worksheet hdrSht = toc.Wb.Worksheets[Decl.HEADER]; // в этом листе шапки в именованных Range по всем Документам
+            Form.setWb(toc.Wb);
+            Excel.Worksheet hdrSht = toc.Wb.Worksheets[Decl.FORMS]; // All Forms stored as Named Ranges of TSmatch.xls pointed to Forms
             Mtr mtr = toc.Body = FileOp.getSheetValue(toc.Sheet);
             toc.i0 = mtr.Int(Decl.TOC_I0, Decl.DOC_I0);
             toc.il = mtr.Int(Decl.TOC_I0, Decl.DOC_IL);
@@ -133,12 +151,19 @@ namespace TSmatch.Document
                     doc.SheetN = mtr.Strng(i, Decl.DOC_SHEET);
                     doc.creationDate = Lib.getDateTime(mtr[i, Decl.DOC_CREATED]);
                     doc.LoadDescription = mtr.Strng(i, Decl.DOC_STRUCTURE_DESCRIPTION);
-                    doc.HDR_name = mtr.Strng(i, Decl.DOC_PATTERN);
-                    string ptrnName = mtr.Strng(i, Decl.DOC_PATTERN);
+                    //.... working with Document Form .....
+///// 15.3.2016 //////////doc.form = new Form(mtr.Strng(i, Decl.DOC_FORMS)
+/////temporary stop Form /                  , mtr.Strng(i, Decl.DOC_FORMS +1)
+//////////////////////////                  , mtr.Strng(i, Decl.DOC_FORMS +2));
+                    string hdrName = mtr.Strng(i, Decl.DOC_FORMS);
+                    doc.HDR_name = hdrName;
+
+                    string ptrnName = mtr.Strng(i, Decl.DOC_FORMS);
                     if (ptrnName != "") doc.ptrn = new Mtr(hdrSht.Range[ptrnName].get_Value());
+                    //......................................
                     doc.Loader = mtr.Strng(i, Decl.DOC_LOADER);
                     doc.type = mtr.Strng(i, Decl.DOC_TYPE);
-                    doc.isNewDoc = (doc.type == Decl.STAMP_TYPE_N);
+                    doc.isNewDoc = (doc.type == Decl.DOC_TYPE_N);
                     int j;
                     for (j = i + 1; j <= mtr.iEOL() && mtr.Strng(j, Decl.DOC_NAME) == ""; j++) ;
                     doc.stamp = new Stamp(i, j - 1);
@@ -177,12 +202,37 @@ namespace TSmatch.Document
             //            doc.isOpen = true;
             //            doc.saveDoc();
 #endif //not_ready
-            Log.exit();
+                Log.exit();
         } // end Start
         /// <summary>
-        /// getDoc(name) - извлечение Документа name. Если еще не прочтен - из файла. При необхоимости - новый лист
+        /// 
         /// </summary>
-        /// <param name="name">имя извлекаемого документа</param>
+        /// <param name="_dirTemplate"></param>
+        /// <param name="_dirValue"></param>
+        public static void setDocTemplate(string _dirTemplate, string _dirValue)
+        {
+            Log.set("setDocTemplate");
+            bool existingTemplate = false;
+            int index = 0;
+            foreach (string t in FileDirTemplate)
+            {
+                if (_dirTemplate == t)
+                {
+                    FileDirValue[index] = _dirValue;
+                    existingTemplate = true;
+                    break;
+                }
+                index++;
+            }
+            if (!existingTemplate) Msg.F("ERR_05.2_setDocTMP_NOTMP", _dirTemplate);
+            Log.exit();
+        }
+        /// <summary>
+        /// getDoc(name) - get Document name - when nor read yet - from the file. If necessary - Create new Sheet
+        /// </summary>
+        /// <param name="name">Document name</param>
+        /// <param name="fatal">FATAL if this flag = true; else - return null if Document doesnt exists</param>
+        /// <returns>Document or null</returns>
         /// <returns>Document</returns>
         /// <journal> 25.12.2013 отлажено
         /// 25.12.2013 - чтение из файла, формирование Range Body
@@ -196,108 +246,83 @@ namespace TSmatch.Document
         /// 2.1.16 - полностью переписано для TSmach: не отделяем пятку от Body; закводим новый Лист и шапкой 
         /// 6.1.16 - NOP если FiliDirectory содержит # - каталог Документа еще будет разворачиваться позже
         /// 19.2.16 - распознавание шаблонов в doc.FileDirectory
+        ///  5.3.16 - null if Document not found or exist
         /// </journal>
-        public static Document getDoc(string name)
+        public static Document getDoc(string name, bool fatal = true)
         {
             Log.set("getDoc(" + name + ")");
+            Document doc = null;
             try
             {
-                Document doc = Documents[name];
+                doc = Documents[name];
                 if (!doc.isOpen)
                 {
                     if (doc.FileDirectory.Contains("#"))
-                    {   // #шаблон заменяем на значение в FileDirValues
+                    {   // #Template substitute with the value in FileDirValues
                         int i = 0;
                         foreach (string str in FileDirTemplate)
                         {
                             if (str == doc.FileDirectory)
-                                doc.FileDirectory = FileDirValues[i];
+                                doc.FileDirectory = FileDirValue[i];
                             i++;
                         }
                     }
-            //-------- загрузка Документа из файла ------------
+            //-------- Load Document from the file or create it ------------
                     bool create = doc.type[0] == 'N' ? true : false;
                     doc.Wb = FileOp.fileOpen(doc.FileDirectory, doc.FileName, create);
-                    switch (doc.type)
-                    {
-                        case Decl.STAMP_TYPE_N1:
-                        case Decl.STAMP_TYPE_N2:
-                        case Decl.STAMP_TYPE_N:
-                            doc.Reset();
-                            break;
-                        default:
-                            doc.Body = FileOp.getSheetValue(doc.Wb.Worksheets[doc.SheetN]);
-                            break;
-                    }
+                    if(create) doc.Reset();
+                    else doc.Body = FileOp.getSheetValue(doc.Wb.Worksheets[doc.SheetN]);
                     doc.Sheet = doc.Wb.Worksheets[doc.SheetN];
-                    doc.isOpen = true; Log.exit(); return doc; //!!!!!
-
-
-                    //                    Mtr rr = new Mtr(doc.Sheet.UsedRange.get_Value());
-                    //                    doc.Body = rr;
-                    //                   doc.Body = doc.Sheet.UsedRange.get_Value();
-
-                    //                    doc.Body = new Mtr(doc.Sheet.UsedRange.get_Value());
-                    /////
-                    /////                    else   //---- файл Документа существует - читаем его ----
-                    doc.Body = FileOp.getSheetValue(doc.Sheet);
-                    //                  Mtr mtr = new Mtr(tocSheet.UsedRange.get_Value());  //перенос данных из Excel в память
-                    //----- если нужно - переопределим EOL и проверим Штамп
-                    int newEOL = doc.Body == null ? 0 : doc.Body.iEOL();
-                    if (newEOL != doc.EOLinTOC)
-                    {
-                        Log.Warning("переопределил EOL(" + name + ")="
-                            + newEOL + " было " + doc.EOLinTOC);
-                        doc.EOLinTOC = newEOL;
-                    }
-                    Mtr rng = doc.Body;
-                    if (rng != null && !doc.stamp.Check(rng)) Log.FATAL(doc.stamp.Trace(doc));
-                        doc.isOpen = true;
+                    doc.isOpen = true;
                 } // end if(!doc.isOpen)
-                Log.exit();
-                return doc;
-            }
+            } // ent try
             catch (Exception e)
             {
-                string msg = (Documents.ContainsKey(name)) ? "не существует" : " не удалось открыть";
-                Log.FATAL("Документ \"" + name + "\" " + msg);
-                return null;    // нужно только при обработке Event File Open для неизвестного файла
-            }
-        }
-        /// <summary>
-        /// NewSheet(name)  - создание нового листа с заголовком для Документа name
-        /// NewSheet()   - создание нового листа для Документа this с именем doc.SheetN
-        /// </summary>
-        /// <param name="name">имя создаваемого Листа</param>
-        /// <returns>вновь созданный Документ name</returns>
-        /// <journal>6.4.2014
-        /// 22.12.2015 - overload NewSheet(doc)
-        /// 4.1.2016 - убрал overload NewSheet(), переписал создание шапки
-        /// 17.1.2016 - Шапка целиком копируется из Named Range листа Header
-        /// </journal>
-        public static Document NewSheet(string name)
-        {
-            Log.set("NewSheet(" + name + ")");
-            Document doc = Documents[name];
-            try
-            {
-                Excel.Workbook wb = doc.Wb;
-                wb.Sheets.Add();
-                wb.ActiveSheet.Name = doc.SheetN;   //создаем Лист по имени в TOC
-                doc.Sheet = wb.ActiveSheet;
-                // ---- запись шапки ---
-                if (doc.HDR_name != "")
+                if (fatal)
                 {
-                    Document toc = getDoc(Decl.DOC_TOC);
-                    Excel.Range rng = FileOp.setRange(doc.Sheet);
-                    FileOp.CopyRng(toc.Wb, doc.HDR_name, rng);
-                    doc.Body = FileOp.getSheetValue(doc.Sheet);
-                }     
+                    string msg = (Documents.ContainsKey(name)) ? "не существует" : " не удалось открыть";
+                    msg += "\nERROR: " + e;
+                    Msg.F("ERR_05.5_getDoc_NOT_OPEN", name, msg);
+                }
+                doc = null;
             }
-            catch (Exception e) { Log.FATAL("ошибка NewSheet(" + name + ")"); }
-            finally { Log.exit(); }
+            Log.exit();
             return doc;
         }
+        /////////////// <summary>
+        /////////////// NewSheet(name)  - создание нового листа с заголовком для Документа name
+        /////////////// NewSheet()   - создание нового листа для Документа this с именем doc.SheetN
+        /////////////// </summary>
+        /////////////// <param name="name">имя создаваемого Листа</param>
+        /////////////// <returns>вновь созданный Документ name</returns>
+        /////////////// <journal>6.4.2014
+        /////////////// 22.12.2015 - overload NewSheet(doc)
+        /////////////// 4.1.2016 - убрал overload NewSheet(), переписал создание шапки
+        /////////////// 17.1.2016 - Шапка целиком копируется из Named Range листа Forms
+        /////////////// </journal>
+        ////////////public static Document NewSheet(string name)
+        ////////////{
+        ////////////    Log.set("NewSheet(" + name + ")");
+        ////////////    Document doc = Documents[name];
+        ////////////    try
+        ////////////    {
+        ////////////        Excel.Workbook wb = doc.Wb;
+        ////////////        wb.Sheets.Add();
+        ////////////        wb.ActiveSheet.Name = doc.SheetN;   //создаем Лист по имени в TOC
+        ////////////        doc.Sheet = wb.ActiveSheet;
+        ////////////        // ---- запись шапки ---
+        ////////////        if (doc.HDR_name != "")
+        ////////////        {
+        ////////////            Document toc = getDoc(Decl.DOC_TOC);
+        ////////////            Excel.Range rng = FileOp.setRange(doc.Sheet);
+        ////////////            FileOp.CopyRng(toc.Wb, doc.HDR_name, rng);
+        ////////////            doc.Body = FileOp.getSheetValue(doc.Sheet);
+        ////////////        }     
+        ////////////    }
+        ////////////    catch (Exception e) { Log.FATAL("ошибка NewSheet(" + name + ")"); }
+        ////////////    finally { Log.exit(); }
+        ////////////    return doc;
+        ////////////}
         /// <summary>
         /// отделение основной части Документа (doc.Body) от пятки (doc.Summary)
         /// </summary>
@@ -465,8 +490,7 @@ namespace TSmatch.Document
                     }
                     else
                     {
-                        if (MD5.Length < 20 || EOL == 0)
-                            Log.FATAL("Internal error: MD5 and EOL is a must with BodySave=false");
+                        if (MD5.Length < 20 || EOL == 0) Msg.F("ERR_05.8_saveDoc_NOMD5");
                         else { doc.chkSum = MD5; doc.EOLinTOC = EOLinTOC; }
                     }
                     for (int n = 4; n < toc.Body.iEOL(); n++)
@@ -629,7 +653,7 @@ namespace TSmatch.Document
             public Stamp(int i0, int i1)
             {
                 Document doc_toc = getDoc(Decl.DOC_TOC);
-                if (doc_toc.Body.Strng(i0, Decl.DOC_STMPTYPE) != Decl.STAMP_TYPE_N)
+                if (doc_toc.Body.Strng(i0, Decl.DOC_STMPTYPE) != Decl.DOC_TYPE_N)
                 {
                     for (int i = i0; i <= i1; i++) stamps.Add(new OneStamp(doc_toc, i));
                 }
@@ -754,6 +778,71 @@ namespace TSmatch.Document
                 }
                 return false;
             }
-        }   // конец класса OneStamp
-    }    // конец класса Document
-}
+        }   // end class OneStamp
+        /// <summary>
+        /// Form - Document's Format description - Document sub-class. Forms get from TSmatch.xlsx/Forms Sheet
+        /// </summary>
+        /// <journal>14.3.2016</journal>
+        public class Form
+        {
+            private static Excel.Workbook Wb;
+
+            public string name
+            {
+                get { return Forms.Count == 0? null : Forms[name].name; }
+                set
+                {
+                    if (Forms.ContainsKey(name)) return;
+                    Forms.Add(name, new Form(name, Wb.Names.Item(name).RefersToRange));
+                }
+            }
+            public Excel.Range rep
+            {
+                get { return rep; }
+                set
+                {
+                    rep = value;
+                    if (!Forms.ContainsKey(name)) Msg.F("ERR_05.4_FORM_NO_RNG", name);
+                    Forms[name].rep = value;
+                }
+            }
+            private Dictionary<string, Form> Forms = new Dictionary<string, Form>(); //sub-Forms
+            public Form(string _name, Excel.Range _rep = null)
+            {
+                this.name = _name;
+                this.rep = _rep;
+            }
+            public Form(string frm, string f1 = "", string f2 = "")
+            {
+                if (frm == "") return;
+                bool language = Msg.getLanguage() == Decl.ENGLISH;
+language = true; //en-US
+                setForm(language, frm);
+                setForm(language, f1);
+                setForm(language, f2);
+            }
+            /// <summary>
+            /// lngName(lng, s) - set Form s, when lng=true->"EN_"s, check if it defined, Add Form, and try s"_F"
+            /// </summary>
+            /// <param name="lng">bool English Language flag</param>
+            /// <param name="s">string to handle</param>
+            /// <returns></returns>
+            private void setForm(bool lng, string s)
+            {
+                if (string.IsNullOrEmpty(s)) return;
+                if (lng)
+                {
+                    s = "EN_" + s;
+                    if (!FileOp.isNamedRangeExist(Wb, s)) Msg.F("ERR_05.4_FORM_NO_RNG", s);
+                }
+                if (FileOp.isNamedRangeExist(Wb, s)) Forms.Add(s, new Form(s, Wb.Names.Item(s).RefersToRange));
+                s = s + "_F";
+                if (FileOp.isNamedRangeExist(Wb, s)) Forms.Add(s, new Form(s, Wb.Names.Item(s).RefersToRange));
+            }
+            public static void setWb(Excel.Workbook _Wb)
+            {
+                Wb = _Wb;
+            }
+        } // end class Form
+    } // end class Document
+} // end namespace
