@@ -1,11 +1,12 @@
 /*--------------------------------------------
  * FileOp - File System primitives
  * 
- *  12.03.2016  Pavel Khrapkin, Alex Pass
+ *  20.03.2016  Pavel Khrapkin, Alex Pass
  *
  *--- JOURNAL ---
  * 2013 - 2013 - created
- * 12.3.2016 - isNamedRangeExist(name)  
+ * 12.3.2016 - isNamedRangeExist(name)
+ * 20.3.2016 - CopyFile, Delete, Move
  * -------------------------------------------        
  * fileOpen(dir,name[,create])  - Open or Create file name in dir catalog
  * isFileExist(name)            - return true if file name exists
@@ -16,6 +17,8 @@
  * saveRngValue(Body [,row_to_ins) - write Document Body content to Excel file 
  * setRange(..)                 - few overloaded methods to set Renge -- preparation for saveRngValue(..)
  * CopyRng(Wb,NamedRange,rng)   - copy named range NamedRange into rng in Workbook Wb
+ * CopyFile(FrDir,FileName,ToDir[,overwrite]) - Copy File from FrDir to ToDir
+ * Delete(dir, name)            - Detete file with Path dir
 ?* FormCol(char col[, dig])     - format column col in Excel file as a Number with dig decimal digits
  */
 using System;
@@ -242,18 +245,45 @@ namespace match.FileOp
         {
             Wb.Names.Item(NamedRange).RefersToRange.Copy(rng);
         }
-        public static bool CopyFile(string FrDir, string FileName, string ToDir)
+        /// <summary>
+        /// CopyFile(FrDir, FileName, ToDir [,overwrite]) - copy FileName from FrDir to ToDir 
+        /// </summary>
+        /// <param name="FrDir">copy from FrDir Directory</param>
+        /// <param name="FileName">file to copy</param>
+        /// <param name="ToDir">destination Directory</param>
+        /// <param name="overwrite">obligatory flag - true - allow overwrite</param>
+        /// <returns>bool result -- true if copy was succesful</returns>
+        /// <journal>20.3.2016 PKh</journal>
+        public static bool CopyFile(string FrDir, string FileName, string ToDir, bool overwrite = false)
         {
             bool result = false;
-            if (!isFileExist(FrDir, FileName)) Msg.F("ERR_");
+            if (!isFileExist(FrDir, FileName)) Msg.F("ERR_02.2_COPY_NOFILEFROM", FrDir, FileName);
             string From = FrDir + "\\" + FileName;
+            string To = ToDir + "\\" + FileName;
+            if (isFileExist(ToDir, FileName))
+            {
+                string sav = "SAVED_" + FileName;
+                if (isFileExist(ToDir, sav)) Delete(ToDir, sav);
+                File.Move(To, ToDir + "\\" + sav);
+            }
             try
             {
-                File.Copy(From, ToDir);
+                File.Copy(From, To, overwrite);
                 result = true;
             }
-            catch { }
+            catch (Exception e){ Msg.F("ERR_02.3_FILENOTCOPIED", e, From, To); }
             return result;
+        }
+        public static void Delete(string dir, string name)
+        {
+            string file  = dir + "\\" + name;
+            File.Delete(file);
+        }
+        public static void Move(string FrDir, string FrName, string ToDir, string ToName)
+        {
+            string fr = FrDir + "\\" + FrName;
+            string to = ToDir + "\\" + ToName;
+            File.Move(fr, to);
         }
         public static void FormCol(char col, int dig = 0)
         {

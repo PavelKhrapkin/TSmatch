@@ -23,7 +23,7 @@ namespace TSmatch.Declaration
     ///  7.3.16     - заложена система сообщений с языком из Windows Culture.Info
     ///  8.3.16     - #шаблоны
     /// 12.3.16     - multilanguage support
-    /// 19.3.16     - bootstrap support - copy from current Path to Tekla directories
+    /// 20.3.16     - bootstrap support - copy from current Path to Tekla directories
     /// </journal>
     class Declaration
     {
@@ -32,16 +32,16 @@ namespace TSmatch.Declaration
         public const string RUSSIAN = "ru-RU";
 
         public const char STR_DELIMITER = ';';  // знак - резделитель в списке в строках
-        /// <summary>
-        /// F_MATCH = "TSmatch.xlsx" - имя файла таблиц приложения TSmatch
-        /// !!временно разместил вместе с Tekla Structures\версия\Environments, но надо будет уточнить в Tekla!!
-        /// </summary>
+
         public const string F_MATCH = "TSmatch.xlsx";
-        public const string BUTTON_DIR = @"Environments\common\macros\modeling";
-        public const string BUTTON_CS  = "TSmatch.cs";
-        public const string BUTTON_BMP = "TSmatch.BMP";
+        public const string TSMATCH_EXE = "TSmatch.exe";
+        public const string BUTTON_DIR  = @"macros\modeling";
+        public const string BUTTON_CS   = "TSmatch.cs";
+        public const string BUTTON_BMP  = "TSmatch.BMP";
+        public const string TSMATCH_ZIP = "Tsmatch.zip";
         public const string DIR_MATCH = @"C:\ProgramData\Tekla Structures\21.1\Environments\common\exceldesign";
         public const string DOC_TOC = "TOC";    // Table Of Content - Лист - таблица-содержание всех Документов в TSmatch
+        public const string TSMATCH_TYPE = "TSmatch";
 
         //--------- листы TSmatch.xlsm --------------
         public const string CONST = "Const";

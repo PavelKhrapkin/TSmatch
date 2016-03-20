@@ -14,7 +14,7 @@ namespace TSmatch
         static void Main(string[] args)
         {     
             Log.START("TSmatch v19.03.2016");
-//!!            Boot.Bootsrap();
+            Boot.Bootsrap();
             Mtch.Start();
 
 //            Mod.openModel();

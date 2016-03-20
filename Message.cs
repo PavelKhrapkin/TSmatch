@@ -1,4 +1,19 @@
-﻿using System;
+﻿/*----------------------------------------------------------------------------
+ * Message -- multilanguage message system
+ * 
+ * 20.3.2016  Pavel Khrapkin
+ *
+ *--- Journal ---
+ * Feb-2016 Created
+ * 20.3.2016 - Error message Code display even when Message system is not initialysed yet
+ * ---------------------------------------------------------------------------------------
+ *      Methods:
+ * Start()    - Copy messages into the static list from TSmatch.xlsx/Messages Sheet
+ * F(Code,..) - Fatal error message output
+ * W(Code,..) - Warneng message output
+ * I(Code,..) - Information Message
+ */
+ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -47,7 +62,7 @@ namespace TSmatch.Message
                 {                                               // multiline messages
                     if (!string.IsNullOrWhiteSpace(doc.Body.Strng(i + 1, 1).ToString())) break;
                     string line = doc.Body.Strng(++i, iLanguage);
-                    if (string.IsNullOrWhiteSpace(line)) continue;  //skip empty lines
+                    if (string.IsNullOrWhiteSpace(line)) continue;  //go toll empty line
                     txt += "\n" + line;
                 }
                 foreach (var v in Messages)                     // healthchech for unique MessageID
@@ -73,20 +88,29 @@ namespace TSmatch.Message
         }
         public static void txt(Severity type, string msgcode, object p0=null, object p1=null, object p2=null)
         {
-            bool ok = false;
-            foreach (var v in Messages)
+            Message msg = Messages.Find(x => x.MessageID == msgcode);
+            if (msg == null)
             {
-                if (v.MessageID == msgcode)
-                {
-                    string s = String.Format(v.text, p0, p1, p2);
-                    mes(s, (int)type);
-                    ok = true;
-                    break;
-                }
+                new Log(msgcode);
+                Log.FATAL("ERR_03 - Message Code Not Found");
             }
-            if (!ok)
-                if (Messages.Count > 0) F("ERR_03_NOMSG", msgcode);
-                else Log.FATAL("Internal ERROR: Message system is not initiated");
+            string str = string.Format(msg.text, p0, p1, p2);
+            mes(str, (int)type);
+
+            //////bool ok = false;
+            //////foreach (var v in Messages)
+            //////{
+            //////    if (v.MessageID == msgcode)
+            //////    {
+            //////        string s = String.Format(v.text, p0, p1, p2);
+            //////        mes(s, (int)type);
+            //////        ok = true;
+            //////        break;
+            //////    }
+            ////////////////////}
+            ////////////////////if (!ok)
+            ////////////////////    if (Messages.Count > 0) F("ERR_03_NOMSG", msgcode);
+            ////////////////////    else Log.FATAL("Internal ERROR: Message system is not initiated");
         }
         public static void txt(string str, object p0= null, object p1 = null, object p2 = null)
         { txt(Severity.FATAL, str, p0, p1, p2); }

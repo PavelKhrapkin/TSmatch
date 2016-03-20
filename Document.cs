@@ -125,6 +125,7 @@ namespace TSmatch.Document
             toc.Wb = FileOp.fileOpen(FileDir, Decl.F_MATCH);
             toc.Sheet = toc.Wb.Worksheets[Decl.DOC_TOC];
             Mtr mtr = toc.Body = FileOp.getSheetValue(toc.Sheet);
+            toc.type = Decl.TSMATCH_TYPE;
             toc.EOL(Decl.TOC_I0);
             Form.setWb(toc.Wb, mtr);
             toc.isOpen = true;
@@ -138,20 +139,21 @@ namespace TSmatch.Document
                     //.. то есть реально загружаем ТОС, а остальные Документы- потом
                     if (doc.name == Decl.DOC_TOC) doc = toc;
                     Documents.Add(docName, doc);
-                    doc.EOL(i);
                     doc.MadeTime = Lib.getDateTime(mtr[i, Decl.DOC_TIME]);
                     doc.ResLines = Lib.ToIntList(mtr.Strng(i, Decl.DOC_TYPE), '/');
                     doc.MadeStep = mtr.Strng(i, Decl.DOC_MADESTEP);
                     doc.FileName = mtr.Strng(i, Decl.DOC_FILE);
                     doc.FileDirectory = mtr.Strng(i, Decl.DOC_DIR);
+                    doc.type = mtr.Strng(i, Decl.DOC_TYPE);
+                    doc.isNewDoc = (doc.type == Decl.DOC_TYPE_N);
                     doc.SheetN = mtr.Strng(i, Decl.DOC_SHEET);
+                    if (doc.type == Decl.TSMATCH_TYPE) doc.Sheet = toc.Wb.Worksheets[doc.SheetN];
                     doc.creationDate = Lib.getDateTime(mtr[i, Decl.DOC_CREATED]);
                     doc.Supplier = mtr.Strng(i, Decl.DOC_SUPPLIER);
                     doc.LoadDescription = mtr.Strng(i, Decl.DOC_STRUCTURE_DESCRIPTION);
                     doc.forms = Form.Init(i);
                     doc.Loader = mtr.Strng(i, Decl.DOC_LOADER);
-                    doc.type = mtr.Strng(i, Decl.DOC_TYPE);
-                    doc.isNewDoc = (doc.type == Decl.DOC_TYPE_N);
+                    doc.EOL(i);
                     int j;
                     for (j = i + 1; j <= mtr.iEOL() && mtr.Strng(j, Decl.DOC_NAME) == ""; j++) ;
                     doc.stamp = new Stamp(i, j - 1);
@@ -190,7 +192,7 @@ namespace TSmatch.Document
             //            doc.isOpen = true;
             //            doc.saveDoc();
 #endif //not_ready
-                Log.exit();
+            Log.exit();
         } // end Start
         /// <summary>
         /// 
@@ -325,13 +327,16 @@ namespace TSmatch.Document
         /// EOLstr(str) - return parsed string str into Int32, or return EOLinTOC, when str is EOL
         /// </summary>
         /// <returns>Int32 or EOLinTOC</returns>
-        /// <journal>19.3.2016</journal>
+        /// <journal>20.3.2016</journal>
         int EOLstr(string str)
         {
             Log.set("Document.Int(" + str + ")");
             int x = 0;
-            if (str.Contains("EOL")) x = this.EOLinTOC;
-            else Int32.TryParse(str, out x);
+            if (!Int32.TryParse(str, out x))
+            {
+                if (this.type == "TSmatch") x = this.Sheet.UsedRange.Rows.Count;
+                else if (str == "EOL") x = this.EOLinTOC;
+            }
             Log.exit();
             return x;
         }
@@ -342,17 +347,11 @@ namespace TSmatch.Document
         /// <journal>19.3.2016</journal>
         void EOL(int tocRow)
         {
-            Document toc = (name == Decl.DOC_TOC)? this: getDoc(Decl.DOC_TOC);
+            Document toc = (name == Decl.DOC_TOC) ? this : getDoc(Decl.DOC_TOC);
             EOLinTOC = EOLstr(toc.Body.Strng(tocRow, Decl.DOC_EOL));
-            this.i0  = EOLstr(toc.Body.Strng(tocRow, Decl.DOC_I0));
-            this.il  = EOLstr(toc.Body.Strng(tocRow, Decl.DOC_IL));
+            this.i0 = EOLstr(toc.Body.Strng(tocRow, Decl.DOC_I0));
+            this.il = EOLstr(toc.Body.Strng(tocRow, Decl.DOC_IL));
         }
-        /// <summary>
-        /// отделение основной части Документа (doc.Body) от пятки (doc.Summary)
-        /// </summary>
-        /// <journal>
-        /// 22.12.2015 - убрал вызов старого iEOL() и iEOC() заменил на Mtr.iEOL() по Body
-        /// </journal>
         private void splitBodySummary()
         {      
             int fullEOL = Body.iEOL();
