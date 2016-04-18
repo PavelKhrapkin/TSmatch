@@ -1,14 +1,21 @@
 /*--------------------------------------------
  * FileOp - File System primitives
  * 
- *  20.03.2016  Pavel Khrapkin, Alex Pass
+ *  17.04.2016  Pavel Khrapkin, Alex Pass
  *
  *--- JOURNAL ---
  * 2013 - 2013 - created
  * 12.3.2016 - isNamedRangeExist(name)
  * 20.3.2016 - CopyFile, Delete, Move
+ * 27.3.2016 - use DisplayAlert in fileOpen for new created file -- now create or reopen silently
+ * 17.4.2016 - isDirExist(path) created; fileRename(..); fileRenSAV(); fileDelete
  * -------------------------------------------        
  * fileOpen(dir,name[,create])  - Open or Create file name in dir catalog
+ * fileRename(dir, oldName, newName) - rename file in the same Directory
+ * fileRenSAV(dir, name)        - rename File name to name_SAV; if _SAV file exist - delete it 
+ * fileDelete(dir, name)        - delete file
+ * DisplayAlert(bool)           - supress or allow dialog, depending on bool
+ * isDirExist(path)             - return true if Directory available at the path
  * isFileExist(name)            - return true if file name exists
  * isSheetExist(Wb, name)       - return true if Worksheet name exists in Workbook Wb
  * isNamedRangeExist(Wb, name)  - return true when named range name exists in Wb 
@@ -65,14 +72,19 @@ namespace match.FileOp
             {
                 string file = dir + "\\" + name;
                 try
-                {       // -- пробуем открть или создать файл --
+                {       // -- пробуем открыть или создать файл --
                     if (create_ifnotexist)
                     {
                         if (isFileExist(file)) Wb = _app.Workbooks.Open(file);
                         else
                         {
+                            DisplayAlert(false);
                             Wb = _app.Workbooks.Add();
+                            int copy_n = 1;
+                            string file_copy = file + "_copy " + copy_n;
+                            while (isFileExist(file_copy)) copy_n++;
                             Wb.SaveAs(file);
+                            DisplayAlert(true);
                         }
                     }
                     else Wb = _app.Workbooks.Open(file);
@@ -83,8 +95,35 @@ namespace match.FileOp
             Log.exit();
             return Wb;
         }
+        public static void fileRename(string dir, string oldName, string newName)
+        {
+            Log.set("FileOp.fileRename");
+            string oldF = Path.Combine(dir, oldName);
+            string newF = Path.Combine(dir, newName);
+            if (isFileExist(oldF)) fileDelete(newF);
+            File.Move(oldF, newF);
+            Log.exit();
+        }
+        public static void fileRenSAV(string dir, string name)
+        {
+            string nm_noext = Path.GetFileNameWithoutExtension(name);
+            string nmSAV = nm_noext + "_SAV" + Path.GetExtension(name);
+            fileRename(dir, name, nmSAV);
+        }
+        public static void fileDelete(string path)
+        {
+            File.Delete(path);
+        }
+        public static void fileDelete(string dir, string name)
+        {
+            File.Delete(Path.Combine(dir, name));
+        }
         public static void DisplayAlert(bool val) { _app.DisplayAlerts = val; }
         public static void fileSave(Excel.Workbook Wb) { Wb.Save(); }
+        public static bool isDirExist(string path)
+        {
+            return Directory.Exists(path);
+        }
         public static bool isFileExist(string name)
         {
             Log.set("isFileExist(" + name + ") ?");

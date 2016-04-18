@@ -44,15 +44,15 @@ namespace TSmatch.Tekla
 {
     class Tekla
     {
-        const string MYNAME = "Tekla.Read v1.4";
+        const string MYNAME = "Tekla.Read v1.5";
         public enum ModelDir : int { exceldesign = 0, model = 1 };
 
         public struct AttSet : IComparable<AttSet>
         {
-            public string guid, mat, prf;
+            public string guid, mat, mat_type, prf;
             public double lng, weight, volume;
-            public AttSet(string g, string m, string p, double l, double w, double v)
-            { guid = g; mat = m; prf = p; lng = l; weight = w; volume = v; }
+            public AttSet(string g, string m, string mt, string p, double l, double w, double v)
+            { guid = g; mat = m; mat_type = mt;  prf = p; lng = l; weight = w; volume = v; }
 
             public int CompareTo(AttSet att)
             {
@@ -109,6 +109,7 @@ namespace TSmatch.Tekla
                     double weight = 0.0;
                     double vol = 0.0;
                     string guid = "";
+                    string mat_type = "";
                     //string profile = "";
                     //double width = 0.0, height = 0.0;
                     //myPart.GetReportProperty("PROFILE", ref profile);
@@ -120,6 +121,7 @@ namespace TSmatch.Tekla
                     myPart.GetReportProperty("LENGTH", ref lng);
                     myPart.GetReportProperty("WEIGHT", ref weight);
                     myPart.GetReportProperty("VOLUME", ref vol);
+                    myPart.GetReportProperty("MATERIAL_TYPE", ref mat_type);
 
                     lng = Math.Round(lng, 0);
                     //string cut = "";
@@ -128,6 +130,7 @@ namespace TSmatch.Tekla
                     //                      profile, lng, weight, vol));
                     ModAtr.Add(new AttSet(guid,
                                           myPart.Material.MaterialString,
+                                          mat_type,
                                           myPart.Profile.ProfileString,
                                           lng, weight, vol));
                     if (ii % 500 == 0) // progress update every 500th items

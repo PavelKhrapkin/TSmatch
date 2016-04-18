@@ -1,7 +1,7 @@
 ﻿/*-------------------------------------------------------------------------------------------------------
  * Document -- works with all Documents in the system basing on TOC - Table Of Content
  * 
- *  19.3.2016  Pavel Khrapkin, Alex Pass, Alex Bobtsov
+ *  17.4.2016  Pavel Khrapkin, Alex Pass, Alex Bobtsov
  *
  *--------- JOURNAL ----------------  
  * 2013-2015 заложена система управления документами на основе TOC и Штампов
@@ -12,15 +12,23 @@
  *  8.3.16 - ErrorMessage system use; setDocTemplate
  * 12.3.16 - module comments in English; minor corrects in getDoc; multilanguage Forms support
  * 16.3.16 - Document Format support in Documents class data structures, Start, etc. Created class Form
- * 19.3.16 - use EOL() method 
+ * 20.3.16 - use EOL() method
+ * 26.3.16 - Reset("Now")
+ * 27.3.16 - Close with saveDoc
+ * 30.3.16 - get #templates from Bootstrap in Start() and getDoc(name)
+ *  1.4.16 - saveDoc(..) overlay
+ *  4.4.16 - wrDoc with account of previous output form last_name allow fast multy-string output
+ * 17.4.16 - tocStart extracted from Start for initial TOC open
  * -------------------------------------------
  *      METHODS:
- * Start(FileDir)       - Load from directory FileDir of TOC all known Document attributes, prepare everithing
+ * Start()              - Load from directory TOCdir of TOC all known Document attributes, prepare everithing
  * setDocTemplate(dirTemplate, val) - set #dirTtemplate value as val in list of #templates  
  * getDoc(name[,fatal]) - return Document doc named in TOC name or create it. Flag fatal is to try to open only
  * Reset()              - "Reset" of the Document. All contents of hes Excel Sheet erased, write Header form
  * wrDoc(str, object[]) - write data from obj to the Excel file in format of Form and Form_F
 ?* loadDoc(name, wb)    - загружает Документ name или его обновления из файла wb, запускает Handler Документа
+ * saveDoc(doc [,BodySave, string MD5]) - сохраняет Документ в Excel файл, если он изменялся
+ * Close([save_flag])   - Close document, save it when saveflag=true, default - false;
 ?* isDocChanged(name)   - проверяет, что Документ name открыт
 ?* recognizeDoc(wb)     - распознает первый лист файла wb по таблице Штампов
  * 
@@ -42,15 +50,14 @@ using Mtr = match.Matrix.Matr;  // класс для работы с внутр�
 using Lib = match.Lib.MatchLib;
 using Log = match.Lib.Log;
 using Msg = TSmatch.Message.Message;
+using Templ = TSmatch.Startup.Bootstrap.Template;
+//using Boot = TSmatch.Startup.Bootstrap;
 
 namespace TSmatch.Document
 {
     public class Document
     {
         private static Dictionary<string, Document> Documents = new Dictionary<string, Document>();   //коллекция Документов
-
-        private static string[] FileDirTemplate;   // пары #шаблоны - значения каталогов..
-        private static string[] FileDirValue;      //..распознаваемых в getDoc
 
         public string name;
         private bool isOpen = false;
@@ -102,33 +109,21 @@ namespace TSmatch.Document
         }
 
         /// <summary>
-        /// Start(DirTemplates, DirValuue) - prepare further works with the Documents; setup data from TOC, set #Templates
+        /// Start(TOCdir) - prepare further works with the Documents; setup data from TOC
         /// </summary>
-        /// <param name="_DirTemplate">#Template string</param>
-        /// <param name="_DirValue">#template value to setup</param>
+        /// <param name="FileDir">Directory, Path to TSmatch.xlsx</param>
         /// <journal> 22.1.2016
         /// 12.3.2016 - multilanguage Heders support
         /// 14.3.2016 - Form class support
         /// 19.3.2016 - use EOL method
+        /// 30.3.2016 - Start(TOCdir) and getDoc with #template interaction with Bootstrap
+        /// 17.4.2016 - tocStart extracted from Start for initial TOC open
         /// </journal>
-        public static void Start(string[] _DirTemplate, string[] _DirValue )
+        public static void Start(string TOCdir)
         {
-            Log.set("Start(Document #Templates ListCount=" + _DirTemplate.Length + ")");
-            FileDirTemplate = _DirTemplate; FileDirValue = _DirValue;
-            string FileDir = _DirValue[0];
-            if (string.IsNullOrEmpty(FileDir))
-            {
-                FileDir = Decl.DIR_MATCH;
-            }
-            //--------- handle ТОС -------------
-            Document toc = new Document(Decl.DOC_TOC);
-            toc.Wb = FileOp.fileOpen(FileDir, Decl.F_MATCH);
-            toc.Sheet = toc.Wb.Worksheets[Decl.DOC_TOC];
-            Mtr mtr = toc.Body = FileOp.getSheetValue(toc.Sheet);
-            toc.type = Decl.TSMATCH_TYPE;
-            toc.EOL(Decl.TOC_I0);
-            Form.setWb(toc.Wb, mtr);
-            toc.isOpen = true;
+            Log.set("Document.Start(" + TOCdir + ")");
+            Document toc = tocStart(TOCdir);
+            Mtr mtr = toc.Body;
             for (int i = toc.i0; i <= toc.il; i++)
             {
                 string docName = mtr.Strng(i, Decl.DOC_NAME);
@@ -159,63 +154,21 @@ namespace TSmatch.Document
                     doc.stamp = new Stamp(i, j - 1);
                 } //if docName !=""
             } // for по строкам TOC
-#if not_ready
-            //                   try { doc.creationDate = Lib.MatchLib.getDateTime(Double.Parse(rw.Range[Decl.DOC_CREATED].Text)); }
-            //                   catch { doc.creationDate = new DateTime(0); }
-
-            //                   try { doc.ptrn = hdrSht.get_Range((string)rw.Range[Decl.DOC_PATTERN].Text); } catch { doc.ptrn = null; }
-            //                   try { doc.SummaryPtrn = hdrSht.get_Range((string)rw.Range[Decl.DOC_SUMMARY_PATTERN].Text); } catch { doc.SummaryPtrn = null; }
-            //                   doc.Loader = rw.Range[Decl.DOC_LOADER].Text;
-            //                   // флаг, разрешающий частичное обновление Документа пока прописан хардкодом
-            //                   switch (docName)
-            //                   {
-            //                       case "Платежи":
-            //                       case "Договоры": doc.isPartialLoadAllowed = true;
-            //                           break;
-            //                       default: doc.isPartialLoadAllowed = false;
-            //                           break;
-            //                   }
-            //               }
-            //           }
-
-            //-----------------------------------------------------------------
-            // из коллекции Documents переносим произошедшие изменения в файл
-            //            if (doc.Body.Range["A" + TOC_DIRDBS_COL].Value2 != Decl.dirDBs)
-            //            {
-            //    Box.Show("Файл '" + F_MATCH + "' загружен из необычного места!");
-            //    // переустановка match -- будем делать потом
-            //            doc.isChanged = true;
-            //          }
-            //            doc.EOLinTOC = iEOL;
-            //PK            doc.Body.Range["C4"].Value2 = iEOL.ToString();
-            //            doc.isChanged = true;   // TOCmatch сохраняем всегда. Возможно, это времянка
-            //            doc.isOpen = true;
-            //            doc.saveDoc();
-#endif //not_ready
             Log.exit();
         } // end Start
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="_dirTemplate"></param>
-        /// <param name="_dirValue"></param>
-        public static void setDocTemplate(string _dirTemplate, string _dirValue)
+        public static Document tocStart(string TOCdir)
         {
-            Log.set("setDocTemplate");
-            bool existingTemplate = false;
-            int index = 0;
-            foreach (string t in FileDirTemplate)
-            {
-                if (_dirTemplate == t)
-                {
-                    FileDirValue[index] = _dirValue;
-                    existingTemplate = true;
-                    break;
-                }
-                index++;
-            }
-            if (!existingTemplate) Msg.F("ERR_05.2_setDocTMP_NOTMP", _dirTemplate);
+            Log.set("tocStart");
+            Document toc = new Document(Decl.DOC_TOC);
+            toc.Wb = FileOp.fileOpen(TOCdir, Decl.F_MATCH);
+            toc.Sheet = toc.Wb.Worksheets[Decl.DOC_TOC];
+            toc.Body = FileOp.getSheetValue(toc.Sheet);
+            toc.type = Decl.TSMATCH_TYPE;
+            toc.EOL(Decl.TOC_I0);
+            Form.setWb(toc.Wb, toc.Body);
+            toc.isOpen = true;
             Log.exit();
+            return toc;
         }
         /// <summary>
         /// getDoc(name) - get Document name - when nor read yet - from the file. If necessary - Create new Sheet
@@ -227,74 +180,67 @@ namespace TSmatch.Document
         /// <journal> 25.12.2013 отлажено
         /// 25.12.2013 - чтение из файла, формирование Range Body
         /// 28.12.13 - теперь doc.Sheet и doc.Wb храним в структуре Документа
-        /// 5.1.14  - обработка шаблонов Документа
-        /// 7.1.14  - отделяем пятку и помещаем в Body и Summary
         /// 5.4.14  - инициализируем docDic, то есть подготавливаем набор данных для Fetch
-        /// 12.12.15 - для TSmatch не нужно обрабатывать F.SFDC
-        /// 13.12.15 - берем каталог файла из TOC
         /// 22.12.15 - getDoc для нового документа - в Штампе он помечен N
-        /// 2.1.16 - полностью переписано для TSmach: не отделяем пятку от Body; закводим новый Лист и шапкой 
         /// 6.1.16 - NOP если FiliDirectory содержит # - каталог Документа еще будет разворачиваться позже
-        /// 19.2.16 - распознавание шаблонов в doc.FileDirectory
         ///  5.3.16 - null if Document not found or exist
+        /// 30.3.16 - get #template Path from Bootstrap.Template; try-catch rewritten
+        ///  5.4.16 - bug fix - SheetReset for "N" Document
         /// </journal>
         public static Document getDoc(string name, bool fatal = true)
         {
             Log.set("getDoc(" + name + ")");
             Document doc = null;
-            try
+            string err = "Err getDoc: ", ex= "";
+            try { doc = Documents[name]; }
+            catch (Exception e) { err += "doc not in TOC"; ex = e.Message; doc = null; }
+            if (doc != null && !doc.isOpen)
             {
-                doc = Documents[name];
-                if (!doc.isOpen)
+                if (doc.FileDirectory.Contains("#"))    // #Template substitute with Path in Bootsrap.Templates
+                    doc.FileDirectory = Templ.Templates.Find(x => x.template == doc.FileDirectory).templ_val;
+                //-------- Load Document from the file or create it ------------
+                bool create = !string.IsNullOrEmpty(doc.type) && doc.type[0] == 'N' ? true : false;
+                doc.Wb = FileOp.fileOpen(doc.FileDirectory, doc.FileName, create);
+                try
                 {
-                    if (doc.FileDirectory.Contains("#"))
-                    {   // #Template substitute with the value in FileDirValues
-                        int i = 0;
-                        foreach (string str in FileDirTemplate)
-                        {
-                            if (str == doc.FileDirectory)
-                                doc.FileDirectory = FileDirValue[i];
-                            i++;
-                        }
-                    }
-            //-------- Load Document from the file or create it ------------
-                    bool create = doc.type[0] == 'N' ? true : false;
-                    doc.Wb = FileOp.fileOpen(doc.FileDirectory, doc.FileName, create);
-                    if(create) doc.Reset();
-                    else doc.Body = FileOp.getSheetValue(doc.Wb.Worksheets[doc.SheetN]);
+                    if (doc.type == Decl.DOC_TYPE_N) FileOp.SheetReset(doc.Wb, doc.SheetN);
                     doc.Sheet = doc.Wb.Worksheets[doc.SheetN];
-                    doc.isOpen = true;
-                } // end if(!doc.isOpen)
-            } // ent try
-            catch (Exception e)
-            {
-                if (fatal)
-                {
-                    if (!Documents.ContainsKey(name)) Msg.F("ERR_05.6_getDoc_NO_IN_Dictionary", e, name);
-                    string msg = (Documents.ContainsKey(name)) ? "не существует" : " не удалось открыть";
-                    Msg.F("ERR_05.5_getDoc_NOT_OPEN", e, name, msg);
                 }
-                doc = null;
-            }
+                catch (Exception e) { err += "no SheetN"; ex = doc.SheetN; doc = null; }
+                if(create && doc != null) doc.Reset();
+                else if( doc != null) doc.Body = FileOp.getSheetValue(doc.Sheet);
+            } // end if(!doc.isOpen)
+            if(doc == null && fatal) Msg.F(err, ex, name);
+            if(doc != null) doc.isOpen = true;
             Log.exit();
             return doc;
         }
         /// <summary>
         /// Reset() - "Reset" of the Document. All contents of hes Excel Sheet erased, write Header form
+        /// Reset("Now") - write DataTime.Now string in Cell [1,1]
         /// </summary>
         /// <journal>9.1.2014
         /// 17.1.16 - полностью переписано с записью Шапки
         /// 16.3.16 - header name get from doc.forms[0]
+        /// 26.3.16 - Reset("Now")
+        /// 27.3.16 - bug fixed. Issue was: Reset named as a doc.name instead SheetN
         /// </journal>
-        public void Reset()
+        public void Reset(string str = "")
         {
             Log.set("Reset(" + this.name + ")");
             Document toc = getDoc(Decl.DOC_TOC);
-            this.Sheet = FileOp.SheetReset(this.Wb, this.name);
+            this.Sheet = FileOp.SheetReset(this.Wb, this.SheetN);
             Excel.Range rng = FileOp.setRange(this.Sheet);
+            if (this.forms.Count == 0) Msg.F("Document.Reset no HDR form", this.name);
             string myHDR_name = this.forms[0].name;
             FileOp.CopyRng(toc.Wb, myHDR_name, rng);
             this.Body = FileOp.getSheetValue(this.Sheet);
+            if (str == "Now")
+            {
+                Body[1, 1] = Lib.timeStr();
+                FileOp.setRange(this.Sheet);
+                FileOp.saveRngValue(Body);
+            }
             Log.exit();
         }
         /// <summary>
@@ -302,25 +248,66 @@ namespace TSmatch.Document
         /// </summary>
         /// <param name="str">form name; "str_F" format is also accounted</param>
         /// <param name="obg">data array to be written</param>
-        /// <journal>16.3.2016</journal>>
-        public void wrDoc(string str, object[] obj)
+        /// <journal>16.3.2016
+        /// 26.3.2016 - output HDR_ form with time.Now in [1,1]
+        ///  3.4.2016 - multiple line output support with last_name
+        /// 13.4.2016 - Internal error message, when form not found
+        /// </journal>
+        public void wrDoc(string str, params object[] obj)
         {
-            Log.set("wrDoc(" + str + ")");
-            Document toc = getDoc(Decl.DOC_TOC);
+            Log.set("wrDoc(" + str + ", obj[])");
             int i0 = Body.iEOL() + 1;
-            Excel.Range rng = FileOp.setRange(Sheet, i0);
-            FileOp.CopyRng(toc.Wb, str, rng);
-            Body = FileOp.getSheetValue(Sheet);
-            FileOp.saveRngValue(Body);
             Form frm = forms.Find(x => x.name == str);
-            int i = 0;
-            foreach (var v in obj)
+            if (frm == null) Msg.F("Document.wrDoc no form", str, this.name);
+            if (frm.name == Form.last_name)
             {
-                int r = frm.row[i] + i0 - 1;
-                int c = frm.col[i++];
-                Body[r, c] = v;
+                Body.AddRow(obj);
             }
-            FileOp.saveRngValue(Body);
+            else
+            {
+                saveDoc();
+                Excel.Range rng = FileOp.setRange(Sheet, i0);
+                Document toc = getDoc(Decl.DOC_TOC);
+                FileOp.CopyRng(toc.Wb, str, rng);
+                Body = FileOp.getSheetValue(Sheet);
+                FileOp.saveRngValue(Body);
+                int i = 0;
+                foreach (var v in obj)
+                {
+                    int r = frm.row[i] + i0 - 1;
+                    int c = frm.col[i++];
+                    Body[r, c] = v;
+                }
+                FileOp.saveRngValue(Body);
+                Form.last_name = frm.name;
+            }
+            Log.exit();
+        }
+        public void wrDoc(int iForm, params object[] obj) { wrDoc(forms[iForm].name, obj); }
+        //public void wrDoc(string form_name, params object[] objs)
+        //{
+        //    wrDoc(form_name, objs);
+        //}
+        ////////public void wrDoc(int iForm, object[] lst) // List<T> lst)
+        ////////{
+        ////////    Form frm = forms.Find(x => x.name == forms[iForm].name);
+        ////////    string format_name = frm.name + "_F";
+        ////////    if (!FileOp.isNamedRangeExist(Wb, format_name)) Msg.F("ERR __!!__.NOFORM_F", frm.name);
+        ////////    object[] obj = new object[lst.Count];
+        ////////    //!!-- fill obj[]
+        ////////    wrDoc(frm.name, obj);
+        ////////}
+        ////public void wrDoc(string str)
+        ////{
+        ////    object[] t = { Lib.timeStr() };
+        ////    wrDoc(str, t);
+        ////    Body[1, 1] = t[0];
+        ////}
+        public void wrDoc(List<int> rows, List<int>cols, List<int> rFr, List<int> cFr)
+        {
+            Log.set("wrDoc(List rows, List cols, List rFr, List cFr)");
+            Mtr tmpBody = FileOp.getSheetValue(this.Sheet);
+            throw new NotImplementedException();
             Log.exit();
         }
         /// <summary>
@@ -427,6 +414,8 @@ namespace TSmatch.Document
         /// <param name="MD5">MD5 документа. Если BodySave = false - обязательно</param>
         /// <journal>10.1.2016
         /// 18.1.16 - аккуратная обработка BodySave=false и MD5
+        /// 20.1.16 - fix bug: not write EOLinTOC for TSmatch type Documents
+        /// 1.04.16 - overlay saveDoc(..)
         /// </journal>
         public static void saveDoc(Document doc, bool BodySave = true, string MD5 = "",int EOL = 0)
         {
@@ -434,6 +423,7 @@ namespace TSmatch.Document
             try
             {
                 Document toc = Documents[Decl.DOC_TOC];
+                if (doc.type == Decl.DOC_TYPE_N) doc.isChanged = true; 
                 if (doc.isChanged)
                 {
                     int EOLinTOC = EOL;
@@ -451,21 +441,38 @@ namespace TSmatch.Document
                         if (MD5.Length < 20 || EOL == 0) Msg.F("ERR_05.8_saveDoc_NOMD5");
                         else { doc.chkSum = MD5; doc.EOLinTOC = EOLinTOC; }
                     }
-                    for (int n = 4; n < toc.Body.iEOL(); n++)
+                    Mtr tmp = FileOp.getSheetValue(toc.Sheet);
+                    for (int n = toc.i0; n <= toc.il; n++)
                     {   // находим и меняем строку документа doc TOC
                         if ((string)toc.Body[n, Decl.DOC_NAME] != doc.name) continue;
-                        toc.Body[1,1]= Lib.timeStr();
-                        toc.Body[n, Decl.DOC_TIME] = Lib.timeStr();
-                        toc.Body[n, Decl.DOC_MD5] = doc.chkSum;
-                        if( doc.type == "N")
-                            toc.Body[n, Decl.DOC_CREATED] = Lib.timeStr();
-                        toc.Body[n, Decl.DOC_EOL] = doc.EOLinTOC;
+                        tmp[1, 1] = Lib.timeStr();
+                        tmp[n, Decl.DOC_TIME] = Lib.timeStr();
+                        tmp[n, Decl.DOC_MD5] = doc.chkSum;
+                        if (doc.type == "N") tmp[n, Decl.DOC_CREATED] = Lib.timeStr();
+                        if (doc.type != Decl.TSMATCH_TYPE) tmp[n, Decl.DOC_EOL] = doc.EOLinTOC;
                         FileOp.setRange(toc.Sheet);
-                        FileOp.saveRngValue(toc.Body, AutoFit:false);  //======= save TОC in TSmatch.xlsx
+                        FileOp.saveRngValue(tmp, AutoFit: false);  //======= save TОC in TSmatch.xlsx
                         break;
                     }
                 }  
-            } catch (Exception e) { Log.FATAL("Ошибка \"" + e.Message + " сохранения файла \"" + doc.name + "\""); }
+            } catch (Exception e) { Log.FATAL("Ошибка \"" + e.Message + "\" сохранения файла \"" + doc.name + "\""); }
+            Log.exit();
+        }
+        public void saveDoc(bool BodySave = true, string MD5 = "", int EOL = 0)
+        { saveDoc(this, BodySave, MD5, EOL); }
+        /// <summary>
+        /// Close([save_flag])   - Close document, save it when saveflag=true, default - false;
+        /// </summary>
+        /// <param name="save_flag">saveDoc if true. This case all rest parameters as in saveDoc</param>
+        public void Close(bool save_flag = false, bool BodySave = true, string MD5 = "", int EOL = 0)
+        {
+            Log.set("Close(" + name + ")");
+            if (save_flag) saveDoc(this, BodySave, MD5, EOL);
+            this.isOpen = false;
+            FileOp.DisplayAlert(false);
+            try { this.Wb.Close(); }
+            catch {  }
+            FileOp.DisplayAlert(true);
             Log.exit();
         }
         private static void colCpy(Mtr mtr, int rwMtr, Excel.Range rng, int rwRng)
@@ -745,6 +752,7 @@ namespace TSmatch.Document
         {
             private static Excel.Workbook Wb;
             private static Mtr tocMtr;
+            internal static string last_name;
 
             public string name;
             public List<int> row = new List<int>();
@@ -798,5 +806,38 @@ namespace TSmatch.Document
                 Wb = _Wb; tocMtr = _tocMtr;
             }
         } // end class Form
+        /// <summary>
+        /// BodyForm - class BodyForm used for output some (not all!) fields of Body into Excel
+        /// </summary>
+        /// <journal>20.3.2016</journal>
+        ////public class BodyForm
+        ////{
+        ////    public Form form;
+        ////    public List<int> rowsBody = new List<int>();
+        ////    public List<int> colsBody = new List<int>();
+
+        ////    public BodyForm(string name, List<int> r, List<int> c, List<int> rB, List<int> cB)
+        ////    {
+        ////        form = new Form(name, r, c);
+        ////        rowsBody = rB; colsBody = cB;
+        ////    }
+
+        ////    public BodyForm BodyRowForm(string _name, int _r, int[] _cols)
+        ////    {
+        ////        Log.set("BodyRowForm");
+        ////        BodyForm result = null;
+        ////        List<int> rs = new List<int>();
+        ////        List<int> cs = new List<int>();
+        ////        List<int> rB = new List<int>();
+        ////        List<int> cB = new List<int>();
+        ////        foreach (int col in _cols)
+        ////        {
+        ////            result.rows
+        ////        }
+        ////        result.Add(new BodyForm(_name, rs, cs, rB, cB));
+        ////        Log.exit();
+        ////        return result;
+        ////    }
+        ////} // end class BodyForm
     } // end class Document
 } // end namespace

@@ -60,9 +60,13 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\2016-Jan\TSmatch 22.01.2016\TSmatch\TSmatch\bin\Debug\Tekla.Structures.Model.dll</HintPath>
     </Reference>
+    <Reference Include="Trimble.Connect.Client">
+      <HintPath>..\..\..\..\..\..\..\..\Program Files\Trimble\Trimble Connect\Trimble.Connect.Client.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Bootstrap.cs" />
+    <Compile Include="TrimbleConnect.cs" />
     <Compile Include="Message.cs" />
     <Compile Include="Components.cs" />
     <Compile Include="Declaration.cs" />
@@ -79,6 +83,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="ClassDiagram2.cd" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

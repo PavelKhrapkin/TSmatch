@@ -1,8 +1,8 @@
 ﻿/*------------------------------------------------------------------------------------------
- * Matcher -- находит соответствия входным компонентам в документах дазы данных
- *            в соответствии с правилами Match Rules
+ * Matcher -- contains important class Rule, which descride how to find Suppliers Components
+ *            suit to the Model Elements. The result - set of foind matches - put in class OK
  *
- * 15.3.2016 П.Храпкин, А.Пасс, А.Бобцов
+ * 11.4.2016 П.Храпкин, А.Пасс, А.Бобцов
  *
  *--- журнал ---
  * 18.1.2016 заложено П.Храпкин, А.Пасс, А.Бобцов
@@ -11,6 +11,9 @@
  * 27.2.2016 PKh перенес фрагменты в модуль Components
  *  6.3.2016 Rule Constructor correction; Start check if Tekla is active
  * 15.3.2016 Use Model Rule list -- UseRules
+ * 26.3.2016 CompSet reference in the Rule class instead of Document
+ *  3.4.2016 adoption to the the Component, CompSet, and Supplier classes
+ * 11.4.2016 Remove CompSet and Supplier not gives any match from Model in UseAllRules
  * -----------------------------------------------------------------------------------------
  *      КОНСТРУКТОРЫ Правил - загружают Правила из листа Правил в TSmatch или из журнала моделей
  * Rule(дата, тип, текст Правила, документ-база сортаментов)    - простая инициализация из TSmatch
@@ -45,6 +48,9 @@ using TS = TSmatch.Tekla.Tekla;
 using Docs = TSmatch.Document.Document;
 using Mod = TSmatch.Model.Model;
 using Cmp = TSmatch.Components.Component;
+using CmpSet = TSmatch.Components.CompSet;
+using Supl = TSmatch.Suppliers.Supplier;
+using System;
 
 namespace TSmatch.Matcher
 {
@@ -54,27 +60,31 @@ namespace TSmatch.Matcher
 
         public struct Rule // структура, описывающая правило работы Matcher'а
         {
-            public readonly string name;    //название правила
-            public readonly string type;    //тип правила
-            public readonly string text;    //текст правила
-            public readonly string doc;     //входной документ - список компонентов, с которыми работает правило
+            public readonly string name;        //название правила
+            public readonly string type;        //тип правила
+            public readonly string text;        //текст правила
+            public readonly CmpSet CompSet;     //список компонентов, с которыми работает правило
+            public readonly Supl Supplier;      //Поставщик
 
             public Rule(Docs doc, int i) : this()
             {
                 this.name = (string)doc.Body[i, Decl.RULE_NAME];
                 this.type = (string)doc.Body[i, Decl.RULE_TYPE];
                 this.text = Lib.ToLat((string)doc.Body[i, Decl.RULE_RULE]);
-                this.doc = (string)doc.Body[i, Decl.RULE_DOCS];
+                string csName = (string)doc.Body[i, Decl.RULE_COMPSETNAME];
+                string suplName = (string)doc.Body[i, Decl.RULE_SUPPLIERNAME];
+                this.Supplier = Supl.getSupplier(suplName);
+                this.CompSet = CmpSet.getCompSet( csName, Supplier.name );
             }
             // параметр doc не указан
-            public Rule(int n) : this(Docs.getDoc(Decl.MATCHING_RULES), n) {}
+            public Rule(int n) : this(Docs.getDoc(Decl.RULES), n) {}
         }
-        public struct OK   // структура даннх, описывающая найденное соответствие..
+        public struct OK    // структура даннsх, описывающая найденное соответствие..
         {                   //..Правил, Прайс-листа комплектующих, и строки - Группы <mat,prf>
             public int gr_nstr; // номер строки Группы, для которой найдено соответствие
             string strComp;     // текст подходящей строки в Comp
-            Docs doc;           // Документ, в котором нашли подходящие комплектующие
-            int nComp;          // номер строки в Документе комплектующихб по которому ОК
+            public Docs doc;           // Документ, в котором нашли подходящие комплектующие
+            int nComp;          // номер строки в Документе комплектующих, по которому ОК
             double weignt;      // общий вес для найденного типа комплектующих
             double? price;      // общая стоимость найденного типа комплектующих; null - не найдено
             /// <summary>
@@ -109,28 +119,16 @@ namespace TSmatch.Matcher
         static List<OK> OKs = new List<OK>();  // список найденных соответствий
 
         /// <summary>
-        /// Start - bootstrap modules Models, Rule, Documents, Messages
+        /// Start - initiate Rules - text lines, which describe match process
         /// </summary>
         /// <journal> Jan-2016
         /// 19.2.16 - переписано обращение к Documents.Start с инициализацией массивов FileDir
+        /// 30.3.16 - Start other modules removed to Bootstrap
         /// </journal>
         public static void Start()
         {
-            const string ERR_TEKLA_INACTIVE = "Tekla Application is not active. "
-                + "Try to run Tekla, check if model is available and restart TSmatch";
             Log.set("Matcher.Start");
-            //-- set #templates - Path values
-            string[] FileDirTemplates = Decl.TOC_DIR_TEMPLATES; 
-            if (!TS.isTeklaActive()) Log.FATAL(ERR_TEKLA_INACTIVE);
-            string TOCdir = TS.GetTeklaDir();
-            string ModelDir = TS.GetTeklaDir((int)TS.ModelDir.model);
-            string ComponentsDir = TOCdir + @"\База комплектующих";
-            string[] FileDirValues = {TOCdir, ModelDir, ComponentsDir, ""};
-
-            Docs.Start(FileDirTemplates, FileDirValues);    // инициируем Документы из TSmatch.xlsx
-            Msg.Start();                                    // инициируем Сообщения из TSmatch.xlsx
-            Mod.Start();                                    // инициируем список Моделей, известных TSmatch
-            Docs rule = Docs.getDoc(Decl.MATCHING_RULES);   // инициируем список Правил Matcher'a
+            Docs rule = Docs.getDoc(Decl.RULES);   // инициируем список Правил Matcher'a
             for (int i = 4; i<=rule.Body.iEOL(); i++)
                 { if (rule.Body[i, Decl.RULE_NAME] != null) Rules.Add(new Rule(rule, i)); }
             Log.exit();
@@ -140,54 +138,67 @@ namespace TSmatch.Matcher
         /// </summary>
         /// <param name="mod">Model to de handled</param>
         /// <journal>10.3.2016
-        /// 15.3.2016 get Rule list (Rules) from the Model mod
+        /// 15.3.2016 - get Rule list (Rules) from the Model mod
+        ///  3.4.2016 - adoption to the updated CompSet class
         /// </journal>
         public static void UseRules(Mod mod)
         {
             Log.set("UseRules(" + mod.name + ")");
             Rules = mod.Rules;
-            Docs Report = Docs.getDoc(Decl.REPORT);
-            int nstr = 0;
+            Docs Report = Docs.getDoc(Decl.REPORT); // output result in ModelINFO Document
+            int nstr = 0;                           // nstr - string number in Groupr
             foreach(var gr in Mod.Groups)
             {
-                bool found = false;
+                bool found = false;                 // true, when matching Component found
+
                 object[] obj = new object[Report.Body.iEOC()];
                 obj[0] = nstr; obj[1] = gr.mat; obj[2] = gr.prf;
                 obj[3] = gr.lng; obj[4] = gr.wgt; obj[5] = gr.vol;
+
                 foreach (var r in Rules)
                 {
-//                    new Log(@"разбираем Правило " + r.name + "(" + r.text + ")");
-                    RuleParser(r.text);
-                    if (isRuleApplicable(r.text, gr.mat, gr.prf))
-                    {   //--- определим по элементу Groups, применять ли Правило?
-                        if (SearchInComp(Docs.getDoc(r.doc), nstr, gr.mat, gr.prf))
-                        {
-                            found = true;
-                            foreach (var ok in OKs)
-                                if( ok.gr_nstr == nstr) ok.okToObj(ok, ref obj, 6);
-                        }
+                    RuleParser(r.text);     // сейчас Правило r многократно разбирается каждый раз для каждой Группы..
+                                            // Возможно,списки Rule.List стоит перенести в класс Rule и обработать заранее
+                    if (SearchInComp(r.CompSet, nstr, gr.mat, gr.prf))
+                    {
+                        found = true;
+                        foreach (var ok in OKs)
+                            if( ok.gr_nstr == nstr) ok.okToObj(ok, ref obj, 6);
                     }
+                    //////else
+                    //////{
+                    //////    mod.CompSets.Remove(r.CompSet);
+                    //////    mod.Rules.Remove(r);
+                    //////}
                 }
-                if (found) Report.Body.AddRow(obj);
-                else Report.Body.AddRow(OK.clearObj(ref obj, 6));              
+                //////if (found) Report.Body.AddRow(obj);
+                //////else Report.Body.AddRow(OK.clearObj(ref obj, 6));
+                if (!found) OK.clearObj(ref obj, 6);
+                Report.wrDoc(1, obj);
                 nstr++;
             }
-            Report.isChanged = true;
-            Docs.saveDoc(Report);
+            foreach (var ok in OKs)
+            {
+                Docs doc = ok.doc;  //подставить
+                CmpSet cs = mod.CompSets.Find(x => x.doc == doc);
+                if (cs == null) mod.CompSets.Remove(cs);
+            }
+            foreach (var sup in mod.Suppliers)
+            {
+                CmpSet cs = mod.CompSets.Find(x => x.Supplier == sup);
+                if (cs == null) mod.Suppliers.Remove(sup);
+            }
             Log.exit();
         }
         /// <summary>
-        /// isRuleApplicable(rule, mat, prf) - возвращает true, если Правило rule применимо
-        ///                                    к Материалу mat и Профилю prf
+        /// isRuleApplicable(mat, prf) - return true when parsed Rule is applicable to mat and prf values
         /// </summary>
-        /// <param name="rule">текст Правила</param>
-        /// <param name="mat">Материал</param>
-        /// <param name="prf">Профиль</param>
-        /// <returns>true, если Правило применимо</returns>
-        static bool isRuleApplicable(string rule, string mat, string prf)
-        {
-            return Lib.IContains(RuleMatList, mat) && Lib.IContains(RulePrfList, prf);
-        }
+        /// <param name="mat">Material</param>
+        /// <param name="prf">Profile</param>
+        /// <returns>true, if Rule after Parcing mentioned mat and prf</returns>
+        /// <journal>9.4.2016</journal>
+        static bool isRuleApplicable(string mat, string prf)
+        { return Lib.IContains(RuleMatList, mat) && Lib.IContains(RulePrfList, prf); }
         /// <summary>
         /// GetPars(str) разбирает строку раздела компонента или Правила, выделяя числовые параметры.
         ///         Названия материалов, профилей и другие нечисловые подстроки игнорируются.
@@ -345,69 +356,64 @@ namespace TSmatch.Matcher
             return result;
         }
         /// <summary>
-        /// SearchInComp(doc, nstr, mat, prf) - поиск комплектующих mat и prf в doc 
+        /// SearchInComp(cs, nstr, mat, prf) - search Components in match with mat and prf in price-list 
         /// </summary>
-        /// <param name="doc">файл компонентов - быза поставщика</param>
-        /// <param name="nstr">номер строки в Groups</param>
-        /// <param name="mat">Материал из строки nstr в Groups</param>
-        /// <param name="prf">Профиль из строки nstr в Groups</param>
+        /// <param name="cs">set of Components - price list of supplies - to search in</param>
+        /// <param name="nstr">string number in Groups</param>
+        /// <param name="mat">Material of nstr line in Groups</param>
+        /// <param name="prf">Profile of nstr line in Groups</param>
         /// <returns></returns>
-        /// <journal> дек 2015 - фев 2016 - пререлизы
-        /// 1.3.15 - обработка двух *параметров
+        /// <journal> дек 2015 - фев 2016 - preliminary releses
+        /// 1.3.16 - handle *parameters
+        /// 3.4.16 - adoption to CompSet and Componenmt classes
         /// </journal>
-        public static bool SearchInComp(Docs doc, int nstr, string mat, string prf)
+        public static bool SearchInComp(CmpSet cs, int nstr, string mat, string prf)
         {
             Log.set("SearchInComp");
             bool found = false;
             mat = mat.ToUpper(); prf = prf.ToUpper();
-            List<int> matPars = GetPars(mat);
-            List<int> prfPars = GetPars(prf);
-            Cmp.getComp(doc);
-            //-- если в Правиле есть * - используем заготовку с любым значением соотв.параметра
-            for (int nComp = doc.i0, iComp = 0; nComp <= doc.il; nComp++, iComp++)
-            {
-                string s = Cmp.Comps[iComp].description;
-                if (string.IsNullOrWhiteSpace(s)) continue;
-                if (!Lib.IContains(RuleMatList, mat)) continue;
-                if (!Lib.IContains(RulePrfList, prf)) continue;
-                List<int> CompPars = GetPars(s.ToUpper());
-                for (int i = 0, iW = 0; i < prfPars.Count; i++)          // все имеющиеся в элементе..
-                {                                               //..модели параметры prf должны ..
-                    if (iW < RuleWildPars.Count)
-                    {
-                        if (i == RuleWildPars[iW])
+            if (isRuleApplicable(mat, prf))
+            { 
+                List<int> matPars = GetPars(mat);
+                List<int> prfPars = GetPars(prf);
+                //-- если в Правиле есть * - используем заготовку с любым значением соотв.параметра
+                for (int nComp = cs.doc.i0, iComp = 0; nComp <= cs.doc.il; nComp++, iComp++)
+                {                                                       // все имеющиеся в элементе..
+                    string s = cs.Components[iComp].description;        //..модели параметры prf должны ..
+                    if (string.IsNullOrWhiteSpace(s)) continue;         //..совпадать с параметрами Comp..
+                    if (!Lib.IContains(RuleMatList, mat)) continue;     //..если совпадают -> found = true
+                    if (!Lib.IContains(RulePrfList, prf)) continue;
+                    List<int> CompPars = GetPars(s.ToUpper());
+                    for (int i = 0, iW = 0; i < prfPars.Count; i++)        
+                    {                                                   // check wild parameters 
+                        if (iW < RuleWildPars.Count)
                         {
-                            // * - Wild !!
-                            found = true;
-                            break;
-
-                            if (i == prfPars.Count - iW - 1) found = true;
-                            iW++;
+                            if (i == RuleWildPars[iW]) found = true;
                         }
+                        if (prfPars[i] != CompPars[i]) break;       
+                        if (i == prfPars.Count - 1) found = true;   
                     }
-                    if (prfPars[i] != CompPars[i]) break;       //..совпадать с параметрами Comp..
-                    if (i == prfPars.Count - 1) found = true;   //..если совпадают -> found = true
-                }
-                if (found)
-                {
-                    if (isOKexist(nstr)) break;     // если уже есть соответствие в OKs - NOP
-                    // обработаем *параметры
-                    double lng = Mod.Groups[nstr].lng / 1000; //приводим lng к [м]
-                    double v = Mod.Groups[nstr].vol;        //объем в [м3]
-                    double w = Mod.Groups[nstr].wgt;        //вес в [т]
-
-                    if (w == 0)
+                    if (found)
                     {
-                        w = v * 7.85 * 1000;   // уд.вес стали в кг
+                        if (isOKexist(nstr)) break;     // если уже есть соответствие в OKs - NOP
+                        // обработаем *параметры
+                        double lng = Mod.Groups[nstr].lng / 1000; //приводим lng к [м]
+                        double v = Mod.Groups[nstr].vol;        //объем в [м3]
+                        double w = Mod.Groups[nstr].wgt;        //вес в [т]
+
+                        if (w == 0)
+                        {
+                            w = v * 7.85 * 1000;   // уд.вес стали в кг
+                        }
+                        w *= 1 + RuleRedundencyPerCent / 100;     // учтем запас в % из Правила
+                        double? p = cs.Components[iComp].price * w / 1000;
+                        OKs.Add(new OK(nstr, s, cs.doc, nComp, w, p));
+                        break;
                     }
-                    w *= 1 + RuleRedundencyPerCent / 100;     // учтем запас в % из Правила
-                    double? p = Cmp.Comps[iComp].price * w / 1000;
-                    OKs.Add(new OK(nstr, s, doc, nComp, w, p));
-                    break;
-                }
-            } //end foreach Comp
+                } //end foreach Comp
+            } // end if isRuleApplicable
             Log.exit();
             return found;
-        }
+        } // end SearchInComp
     } // end class Matcher
 } // end namespace Matcher
