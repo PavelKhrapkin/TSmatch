@@ -1,10 +1,10 @@
 ﻿/*----------------------------------------------------------------------------
  * Suppliers - componets supplier organisations
  * 
- *  27.3.2016  Pavel Khrapkin
+ *  27.4.2016  Pavel Khrapkin
  *
- *--- JOURNAL ---
- * 
+ *--- History ---
+ * 27.4.2016 - Remove List<string> doc_names from the Supplier class
  * ---------------------------------------------------------------------------
  *      METHODS:
  * Start()  - Get Supplier Listr from TSmatch.xlsx/Suppliers
@@ -44,33 +44,32 @@ namespace TSmatch.Suppliers
         public string country;
         public string telephone;
         public string contact;
-        public List<Components.CompSet> CompSets = new List<Components.CompSet>();
-        public List<string> doc_names = new List<string>();  // full list of prices-list document names from the Supplier could be found in TOC
+        public List<CmpSet> CompSets = new List<CmpSet>();
 
         /// <summary>
         /// Supplier Constructor
         /// </summary>
-        /// <param name="_date">last updated</param>
-        /// <param name="_name">Supplier name</param>
-        /// <param name="_url">hyperlink - Web page of the Suppliers </param>
-        /// <param name="_city">city to deliver supplies from</param>
-        /// <param name="_street">street address</param>
-        /// <param name="_index">post intex of the Supplier</param>
-        /// <param name="_tel">Telephone of the Supplier</param>
-        /// <param name="_doc_nms">Document names from TOC related to the Supplier</param>
-        public Supplier(DateTime _date, string _name, string _url, string _city, string _street, string _index, string _tel, List<string> _doc_nms)
+        /// <param name="date">last updated</param>
+        /// <param name="name">Supplier name</param>
+        /// <param name="url">hyperlink - Web page of the Suppliers </param>
+        /// <param name="city">city to deliver supplies from</param>
+        /// <param name="street">street address</param>
+        /// <param name="index">post intex of the Supplier</param>
+        /// <param name="tel">Telephone of the Supplier</param>
+        /// <param name="List<CompSet> CompSets">collection of CompSet related to the Supplier</param>
+        public Supplier(DateTime date, string name, string url, string city, string street, string index, string tel, List<CmpSet> CompSets)
         {
-            this.date = _date;
-            this.name = _name;
-            this.Url = _url;
-            this.City = _city;
-            this.index = _index;
-            this.street = _street;
-            this.telephone = _tel;
-            this.doc_names = _doc_nms;
+            this.date = date;
+            this.name = name;
+            this.Url = url;
+            this.City = city;
+            this.index = index;
+            this.street = street;
+            this.telephone = tel;
+            this.CompSets = CompSets;
         }
         public Supplier(int n)
-        {       // get data from TSmatch.xlsx/TOC
+        {       // get data from TSmatch.xlsx/Suppliers
             Docs doc = Docs.getDoc(Decl.SUPPLIERS);
             this.date = Lib.getDateTime(doc.Body[n, Decl.SUPL_DATE]);
             this.name = (string)doc.Body[n, Decl.SUPL_NAME];
@@ -79,6 +78,17 @@ namespace TSmatch.Suppliers
             this.street = (string)doc.Body[n, Decl.SUPL_STREET];
             this.index = (string)doc.Body[n, Decl.SUPL_INDEX];
             this.telephone = (string)doc.Body[n, Decl.SUPL_TEL];
+                // get doc_names list from TOC
+            Docs toc = Docs.getDoc(Decl.DOC_TOC);
+            for(int i= toc.i0; i < toc.il; i++)
+            {
+                string str = toc.Body.Strng(i, Decl.DOC_SUPPLIER);
+                if (name != str) continue;
+                string cs_name = toc.Body.Strng(i, Decl.DOC_SHEET);
+                string doc_name = toc.Body.Strng(i, Decl.DOC_NAME);
+                CmpSet cs = CmpSet.setCompSet(cs_name, doc_name, this);
+                this.CompSets.Add(cs);
+            }
         }
         public Supplier(string _name)
         {
@@ -87,18 +97,16 @@ namespace TSmatch.Suppliers
             if (supl == null)
             {   // new Supplier
                 Msg.F("ERR __.UNKNOWN SUPPLIER", _name);
-                ////////////this.date = DateTime.Now;
-                ////////////Url = City = index = street = telephone = "";
-                ////////////Suppliers.Add(new Supplier())
             }
             else
             {   // existing Supplier
-                date = supl.date;
-                Url = supl.Url;
-                City = supl.City;
-                index = supl.index;
-                street = supl.street;
-                telephone = supl.telephone; 
+                date      = supl.date;
+                Url       = supl.Url;
+                City      = supl.City;
+                index     = supl.index;
+                street    = supl.street;
+                telephone = supl.telephone;
+                CompSets  = supl.CompSets;
             }
         }
         /// <summary>
@@ -112,7 +120,7 @@ namespace TSmatch.Suppliers
             int result = this.City.CompareTo(supl.City);
             if (result == 0)
             {
-                result = - doc_names.Count.CompareTo(supl.doc_names.Count);
+                result = -this.CompSets.Count.CompareTo(supl.CompSets.Count);
             }
             return result;
         }
@@ -136,20 +144,20 @@ namespace TSmatch.Suppliers
                 if (nPriceLists <= 0) continue;
                 Suppliers.Add(new Supplier(i));
             }
-            //-- check Suppliers/CompSets list with TOC -- Suppliers HealthCheck
-            //.. Initiate CompSet collections, however, not load them yet
-            Docs toc = Docs.getDoc(Decl.DOC_TOC);
-            for (int i = toc.i0; i <= toc.il; i++)
-            {
-                if (toc.Body.Strng(i, Decl.DOC_DIR) != Decl.TEMPL_COMP) continue;
-                string supl = toc.Body.Strng(i, Decl.DOC_SUPPLIER);
-                string cs_name = toc.Body.Strng(i, Decl.DOC_SHEET);
-                Supplier sss = Suppliers.Find(x => x.name == supl);
-                if (sss == null)
-                    Msg.F("Err Supplier.Start_ is inTOC not in Suppliers", supl, i, toc.Body.Strng(i, Decl.DOC_NAME));
-                else
-                    sss.CompSets.Add(new CmpSet(cs_name, sss));
-            }
+            //////////////-- check Suppliers/CompSets list with TOC -- Suppliers HealthCheck
+            //////////////.. Initiate CompSet collections, however, not load them yet
+            ////////////Docs toc = Docs.getDoc(Decl.DOC_TOC);
+            ////////////for (int i = toc.i0; i <= toc.il; i++)
+            ////////////{
+            ////////////    if (toc.Body.Strng(i, Decl.DOC_DIR) != Decl.TEMPL_COMP) continue;
+            ////////////    string supl = toc.Body.Strng(i, Decl.DOC_SUPPLIER);
+            ////////////    string cs_name = toc.Body.Strng(i, Decl.DOC_SHEET);
+            ////////////    Supplier sss = Suppliers.Find(x => x.name == supl);
+            ////////////    if (sss == null)
+            ////////////        Msg.F("Err Supplier.Start_ is inTOC not in Suppliers", supl, i, toc.Body.Strng(i, Decl.DOC_NAME));
+            ////////////    else
+            ////////////        sss.CompSets.Add(new CmpSet(cs_name, sss));
+            ////////////}
             //(ToDo)-----------------------------------
             // тут можно вставить формирование горизонтальной цепочки ячеек - прайс-листов в Suppliers
             //NB1: можно формировать этот список не a TSmatch.xlsx/Supplers, а в С# и только проверять значение в листе Suppliers
@@ -175,7 +183,7 @@ namespace TSmatch.Suppliers
             doc.Reset("Now");
             foreach (var s in Suppliers)
             {
-                doc.wrDoc(1, s.date, s.name, s.Url, s.City, s.index, s.street, s.telephone, s.doc_names.Count);
+                doc.wrDoc(1, s.date, s.name, s.Url, s.City, s.index, s.street, s.telephone, s.CompSets.Count);
                 foreach (var cs in s.CompSets) 
                 {
                     cs.getCompSet();
@@ -191,5 +199,6 @@ namespace TSmatch.Suppliers
             doc.saveDoc();
             doc.Close();
         }
-    } // end class Supplier
+    } // end class Supplier+		doc	null	TSmatch.Document.Document
+
 } // end namespace Suppliers

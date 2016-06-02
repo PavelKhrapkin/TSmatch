@@ -27,6 +27,7 @@ namespace TSmatch.Declaration
     /// 25.3.16     - Sullier List attributes
     /// 30.3.16     - Resource constants created
     ///  9.4.16     - TSmatchINFO/Report section
+    /// 19.9.16     - Resources chage
     /// </journal>
     class Declaration
     {
@@ -59,7 +60,7 @@ namespace TSmatch.Declaration
         // Resources - are various files, necessary for TSmatch operation in PC.
         // Constants hereunder descripe the Resource name, type and date to be checked as "Actual"
         //!! we should set here (EXPECT DATE) time earlier, than is written in [1,1] of the Document
-        public enum RESOURCE_TYPES { Document, File, Directory, BMP, Application };
+        public enum RESOURCE_TYPES { Document, File, TeklaFile, Directory, Application };
         public enum RESOURCE_FAULT_REASON { NoFile, Obsolete, NoTekla };
 
         public const string R_TEKLA = "Tekla";              //Application Tekla Structure is up an running
@@ -80,7 +81,7 @@ namespace TSmatch.Declaration
 
         public const string R_MSG = MESSAGES;               //TSmatch.xlsx/Messages - Сообщения       
         public const string R_MSG_TYPE = TEMPL_TOC;
-        public const string R_MSG_DATE = "4.4.2016 22:40";
+        public const string R_MSG_DATE = "19.4.2016 22:40";
 
         public const string R_RULES = RULES;               //TSmatch.xlsx/Rules - Правила       
         public const string R_RULES_TYPE = TEMPL_TOC;
@@ -93,6 +94,18 @@ namespace TSmatch.Declaration
         public const string R_CONST = CONST;               //TSmatch.xlsx/Constants - Таблицы и константы TSmatch
         public const string R_CONST_TYPE = TEMPL_TOC;
         public const string R_CONST_DATE = "2.4.2016";
+
+        public const string R_TSMATCH_EXE = TEMPL_TOC + @"\" + TSMATCH_EXE;   //File TSmatch.exe - executable file
+        public static readonly string R_TSMATCH_EXE_TYPE = RESOURCE_TYPES.File.ToString();
+        public const string R_TSMATCH_EXE_DATE = "12.4.2016";
+
+        public const string R_BUTTON_CS = TEMPL_MACROS + @"\" + BUTTON_CS;    //TSmatch.cs -- Tekla Macros file for TSmatch Button
+        public static readonly string R_BUTTON_CS_TYPE = RESOURCE_TYPES.TeklaFile.ToString();
+        public const string R_BUTTON_CS_DATE = "1.3.2016";
+
+        public const string R_BUTTON_BMP = TEMPL_MACROS + @"\" + BUTTON_BMP;  //TSmatch.BMP -- TSmatch Button image in Tekla Macros
+        public static readonly string R_BUTTON_BMP_TYPE = RESOURCE_TYPES.TeklaFile.ToString();
+        public const string R_BUTTON_BMP_DATE = "1.3.2016";
 
         //-----------константы таблицы Документов -----------------
         public const int TOC_I0 = 4;    // строка TOC в таблице TOC
@@ -130,12 +143,13 @@ namespace TSmatch.Declaration
 
         //----------- # шаблоны каталогов документов (поле doc.FileDirectory) --------------------
         public static readonly string[] TOC_DIR_TEMPLATES
-            = { TEMPL_TOC, TEMPL_MODEL, TEMPL_COMP, TEMPL_TMP, TEMPL_DEBUG };
+            = { TEMPL_TOC, TEMPL_MODEL, TEMPL_COMP, TEMPL_TMP, TEMPL_DEBUG, TEMPL_MACROS};
         public const string TEMPL_TOC   = "#TOC";           //каталог TSmatch.xlsx 
         public const string TEMPL_MODEL = "#Model";         //каталоги Моделей
         public const string TEMPL_COMP  = "#Components";    //каталог файлов комплектующих - базы поставщиков
         public const string TEMPL_TMP   = "#TMP";           //каталог временного файла
         public const string TEMPL_DEBUG = "#DEBUG";         //каталог для собственной отладки
+        public const string TEMPL_MACROS = "#Macros";       //каталог Tekla Macros - тут файлы для кнопки TSmatch
 
         //----------- ТИПЫ ШТАМПОВ / ТИПЫ ДОКУМЕНТОВ ----------------------
         ////public const string STAMP_TYPE_EQ = "=";  // точное соответствие

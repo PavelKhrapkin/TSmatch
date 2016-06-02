@@ -1,9 +1,9 @@
 ﻿/*-----------------------------------------------------------------------
  * TS_OpenAPI -- Interaction with Tekla Structure over Open API
  * 
- * 10.3.2016  Pavel Khrapkin, Alex Bobtsov
+ * 20.4.2016  Pavel Khrapkin, Alex Bobtsov
  *  
- *----- JOURNAL ------------------------------------------
+ *----- History ------------------------------------------
  3.1.2016 АБ получаем длину элемента
  * 12.1.2016 PKh - добавлено вычисление MD5 по списку атрибутов модели, теперь это public string.
  *               - из имени модели удалено ".db1"
@@ -16,6 +16,7 @@
  *  4.3.2016 PKh - Add GUID in AttSet; "Fixed" profile is used
  *  6.3.2016 PKh - isTeklaActive() metod included
  * 10.3.2016 PKh - AttSet Compararer implemented
+ * 20.4.2016 PKh - GetTeklaDir() rewritten
  * -------------------------------------------
  * public Structure AttSet - set of model component attribuyes, extracted from Tekla by method Read
  *                           AttSet is Comparable, means Sort is applicable, and 
@@ -45,7 +46,7 @@ namespace TSmatch.Tekla
     class Tekla
     {
         const string MYNAME = "Tekla.Read v1.5";
-        public enum ModelDir : int { exceldesign = 0, model = 1 };
+        public enum ModelDir { exceldesign, model, macro};
 
         public struct AttSet : IComparable<AttSet>
         {
@@ -163,24 +164,28 @@ namespace TSmatch.Tekla
             return ModelMD5;
             //            new Log("MD5 time = " + (DateTime.Now - t0).ToString());
         } // ModAtrMD5
-        public static string GetTeklaDir(int mode = -1)
+        public static string GetTeklaDir(ModelDir mode)
         {
             string TSdir = "";
-            try
+            switch (mode)
             {
-                if (mode == -1 || ModelDir.exceldesign.Equals(mode))
+                case ModelDir.exceldesign:
                     TeklaStructuresSettings.GetAdvancedOption("XS_EXTERNAL_EXCEL_DESIGN_PATH", ref TSdir);
-                else
-                {
+                    break;
+                case ModelDir.model:
                     TSM.Model model = new TSM.Model();
                     ModInfo = model.GetInfo();
                     TSdir = ModInfo.ModelPath;
-                }
+                    break;
+                case ModelDir.macro:
+                    TeklaStructuresSettings.GetAdvancedOption("XS_MACRO_DIRECTORY", ref TSdir);
+                    string[] str = TSdir.Split(';');
+                    TSdir = str[0] + @"\modeling";     // this Split is to ignore other, than common TS Enviroments
+                    break;
             }
-            catch { Log.FATAL("You address Tekla Strucures, when it is not active. Please, try to run Tekla!"); }
-            //            var ff = TeklaStructuresInfo.GetCurrentProgramVersion();
-            //            var dd = TeklaStructuresFiles.GetAttributeFile(TSdir);
-            //            TSdir = TS.TeklaStructuresFiles();
+            //////////            var ff = TeklaStructuresInfo.GetCurrentProgramVersion();
+            //////////            var dd = TeklaStructuresFiles.GetAttributeFile(TSdir);
+            //////////            TSdir = TS.TeklaStructuresFiles();
             return TSdir;
         }
         public static bool isTeklaActive()

@@ -1,9 +1,9 @@
 ﻿/*-------------------------------------------------------------------------------------------------------
  * Document -- works with all Documents in the system basing on TOC - Table Of Content
  * 
- *  17.4.2016  Pavel Khrapkin, Alex Pass, Alex Bobtsov
+ *  27.4.2016  Pavel Khrapkin, Alex Pass, Alex Bobtsov
  *
- *--------- JOURNAL ----------------  
+ *--------- History ----------------  
  * 2013-2015 заложена система управления документами на основе TOC и Штампов
  * 22.1.16 - из статического конструктора начало работы Document перенесено в Start
  * 17.2.16 - в Documents добавлены - строки границы таблицы I0 и IN и их обработка
@@ -18,12 +18,15 @@
  * 30.3.16 - get #templates from Bootstrap in Start() and getDoc(name)
  *  1.4.16 - saveDoc(..) overlay
  *  4.4.16 - wrDoc with account of previous output form last_name allow fast multy-string output
- * 17.4.16 - tocStart extracted from Start for initial TOC open
+ * 19.4.16 - tocStart extracted from Start for initial TOC open; write TOCdir in Win Registry if OK
+ * 27.4.16 - getDoc(.. [bool load=true]) - not real document load, when load fag = false
  * -------------------------------------------
  *      METHODS:
  * Start()              - Load from directory TOCdir of TOC all known Document attributes, prepare everithing
+ * tocStart(TOCdir)     - open TSmatch.xlsx from TOCdir directory; set Windown Registry Path if OK
  * setDocTemplate(dirTemplate, val) - set #dirTtemplate value as val in list of #templates  
- * getDoc(name[,fatal]) - return Document doc named in TOC name or create it. Flag fatal is to try to open only
+ * getDoc(name[,fatal][,load]) - return Document doc named in TOC name or create it. Flag fatal is to try to open only
+ *                                      load=false means do not document contents load from file
  * Reset()              - "Reset" of the Document. All contents of hes Excel Sheet erased, write Header form
  * wrDoc(str, object[]) - write data from obj to the Excel file in format of Form and Form_F
 ?* loadDoc(name, wb)    - загружает Документ name или его обновления из файла wb, запускает Handler Документа
@@ -156,6 +159,14 @@ namespace TSmatch.Document
             } // for по строкам TOC
             Log.exit();
         } // end Start
+        /// <summary>
+        /// tocStart(TOCdir) - open file TSmatch.xlsx in TOCdir directory
+        /// </summary>
+        /// <param name="TOCdir"></param>
+        /// <returns>return TOC document</returns>
+        /// <journal>18.4.2016
+        /// 19.4.2016 - set Windows Environment Path paramenters
+        /// </journal>
         public static Document tocStart(string TOCdir)
         {
             Log.set("tocStart");
@@ -167,6 +178,9 @@ namespace TSmatch.Document
             toc.EOL(Decl.TOC_I0);
             Form.setWb(toc.Wb, toc.Body);
             toc.isOpen = true;
+            // read Windows Environment is much faset then setting. So, we don't read Registry without neccesity
+            string tmp = Environment.GetEnvironmentVariable(Decl.WIN_TSMATCH_DIR, EnvironmentVariableTarget.User);
+            if(tmp != TOCdir) Environment.SetEnvironmentVariable(Decl.WIN_TSMATCH_DIR, TOCdir, EnvironmentVariableTarget.User);
             Log.exit();
             return toc;
         }
@@ -186,8 +200,10 @@ namespace TSmatch.Document
         ///  5.3.16 - null if Document not found or exist
         /// 30.3.16 - get #template Path from Bootstrap.Template; try-catch rewritten
         ///  5.4.16 - bug fix - SheetReset for "N" Document
+        /// 19.4.16 - use Templ.getPath in getDoc()
+        /// 27.4.16 - optional flag load - if false -> don't load contents from the file
         /// </journal>
-        public static Document getDoc(string name, bool fatal = true)
+        public static Document getDoc(string name, bool fatal = true, bool load = true)
         {
             Log.set("getDoc(" + name + ")");
             Document doc = null;
@@ -196,22 +212,25 @@ namespace TSmatch.Document
             catch (Exception e) { err += "doc not in TOC"; ex = e.Message; doc = null; }
             if (doc != null && !doc.isOpen)
             {
-                if (doc.FileDirectory.Contains("#"))    // #Template substitute with Path in Bootsrap.Templates
-                    doc.FileDirectory = Templ.Templates.Find(x => x.template == doc.FileDirectory).templ_val;
-                //-------- Load Document from the file or create it ------------
-                bool create = !string.IsNullOrEmpty(doc.type) && doc.type[0] == 'N' ? true : false;
-                doc.Wb = FileOp.fileOpen(doc.FileDirectory, doc.FileName, create);
-                try
+                if (load)
                 {
-                    if (doc.type == Decl.DOC_TYPE_N) FileOp.SheetReset(doc.Wb, doc.SheetN);
-                    doc.Sheet = doc.Wb.Worksheets[doc.SheetN];
+                    if (doc.FileDirectory.Contains("#"))    // #Template substitute with Path in Bootsrap.Templates
+                        doc.FileDirectory = Templ.getPath(doc.FileDirectory);
+                    //-------- Load Document from the file or create it ------------
+                    bool create = !string.IsNullOrEmpty(doc.type) && doc.type[0] == 'N' ? true : false;
+                    doc.Wb = FileOp.fileOpen(doc.FileDirectory, doc.FileName, create);
+                    try
+                    {
+                        if (doc.type == Decl.DOC_TYPE_N) FileOp.SheetReset(doc.Wb, doc.SheetN);
+                        doc.Sheet = doc.Wb.Worksheets[doc.SheetN];
+                    }
+                    catch (Exception e) { err += "no SheetN"; ex = doc.SheetN; doc = null; }
+                    if (create && doc != null) doc.Reset();
+                    else if (doc != null) doc.Body = FileOp.getSheetValue(doc.Sheet);
                 }
-                catch (Exception e) { err += "no SheetN"; ex = doc.SheetN; doc = null; }
-                if(create && doc != null) doc.Reset();
-                else if( doc != null) doc.Body = FileOp.getSheetValue(doc.Sheet);
             } // end if(!doc.isOpen)
             if(doc == null && fatal) Msg.F(err, ex, name);
-            if(doc != null) doc.isOpen = true;
+            if(doc != null && doc.Body != null) doc.isOpen = true;
             Log.exit();
             return doc;
         }

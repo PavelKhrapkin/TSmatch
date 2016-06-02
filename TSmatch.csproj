@@ -33,6 +33,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="IfcManager">
+      <HintPath>..\..\Look_around\Oleg\IfcManager\IfcManager\bin\Debug\IfcManager.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Office.Interop.Excel, Version=15.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <EmbedInteropTypes>True</EmbedInteropTypes>
@@ -61,11 +64,13 @@
       <HintPath>..\..\..\2016-Jan\TSmatch 22.01.2016\TSmatch\TSmatch\bin\Debug\Tekla.Structures.Model.dll</HintPath>
     </Reference>
     <Reference Include="Trimble.Connect.Client">
-      <HintPath>..\..\..\..\..\..\..\..\Program Files\Trimble\Trimble Connect\Trimble.Connect.Client.dll</HintPath>
+      <HintPath>E:\Program Files\Trimble\Trimble Connect\Trimble.Connect.Client.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Bootstrap.cs" />
+    <Compile Include="ElmAttSet.cs" />
+    <Compile Include="IFC.cs" />
     <Compile Include="TrimbleConnect.cs" />
     <Compile Include="Message.cs" />
     <Compile Include="Components.cs" />

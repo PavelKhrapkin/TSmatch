@@ -1,0 +1,32 @@
+C:\Users\isu\documents\visual studio 2012\Projects\IfcManagerAppl\IfcManagerAppl\bin\Debug\IfcManagerAppl.exe.config
+C:\Users\isu\documents\visual studio 2012\Projects\IfcManagerAppl\IfcManagerAppl\obj\Debug\IfcManagerAppl.csprojResolveAssemblyReference.cache
+C:\Users\isu\documents\visual studio 2012\Projects\IfcManagerAppl\IfcManagerAppl\bin\Debug\IfcManagerAppl.exe
+C:\Users\isu\documents\visual studio 2012\Projects\IfcManagerAppl\IfcManagerAppl\bin\Debug\IfcManagerAppl.pdb
+C:\Users\isu\documents\visual studio 2012\Projects\IfcManagerAppl\IfcManagerAppl\bin\Debug\IfcManager.dll
+C:\Users\isu\documents\visual studio 2012\Projects\IfcManagerAppl\IfcManagerAppl\bin\Debug\IfcManager.pdb
+C:\Users\isu\documents\visual studio 2012\Projects\IfcManagerAppl\IfcManagerAppl\obj\Debug\IfcManagerAppl.exe
+C:\Users\isu\documents\visual studio 2012\Projects\IfcManagerAppl\IfcManagerAppl\obj\Debug\IfcManagerAppl.pdb
+C:\Users\isu\documents\visual studio 2012\Projects\IfcManagerAppl\IfcManagerAppl\bin\Debug\IfcEngineCS.dll
+C:\Users\isu\documents\visual studio 2012\Projects\IfcManagerAppl\IfcManagerAppl\bin\Debug\IfcEngineCS.pdb
+C:\Users\isu\documents\visual studio 2012\Projects\IfcManagerAppl\IfcManagerAppl\bin\Debug\ifcengine_x32.dll
+C:\Users\isu\documents\visual studio 2012\Projects\IfcManagerAppl\IfcManagerAppl\bin\Debug\ifcengine_x64.dll
+C:\Users\isu\documents\visual studio 2012\Projects\IfcManagerAppl\IfcManagerAppl\bin\Debug\IFC2X3_TC1.exp
+C:\Users\isu\documents\visual studio 2012\Projects\IfcManagerAppl\IfcManagerAppl\bin\Debug\IFC2X3-Settings.xml
+C:\Users\isu\documents\visual studio 2012\Projects\IfcManagerAppl\IfcManagerAppl\bin\Debug\IFC4-Settings.xml
+C:\Users\isu\documents\visual studio 2012\Projects\IfcManagerAppl\IfcManagerAppl\bin\Debug\IFC4.exp
+F:\Pavel\match\matchCodes\С#\TSmatch\Look_around\Oleg\IfcManagerAppl\IfcManagerAppl\bin\Debug\IfcManagerAppl.exe.config
+F:\Pavel\match\matchCodes\С#\TSmatch\Look_around\Oleg\IfcManagerAppl\IfcManagerAppl\obj\Debug\IfcManagerAppl.exe
+F:\Pavel\match\matchCodes\С#\TSmatch\Look_around\Oleg\IfcManagerAppl\IfcManagerAppl\obj\Debug\IfcManagerAppl.pdb
+F:\Pavel\match\matchCodes\С#\TSmatch\Look_around\Oleg\IfcManagerAppl\IfcManagerAppl\bin\Debug\IFC4-Settings.xml
+F:\Pavel\match\matchCodes\С#\TSmatch\Look_around\Oleg\IfcManagerAppl\IfcManagerAppl\bin\Debug\ifcengine_x32.dll
+F:\Pavel\match\matchCodes\С#\TSmatch\Look_around\Oleg\IfcManagerAppl\IfcManagerAppl\bin\Debug\ifcengine_x64.dll
+F:\Pavel\match\matchCodes\С#\TSmatch\Look_around\Oleg\IfcManagerAppl\IfcManagerAppl\bin\Debug\IFC2X3_TC1.exp
+F:\Pavel\match\matchCodes\С#\TSmatch\Look_around\Oleg\IfcManagerAppl\IfcManagerAppl\bin\Debug\IFC4.exp
+F:\Pavel\match\matchCodes\С#\TSmatch\Look_around\Oleg\IfcManagerAppl\IfcManagerAppl\bin\Debug\IFC2X3-Settings.xml
+F:\Pavel\match\matchCodes\С#\TSmatch\Look_around\Oleg\IfcManagerAppl\IfcManagerAppl\bin\Debug\IfcManagerAppl.exe
+F:\Pavel\match\matchCodes\С#\TSmatch\Look_around\Oleg\IfcManagerAppl\IfcManagerAppl\bin\Debug\IfcManagerAppl.pdb
+F:\Pavel\match\matchCodes\С#\TSmatch\Look_around\Oleg\IfcManagerAppl\IfcManagerAppl\bin\Debug\IfcManager.dll
+F:\Pavel\match\matchCodes\С#\TSmatch\Look_around\Oleg\IfcManagerAppl\IfcManagerAppl\bin\Debug\IfcEngineCS.dll
+F:\Pavel\match\matchCodes\С#\TSmatch\Look_around\Oleg\IfcManagerAppl\IfcManagerAppl\bin\Debug\IfcManager.pdb
+F:\Pavel\match\matchCodes\С#\TSmatch\Look_around\Oleg\IfcManagerAppl\IfcManagerAppl\bin\Debug\IfcEngineCS.pdb
+F:\Pavel\match\matchCodes\С#\TSmatch\Look_around\Oleg\IfcManagerAppl\IfcManagerAppl\obj\Debug\IfcManagerAppl.csprojResolveAssemblyReference.cache

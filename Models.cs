@@ -169,9 +169,9 @@ namespace TSmatch.Model
             if (mod.wrToFile) 
             {
                 mod.wrModel(Decl.RAW);
-                mod.wrModel(Decl.MODELINFO);
                 setGroups();            // Group Elements by Materials and Profile
                 Mgroup.setMgr();        // Additionally group Groups by Material 
+                mod.wrModel(Decl.MODELINFO);
                 setModel(mod.name);     // Load price-list for the model
                 Mtch.UseRules(mod);     // Search for Model Groups matching Components
                 mod.wrModel(Decl.REPORT);
@@ -335,11 +335,17 @@ namespace TSmatch.Model
                     doc.saveDoc(BodySave: false, MD5: mod.MD5, EOL: Elements.Count + 1);
                     break;
                 case Decl.MODELINFO:
-                    doc.wrDoc(1, name, dir, "фаза?", date, MD5, Elements.Count, strListRules);
+                    doc.wrDoc(1, name, dir, "фаза?", date, MD5, Elements.Count);    //, strListRules);
+                    doc.wrDoc(2);
+                    foreach (var mgr in Mgroup.Mgroups)
+                    {
+                        doc.wrDoc(3, mgr.mat, mgr.volume, mgr.weight);
+                    }
+                    doc.wrDoc(4, strListRules);
                     foreach (var rule in this.Rules)
                     {
                         string supplier = rule.Supplier.name;
-                        doc.wrDoc(doc.forms[2].name, supplier, rule.CompSet.name, rule.text);
+                        doc.wrDoc(5, supplier, rule.CompSet.name, rule.text);
                     }
                     doc.isChanged = true;
                     doc.saveDoc();
@@ -384,6 +390,11 @@ namespace TSmatch.Model
             }
             Log.exit();
             return mod;
+        }
+        public static string RecentModelDir()
+        {
+            Models.Sort();
+            return Models[0].dir;
         }
         public struct Group : IComparable<Group>
         {
@@ -447,10 +458,10 @@ namespace TSmatch.Model
         //}
         public class Mgroup : IComparable<Mgroup>
         {
-            static List<Mgroup> Mgroups = new List<Mgroup>();
+            public static List<Mgroup> Mgroups = new List<Mgroup>();
             
-            String mat;
-            double volume, weight;
+            public String mat;
+            public double volume, weight;
             List<Group> groups = new List<Group>();
 
             public Mgroup(string mat, double vol, double wgt, List<Group> grps)

@@ -75,28 +75,32 @@ namespace TSmatch.Components
             List<Component> Comps = new List<Component>();
             for (int i = doc.i0; i <= doc.il; i++)
             {
-                string descr = doc.Body.Strng(i, docCompPars[0]);
-                double lng = 0;
-                //-- разбор параметров LoadDescription
-                List<int> strPars = Mtch.GetPars(descr);
-                string docDescr = doc.LoadDescription;
-                int parShft = 0;
-                while (docDescr.Contains('/'))
+                try
                 {
-                    string[] s = doc.LoadDescription.Split('/');
-                    List<int> c = Mtch.GetPars(s[0]);
-                    int pCol = c[c.Count() - 1];    // колонка - последний параметр до '/'
-                    List<int> p = Mtch.GetPars(s[1]);
-                    lng = strPars[p[0] - 1];    // длина заготовки = параметр в str; индекс - первое число после '/'
-                    docDescr = docDescr.Replace("/", "");
-                    parShft++;
+                    string descr = doc.Body.Strng(i, docCompPars[0]);
+                    double lng = 0;
+                    //-- разбор параметров LoadDescription
+                    List<int> strPars = Mtch.GetPars(descr);
+                    string docDescr = doc.LoadDescription;
+                    int parShft = 0;
+                    while (docDescr.Contains('/'))
+                    {
+                        string[] s = doc.LoadDescription.Split('/');
+                        List<int> c = Mtch.GetPars(s[0]);
+                        int pCol = c[c.Count() - 1];    // колонка - последний параметр до '/'
+                        List<int> p = Mtch.GetPars(s[1]);
+                        lng = strPars[p[0] - 1];    // длина заготовки = параметр в str; индекс - первое число после '/'
+                        docDescr = docDescr.Replace("/", "");
+                        parShft++;
+                    }
+                    if (lng == 0)
+                        lng = doc.Body.Int(i, docCompPars[1]) / 1000;    // для lng указана колонка в LoadDescription   
+                    double? price = doc.Body.Double(i, docCompPars[2] + parShft);
+                    double wgt = 0.0;   //!!! времянка -- пока вес будем брать только из Tekla
+                    string mat = "";    //!!! времянка -- материал нужно извлекать из description или описания - еще не написано!
+                    Comps.Add(new Component(descr, mat, lng, wgt, price));
                 }
-                if (lng == 0)
-                    lng = doc.Body.Int(i, docCompPars[1]) / 1000;    // для lng указана колонка в LoadDescription   
-                double? price = doc.Body.Double(i, docCompPars[2] + parShft);
-                double wgt = 0.0;   //!!! времянка -- пока вес будем брать только из Tekla
-                string mat = "";    //!!! времянка -- материал нужно извлекать из description или описания - неще не написано!
-                Comps.Add(new Component(descr, mat, lng, wgt, price));
+                catch { Msg.F("Err in setComp", doc.name); }
             }
             Log.exit();
             return Comps; 
@@ -209,6 +213,12 @@ namespace TSmatch.Components
         }
         public CompSet(string _name, Supl _supl) : this(_name, null, null, _supl, null) { }
         public CompSet(string _name, string _supplier_name) : this(_name, Supl.getSupplier(_supplier_name)) { }
+        public static CompSet setCompSet(string cs_name, string doc_name, Supl supl)
+        {
+            CompSet cs = new CompSet(cs_name, supl);
+            cs.doc = Docs.getDoc(doc_name, load: false);
+            return cs;
+        }
         /// <summary>
         /// getCompSet() - fill CompSet from price-list. With all overloader getCompSet() method,
         ///                only one without parameters loaded price-list. Others set cs.name only.

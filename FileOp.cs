@@ -3,7 +3,7 @@
  * 
  *  17.04.2016  Pavel Khrapkin, Alex Pass
  *
- *--- JOURNAL ---
+ *--- History ---
  * 2013 - 2013 - created
  * 12.3.2016 - isNamedRangeExist(name)
  * 20.3.2016 - CopyFile, Delete, Move
@@ -137,9 +137,10 @@ namespace match.FileOp
             return result;
         }
         public static bool isFileExist(string dir, string name)
-        {
-            return isFileExist(dir + "\\" + name);
-        }
+        { return isFileExist(dir + "\\" + name); }
+        public static DateTime getFileDate(string dir, string name)
+        { return File.GetLastWriteTime(Path.Combine(dir, name)); } 
+        public static DateTime getFileDate(string path) { return File.GetLastWriteTime(path); }
         public static bool isSheetExist(Excel.Workbook Wb, string name)
         {
             try { Excel.Worksheet Sh = Wb.Worksheets[name]; return true; }
@@ -310,7 +311,7 @@ namespace match.FileOp
                 File.Copy(From, To, overwrite);
                 result = true;
             }
-            catch (Exception e){ Msg.F("ERR_02.3_FILENOTCOPIED", e, From, To); }
+            catch (Exception e) { Msg.F("ERR_02.3_FILENOTCOPIED", e, From, To); }
             return result;
         }
         public static void Delete(string dir, string name)
