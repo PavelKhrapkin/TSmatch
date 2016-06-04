@@ -57,13 +57,13 @@ namespace match.Lib
         /// <param name="name">имя файла</param>
         /// <param optional OpenMode="OpenMode">режим Open. Если не существует - создать </param>
         /// <returns>Excel.Workbook</returns>
-        /// <journal>11.12.2013
+        /// <history>11.12.2013
         /// 7.1.14  - единая точка выхода из метода с finally
         /// 12.12.15 - перенес в matchLib, переписал для TSmatch
         /// 2.1.2016 - добавил параметр OpenMode
         /// 4.1.2016 - отделил dir от name
         /// 10.1.16 - bug fix, Log.set/exit balance
-        /// </journal>
+        /// </history>
         public static string dirDBs = null;             // имя каталога для Документов и базы данных
         private static Excel.Application _app = null;   // Application Excel
         /// <summary>
@@ -104,7 +104,7 @@ namespace match.Lib
         /// <param name="rw">входная строка, возможно, содержащая несколько подстрок</param>
         /// <param name="i"></param>
         /// <returns></returns>
-        /// <journal>10.1.2016 PKh разбор строки с делимитрами по подстрокам</journal>
+        /// <history>10.1.2016 PKh разбор строки с делимитрами по подстрокам</history>
         public static List<string> ToStrList(DataRow rw, int i)
         {
             List<string> strs = new List<string>();
@@ -172,8 +172,8 @@ namespace match.Lib
         /// <param name="s"></param>
         /// <param name="separator"></param>
         /// <returns></returns>
-        /// <journal> 12.12.13 A.Pass
-        /// </journal>
+        /// <history> 12.12.13 A.Pass
+        /// </history>
         public static List<int> ToIntList(string s, char separator)
         {
             string[] ar = s.Split(separator);
@@ -199,8 +199,8 @@ namespace match.Lib
         /// <param name="row"></param>
         /// <param name="col"></param>
         /// <returns></returns>
-        /// <journal> 13.12.13 A.Pass
-        /// </journal>
+        /// <history> 13.12.13 A.Pass
+        /// </history>
         public static bool isCellEmpty(Excel.Worksheet sh, int row, int col)
         {
             var value = sh.UsedRange.Cells[row, col].Value2;
@@ -211,9 +211,9 @@ namespace match.Lib
         /// </summary>
         /// <param name="inp"></param>
         /// <returns>DateTime</returns>
-        /// <journal> 02.01.14 A.Pass
+        /// <history> 02.01.14 A.Pass
         /// 15.1.16 PKh перписано с TryParse, проверено с timeTest. Ох и намаялся..((
-        /// </journal>
+        /// </history>
         public static DateTime getDateTime(dynamic inp)
         {
             if (inp == null) return new DateTime(0);
@@ -256,7 +256,7 @@ namespace match.Lib
         /// </summary>
         /// <param name="obj">входной параметр - список объектов</param>
         /// <returns></returns>
-        /// <journal>12.1.2016 PKh</journal>
+        /// <history>12.1.2016 PKh</history>
         public static string ComputeMD5(List<object> obj)
         {
             string str = "";
@@ -276,7 +276,7 @@ namespace match.Lib
         ///           по написалию знаками латинского алфавита       
         /// </summary>
         /// <returns>преобразованная текстовая строка</returns>
-        /// <journal> 21.2.2016 </journal>
+        /// <history> 21.2.2016 </history>
         ////// не получилось сделать вызов str.ToLat()
         //////public string ToLat(this string str, bool up = false)
         //////{
@@ -301,13 +301,13 @@ namespace match.Lib
     /// <summary>
     /// Lib - библиотека нестатических методов
     /// </summary>
-    /// <journal> 21.2.2016 </journal>
+    /// <history> 21.2.2016 </history>
     /// <summary>
     /// Log & Dump System
     /// </summary>
-    /// <journal> 30.12.2013 P.Khrapkin
+    /// <history> 30.12.2013 P.Khrapkin
     /// 1.1.2016 в FATAL выводим стек имен
-    /// </journal>
+    /// </history>
     public class Log
     {
         private static string _context;
@@ -339,12 +339,12 @@ namespace match.Lib
     /// TextBoxWriter - система отладки с Log в WindowsForm 
     /// из http://devnuances.com/c_sharp/kak-perenapravit-vyivod-konsoli-v-textbox-v-c-sharp/
     /// </summary>
-    /// <journal> 
+    /// <history> 
     /// 22.1.2016 - безуспешно потратил день на попытки сделать консольный вывод потокобезопасным.
     ///             В итоге вернулся к прежнему коду, когда поток Start, инициализирующий загрузку 
     ///             начальных данные из TSmatch.xlsx приходится делать в потоке WindowsForm, то есть
     ///             практически, без вывода Log. 
-    /// </journal>
+    /// </history>
     public class TextBoxStreamWriter : TextWriter
     {
         TextBox _output = null;

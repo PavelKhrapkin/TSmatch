@@ -60,11 +60,11 @@ namespace TSmatch.Components
         /// </summary>
         /// <param name="doc">price-list</param>
         /// <returns>List of Components</returns>
-        /// <journal>26.3.2016
+        /// <history>26.3.2016
         ///  3.4.2016 - setComp(doc_name) overload
         ///  8.4.2016 - remove unnecteesary fields - bug fix
         /// 14.4.2016 - field mat = Material fill 
-        ///  </journal>
+        ///  </history>
         public static List<Component> setComp(string doc_name)
         { return setComp(Docs.getDoc(doc_name)); }
         public static List<Component> setComp(Docs doc)
@@ -110,12 +110,12 @@ namespace TSmatch.Components
         /// </summary>
         /// <param name="doc"></param>
         /// <returns></returns>
-        /// <journal> 21.2.2016
+        /// <history> 21.2.2016
         /// 24.2.2016 - выделил в отдельный модуль Components
         /// 27.2.2016 - оформил внутреннюю структуру Component и встроил в getComp(doc)
         ///             для разбора, где указана длина комплектующего, используем строку
         ///             вида <col>/<№ параметра в str> 
-        /// </journal>
+        /// </history>
         public void getComp()
         {
             Log.set("getComp");
@@ -190,9 +190,9 @@ namespace TSmatch.Components
     /// <summary>
     /// CompSet - набор однотипных компонентов одного поставщика, например, прайслист Стальхолдинга "Пластины"                                                          
     /// </summary>
-    /// <journal>27.3.2016
+    /// <history>27.3.2016
     /// 14.4.2016 add List<string>mats in class fields and method getMat()
-    /// </journal>
+    /// </history>
     public class CompSet   
     {
         static List<CompSet> CompSets = new List<CompSet>();    // список всех наборов компонентов - ..
@@ -226,7 +226,7 @@ namespace TSmatch.Components
         /// <param name="name"></param>
         /// <param name="supl_name"></param>
         /// <returns></returns>
-        /// <journal>14.4.2016</journal>
+        /// <history>14.4.2016</history>
         public static CompSet getCompSet(string name, string supl_name)
         { return getCompSet(name, Supl.getSupplier(supl_name)); }
         public static CompSet getCompSet(string name, Supl supplier)
@@ -260,7 +260,7 @@ namespace TSmatch.Components
         /// <summary>
         /// getMat() - setup mats - List of materials used in Components
         /// </summary>
-        /// <journal>14.4.2016</journal>
+        /// <history>14.4.2016</history>
         /// <description>
         /// mats taken from Component.description
         /// </description>

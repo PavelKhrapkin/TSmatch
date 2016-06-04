@@ -18,8 +18,7 @@ namespace TSmatch
             Log.START("TSmatch v31.05.2016");
             TSmatch.Startup.Bootstrap.Bootsrap();
 
-            Ifc.Start();
-            Ifc.Read(@"C:\TeklaStructuresModels\2016\ЗС2\IFC\out.ifc");
+            Ifc.Read(@"F:\Pavel\match\matchCodes\С#\TSmatch\Look_around\Oleg\IfcManagerAppl\IfcManagerAppl\bin\Debug\out-2.ifc");
 
             Supplier.SupplReport();
 

@@ -57,7 +57,7 @@ namespace match.Matrix
         /// <summary>
         /// Matr(string[]) - инициализация объектного массива с первой строкой из шапки. Специально для Excel с 1!!
         /// </summary>
-        /// <journal>10.1.2016 PKh</journal>
+        /// <history>10.1.2016 PKh</history>
         /// <param name="str">массив текстовых строк - заголовкий колонок</param>
         public Matr(string[] str)
         {
@@ -185,7 +185,7 @@ namespace match.Matrix
         /// ComputeMD5() по private матрице _matr
         /// </summary>
         /// <returns>строку контрольной суммы MD5 из 32 знаков</returns>
-        /// <journal>12.1.2016 PKh</journal>
+        /// <history>12.1.2016 PKh</history>
         public string ComputeMD5()
         {
             Log.set("ComputeMD5");
@@ -208,7 +208,7 @@ namespace match.Matrix
     /// <summary>
     /// class Matrix -- взято из http://www.cyberforum.ru/csharp-beginners/thread220862.html
     /// </summary>
-    /// <journal>5.1.2016 адаптировал П.Храпкин</journal>
+    /// <history>5.1.2016 адаптировал П.Храпкин</history>
     public class Matrix<T> where T : new()
     {
         private readonly List<List<T>> _matrix;

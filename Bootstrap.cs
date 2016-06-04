@@ -1,12 +1,13 @@
 ﻿/*-----------------------------------------------------------------------------------
  * Bootstrap - provide initial start of TSmatch, when necessary - startup procedure
  * 
- *  19.4.2016  Pavel Khrapkin
+ *  2.6.2016  Pavel Khrapkin
  *
  *--- History ---
  * 25.3.2016 started 
  * 30.3.2016 - Template, Resource classes, HealthCheck() method
  * 19.4.2016 - Resource recover, when it is absent or obsolete
+ *  2.6.2016 - Add Resource IFC2X3, get this file when Tekla not active
  * ---------------------------------------------------------------------------
  *      Bootstrap Methods:
  * Bootstrap()      - check all resources and start all other modules
@@ -24,7 +25,9 @@
  */
 
 using System;
+using System.IO;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -38,8 +41,9 @@ using Msg = TSmatch.Message.Message;
 using Docs = TSmatch.Document.Document;
 using FileOp = match.FileOp.FileOp;
 using Decl = TSmatch.Declaration.Declaration;
+using Ifc = TSmatch.IFC.IFC;
 
-namespace TSmatch.Startup
+namespace TSmatch.Startup   
 {
     public class Bootstrap
     {
@@ -49,7 +53,8 @@ namespace TSmatch.Startup
         static string ComponentsDir;        // all price-lists directory
         static string ModelDir = "";        // Model Report catalog
         static string TMPdir = "";          // temporary catalog
-        static string macroDir = "";        // directory in Tecla\Environment to store button TSmatch
+        static string macroDir = "";        // directory in Tekla\Environment to store button TSmatch
+        static string IFCschemaDir = "";    // directory in Tekla Environment\common\inp for IFC schema 
         static string desktop_path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
         static string DebugDir = desktop_path;
 
@@ -66,6 +71,7 @@ namespace TSmatch.Startup
             Suppliers.Supplier.Start();     // инициируем список Поставщиков из TSmatch.xlsx/Suppliers
             Matcher.Matcher.Start();        // инициируем Правила из TSmatch.xlsx/Matcher
             Model.Model.Start();            // инициируем Журнал Моделей, известных TSmatch в TSmatch.xlsx/Models
+            Ifc.Start(IFCschemaDir);        // инициируем IFC, используя файл схемы IFC
             if (!isTeklaActive) ModelDir = Model.Model.RecentModelDir();
             Log.exit();
         }
@@ -121,6 +127,7 @@ namespace TSmatch.Startup
                 setR(Decl.R_TSMATCH_EXE,    Decl.R_TSMATCH_EXE_TYPE,    Decl.R_TSMATCH_EXE_DATE);
                 setR(Decl.R_BUTTON_CS,      Decl.R_BUTTON_CS_TYPE,      Decl.R_BUTTON_CS_DATE);
                 setR(Decl.R_BUTTON_BMP,     Decl.R_BUTTON_BMP_TYPE,     Decl.R_BUTTON_BMP_DATE);
+                setR(Decl.R_IFC2X3,         Decl.R_IFC2X3_TYPE,         Decl.R_IFC2X3_DATE);
 
                 Bootstrap.MyPath = System.IO.Directory.GetCurrentDirectory();
                 Log.exit();
@@ -136,10 +143,10 @@ namespace TSmatch.Startup
             /// </summary>
             /// <param name="name">if name == "" - check all resources</param>
             /// <returns>true if Resource in uptodate</returns>
-            /// <journal>31.3.2016
+            /// <history>31.3.2016
             /// 14.4.2016 - non static overload checkResource()
             /// 19.4.2016 - check Resource data
-            /// </journal>
+            /// </history>
             private bool checkResource()
             {
                 bool ok = false;
@@ -195,9 +202,12 @@ namespace TSmatch.Startup
             /// Recover(Decl.RESOURCE_FAULT_REASON reason) -- when found inactive or obsolete Resource - Recover it
             /// </summary>
             /// <param name="reason"></param>
+            /// <param arg1-arg-3>optional parameters for Recovery</param>
             /// <returns>true if Resource recovered successfully</returns>
-            /// <journal>19.4.2016</journal>
-            private bool Recover(Decl.RESOURCE_FAULT_REASON reason)
+            /// <history>19.4.2016
+            ///  2.6.2016 - get Environment\common\inp for IFC.exd
+            /// </history>
+            private bool Recover(Decl.RESOURCE_FAULT_REASON reason, string arg1 = "", string arg2 = "", string arg3 = "")
             {
                 bool ok = false;
                 switch (reason)
@@ -208,16 +218,29 @@ namespace TSmatch.Startup
                     case Decl.RESOURCE_FAULT_REASON.Obsolete:
                         if (checkTOCdate(desktop_path, this)) break;
                         if (checkTOCdate(desktop_path + Decl.TSMATCH_DIR, this)) break;
-
+                        // -- action plan --
                         // 1) проверим, есть ли такой файл в каталоге MyPath
                         // 2) есть ли этот файл на Рабочем столе
                         // 3) есть ли на рабочем столе папка TSmatch
                         // 4) есть ли RAR, ZIP с такоим файлом
+                        throw new NotImplementedException();
                         break;
                     case Decl.RESOURCE_FAULT_REASON.NoTekla:
                         TOCdir = Environment.GetEnvironmentVariable(Decl.WIN_TSMATCH_DIR, EnvironmentVariableTarget.User);
                         if (TOCdir == null) Msg.F("Windows Parametr TSmatch_Dir not defined");
-                        // other parameters for #template (f.e.ModelDir) get later from TSmatch.xlsx when necessary 
+                        // other parameters for #template (f.e.ModelDir) get later from TSmatch.xlsx when necessary
+                        // another Resource - IFC schema take from Tekla Environment; for inactive Tekla -- near TOCdir
+                        string[] dirs = TOCdir.Split('\\');
+                        int nDirs = dirs.Length;
+                        while (dirs[--nDirs] != "common") { dirs[nDirs] = ""; }
+                        IFCschemaDir = Path.Combine(dirs) + @"\" + Decl.ENV_INP_DIR;
+                        break;
+                    case Decl.RESOURCE_FAULT_REASON.DirRelocation:
+                        // -- action plan --
+                        //  1) проверить все ресурсы в новом месте
+                        //  2) если чего-то не хватает - перенесем из прежнего места
+                        //  3) исправим переменную TOCdir в TSmatch и в переменной Registry
+                        throw new NotImplementedException();
                         break;
                 }
                 return ok;
@@ -230,7 +253,8 @@ namespace TSmatch.Startup
             /// <param name="name">file name with the #template</param>
             /// <param name="date">Last modified date should be later than expected in Resource</param>
             /// <returns></returns>
-            /// <journal>19.4.2016</journal>
+            /// <history>19.4.2016
+            /// 4.6.2016 - #template parsing modified for IFC and other "multi-word Dir" templates</history>
             private bool checkFile(string name, DateTime date)
             {
                 Log.set("Bootstrap.checkFile(" + name + ")");
@@ -239,7 +263,7 @@ namespace TSmatch.Startup
                 {           // if name contains #template -- replace it with the real Path
                     string[] str = name.Split('\\');
                     string dir = Template.getPath(str[0]);
-                    this.name = System.IO.Path.Combine(dir, str[1]);
+                    this.name = System.IO.Path.Combine(dir, str[str.Length - 1]);
                 }
                 ok = FileOp.isFileExist(this.name) && FileOp.getFileDate(this.name) > date;
                 if (!ok) ok = Recover();
@@ -279,6 +303,13 @@ namespace TSmatch.Startup
             private static bool checkTOCdate(string path, Resource r)
             {
                 Docs toc = Docs.tocStart(path);
+                string realTOCdir = toc.Wb.FullName;
+                // read Windows Environment is much faset then setting. So, we don't write Registry without neccesity
+                string registryTOCdir = Environment.GetEnvironmentVariable(Decl.WIN_TSMATCH_DIR, EnvironmentVariableTarget.User);
+                if (registryTOCdir != realTOCdir || realTOCdir != TOCdir)
+                {
+                    Environment.SetEnvironmentVariable(Decl.WIN_TSMATCH_DIR, TOCdir, EnvironmentVariableTarget.User);
+                }
                 DateTime tocD = Lib.getDateTime(toc.Body[1, 1]);
                 bool ok = tocD >= r.date;
                 if (!ok)
@@ -300,7 +331,7 @@ namespace TSmatch.Startup
         /// </summary>
         /// <example> Docs.Start(FileDirTemplates, FileDirValues);
         /// </</example>
-        /// <journal>30.3.2016</journal>
+        /// <history>30.3.2016</history>
         public class Template
         {
             public readonly string template;       //#template, for example "#TOC"
@@ -314,9 +345,9 @@ namespace TSmatch.Startup
             /// <summary>
             /// Bootstrap.Templates.Start -- #templates Path filleng
             /// </summary>
-            /// <journal> mar-2016 created
+            /// <history> mar-2016 created
             /// 18.4.2016 -- #template Path build without Tekla
-            /// </journal>
+            /// </history>
             public static void Start()
             {
                 Log.set("Bootstrap.Template.Start");
@@ -324,15 +355,17 @@ namespace TSmatch.Startup
                 if (isTeklaActive)
                 {
                     //  already set earlier TOCdir   = TS.GetTeklaDir(TS.ModelDir.exceldesign);
-                    ModelDir = TS.GetTeklaDir(TS.ModelDir.model);
-                    macroDir = TS.GetTeklaDir(TS.ModelDir.macro);
+                    ModelDir     = TS.GetTeklaDir(TS.ModelDir.model);
+                    macroDir     = TS.GetTeklaDir(TS.ModelDir.macro);
+                    IFCschemaDir = TS.GetTeklaDir(TS.ModelDir.environment) + Decl.ENV_INP_DIR;
                 }
                 else
                 {
+                    throw new NotImplementedException();
                 }
                 ComponentsDir = TOCdir + @"\База комплектующих";
                 string[] FileDirTemplates = Decl.TOC_DIR_TEMPLATES;
-                string[] FileDirValues = { TOCdir, ModelDir, ComponentsDir, TMPdir, DebugDir, macroDir};
+                string[] FileDirValues = { TOCdir, ModelDir, ComponentsDir, TMPdir, DebugDir, macroDir, IFCschemaDir};
                 int i = 0;
                 foreach (var v in FileDirTemplates)
                     Templates.Add(new Template(FileDirTemplates[i], FileDirValues[i++]));
@@ -343,7 +376,7 @@ namespace TSmatch.Startup
             /// </summary>
             /// <param name="templ">#template</param>
             /// <returns>value of #template</returns>
-            /// <journal>19.4.2016</journal>
+            /// <history>19.4.2016</history>
             public static string getPath(string templ)
             {
                 Log.set("Bootstrap.getPath(" + templ + ")");

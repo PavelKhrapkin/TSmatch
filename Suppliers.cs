@@ -131,9 +131,9 @@ namespace TSmatch.Suppliers
         /// 1) read List<Supplier> Suppliers from Excel Document
         /// 2) output this list with the appropriate Language Form  --!! NOT READY YET
         /// </description>
-        /// <journal>25.3.2016
+        /// <history>25.3.2016
         /// 2.4.16 fill Supliers list only if CompSets.Count > 0
-        /// </journal>
+        /// </history>
         public static List<Supplier> Start()
         {
             Log.set("Supplier.Start");
@@ -172,7 +172,7 @@ namespace TSmatch.Suppliers
         /// </summary>
         /// <param name="name">name of the supplier to find</param>
         /// <returns>found supplier of null</returns>
-        /// <journal>27.3.2016</journal>
+        /// <history>27.3.2016</history>
         internal static Supplier getSupplier(string name) { return Suppliers.Find(x => x.name == name); }
         /// <summary>
         /// SupplReport() - Debugging report: output list of Supplier companies in TSmatch.xlsx/Suppliers

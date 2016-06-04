@@ -22,6 +22,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <WarningsNotAsErrors>612,618</WarningsNotAsErrors>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -33,6 +34,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="IfcEngineCS">
+      <HintPath>ifcEngineCS\IfcEngineCS\bin\Debug\IfcEngineCS.dll</HintPath>
+    </Reference>
     <Reference Include="IfcManager">
       <HintPath>..\..\Look_around\Oleg\IfcManager\IfcManager\bin\Debug\IfcManager.dll</HintPath>
     </Reference>

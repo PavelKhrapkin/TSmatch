@@ -108,7 +108,7 @@ namespace TSmatch.Model
         /// Model.Start() - начинает работу со списком моделей, инициализирует структуры данных
         /// </summary>
         /// <returns></returns>
-        /// <journal>12.2.2016<\journal>
+        /// <history>12.2.2016<\history>
         public static List<string> Start()
         {
             Log.set("Model.Start");
@@ -169,9 +169,9 @@ namespace TSmatch.Model
             if (mod.wrToFile) 
             {
                 mod.wrModel(Decl.RAW);
+                mod.wrModel(Decl.MODELINFO);
                 setGroups();            // Group Elements by Materials and Profile
                 Mgroup.setMgr();        // Additionally group Groups by Material 
-                mod.wrModel(Decl.MODELINFO);
                 setModel(mod.name);     // Load price-list for the model
                 Mtch.UseRules(mod);     // Search for Model Groups matching Components
                 mod.wrModel(Decl.REPORT);
@@ -192,10 +192,10 @@ namespace TSmatch.Model
         /// <param name="Made">version name of TS.Read - important as AttSet field list identifier</param>
         /// <param name="MD5">checksum of all Model parts</param>
         /// <returns>Model, updated in the list of models in TSmatch</returns>
-        /// <journal> 6.3.2016 PKh
+        /// <history> 6.3.2016 PKh
         /// 15.3.16 return Model instead of null in case of completely new model; wrToFile handle
         ///  5.4.16 Current Phase handling
-        /// </journal>
+        /// </history>
         static Model modelListUpdate(string name, string dir=null, string Made=null, 
                                      string MD5=null, string Phase = null, string str=null)
         {
@@ -293,11 +293,11 @@ namespace TSmatch.Model
         /// wrModel(doc_name) - write formatted data from mod to Excel file
         /// </summary>
         /// <param name="doc_name">document to be written name</param>
-        /// <journal>16.3.2016
+        /// <history>16.3.2016
         /// 18.3.2016 - write in Excel list of Rules in FORM_RULE
         /// 26.3.2016 - use rule.CompSet.name reference instead of doc.name
         ///  1.4.2016 - re-written
-        /// </journal>
+        /// </history>
         public void wrModel(string doc_name)
         {
             Log.set("Model.wrModel(" + doc_name + ")");
@@ -335,17 +335,11 @@ namespace TSmatch.Model
                     doc.saveDoc(BodySave: false, MD5: mod.MD5, EOL: Elements.Count + 1);
                     break;
                 case Decl.MODELINFO:
-                    doc.wrDoc(1, name, dir, "фаза?", date, MD5, Elements.Count);    //, strListRules);
-                    doc.wrDoc(2);
-                    foreach (var mgr in Mgroup.Mgroups)
-                    {
-                        doc.wrDoc(3, mgr.mat, mgr.volume, mgr.weight);
-                    }
-                    doc.wrDoc(4, strListRules);
+                    doc.wrDoc(1, name, dir, "фаза?", date, MD5, Elements.Count, strListRules);
                     foreach (var rule in this.Rules)
                     {
                         string supplier = rule.Supplier.name;
-                        doc.wrDoc(5, supplier, rule.CompSet.name, rule.text);
+                        doc.wrDoc(doc.forms[2].name, supplier, rule.CompSet.name, rule.text);
                     }
                     doc.isChanged = true;
                     doc.saveDoc();
@@ -458,10 +452,10 @@ namespace TSmatch.Model
         //}
         public class Mgroup : IComparable<Mgroup>
         {
-            public static List<Mgroup> Mgroups = new List<Mgroup>();
+            static List<Mgroup> Mgroups = new List<Mgroup>();
             
-            public String mat;
-            public double volume, weight;
+            String mat;
+            double volume, weight;
             List<Group> groups = new List<Group>();
 
             public Mgroup(string mat, double vol, double wgt, List<Group> grps)

@@ -52,14 +52,14 @@ namespace match.FileOp
         /// <param name="name">имя открываемого файла</param>
         /// <param name="create_ifnotexist">optional flag - создавать, если такой файл не существует</param>
         /// <returns>Excel.Workbook</returns>
-        /// <journal>11.12.2013
+        /// <history>11.12.2013
         ///  7.01.14 - единая точка выхода из метода с finally
         /// 22.12.14 - сообщение о задании Переменной среды
         /// 24.01.15 - setDirDBs выделено в отдельную подпрограмму
         ///  1.02.15 - добавлен метод Quit()
         /// 17.01.16 - реорганизовано в отдельный файл FileOp.cs, обработка [,create_ifnotexist]
         /// 27.01.16 - поправил "create_ifnotexist" моду
-        /// </journal>
+        /// </history>
         public static Excel.Workbook fileOpen(string dir, string name, bool create_ifnotexist = false)
         {
             Log.set("fileOpen");
@@ -293,7 +293,7 @@ namespace match.FileOp
         /// <param name="ToDir">destination Directory</param>
         /// <param name="overwrite">obligatory flag - true - allow overwrite</param>
         /// <returns>bool result -- true if copy was succesful</returns>
-        /// <journal>20.3.2016 PKh</journal>
+        /// <history>20.3.2016 PKh</history>
         public static bool CopyFile(string FrDir, string FileName, string ToDir, bool overwrite = false)
         {
             bool result = false;
@@ -344,7 +344,7 @@ namespace match.FileOp
     /// </summary>
     /// <param name="name">string name - имя файла - отчета *.txt</param>
     /// <param name="dt">DataTable dt - таблица с данными для отчета</param>
-    /// <journal>23.01.2015</journal>
+    /// <history>23.01.2015</history>
     public static void WrReport(string name, DataTable dt)
     {
         setDirDBs();
@@ -378,7 +378,7 @@ namespace match.FileOp
     /// </summary>
     /// <param name="name">string name - имя файла - отчета *.txt</param>
     /// <param name="dt">DataTable dt - таблица с данными для отчета</param>
-    /// <journal>23.01.2015</journal>
+    /// <history>23.01.2015</history>
     public static void WrReport(string name, DataTable dt)
     {
         setDirDBs();
@@ -412,7 +412,7 @@ namespace match.FileOp
     /// WrCSV(name) - записывает CSV файл его для дальнейшего ввод в SalesForce
     /// </summary>
     /// <param name="name">string name  - имя файла для вывода</param>
-    /// <journal>23/1/2015</journal>
+    /// <history>23/1/2015</history>
     public static void WrCSV(string name, DataTable dt)
     {
         string pathCSV = @"C:/SFconstr/";    // каталог, куда выводятся CSV файлы
@@ -457,8 +457,8 @@ namespace match.FileOp
     /// <param name="row"></param>
     /// <param name="col"></param>
     /// <returns></returns>
-    /// <journal> 13.12.13 A.Pass
-    /// </journal>
+    /// <history> 13.12.13 A.Pass
+    /// </history>
     public static bool isCellEmpty(Excel.Worksheet sh, int row, int col)
     {
         var value = sh.UsedRange.Cells[row, col].Value2;

@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------
  * TS_OpenAPI -- Interaction with Tekla Structure over Open API
  * 
- * 20.4.2016  Pavel Khrapkin, Alex Bobtsov
+ * 3.6.2016  Pavel Khrapkin, Alex Bobtsov
  *  
  *----- History ------------------------------------------
  3.1.2016 АБ получаем длину элемента
@@ -17,6 +17,7 @@
  *  6.3.2016 PKh - isTeklaActive() metod included
  * 10.3.2016 PKh - AttSet Compararer implemented
  * 20.4.2016 PKh - GetTeklaDir() rewritten
+ *  3.6.2016 PKh - GetTeklaDir(Environment) add
  * -------------------------------------------
  * public Structure AttSet - set of model component attribuyes, extracted from Tekla by method Read
  *                           AttSet is Comparable, means Sort is applicable, and 
@@ -30,6 +31,7 @@
  */
 
 using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Diagnostics;
 
@@ -46,7 +48,7 @@ namespace TSmatch.Tekla
     class Tekla
     {
         const string MYNAME = "Tekla.Read v1.5";
-        public enum ModelDir { exceldesign, model, macro};
+        public enum ModelDir { exceldesign, model, macro, environment };
 
         public struct AttSet : IComparable<AttSet>
         {
@@ -181,6 +183,12 @@ namespace TSmatch.Tekla
                     TeklaStructuresSettings.GetAdvancedOption("XS_MACRO_DIRECTORY", ref TSdir);
                     string[] str = TSdir.Split(';');
                     TSdir = str[0] + @"\modeling";     // this Split is to ignore other, than common TS Enviroments
+                    break;
+                case ModelDir.environment:
+                    const string env = "environments";
+                    TSdir = GetTeklaDir(ModelDir.exceldesign);
+                    int lastEnv = TSdir.ToLower().LastIndexOf(env) + env.Length;
+                    TSdir = TSdir.Remove(lastEnv);
                     break;
             }
             //////////            var ff = TeklaStructuresInfo.GetCurrentProgramVersion();

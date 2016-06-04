@@ -9,7 +9,7 @@ namespace TSmatch.Declaration
     /// <summary>
     /// Declaration -- определения глобальных констант
     /// </summary>
-    /// <journal> 20.12.2013
+    /// <history> 20.12.2013
     /// 7.1.2014    - добавлена секция констант Шаблонов
     /// 23.1.14     - переход к DataTable
     /// 12.12.15    - адаптация к TSmatch
@@ -27,41 +27,50 @@ namespace TSmatch.Declaration
     /// 25.3.16     - Sullier List attributes
     /// 30.3.16     - Resource constants created
     ///  9.4.16     - TSmatchINFO/Report section
-    /// 19.9.16     - Resources chage
-    /// </journal>
+    /// 19.4.16     - Resources chage
+    ///  2.6.16     - Resource IFC2X3.exp add
+    /// </history>
     class Declaration
     {
-        //------------ GENERAL PURPASE CONSTANTS -----------------
-        public const string ENGLISH = "en-US";
-        public const string RUSSIAN = "ru-RU";
-
+        #region ----------- GENERAL PURPASE CONSTANTS -----------------
         public const char STR_DELIMITER = ';';  // знак - резделитель в списке в строках
 
         public const string TSMATCH = "TSmatch";                // general Application Name
         public const string WIN_TSMATCH_DIR = TSMATCH + "_Dir"; // Windows Path Paramentr
         public const string F_MATCH = TSMATCH + ".xlsx";        // central dispatch file
         public const string TSMATCH_EXE = TSMATCH + ".exe";     // Application exe file       
-        public const string BUTTON_DIR  = @"macros\modeling";
         public const string BUTTON_CS   = "TSmatch.cs";
         public const string BUTTON_BMP  = "TSmatch.BMP";
+        public const string ENV_INP_DIR = @"\common\inp";       // IFC schema stored in Tekla Environment
+        public const string IFC_SCHEMA = "IFC2X3.exp";
         public const string TSMATCH_ZIP = "Tsmatch.zip";
-        public const string DIR_MATCH = @"C:\ProgramData\Tekla Structures\21.1\Environments\common\exceldesign";
         public const string TSMATCH_DIR = "TSmatch";
         public const string TSMATCH_TYPE = "TSmatch";
 
-        //--------- Sheets of TSmatch.xlsm --------------
+        //----------- Language Adapter strings sets for ru-RU and en-US ----------------
+        public const string ENGLISH = "en-US";
+        public const string RUSSIAN = "ru-RU";
+
+        public const string MESSAGES = "Messages";      // Multilanguage Message doc in TSmatch
+        public const int MSG_ID = 1;
+        public const int MSG_TXT_RU = 2;
+        public const int MSG_TXT_EN = 3;
+        #endregion
+
+        #region ----------- Sheets of TSmatch.xlsm --------------
         public const string DOC_TOC = "TOC";    // Table Of Content - Лист - таблица-содержание всех Документов в TSmatch
         public const string SUPPLIERS = "Suppliers";    //Лист общей информации по Поставщикам
         public const string CONST = "Constants";
         public const string FORMS = "Forms";
         public const string LOG = "Log";
+        #endregion
 
-        //------------ RESOURCE CONSTANTS ----------------
+        #region ----------- RESOURCE CONSTANTS ----------------
         // Resources - are various files, necessary for TSmatch operation in PC.
         // Constants hereunder descripe the Resource name, type and date to be checked as "Actual"
         //!! we should set here (EXPECT DATE) time earlier, than is written in [1,1] of the Document
         public enum RESOURCE_TYPES { Document, File, TeklaFile, Directory, Application };
-        public enum RESOURCE_FAULT_REASON { NoFile, Obsolete, NoTekla };
+        public enum RESOURCE_FAULT_REASON { NoFile, Obsolete, NoTekla, DirRelocation };
 
         public const string R_TEKLA = "Tekla";              //Application Tekla Structure is up an running
         public static readonly string R_TEKLA_TYPE = RESOURCE_TYPES.Application.ToString();
@@ -81,7 +90,7 @@ namespace TSmatch.Declaration
 
         public const string R_MSG = MESSAGES;               //TSmatch.xlsx/Messages - Сообщения       
         public const string R_MSG_TYPE = TEMPL_TOC;
-        public const string R_MSG_DATE = "19.4.2016 22:40";
+        public const string R_MSG_DATE = "2.6.2016 22:40";
 
         public const string R_RULES = RULES;               //TSmatch.xlsx/Rules - Правила       
         public const string R_RULES_TYPE = TEMPL_TOC;
@@ -107,7 +116,12 @@ namespace TSmatch.Declaration
         public static readonly string R_BUTTON_BMP_TYPE = RESOURCE_TYPES.TeklaFile.ToString();
         public const string R_BUTTON_BMP_DATE = "1.3.2016";
 
-        //-----------константы таблицы Документов -----------------
+        public const string R_IFC2X3 = TEMPL_ENVIRONMENTS + @"\" + ENV_INP_DIR + @"\" + IFC_SCHEMA;           //IFC schema
+        public static readonly string R_IFC2X3_TYPE = RESOURCE_TYPES.TeklaFile.ToString();
+        public const string R_IFC2X3_DATE = "1.1.2015";
+        #endregion
+
+        #region ----------- константы таблицы Документов -----------------
         public const int TOC_I0 = 4;    // строка TOC в таблице TOC
 
         public const int DOC_TIME = 1; // дата и время последнего изменения Документа
@@ -134,44 +148,35 @@ namespace TSmatch.Declaration
         public const int DOC_STRUCTURE_DESCRIPTION = 22;    // строка - описание структуры документа
         public const int DOC_MD5 = 28; // Check Sum MD5
 
-        //-----------константы моды работы с Документом -----------------
+        // -----------константы моды работы с Документом -----------------
         public enum DOC_RW_TYPE { RW, RO, CREATEOROPEN, N1, N2, N };
         public const int READWRITE = 0;   // Мода Документа - открыть на чтение и запись -- по умолчанию
-        public const int READONLY = 3;   // Мода Документа - только чтение
-        public const int APPEND = 11;   // Мода Документа - дописывать
+        public const int READONLY  = 3;   // Мода Документа - только чтение
+        public const int APPEND    = 11;   // Мода Документа - дописывать
         public const int CREATEOROPEN = 21;   // Мода Документа - если не найден - создать
+        #endregion
 
-        //----------- # шаблоны каталогов документов (поле doc.FileDirectory) --------------------
+        #region ----------- # шаблоны каталогов документов (поле doc.FileDirectory) --------------------
         public static readonly string[] TOC_DIR_TEMPLATES
-            = { TEMPL_TOC, TEMPL_MODEL, TEMPL_COMP, TEMPL_TMP, TEMPL_DEBUG, TEMPL_MACROS};
+            = { TEMPL_TOC, TEMPL_MODEL, TEMPL_COMP, TEMPL_TMP, TEMPL_DEBUG, TEMPL_MACROS, TEMPL_ENVIRONMENTS};
         public const string TEMPL_TOC   = "#TOC";           //каталог TSmatch.xlsx 
         public const string TEMPL_MODEL = "#Model";         //каталоги Моделей
         public const string TEMPL_COMP  = "#Components";    //каталог файлов комплектующих - базы поставщиков
         public const string TEMPL_TMP   = "#TMP";           //каталог временного файла
         public const string TEMPL_DEBUG = "#DEBUG";         //каталог для собственной отладки
         public const string TEMPL_MACROS = "#Macros";       //каталог Tekla Macros - тут файлы для кнопки TSmatch
+        public const string TEMPL_ENVIRONMENTS = "#Envir";  //каталог Tekla Environments
+        #endregion
 
-        //----------- ТИПЫ ШТАМПОВ / ТИПЫ ДОКУМЕНТОВ ----------------------
+        #region ----------- ТИПЫ ШТАМПОВ / ТИПЫ ДОКУМЕНТОВ ----------------------
         ////public const string STAMP_TYPE_EQ = "=";  // точное соответствие
         ////public const string STAMP_TYPE_INC = "I"; // Includes
         public const string DOC_TYPE_N = "N";   // New Doc без Штампа или No Stamp
-        ////public const string DOC_TYPE_N1 = "N1"; // New Doc, создавать новый Лист в самой левой позиции, если его нет; для Summary
-        ////public const string STAMP_TYPE_N2 = "N2"; // New Doc, если нет, создавать в Листе2
+                                                //public const string DOC_TYPE_N1 = "N1"; // New Doc, создавать новый Лист в самой левой позиции, если его нет; для Summary
+                                                //public const string STAMP_TYPE_N2 = "N2"; // New Doc, если нет, создавать в Листе2
+        #endregion
 
-        //-----------константы таблицы Процессов -----------------
-        public const string PROCESS = "Process";
-
-        public const int STEP_TIME = 0;    // Дата и время выполнения Шага. Если тут пусто или "/" - это строка-комментарий
-        public const int PROC_NAME = 1;    // Имя Процесса. В сроках Шага тут пусто
-        public const int STEP_PREVSTEP = 2;    // Предшествующий Шаг. Шаг этой строки выполняем только
-                                               //..если предыдущий Шаг выполнен или тут пусто
-        public const int STEP_NAME = 3;    // Имя Шага
-        public const int STEP_DONE = 4;    // Шаг выполнен "1", иначе - выполняем
-        public const int STEP_PARAM = 5;    // Параметры Шага
-        public const int STEP_INPDOCS = 6;    // Входные Документы Шага
-        public const int STEP_OUTDOCS = 7;    // Выходные Документы Шага
-
-        //------------ константы журнала моделей -------------------
+        #region ------------ константы журнала моделей -------------------
         public const string MODELS = "Models";
 
         public const int MODEL_DATE = 1;    // Дата и время записи в Журнал моделей
@@ -181,8 +186,9 @@ namespace TSmatch.Declaration
         public const int MODEL_PHASE = 5;   // Текущая фаза проекта
         public const int MODEL_MD5  = 6;    // Контрольная сумма - MD5
         public const int MODEL_R_LIST = 7;  // колонка - список номеров строк Правил
+        #endregion
 
-        //------------ константы правил Matching_Rules -------------------
+        #region ------------ константы правил Matching_Rules -------------------
         public const string RULES = "Rules";
 
         public const int RULE_DATE = 1;    // Дата и время записи Правила в TSmatch
@@ -195,8 +201,9 @@ namespace TSmatch.Declaration
         public const string ATT_DELIM = @"(${must}|,|=| |\t|\*|x|X|х|Х)";  //делимитры в Правилах
         public const string ATT_MUST  = @"(?<must>(&'.+')|(&"".+"")|(&«.+»)|(&“.+”)"; // &обязательно
         public const string ATT_PARAM = @"(?<param>(\$|p|р|п|P|Р|П)\w*\d)"; //параметры в Правилах
+        #endregion
 
-        //------------ Файл TSmatchINFO.xlsx - записывается в каталог модели ----------
+        #region ------------ Файл TSmatchINFO.xlsx - записывается в каталог модели ----------
         public const string MODELINFO = "ModelINFO";    //Лист общей информации по модели
         public const string RAW = "Raw";                //Лист необработанных данных по компонентам модели
         public const string MODEL_SUPPLIERS = "ModSuppliers";   // Лист поставщиков для проекта / модели
@@ -205,8 +212,9 @@ namespace TSmatch.Declaration
         public const string TMP_MODELINFO = "TMP_" + MODELINFO;
         public const string TMP_RAW       = "TMP_" + RAW;
         public const string TMP_REPORT    = "TMP_" + REPORT;
+        #endregion
 
-        //------------ TSmatchINFO.xlsx/Report - Отчет по результатам подбора сортамента ----------
+        #region ------------ TSmatchINFO.xlsx/Report - Отчет по результатам подбора сортамента ----------
         public const int REPORT_N   = 1;     // Report' line Numer
         public const int REPORT_MAT = 2;     // Group Material
         public const int REPORT_PRF = 3;     // Group Profile
@@ -218,9 +226,9 @@ namespace TSmatch.Declaration
         public const int REPORT_SUPL_LN_N = 9;   // Supplied component' line number in price-list
         public const int REPORT_SUPL_WGT  = 10;  // Supplied component' total weight
         public const int REPORT_SUPL_PRICE = 11; // Supplied component' total price
+        #endregion
 
-        //------------ TSmatchINFO.xlsx/Suppliers - Поставщики сортамента ----------
-
+        #region ------------ TSmatchINFO.xlsx/Suppliers - Поставщики сортамента ----------
         public const int SUPL_DATE = 1;     // Date when Supplier record  was updated in TSmatch.xlsx
         public const int SUPL_NAME = 2;     // Supplier' name
         public const int SUPL_URL  = 3;     // Supplier' hyperlink
@@ -230,18 +238,29 @@ namespace TSmatch.Declaration
         public const int SUPL_STREET = 7;   // Supplier' Street
         public const int SUPL_TEL = 8;      // Supplier' Telephone
         public const int SUPL_LISTCOUNT = 9;// Supplier' price-list/worksheets/Documents count in TSmatch.xlsx
+        #endregion
 
-        //-----------константы Шаблонов -----------------
+        #region -----------константы Шаблонов - not in use -----------------
+
         public const string PTRN_HDR = "A1";     // заголовки колонок   
         public const string PTRN_WIDTH = "A3";     // ширина колонок
         public const int PTRN_FETCH = 6;    // Fetch запрос
 
         public const string PTRN_COPYHDR = "CopyHdr"; // указание копировать заголовок из Шаблона
 
-        //----------- Language Adaptel strings sets for ru-RU and en-US ----------------
-        public const string MESSAGES = "Messages";      // Multilanguage Message doc in TSmatch
-        public const int MSG_ID = 1;
-        public const int MSG_TXT_RU = 2;
-        public const int MSG_TXT_EN = 3;
+        // -----------константы таблицы Процессов -----------------
+        public const string PROCESS = "Process";
+
+        public const int STEP_TIME = 0;    // Дата и время выполнения Шага. Если тут пусто или "/" - это строка-комментарий
+        public const int PROC_NAME = 1;    // Имя Процесса. В сроках Шага тут пусто
+        public const int STEP_PREVSTEP = 2;    // Предшествующий Шаг. Шаг этой строки выполняем только
+                                               //..если предыдущий Шаг выполнен или тут пусто
+        public const int STEP_NAME = 3;    // Имя Шага
+        public const int STEP_DONE = 4;    // Шаг выполнен "1", иначе - выполняем
+        public const int STEP_PARAM = 5;    // Параметры Шага
+        public const int STEP_INPDOCS = 6;    // Входные Документы Шага
+        public const int STEP_OUTDOCS = 7;    // Выходные Документы Шага
+        #endregion
+
     }
 }

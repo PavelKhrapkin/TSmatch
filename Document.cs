@@ -1,7 +1,7 @@
 ﻿/*-------------------------------------------------------------------------------------------------------
  * Document -- works with all Documents in the system basing on TOC - Table Of Content
  * 
- *  27.4.2016  Pavel Khrapkin, Alex Pass, Alex Bobtsov
+ *   2.6.2016  Pavel Khrapkin, Alex Pass, Alex Bobtsov
  *
  *--------- History ----------------  
  * 2013-2015 заложена система управления документами на основе TOC и Штампов
@@ -20,6 +20,7 @@
  *  4.4.16 - wrDoc with account of previous output form last_name allow fast multy-string output
  * 19.4.16 - tocStart extracted from Start for initial TOC open; write TOCdir in Win Registry if OK
  * 27.4.16 - getDoc(.. [bool load=true]) - not real document load, when load fag = false
+ *  2.5.16 - remove work with Registry Environment value from TOCstart to Bootstrap for DirRelocation Recovery if need
  * -------------------------------------------
  *      METHODS:
  * Start()              - Load from directory TOCdir of TOC all known Document attributes, prepare everithing
@@ -54,7 +55,6 @@ using Lib = match.Lib.MatchLib;
 using Log = match.Lib.Log;
 using Msg = TSmatch.Message.Message;
 using Templ = TSmatch.Startup.Bootstrap.Template;
-//using Boot = TSmatch.Startup.Bootstrap;
 
 namespace TSmatch.Document
 {
@@ -62,6 +62,7 @@ namespace TSmatch.Document
     {
         private static Dictionary<string, Document> Documents = new Dictionary<string, Document>();   //коллекция Документов
 
+        #region Document Declaration area
         public string name;
         private bool isOpen = false;
         public bool isChanged = false;
@@ -110,18 +111,20 @@ namespace TSmatch.Document
             creationDate = d.creationDate;
             forms = d.forms;
         }
+        #endregion
 
+        #region Start area
         /// <summary>
         /// Start(TOCdir) - prepare further works with the Documents; setup data from TOC
         /// </summary>
         /// <param name="FileDir">Directory, Path to TSmatch.xlsx</param>
-        /// <journal> 22.1.2016
+        /// <history> 22.1.2016
         /// 12.3.2016 - multilanguage Heders support
         /// 14.3.2016 - Form class support
         /// 19.3.2016 - use EOL method
         /// 30.3.2016 - Start(TOCdir) and getDoc with #template interaction with Bootstrap
         /// 17.4.2016 - tocStart extracted from Start for initial TOC open
-        /// </journal>
+        /// </history>
         public static void Start(string TOCdir)
         {
             Log.set("Document.Start(" + TOCdir + ")");
@@ -164,9 +167,10 @@ namespace TSmatch.Document
         /// </summary>
         /// <param name="TOCdir"></param>
         /// <returns>return TOC document</returns>
-        /// <journal>18.4.2016
+        /// <history>18.4.2016
         /// 19.4.2016 - set Windows Environment Path paramenters
-        /// </journal>
+        ///  2.5.2016 - when TOCdir differ from Registry Environment value -- start DirRelocation Recovery
+        /// </history>
         public static Document tocStart(string TOCdir)
         {
             Log.set("tocStart");
@@ -178,12 +182,11 @@ namespace TSmatch.Document
             toc.EOL(Decl.TOC_I0);
             Form.setWb(toc.Wb, toc.Body);
             toc.isOpen = true;
-            // read Windows Environment is much faset then setting. So, we don't read Registry without neccesity
-            string tmp = Environment.GetEnvironmentVariable(Decl.WIN_TSMATCH_DIR, EnvironmentVariableTarget.User);
-            if(tmp != TOCdir) Environment.SetEnvironmentVariable(Decl.WIN_TSMATCH_DIR, TOCdir, EnvironmentVariableTarget.User);
             Log.exit();
             return toc;
         }
+        #endregion
+
         /// <summary>
         /// getDoc(name) - get Document name - when nor read yet - from the file. If necessary - Create new Sheet
         /// </summary>
@@ -191,7 +194,7 @@ namespace TSmatch.Document
         /// <param name="fatal">FATAL if this flag = true; else - return null if Document doesnt exists</param>
         /// <returns>Document or null</returns>
         /// <returns>Document</returns>
-        /// <journal> 25.12.2013 отлажено
+        /// <history> 25.12.2013 отлажено
         /// 25.12.2013 - чтение из файла, формирование Range Body
         /// 28.12.13 - теперь doc.Sheet и doc.Wb храним в структуре Документа
         /// 5.4.14  - инициализируем docDic, то есть подготавливаем набор данных для Fetch
@@ -202,7 +205,7 @@ namespace TSmatch.Document
         ///  5.4.16 - bug fix - SheetReset for "N" Document
         /// 19.4.16 - use Templ.getPath in getDoc()
         /// 27.4.16 - optional flag load - if false -> don't load contents from the file
-        /// </journal>
+        /// </history>
         public static Document getDoc(string name, bool fatal = true, bool load = true)
         {
             Log.set("getDoc(" + name + ")");
@@ -238,12 +241,12 @@ namespace TSmatch.Document
         /// Reset() - "Reset" of the Document. All contents of hes Excel Sheet erased, write Header form
         /// Reset("Now") - write DataTime.Now string in Cell [1,1]
         /// </summary>
-        /// <journal>9.1.2014
+        /// <history>9.1.2014
         /// 17.1.16 - полностью переписано с записью Шапки
         /// 16.3.16 - header name get from doc.forms[0]
         /// 26.3.16 - Reset("Now")
         /// 27.3.16 - bug fixed. Issue was: Reset named as a doc.name instead SheetN
-        /// </journal>
+        /// </history>
         public void Reset(string str = "")
         {
             Log.set("Reset(" + this.name + ")");
@@ -267,11 +270,11 @@ namespace TSmatch.Document
         /// </summary>
         /// <param name="str">form name; "str_F" format is also accounted</param>
         /// <param name="obg">data array to be written</param>
-        /// <journal>16.3.2016
+        /// <history>16.3.2016
         /// 26.3.2016 - output HDR_ form with time.Now in [1,1]
         ///  3.4.2016 - multiple line output support with last_name
         /// 13.4.2016 - Internal error message, when form not found
-        /// </journal>
+        /// </history>
         public void wrDoc(string str, params object[] obj)
         {
             Log.set("wrDoc(" + str + ", obj[])");
@@ -333,7 +336,7 @@ namespace TSmatch.Document
         /// EOLstr(str) - return parsed string str into Int32, or return EOLinTOC, when str is EOL
         /// </summary>
         /// <returns>Int32 or EOLinTOC</returns>
-        /// <journal>20.3.2016</journal>
+        /// <history>20.3.2016</history>
         int EOLstr(string str)
         {
             Log.set("Document.Int(" + str + ")");
@@ -350,7 +353,7 @@ namespace TSmatch.Document
         /// EOL(int tocRow) - setup this Document int numbers EndEOLinTOC, i0, and il - main table borders
         /// </summary>
         /// <param name="tocRow">line number of this Document in TOC</param>
-        /// <journal>19.3.2016</journal>
+        /// <history>19.3.2016</history>
         void EOL(int tocRow)
         {
             Document toc = (name == Decl.DOC_TOC) ? this : getDoc(Decl.DOC_TOC);
@@ -381,10 +384,10 @@ namespace TSmatch.Document
         /// <param name="name"></param>
         /// <param name="wb"></param>
         /// <returns>Document   - при необходимости читает name из файла в match и сливает его с данными в wb</returns>
-        /// <journal> Не дописано
+        /// <history> Не дописано
         /// 15.12.2013 - взаимодействие с getDoc(name)
         /// 7.1.13 - выделяем в Документе Body и пятку посредством splitBodySummary
-        /// </journal>
+        /// </history>
         public static Document loadDoc(string name, Excel.Workbook wb)
         {
             Log.set("loadDoc(" + name + ", " + wb.Name + ")");
@@ -431,11 +434,11 @@ namespace TSmatch.Document
         /// <param name="name">имя документа</param>
         /// <param name="BodySave>true - doc.Body нужно сохранить, false - уже в Excel</param>
         /// <param name="MD5">MD5 документа. Если BodySave = false - обязательно</param>
-        /// <journal>10.1.2016
+        /// <history>10.1.2016
         /// 18.1.16 - аккуратная обработка BodySave=false и MD5
         /// 20.1.16 - fix bug: not write EOLinTOC for TSmatch type Documents
         /// 1.04.16 - overlay saveDoc(..)
-        /// </journal>
+        /// </history>
         public static void saveDoc(Document doc, bool BodySave = true, string MD5 = "",int EOL = 0)
         {
             Log.set("saveDoc(\"" + doc.name + "\")");
@@ -504,10 +507,10 @@ namespace TSmatch.Document
         /// </summary>
         /// <param name="wb"></param>
         /// <returns>имя распознанного документа или null, если Документ не распознан</returns>
-        /// <journal> 14.12.2013
+        /// <history> 14.12.2013
         /// 16.12.13 (ПХ) переписано распознавание с учетом if( is_wbSF(wb) )
         /// 18.01.14 (ПХ) с использование Matrix
-        /// </journal>
+        /// </history>
         public static string recognizeDoc(Excel.Workbook wb)
         {
             Log.set("recognizeDoc(wb)");
@@ -538,8 +541,8 @@ namespace TSmatch.Document
         /// Если fetch_rqst не указан - для всех Запросов Документа.
         /// </summary>
         /// <param name="fetch_rqst"></param>
-        /// <journal>11.1.2014 PKh
-        /// 15.1.2014 - дописан FetchInit() - просмотр всех Fetch Документа</journal>
+        /// <history>11.1.2014 PKh
+        /// 15.1.2014 - дописан FetchInit() - просмотр всех Fetch Документа</history>
         public void FetchInit()
         {
             Log.set("FetchInit");
@@ -601,7 +604,7 @@ namespace TSmatch.Document
         /// <param name="fetch_rqst"></param>
         /// <param name="x"></param>
         /// <returns></returns>
-        /// <journal>5.4.2014</journal>
+        /// <history>5.4.2014</history>
         public string Fetch(string fetch_rqst, string x)
         {
             Log.set("Fetch");
@@ -620,9 +623,9 @@ namespace TSmatch.Document
         /// <summary>
         /// Класс Stamp, описывающий все штампы документа
         /// </summary>
-        /// <journal> дек 2013
+        /// <history> дек 2013
         /// 12.1.2014 - работа с матрицей в памяти, а не с Range в Excel
-        /// </journal>
+        /// </history>
         private class Stamp
         {
             public List<OneStamp> stamps = new List<OneStamp>();
@@ -631,9 +634,9 @@ namespace TSmatch.Document
             /// </summary>
             /// <param name="i0"></param>
             /// <param name="i1"></param>
-            /// <journal>
+            /// <history>
             /// 18.1.2014 (ПХ) в класс Штамп и в конструктор добавлен _parentDoc - Документ Штампа
-            /// </journal>
+            /// </history>
             public Stamp(int i0, int i1)
             {
                 Document doc_toc = getDoc(Decl.DOC_TOC);
@@ -649,11 +652,11 @@ namespace TSmatch.Document
             /// </summary>
             /// <param name="doc">проверяемый Документ</param>
             /// <returns>true, если результат проверки положительный, иначе false</returns>
-            /// <journal> 12.12.13
+            /// <history> 12.12.13
             /// 16.12.13 (ПХ) перенес в класс Stamp и переписал
             /// 13.1.2014 - переписано
             /// 18.1.14 (ПХ) - переписано еще раз: проверяем mtr
-            /// </journal>
+            /// </history>
             public bool Check(Mtr mtr)
             {             
                 if (mtr == null) return false;
@@ -664,10 +667,10 @@ namespace TSmatch.Document
             /// Trace(Stamp)    - вывод в Log-файл данных по Штампам Документа
             /// </summary>
             /// <param name="st"></param>
-            /// <journal> 26.12.13 -- не дописано -- нужно rnd не только doc.Body, но для SF doc.Summary
+            /// <history> 26.12.13 -- не дописано -- нужно rnd не только doc.Body, но для SF doc.Summary
             /// 18.1.14 (ПХ) отладка с Matrix
             /// 12.12.15 - для TSmatch не нужно обрабатывать документы типа SFDC
-            /// </journal>
+            /// </history>
             public string Trace(Document doc)
             {
                 Mtr rng = doc.Body;
@@ -699,10 +702,10 @@ namespace TSmatch.Document
             /// примеры: {[1, "1, 6"]} --> [1,1] или [1,6]
             ///  .. {["4,1", "2,3"]} --> [4,2]/[4,3]/[1,2]/[1,3]
             /// </example>
-            /// <journal> 12.12.2013 (AP)
+            /// <history> 12.12.2013 (AP)
             /// 16.12.13 (ПХ) добавлен параметр isSF - добавляется в структуру Штампа
             /// 12.1.14 - работаем с TOCmatch с памяти -- Matrix
-            /// </journal>
+            /// </history>
             public OneStamp(Document doc, int rowNumber)
             {
                 signature = doc.Body.Strng(rowNumber, Decl.DOC_STMPTXT);
@@ -718,7 +721,7 @@ namespace TSmatch.Document
             /// </summary>
             /// <param name="str">что извлекаем: "signature" или "type" или "position"</param>
             /// <returns>string</returns>
-            /// <journal> 18.1.2014 (ПХ)</journal>
+            /// <history> 18.1.2014 (ПХ)</history>
             public string get(string str = "position")
             {
                 string v;
@@ -744,11 +747,11 @@ namespace TSmatch.Document
             /// </summary>
             /// <param name="mtr"></param>
             /// <returns>bool: true если проверка Штампа дает совпадение сигнатуры</returns>
-            /// <journal> 12.12.2013
+            /// <history> 12.12.2013
             /// 25.12.13 (ПХ) ToString вместо Value2 для проверяемой ячейки
             /// 13.1.14 - работа с матрицами
             /// 18.1.14 - (ПХ) рефакторинг. Теперь сверяем strToCheck в mtr и SigInStamp в Штампе
-            /// </journal>
+            /// </history>
             public bool Check(Mtr mtr)
             {
                 string sigInStamp = signature.ToLower();
@@ -766,7 +769,7 @@ namespace TSmatch.Document
         /// <summary>
         /// Form - Document's Format description - Document sub-class. Forms get from TSmatch.xlsx/Forms
         /// </summary>
-        /// <journal>16.3.2016</journal>
+        /// <history>16.3.2016</history>
         public class Form
         {
             private static Excel.Workbook Wb;
@@ -828,7 +831,7 @@ namespace TSmatch.Document
         /// <summary>
         /// BodyForm - class BodyForm used for output some (not all!) fields of Body into Excel
         /// </summary>
-        /// <journal>20.3.2016</journal>
+        /// <history>20.3.2016</history>
         ////public class BodyForm
         ////{
         ////    public Form form;

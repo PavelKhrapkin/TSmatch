@@ -121,10 +121,10 @@ namespace TSmatch.Matcher
         /// <summary>
         /// Start - initiate Rules - text lines, which describe match process
         /// </summary>
-        /// <journal> Jan-2016
+        /// <history> Jan-2016
         /// 19.2.16 - переписано обращение к Documents.Start с инициализацией массивов FileDir
         /// 30.3.16 - Start other modules removed to Bootstrap
-        /// </journal>
+        /// </history>
         public static void Start()
         {
             Log.set("Matcher.Start");
@@ -137,10 +137,10 @@ namespace TSmatch.Matcher
         /// UserRules(mod) - Apply Model mod Rules to create TSmatchINFO.xlsx/Report
         /// </summary>
         /// <param name="mod">Model to de handled</param>
-        /// <journal>10.3.2016
+        /// <history>10.3.2016
         /// 15.3.2016 - get Rule list (Rules) from the Model mod
         ///  3.4.2016 - adoption to the updated CompSet class
-        /// </journal>
+        /// </history>
         public static void UseRules(Mod mod)
         {
             Log.set("UseRules(" + mod.name + ")");
@@ -196,7 +196,7 @@ namespace TSmatch.Matcher
         /// <param name="mat">Material</param>
         /// <param name="prf">Profile</param>
         /// <returns>true, if Rule after Parcing mentioned mat and prf</returns>
-        /// <journal>9.4.2016</journal>
+        /// <history>9.4.2016</history>
         static bool isRuleApplicable(string mat, string prf)
         { return Lib.IContains(RuleMatList, mat) && Lib.IContains(RulePrfList, prf); }
         /// <summary>
@@ -248,7 +248,7 @@ namespace TSmatch.Matcher
         ///              (избыток, запас, отходы, Redundency, Excess, Waste) по русски или 
         ///              по английски заглавными или строчными буквами.
         /// </описание>
-        /// <journal> декабрь 2015 - январь 2016
+        /// <history> декабрь 2015 - январь 2016
         /// 19.2.16 - #параметры
         /// 29.2.16 - *параметры
         static List<string> RuleMatList = new List<string>();
@@ -262,7 +262,7 @@ namespace TSmatch.Matcher
         {
             Log.set("RuleParser(\"" + rule + "\")");
             const string rM = "(m|м).*:", rP = "(п|p).*:",           // Материал и Профиль
-                rVal = @"#\d+", rWild = @"\*.*?\d+",                  // #- и *- параметры 
+                rVal = @"#\d+", rWild = @"\*.*?\d+",                 // #- и *- параметры 
                 rDec = @"(\d+)|(\d.\d*)|(\d,\d)",                    // десятичные числа с точкой или запятой
                 rRedundancy = @"(изб|зaп|oтx|red|was|excess).*\d+%"; //Redundency|Waste|Excess|Отходы|Запас
             Regex regM = new Regex(rM, RegexOptions.IgnoreCase);
@@ -321,7 +321,7 @@ namespace TSmatch.Matcher
         /// <param name="lst">разбираемые параметры раздела</param>
         /// <param name="n">счетчик параметров</param>
         /// <returns>возвращает строку str после разбора - она должна быть пустой</returns>
-        /// <journal> 12.2.2016 PKh <\journal>
+        /// <history> 12.2.2016 PKh <\history>
         static string attParse(string str, Regex reg, List<string> lst, ref int n)
         {
             if (reg != null) str = reg.Replace(str, "");
@@ -363,10 +363,10 @@ namespace TSmatch.Matcher
         /// <param name="mat">Material of nstr line in Groups</param>
         /// <param name="prf">Profile of nstr line in Groups</param>
         /// <returns></returns>
-        /// <journal> дек 2015 - фев 2016 - preliminary releses
+        /// <history> дек 2015 - фев 2016 - preliminary releses
         /// 1.3.16 - handle *parameters
         /// 3.4.16 - adoption to CompSet and Componenmt classes
-        /// </journal>
+        /// </history>
         public static bool SearchInComp(CmpSet cs, int nstr, string mat, string prf)
         {
             Log.set("SearchInComp");

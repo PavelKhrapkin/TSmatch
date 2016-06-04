@@ -45,8 +45,8 @@ namespace TSmatch.Message
         /// <summary>
         /// Start() - Multilanguage Message system initialize from TSmatch.xlsx/Messages
         /// </summary>
-        /// <journal> 7.3.2016 P.Khrapkin
-        /// 12.3.16 - bootstrap error handling</journal>
+        /// <history> 7.3.2016 P.Khrapkin
+        /// 12.3.16 - bootstrap error handling</history>
         public static void Start()
         {
             int iLanguage = 3;   //iLanguage =2 - ru-Ru; iLanguage = 3 - en-US
