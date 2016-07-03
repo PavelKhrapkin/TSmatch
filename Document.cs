@@ -1,7 +1,7 @@
 ﻿/*-------------------------------------------------------------------------------------------------------
  * Document -- works with all Documents in the system basing on TOC - Table Of Content
  * 
- *   2.6.2016  Pavel Khrapkin, Alex Pass, Alex Bobtsov
+ *   2.7.2016  Pavel Khrapkin, Alex Pass, Alex Bobtsov
  *
  *--------- History ----------------  
  * 2013-2015 заложена система управления документами на основе TOC и Штампов
@@ -21,6 +21,7 @@
  * 19.4.16 - tocStart extracted from Start for initial TOC open; write TOCdir in Win Registry if OK
  * 27.4.16 - getDoc(.. [bool load=true]) - not real document load, when load fag = false
  *  2.5.16 - remove work with Registry Environment value from TOCstart to Bootstrap for DirRelocation Recovery if need
+ *  2.7.16 - wrDoc nStrBody argument add
  * -------------------------------------------
  *      METHODS:
  * Start()              - Load from directory TOCdir of TOC all known Document attributes, prepare everithing
@@ -170,6 +171,7 @@ namespace TSmatch.Document
         /// <history>18.4.2016
         /// 19.4.2016 - set Windows Environment Path paramenters
         ///  2.5.2016 - when TOCdir differ from Registry Environment value -- start DirRelocation Recovery
+        ///  4.5.2016 - remove works with Registry to module Bootstrap
         /// </history>
         public static Document tocStart(string TOCdir)
         {
@@ -184,6 +186,35 @@ namespace TSmatch.Document
             toc.isOpen = true;
             Log.exit();
             return toc;
+        }
+        /// <summary>
+        /// EOLstr(str) - return parsed string str into Int32, or return EOLinTOC, when str is EOL
+        /// </summary>
+        /// <returns>Int32 or EOLinTOC</returns>
+        /// <history>20.3.2016</history>
+        int EOLstr(string str)
+        {
+            Log.set("Document.Int(" + str + ")");
+            int x = 0;
+            if (!Int32.TryParse(str, out x))
+            {
+                if (this.type == "TSmatch") x = this.Sheet.UsedRange.Rows.Count;
+                else if (str == "EOL") x = this.EOLinTOC;
+            }
+            Log.exit();
+            return x;
+        }
+        /// <summary>
+        /// EOL(int tocRow) - setup this Document int numbers EndEOLinTOC, i0, and il - main table borders
+        /// </summary>
+        /// <param name="tocRow">line number of this Document in TOC</param>
+        /// <history>19.3.2016</history>
+        void EOL(int tocRow)
+        {
+            Document toc = (name == Decl.DOC_TOC) ? this : getDoc(Decl.DOC_TOC);
+            EOLinTOC = EOLstr(toc.Body.Strng(tocRow, Decl.DOC_EOL));
+            this.i0 = EOLstr(toc.Body.Strng(tocRow, Decl.DOC_I0));
+            this.il = EOLstr(toc.Body.Strng(tocRow, Decl.DOC_IL));
         }
         #endregion
 
@@ -265,6 +296,49 @@ namespace TSmatch.Document
             }
             Log.exit();
         }
+
+        #region wrDoc -- Output into the Document area formatted data
+
+        Form form;  // form set in wrDocSet
+        internal void wrDocSetForm(string formName, int nStrBody = -1, bool AutoFit = false)
+        {
+            Log.set("wrDocSetForm");
+            if (!Form.isFormExist(forms, formName)) Msg.F("Document.wrDoc no form", formName, this.name);
+            form = Form.getFormByName(this, formName);
+            form.AutoFit = AutoFit;
+            Form.last_name = "";
+            Form.nStr = nStrBody == -1 ? Body.iEOL(): nStrBody ;
+///            Form.getFormByName(this, formName).AutoFit = AutoFit;
+            Log.exit();
+        }
+        internal void wrDocForm(params object[] obj)
+        {
+            if (obj is Array && obj[0] is Array)
+            {
+                double[] ob = (double[])obj[0];
+                int lng = ob.Length;
+                if (lng == 6) wrDoc(form.name, ob[0], ob[1], ob[2], ob[3], ob[4], ob[5]);
+
+                //               wrDoc(form.name, ob);
+            }
+            else wrDoc(form.name, obj);
+            ////{
+            ////    wrdoc
+            ////}
+            ////if (obj is Array)
+            ////{
+            ////    if (obj[0] is Array)
+            ////    {
+
+            ////    }
+            ////}
+            ////wrDoc(form.name, obj);
+        }
+        //internal void wrDoсForm(string dir, string v, DateTime date, string mD5, int count, string strListRules)
+        //{
+        //    throw new NotImplementedException();
+        //}
+
         /// <summary>
         /// wrDoc(str, obect[] obj) -- write data from array of objects to the Document in Excel
         /// </summary>
@@ -278,7 +352,19 @@ namespace TSmatch.Document
         public void wrDoc(string str, params object[] obj)
         {
             Log.set("wrDoc(" + str + ", obj[])");
-            int i0 = Body.iEOL() + 1;
+
+            if(obj is Array)
+            {
+                if( obj[0] is Array)
+                {
+                    
+                }
+
+            }
+            int objLng = obj.Length;
+            object[] _obj = obj;
+ //           Type ob = typeof(obj);  //.IsAssignableFrom(type); 
+
             Form frm = forms.Find(x => x.name == str);
             if (frm == null) Msg.F("Document.wrDoc no form", str, this.name);
             if (frm.name == Form.last_name)
@@ -288,6 +374,7 @@ namespace TSmatch.Document
             else
             {
                 saveDoc();
+                int i0 = Form.nStr < 1 ? Body.iEOL() + 1 : Form.nStr;   //line to write in Body
                 Excel.Range rng = FileOp.setRange(Sheet, i0);
                 Document toc = getDoc(Decl.DOC_TOC);
                 FileOp.CopyRng(toc.Wb, str, rng);
@@ -300,12 +387,13 @@ namespace TSmatch.Document
                     int c = frm.col[i++];
                     Body[r, c] = v;
                 }
-                FileOp.saveRngValue(Body);
+                FileOp.saveRngValue(Body, 1, AutoFit: frm.AutoFit);
                 Form.last_name = frm.name;
             }
             Log.exit();
         }
         public void wrDoc(int iForm, params object[] obj) { wrDoc(forms[iForm].name, obj); }
+
         //public void wrDoc(string form_name, params object[] objs)
         //{
         //    wrDoc(form_name, objs);
@@ -332,35 +420,8 @@ namespace TSmatch.Document
             throw new NotImplementedException();
             Log.exit();
         }
-        /// <summary>
-        /// EOLstr(str) - return parsed string str into Int32, or return EOLinTOC, when str is EOL
-        /// </summary>
-        /// <returns>Int32 or EOLinTOC</returns>
-        /// <history>20.3.2016</history>
-        int EOLstr(string str)
-        {
-            Log.set("Document.Int(" + str + ")");
-            int x = 0;
-            if (!Int32.TryParse(str, out x))
-            {
-                if (this.type == "TSmatch") x = this.Sheet.UsedRange.Rows.Count;
-                else if (str == "EOL") x = this.EOLinTOC;
-            }
-            Log.exit();
-            return x;
-        }
-        /// <summary>
-        /// EOL(int tocRow) - setup this Document int numbers EndEOLinTOC, i0, and il - main table borders
-        /// </summary>
-        /// <param name="tocRow">line number of this Document in TOC</param>
-        /// <history>19.3.2016</history>
-        void EOL(int tocRow)
-        {
-            Document toc = (name == Decl.DOC_TOC) ? this : getDoc(Decl.DOC_TOC);
-            EOLinTOC = EOLstr(toc.Body.Strng(tocRow, Decl.DOC_EOL));
-            this.i0 = EOLstr(toc.Body.Strng(tocRow, Decl.DOC_I0));
-            this.il = EOLstr(toc.Body.Strng(tocRow, Decl.DOC_IL));
-        }
+        #endregion      //wrDoc area
+
         private void splitBodySummary()
         {      
             int fullEOL = Body.iEOL();
@@ -378,6 +439,7 @@ namespace TSmatch.Document
             dt = Body.DaTab();
             if (_resLns > 0) Summary = FileOp.getRngValue(Sheet, iEOL + 1, 1, fullEOL, iEOC);
         }
+
         /// <summary>
         /// loadDoc(name, wb)   - загрузка содержимого Документа name из файла wb
         /// </summary>
@@ -769,16 +831,21 @@ namespace TSmatch.Document
         /// <summary>
         /// Form - Document's Format description - Document sub-class. Forms get from TSmatch.xlsx/Forms
         /// </summary>
-        /// <history>16.3.2016</history>
+        /// <history>16.3.2016
+        ///  2.7.2016 - static language, last_name and nStr
+        ///  </history>
         public class Form
         {
-            private static Excel.Workbook Wb;
-            private static Mtr tocMtr;
+            internal static Excel.Workbook Wb;
+            internal static Mtr tocMtr;
+            internal static bool language = Msg.getLanguage() == Decl.ENGLISH;
             internal static string last_name;
+            internal static int nStr;
 
             public string name;
             public List<int> row = new List<int>();
             public List<int> col = new List<int>();
+            public bool AutoFit = true;
 
             public Form(string _name, List<int> _row, List<int> _col)  // constructor Form
             {
@@ -792,16 +859,14 @@ namespace TSmatch.Document
             public static List<Form> Init(int toc_line)
             {
                 Log.set("Init(" + toc_line + ")");
-                bool language = Msg.getLanguage() == Decl.ENGLISH;
                 //------------------------------------------------------------------------------
                 language = true; //en-US for Englisg Debug. Remove or comment this line later  !
                 //------------------------------------------------------------------------------
                 List<Form> Forms = new List<Form>();
                 for (int col = Decl.DOC_FORMS, i = 0; i < 10; i++)
                 {
-                    string s = tocMtr.Strng(toc_line, col++);
-                    if (string.IsNullOrEmpty(s)) continue;                 
-                    if (language) s = "EN_" + s;
+                    string s = Lang(tocMtr.Strng(toc_line, col++));
+                    if (string.IsNullOrEmpty(s)) continue;
                     if (FileOp.isNamedRangeExist(Wb, s))
                     {
                         List<int> _r = new List<int>();
@@ -826,6 +891,23 @@ namespace TSmatch.Document
             public static void setWb(Excel.Workbook _Wb, Mtr _tocMtr)
             {
                 Wb = _Wb; tocMtr = _tocMtr;
+            }
+            internal static Form getFormByName(Document doc, string name)
+            {
+
+                if (!isFormExist(doc.forms, name)) Msg.F("Document.wrDoc no form", name, doc.name);
+                name = Lang(name);
+                return doc.forms.Find(x => x.name == name);
+            }
+            internal static bool isFormExist(List<Form> forms, string name)
+            {
+                name = Lang(name);
+                return forms.Find(x => x.name == name) != null;
+            }
+            private static string Lang(string name)
+            {
+                if (string.IsNullOrEmpty(name)) return "";
+                return language && name.Substring(0, 3) != Decl.EN ? name : Decl.EN + name;
             }
         } // end class Form
         /// <summary>

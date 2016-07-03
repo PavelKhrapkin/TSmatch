@@ -2,7 +2,7 @@
  * Matcher -- contains important class Rule, which descride how to find Suppliers Components
  *            suit to the Model Elements. The result - set of foind matches - put in class OK
  *
- * 11.4.2016 П.Храпкин, А.Пасс, А.Бобцов
+ * 21.6.2016 П.Храпкин, А.Пасс, А.Бобцов
  *
  *--- History ---
  * 18.1.2016 заложено П.Храпкин, А.Пасс, А.Бобцов
@@ -14,6 +14,7 @@
  * 26.3.2016 CompSet reference in the Rule class instead of Document
  *  3.4.2016 adoption to the the Component, CompSet, and Supplier classes
  * 11.4.2016 Remove CompSet and Supplier not gives any match from Model in UseAllRules
+ * 21.6.2016 adapt to the Groups, Mgroups etc in ElmAttSet
  * -----------------------------------------------------------------------------------------
  *      КОНСТРУКТОРЫ Правил - загружают Правила из листа Правил в TSmatch или из журнала моделей
  * Rule(дата, тип, текст Правила, документ-база сортаментов)    - простая инициализация из TSmatch
@@ -47,6 +48,8 @@ using Decl = TSmatch.Declaration.Declaration;
 using TS = TSmatch.Tekla.Tekla;
 using Docs = TSmatch.Document.Document;
 using Mod = TSmatch.Model.Model;
+using Elm = TSmatch.ElmAttSet.ElmAttSet;
+using ElmGr = TSmatch.ElmAttSet.Group;
 using Cmp = TSmatch.Components.Component;
 using CmpSet = TSmatch.Components.CompSet;
 using Supl = TSmatch.Suppliers.Supplier;
@@ -147,13 +150,13 @@ namespace TSmatch.Matcher
             Rules = mod.Rules;
             Docs Report = Docs.getDoc(Decl.REPORT); // output result in ModelINFO Document
             int nstr = 0;                           // nstr - string number in Groupr
-            foreach(var gr in Mod.Groups)
+            foreach(var gr in ElmGr.Groups)
             {
                 bool found = false;                 // true, when matching Component found
 
                 object[] obj = new object[Report.Body.iEOC()];
                 obj[0] = nstr; obj[1] = gr.mat; obj[2] = gr.prf;
-                obj[3] = gr.lng; obj[4] = gr.wgt; obj[5] = gr.vol;
+//!! 21/6/2016                obj[3] = gr.lng; obj[4] = gr.wgt; obj[5] = gr.vol;
 
                 foreach (var r in Rules)
                 {
@@ -397,6 +400,7 @@ namespace TSmatch.Matcher
                     {
                         if (isOKexist(nstr)) break;     // если уже есть соответствие в OKs - NOP
                         // обработаем *параметры
+/* //!! 21/6/2016 в отладку с ElmAttSet Group
                         double lng = Mod.Groups[nstr].lng / 1000; //приводим lng к [м]
                         double v = Mod.Groups[nstr].vol;        //объем в [м3]
                         double w = Mod.Groups[nstr].wgt;        //вес в [т]
@@ -408,6 +412,7 @@ namespace TSmatch.Matcher
                         w *= 1 + RuleRedundencyPerCent / 100;     // учтем запас в % из Правила
                         double? p = cs.Components[iComp].price * w / 1000;
                         OKs.Add(new OK(nstr, s, cs.doc, nComp, w, p));
+*/  //!! 21/6/2016 в отладку с ElmAttSet Group
                         break;
                     }
                 } //end foreach Comp

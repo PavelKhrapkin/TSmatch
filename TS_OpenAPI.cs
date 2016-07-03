@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------
  * TS_OpenAPI -- Interaction with Tekla Structure over Open API
  * 
- * 3.6.2016  Pavel Khrapkin, Alex Bobtsov
+ * 30.6.2016  Pavel Khrapkin, Alex Bobtsov
  *  
  *----- History ------------------------------------------
  3.1.2016 АБ получаем длину элемента
@@ -17,14 +17,20 @@
  *  6.3.2016 PKh - isTeklaActive() metod included
  * 10.3.2016 PKh - AttSet Compararer implemented
  * 20.4.2016 PKh - GetTeklaDir() rewritten
- *  3.6.2016 PKh - GetTeklaDir(Environment) add
+ *  4.6.2016 PKh - GetTeklaDir(Environment) add
+ *  5.6.2016 PKh - isTeklaModel(name) add
+ * 21.6.2016 PKh - ElmAttSet module keep all Elements instead of AttSet
+ * 30.6/2016 PKh - IsTeklaActive() modified
  * -------------------------------------------
  * public Structure AttSet - set of model component attribuyes, extracted from Tekla by method Read
  *                           AttSet is Comparable, means Sort is applicable, and 
  *
  *      METHPDS:
- * Read()           - read current model from Tekla, return List<AttSet> - list of this model attributes
- *                    AttSet contains Materins, Profile, Weight, Volume etc
+ * Read()           - read current model from Tekla, return List<ElmAttSet> - list of this model attributes.
+ *                    Model element atrtibutes conaines in class ElmAttSet:
+ *                    * all Element Properties - in the class fields: Material, Profile, Guid, Volume, Weight etc
+ *                    * TAG - propertiy names for getting them from Tekla Structures
+ *                    * List<ElmAttSet>Elements - static list of properties all Elements
  * ModAtrMD5()      - calculate MD5 - contol sum of the current model
  * GetTeklaDir(mode) - return Path to the model directory, or Path to exceldesign in Tekla environmen
  * isTeklaActive()  - return true, when Tekla up and runing, else false
@@ -40,16 +46,18 @@ using TSD = Tekla.Structures.Dialog.ErrorDialog;
 using Tekla.Structures.Model;
 
 using Log = match.Lib.Log;
+using Msg = TSmatch.Message.Message;
 using Lib = match.Lib.MatchLib;
 using TSM = Tekla.Structures.Model;
+using Elm = TSmatch.ElmAttSet.ElmAttSet;
 
 namespace TSmatch.Tekla
 {
     class Tekla
     {
-        const string MYNAME = "Tekla.Read v1.5";
+        const string MYNAME = "Tekla.Read v2.0";
         public enum ModelDir { exceldesign, model, macro, environment };
-
+/* 21.6.2016 -- заменяем на ElmAttSet
         public struct AttSet : IComparable<AttSet>
         {
             public string guid, mat, mat_type, prf;
@@ -81,14 +89,16 @@ namespace TSmatch.Tekla
             }
         } // class AttSetCompararer
         private static List<AttSet> ModAtr = new List<AttSet>();
+21/6/2016 заменяем на ElmAttSet */
         public static TSM.ModelInfo ModInfo;
 
         public static string MyName = MYNAME;
-        public static string ModelMD5;
+////        public static string ModelMD5;
 
-        public static List<AttSet> Read()
+        public static List<Elm> Read()
         {
             Log.set("TS_OpenAPI.Read");
+            Elm.Elements.Clear();
             TSM.Model model = new TSM.Model();
             List<Part> parts = new List<Part>();
             ModInfo = model.GetInfo();
@@ -113,6 +123,7 @@ namespace TSmatch.Tekla
                     double vol = 0.0;
                     string guid = "";
                     string mat_type = "";
+                    double price = 0.0;
                     //string profile = "";
                     //double width = 0.0, height = 0.0;
                     //myPart.GetReportProperty("PROFILE", ref profile);
@@ -131,11 +142,10 @@ namespace TSmatch.Tekla
                     //myPart.GetReportProperty("CAST_UNIT_TYPE", ref cut);
                     //ModAtr.Add(new AttSet(myPart.Material.MaterialString,
                     //                      profile, lng, weight, vol));
-                    ModAtr.Add(new AttSet(guid,
-                                          myPart.Material.MaterialString,
-                                          mat_type,
-                                          myPart.Profile.ProfileString,
-                                          lng, weight, vol));
+                    //21/6/2016 в отладке                    Elm.Elements.Add(new Elm());
+                    new Elm(guid, myPart.Material.MaterialString, mat_type,
+                                           myPart.Profile.ProfileString,
+                                           lng, weight, vol, price);
                     if (ii % 500 == 0) // progress update every 500th items
                     {
                         if (progress.Canceled())
@@ -149,11 +159,11 @@ namespace TSmatch.Tekla
                 }
             } //while
             progress.Close();
-            ModAtr.Sort();
+            Elm.Elements.Sort();
             Log.exit();
-            return ModAtr;
+            return Elm.Elements;
         } // Read
-        /// <summary>
+/*2016.6.21        /// <summary>
         /// ModAtrMD5() - calculate MD5 of the model read from Tekla in ModAtr
         /// </summary>
         /// <remarks>It could take few minutes for the large model</remarks>
@@ -166,6 +176,7 @@ namespace TSmatch.Tekla
             return ModelMD5;
             //            new Log("MD5 time = " + (DateTime.Now - t0).ToString());
         } // ModAtrMD5
+2016.6.21 */
         public static string GetTeklaDir(ModelDir mode)
         {
             string TSdir = "";
@@ -185,10 +196,9 @@ namespace TSmatch.Tekla
                     TSdir = str[0] + @"\modeling";     // this Split is to ignore other, than common TS Enviroments
                     break;
                 case ModelDir.environment:
-                    const string env = "environments";
                     TSdir = GetTeklaDir(ModelDir.exceldesign);
-                    int lastEnv = TSdir.ToLower().LastIndexOf(env) + env.Length;
-                    TSdir = TSdir.Remove(lastEnv);
+                    TSdir = Path.Combine(TSdir, @"..\..");
+                    TSdir = Path.GetFullPath(TSdir);
                     break;
             }
             //////////            var ff = TeklaStructuresInfo.GetCurrentProgramVersion();
@@ -196,8 +206,13 @@ namespace TSmatch.Tekla
             //////////            TSdir = TS.TeklaStructuresFiles();
             return TSdir;
         }
+        /// <summary>
+        /// IsTeklaActice() - return true if TeklaStructures Process exists in Windows, and model is available 
+        /// </summary>
+        /// <returns>true if Tekla is up and running</returns>
         public static bool isTeklaActive()
         {
+            Log.set("isTeklaActive()");
             bool ok = false;
             const string Tekla = "TeklaStructures";
             foreach (Process clsProcess in Process.GetProcesses())
@@ -205,11 +220,36 @@ namespace TSmatch.Tekla
                 if (clsProcess.ProcessName.ToLower().Contains(Tekla.ToLower()))
                 {
                     TSM.Model model = new TSM.Model();
-                    ModInfo = model.GetInfo();
-                    ok = model.GetConnectionStatus() && ModInfo.ModelName != "";
+                    try
+                    {
+                        ModInfo = model.GetInfo();
+                        ok = model.GetConnectionStatus() && ModInfo.ModelName != "";
+                    }
+                    catch { Msg.W("isTeklaActive no model Connection"); }
                     break;
                 }
             }
+            Log.exit();
+            return ok;
+        }
+        /// <summary>
+        /// isTeklaModel(name) -- check if Tekla open with the model name
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns>true if in Tekla active and open model == name</returns>
+        /// <history>5.6.2016</history>
+        public static bool isTeklaModel(string name)
+        {
+            Log.set("TS_OpenAPI.isTeklaModel(\"" + name + "\")");
+            bool ok = false;
+            if (isTeklaActive())
+            {
+                TSM.Model model = new TSM.Model();
+                ModInfo = model.GetInfo();
+                ModInfo.ModelName = ModInfo.ModelName.Replace(".db1", "");
+                ok = ModInfo.ModelName == name;
+            }
+            Log.exit();
             return ok;
         }
     } //class Tekla

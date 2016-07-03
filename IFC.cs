@@ -39,19 +39,23 @@ namespace TSmatch.IFC
         {
             schemaName = _schemaName;
         }
-        
+        public static List<ElmAttributes.ElmAttSet> Read(string dir, string FileName)
+        { return Read(Path.Combine(dir, FileName)); }    
         public static List<ElmAttributes.ElmAttSet> Read(string ifcFileName)
         {
             var manager = new IfcManager.Core.IfcManager();
 
-            string dir = Path.GetDirectoryName(ifcFileName);
-            string nam = Path.GetFileName(ifcFileName);
-            FileOp.fileOpen(dir, nam);
+            //string dir = Path.GetDirectoryName(ifcFileName);
+            //string nam = Path.GetFileName(ifcFileName);
+            //FileOp.fileOpen(dir, nam);
 
             manager.init(ifcFileName, schemaName);
 
-            List<String> objectNameList = manager.getElementsByProperty("Volume");
-//            printList(objectNameList);
+            List<String> objectNameListNet = manager.getElementsByProperty("NetVolume");
+ //           List<String> objectNameList = manager.getElementsByProperty("Volume");
+
+///            List<String> objectNameListGross = manager.getElementsByProperty("GrossVolume");
+            //            printList(objectNameList);
             return null;
         }
     } // end class TSmatch.IFC
@@ -74,8 +78,9 @@ namespace IfcManager.Core
             #region init
             public void init(string ifcFile, string ifcSchema)
             {
+                _ifcEngine = new IfcEngine();
                 _ifcModel = _ifcEngine.OpenModel(IntPtr.Zero, ifcFile, ifcSchema);
-
+                #region commented Oleg' code
                 //if (!String.Empty.Equals(ifcFilePath))
                 //{
                 //    _ifcEngine = new IfcEngine();
@@ -92,6 +97,7 @@ namespace IfcManager.Core
                 //{
                 //    throw new Exception("Error: incorrect file name");
                 //}
+                #endregion
             }
             #endregion init
 
@@ -131,16 +137,16 @@ namespace IfcManager.Core
             #endregion convertIfcFile
 
             #region getElementsByProperty
-            public List<String> getElementsByProperty(String Arg3)
+            public List<String> getElementsByProperty(String propertyName)
             {
                 var objectNameList = new List<String>();
-                if (null != Arg3 && !String.Empty.Equals(Arg3))
+                if (null != propertyName && !String.Empty.Equals(propertyName))
                 {
                     System.Console.WriteLine("begin process");
 
                     var propertyInstance = IntPtr.Zero;
                     List<IntPtr> listPropSets = new List<IntPtr>();
-                    if ((propertyInstance = findProperty(Arg3)) != IntPtr.Zero)
+                    if ((propertyInstance = findProperty(propertyName)) != IntPtr.Zero)
                     {
                         if ((listPropSets = findPropertySets(propertyInstance)).Count() > 0)
                         {
@@ -149,7 +155,7 @@ namespace IfcManager.Core
                     }
                     else
                     {
-                        throw new Exception("Model doesn't contain the property with name: " + Arg3);
+                        throw new Exception("Model doesn't contain the property with name: " + propertyName);
                     }
 
                     System.Console.WriteLine("end process");
@@ -165,7 +171,8 @@ namespace IfcManager.Core
             private IntPtr findProperty(String strPropertyName)
             {
                 IntPtr iEntitiesCount;
-                IntPtr properties = getAggregator("ifcPropertySingleValue", out iEntitiesCount);
+//16/6/16                IntPtr properties = getAggregator("ifcPropertySingleValue", out iEntitiesCount);
+                IntPtr properties = getAggregator("ifcQuantityVolume", out iEntitiesCount); //!!16/6/16
                 IntPtr propertyInstance = IntPtr.Zero;
                 foreach (IntPtr iPropertyInstance in findEntity(properties, iEntitiesCount))
                 {
@@ -268,10 +275,15 @@ namespace IfcManager.Core
                 return Marshal.PtrToStringUni(name);
             }
 
-            private List<String> createResult(List<IntPtr> objectList)
+            private List<String> createResult(List<IntPtr> objectList, String propValue = "")
             {
                 var result = new List<String>();
-                objectList.ForEach(objectInstance => result.Add(getAttrValueAsString(objectInstance, "Name")));
+                objectList.ForEach(objectInstance => result.Add(
+                    "Object Name: " +
+                    getAttrValueAsString(objectInstance, "Name") + " " +
+                    "GUID: " +
+                    getAttrValueAsString(objectInstance, "GlobalId") + " " +
+                    (propValue.Equals("") ? "" : "Property Value: " + propValue)));
                 return result;
             }
             #endregion utilities

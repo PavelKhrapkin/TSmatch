@@ -29,6 +29,7 @@ namespace TSmatch.Declaration
     ///  9.4.16     - TSmatchINFO/Report section
     /// 19.4.16     - Resources chage
     ///  2.6.16     - Resource IFC2X3.exp add
+    ///  2.7.16     - FORM Resourse add for TSmatch.xlsx
     /// </history>
     class Declaration
     {
@@ -41,7 +42,7 @@ namespace TSmatch.Declaration
         public const string TSMATCH_EXE = TSMATCH + ".exe";     // Application exe file       
         public const string BUTTON_CS   = "TSmatch.cs";
         public const string BUTTON_BMP  = "TSmatch.BMP";
-        public const string ENV_INP_DIR = @"\common\inp";       // IFC schema stored in Tekla Environment
+        public const string ENV_INP_DIR = @"common\inp";        // IFC schema stored in sub-dir Tekla Environment
         public const string IFC_SCHEMA = "IFC2X3.exp";
         public const string TSMATCH_ZIP = "Tsmatch.zip";
         public const string TSMATCH_DIR = "TSmatch";
@@ -50,6 +51,7 @@ namespace TSmatch.Declaration
         //----------- Language Adapter strings sets for ru-RU and en-US ----------------
         public const string ENGLISH = "en-US";
         public const string RUSSIAN = "ru-RU";
+        public const string EN = "EN_";         // used with the Document.Form names
 
         public const string MESSAGES = "Messages";      // Multilanguage Message doc in TSmatch
         public const int MSG_ID = 1;
@@ -67,8 +69,8 @@ namespace TSmatch.Declaration
 
         #region ----------- RESOURCE CONSTANTS ----------------
         // Resources - are various files, necessary for TSmatch operation in PC.
-        // Constants hereunder descripe the Resource name, type and date to be checked as "Actual"
-        //!! we should set here (EXPECT DATE) time earlier, than is written in [1,1] of the Document
+        // Constants hereunder descripe the Resource name, type and date to be checked as "Actual".
+        // We should set here (EXPECT DATE) time earlier, than it is written in [1,1] of the Document
         public enum RESOURCE_TYPES { Document, File, TeklaFile, Directory, Application };
         public enum RESOURCE_FAULT_REASON { NoFile, Obsolete, NoTekla, DirRelocation };
 
@@ -82,7 +84,7 @@ namespace TSmatch.Declaration
 
         public const string R_TOC = DOC_TOC;                //TSmatch.xlsx/TOC - Table of Content
         public const string R_TOC_TYPE = TEMPL_TOC;     
-        public const string R_TOC_DATE = "12.4.2016 10:10";
+        public const string R_TOC_DATE = "3.7.2016 10:10";
 
         public const string R_SUPPLIERS = SUPPLIERS;        //TSmatch.xlsx/Suppliers - Поставщики         
         public const string R_SUPPLIERS_TYPE = TEMPL_TOC;
@@ -91,6 +93,10 @@ namespace TSmatch.Declaration
         public const string R_MSG = MESSAGES;               //TSmatch.xlsx/Messages - Сообщения       
         public const string R_MSG_TYPE = TEMPL_TOC;
         public const string R_MSG_DATE = "2.6.2016 22:40";
+
+        public const string R_FORM = FORMS;                //TSmatch.xlsx/Forms - Формы
+        public const string R_FORM_TYPE = TEMPL_TOC;
+        public const string R_FORM_DATE = "2.7.2016 7:40";
 
         public const string R_RULES = RULES;               //TSmatch.xlsx/Rules - Правила       
         public const string R_RULES_TYPE = TEMPL_TOC;
@@ -176,19 +182,19 @@ namespace TSmatch.Declaration
                                                 //public const string STAMP_TYPE_N2 = "N2"; // New Doc, если нет, создавать в Листе2
         #endregion
 
-        #region ------------ константы журнала моделей -------------------
+        #region ----------- константы журнала моделей -------------------
         public const string MODELS = "Models";
 
         public const int MODEL_DATE = 1;    // Дата и время записи в Журнал моделей
         public const int MODEL_NAME = 2;    // Имя модели
         public const int MODEL_DIR  = 3;    // Каталог модели
-        public const int MODEL_MADE = 4;    // Модель обработана Шагом (Made)
+        public const int MODEL_MADE = 4;    // Model exported as (Made)
         public const int MODEL_PHASE = 5;   // Текущая фаза проекта
         public const int MODEL_MD5  = 6;    // Контрольная сумма - MD5
         public const int MODEL_R_LIST = 7;  // колонка - список номеров строк Правил
         #endregion
 
-        #region ------------ константы правил Matching_Rules -------------------
+        #region ----------- константы правил Matching_Rules -------------------
         public const string RULES = "Rules";
 
         public const int RULE_DATE = 1;    // Дата и время записи Правила в TSmatch
@@ -203,7 +209,7 @@ namespace TSmatch.Declaration
         public const string ATT_PARAM = @"(?<param>(\$|p|р|п|P|Р|П)\w*\d)"; //параметры в Правилах
         #endregion
 
-        #region ------------ Файл TSmatchINFO.xlsx - записывается в каталог модели ----------
+        #region ----------- Файл TSmatchINFO.xlsx - записывается в каталог модели ----------
         public const string MODELINFO = "ModelINFO";    //Лист общей информации по модели
         public const string RAW = "Raw";                //Лист необработанных данных по компонентам модели
         public const string MODEL_SUPPLIERS = "ModSuppliers";   // Лист поставщиков для проекта / модели
@@ -214,7 +220,7 @@ namespace TSmatch.Declaration
         public const string TMP_REPORT    = "TMP_" + REPORT;
         #endregion
 
-        #region ------------ TSmatchINFO.xlsx/Report - Отчет по результатам подбора сортамента ----------
+        #region ----------- TSmatchINFO.xlsx/Report - Отчет по результатам подбора сортамента ----------
         public const int REPORT_N   = 1;     // Report' line Numer
         public const int REPORT_MAT = 2;     // Group Material
         public const int REPORT_PRF = 3;     // Group Profile
@@ -228,7 +234,7 @@ namespace TSmatch.Declaration
         public const int REPORT_SUPL_PRICE = 11; // Supplied component' total price
         #endregion
 
-        #region ------------ TSmatchINFO.xlsx/Suppliers - Поставщики сортамента ----------
+        #region ----------- TSmatchINFO.xlsx/Suppliers - Поставщики сортамента ----------
         public const int SUPL_DATE = 1;     // Date when Supplier record  was updated in TSmatch.xlsx
         public const int SUPL_NAME = 2;     // Supplier' name
         public const int SUPL_URL  = 3;     // Supplier' hyperlink
@@ -240,7 +246,7 @@ namespace TSmatch.Declaration
         public const int SUPL_LISTCOUNT = 9;// Supplier' price-list/worksheets/Documents count in TSmatch.xlsx
         #endregion
 
-        #region -----------константы Шаблонов - not in use -----------------
+        #region ----------- константы Шаблонов - not in use -----------------
 
         public const string PTRN_HDR = "A1";     // заголовки колонок   
         public const string PTRN_WIDTH = "A3";     // ширина колонок

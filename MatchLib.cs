@@ -326,7 +326,7 @@ namespace match.Lib
             new Log("\n\n[FATAL] " + msg);
             _tx("\n\tв стеке имен:");
             foreach (var s in _nameStack) _tx("\t-> " + s);
-      System.Diagnostics.Debugger.Break();
+            System.Diagnostics.Debugger.Break();
         }
         public static void Warning(string msg) { new Log("\n[warning] " + msg); }
         public static void START(string msg)

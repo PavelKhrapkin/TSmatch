@@ -55,17 +55,17 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
-    <Reference Include="Tekla.Structures, Version=21.1.0.0, Culture=neutral, PublicKeyToken=2f04dbe497b71114, processorArchitecture=MSIL">
+    <Reference Include="Tekla.Structures, Version=2016.0.0.0, Culture=neutral, PublicKeyToken=2f04dbe497b71114, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\2016-Jan\TSmatch 22.01.2016\TSmatch\TSmatch\bin\Debug\Tekla.Structures.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\..\Program Files\Tekla Structures\2016\nt\bin\applications\Tekla\Model\ExportToSoftware\Tekla.Structures.dll</HintPath>
     </Reference>
-    <Reference Include="Tekla.Structures.Dialog, Version=21.1.0.0, Culture=neutral, PublicKeyToken=2f04dbe497b71114, processorArchitecture=MSIL">
+    <Reference Include="Tekla.Structures.Dialog, Version=2016.0.0.0, Culture=neutral, PublicKeyToken=2f04dbe497b71114, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\..\..\Program Files\Tekla Structures\21.1\nt\bin\plugins\Tekla.Structures.Dialog.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\..\Program Files\Tekla Structures\2016\nt\bin\applications\Tekla\Model\ExportToSoftware\Tekla.Structures.Dialog.dll</HintPath>
     </Reference>
-    <Reference Include="Tekla.Structures.Model, Version=21.1.0.0, Culture=neutral, PublicKeyToken=2f04dbe497b71114, processorArchitecture=MSIL">
+    <Reference Include="Tekla.Structures.Model, Version=2016.0.0.0, Culture=neutral, PublicKeyToken=2f04dbe497b71114, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\2016-Jan\TSmatch 22.01.2016\TSmatch\TSmatch\bin\Debug\Tekla.Structures.Model.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\..\Program Files\Tekla Structures\2016\nt\bin\applications\Tekla\Model\TrimbleConnector\Tekla.Structures.Model.dll</HintPath>
     </Reference>
     <Reference Include="Trimble.Connect.Client">
       <HintPath>E:\Program Files\Trimble\Trimble Connect\Trimble.Connect.Client.dll</HintPath>

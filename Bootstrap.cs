@@ -1,13 +1,14 @@
 ﻿/*-----------------------------------------------------------------------------------
  * Bootstrap - provide initial start of TSmatch, when necessary - startup procedure
  * 
- *  2.6.2016  Pavel Khrapkin
+ *  2.7.2016  Pavel Khrapkin
  *
  *--- History ---
  * 25.3.2016 started 
  * 30.3.2016 - Template, Resource classes, HealthCheck() method
  * 19.4.2016 - Resource recover, when it is absent or obsolete
  *  2.6.2016 - Add Resource IFC2X3, get this file when Tekla not active
+ *  2.7.2016 - FORMS Resours check add
  * ---------------------------------------------------------------------------
  *      Bootstrap Methods:
  * Bootstrap()      - check all resources and start all other modules
@@ -49,12 +50,12 @@ namespace TSmatch.Startup
     {
         static bool isTeklaActive = TS.isTeklaActive();
         static string MyPath;               // directory, where TSmatch.exe strated
-        static string TOCdir;               // directore, where TSmatch.xlsx located. Usually in Tekla\..\exceldesign
+        static string TOCdir;               // directory, where TSmatch.xlsx located. Usually in Tekla\..\exceldesign
         static string ComponentsDir;        // all price-lists directory
         static string ModelDir = "";        // Model Report catalog
         static string TMPdir = "";          // temporary catalog
         static string macroDir = "";        // directory in Tekla\Environment to store button TSmatch
-        static string IFCschemaDir = "";    // directory in Tekla Environment\common\inp for IFC schema 
+        static string IFCschema = "";       // IFC2X3.exd in Tekla Environment\common\inp as IFC schema 
         static string desktop_path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
         static string DebugDir = desktop_path;
 
@@ -71,8 +72,8 @@ namespace TSmatch.Startup
             Suppliers.Supplier.Start();     // инициируем список Поставщиков из TSmatch.xlsx/Suppliers
             Matcher.Matcher.Start();        // инициируем Правила из TSmatch.xlsx/Matcher
             Model.Model.Start();            // инициируем Журнал Моделей, известных TSmatch в TSmatch.xlsx/Models
-            Ifc.Start(IFCschemaDir);        // инициируем IFC, используя файл схемы IFC
-            if (!isTeklaActive) ModelDir = Model.Model.RecentModelDir();
+            if(!isTeklaActive) ModelDir = Model.Model.RecentModelDir();
+            Ifc.Start(IFCschema);           // инициируем IFC, используя файл схемы IFC
             Log.exit();
         }
         //////////static bool Renew(string dir, string name)
@@ -120,6 +121,7 @@ namespace TSmatch.Startup
                 setR(Decl.R_TSMATCH,        Decl.R_TSMATCH_TYPE,        Decl.R_TSMATCH_DATE);
                 setR(Decl.R_TOC,            Decl.R_TOC_TYPE,            Decl.R_TOC_DATE);
                 setR(Decl.R_MSG,            Decl.R_MSG_TYPE,            Decl.R_MSG_DATE);
+                setR(Decl.R_FORM,           Decl.R_FORM_TYPE,           Decl.R_FORM_DATE);
                 setR(Decl.R_SUPPLIERS,      Decl.R_SUPPLIERS_TYPE,      Decl.R_SUPPLIERS_DATE);
                 setR(Decl.R_MODELS,         Decl.R_MODELS_TYPE,         Decl.R_MODELS_DATE);
                 setR(Decl.R_RULES,          Decl.R_RULES_TYPE,          Decl.R_RULES_DATE);
@@ -227,13 +229,12 @@ namespace TSmatch.Startup
                         break;
                     case Decl.RESOURCE_FAULT_REASON.NoTekla:
                         TOCdir = Environment.GetEnvironmentVariable(Decl.WIN_TSMATCH_DIR, EnvironmentVariableTarget.User);
-                        if (TOCdir == null) Msg.F("Windows Parametr TSmatch_Dir not defined");
+                        if (TOCdir == null) Msg.F("Windows Parametr TSmatch_Dir not defined." 
+                                            + "\n\rTry to run TSmatch.xlsx manualy and restart, or run Tekla.");
                         // other parameters for #template (f.e.ModelDir) get later from TSmatch.xlsx when necessary
-                        // another Resource - IFC schema take from Tekla Environment; for inactive Tekla -- near TOCdir
-                        string[] dirs = TOCdir.Split('\\');
-                        int nDirs = dirs.Length;
-                        while (dirs[--nDirs] != "common") { dirs[nDirs] = ""; }
-                        IFCschemaDir = Path.Combine(dirs) + @"\" + Decl.ENV_INP_DIR;
+                        // another Resource - IFC schema take from Tekla Environment; for inactive Tekla - get from TOCdir
+                        string inp = Path.Combine(TOCdir, @"..\..", Decl.ENV_INP_DIR, Decl.IFC_SCHEMA);
+                        IFCschema = Path.GetFullPath(inp);
                         break;
                     case Decl.RESOURCE_FAULT_REASON.DirRelocation:
                         // -- action plan --
@@ -263,7 +264,7 @@ namespace TSmatch.Startup
                 {           // if name contains #template -- replace it with the real Path
                     string[] str = name.Split('\\');
                     string dir = Template.getPath(str[0]);
-                    this.name = System.IO.Path.Combine(dir, str[str.Length - 1]);
+                    this.name = Path.Combine(dir, str[str.Length - 1]);
                 }
                 ok = FileOp.isFileExist(this.name) && FileOp.getFileDate(this.name) > date;
                 if (!ok) ok = Recover();
@@ -303,12 +304,12 @@ namespace TSmatch.Startup
             private static bool checkTOCdate(string path, Resource r)
             {
                 Docs toc = Docs.tocStart(path);
-                string realTOCdir = toc.Wb.FullName;
-                // read Windows Environment is much faset then setting. So, we don't write Registry without neccesity
+                string realTOCdir = Path.GetDirectoryName(toc.Wb.FullName);
+                // read Windows Environment is much faster then setting. So, we don't write Registry without neccesity
                 string registryTOCdir = Environment.GetEnvironmentVariable(Decl.WIN_TSMATCH_DIR, EnvironmentVariableTarget.User);
                 if (registryTOCdir != realTOCdir || realTOCdir != TOCdir)
                 {
-                    Environment.SetEnvironmentVariable(Decl.WIN_TSMATCH_DIR, TOCdir, EnvironmentVariableTarget.User);
+                    Environment.SetEnvironmentVariable(Decl.WIN_TSMATCH_DIR, realTOCdir, EnvironmentVariableTarget.User);
                 }
                 DateTime tocD = Lib.getDateTime(toc.Body[1, 1]);
                 bool ok = tocD >= r.date;
@@ -323,15 +324,19 @@ namespace TSmatch.Startup
         /// <summary>
         /// Template - class for #template handling; it is used to substitute the Document Path with real value in Windows
         ///     #templates listed in Declaration to the moment:
-        ///     - #TOC   - Path to TSmatch.xlxs
-        ///     - #Model - Path to Tekla Model, used for TSmatchINFO.xlsx path
+        ///     - #TOC    - Path to TSmatch.xlxs
+        ///     - #Model  - Path to Tekla Model, used for TSmatchINFO.xlsx path
         ///     - #TMP    - temporary file directory; it could be used for Model transfer
         ///     - #Component - Path to Tekla\Environment\common\exceldesign\База комплектующих
-        ///     - #Debug - Path to debug report file
+        ///     - #Debug   - Path to debug report file
+        ///     - #Macros  - Path to Tekla Macros for TSmatch button definition 
+        ///     - #Envir   - Path to Tekla Environments
         /// </summary>
         /// <example> Docs.Start(FileDirTemplates, FileDirValues);
         /// </</example>
-        /// <history>30.3.2016</history>
+        /// <history>30.3.2016
+        /// 23.6.29016 - bug fix - unnecessary IFC file name excluded from #Envir template
+        /// </history>
         public class Template
         {
             public readonly string template;       //#template, for example "#TOC"
@@ -354,18 +359,20 @@ namespace TSmatch.Startup
 
                 if (isTeklaActive)
                 {
-                    //  already set earlier TOCdir   = TS.GetTeklaDir(TS.ModelDir.exceldesign);
-                    ModelDir     = TS.GetTeklaDir(TS.ModelDir.model);
-                    macroDir     = TS.GetTeklaDir(TS.ModelDir.macro);
-                    IFCschemaDir = TS.GetTeklaDir(TS.ModelDir.environment) + Decl.ENV_INP_DIR;
+                    //  already set earlier -- TOCdir   = TS.GetTeklaDir(TS.ModelDir.exceldesign);
+                    ModelDir  = TS.GetTeklaDir(TS.ModelDir.model);
+                    macroDir  = TS.GetTeklaDir(TS.ModelDir.macro);
+                    IFCschema = Path.Combine(TS.GetTeklaDir(TS.ModelDir.environment), Decl.ENV_INP_DIR);
                 }
                 else
                 {
-                    throw new NotImplementedException();
+                    // ModelDir = Model.Model.RecentModelDir();  -- do it in Bootstrap.Start, when Models have read in TSmatch.xlsx
+                    //                                           -- macroDir not in use without Tekla
+                    // IFCschemaDir = Path.Combine(TOCdir, @"..\..", Decl.ENV_INP_DIR); -- made in NoTekla Recovery
                 }
                 ComponentsDir = TOCdir + @"\База комплектующих";
                 string[] FileDirTemplates = Decl.TOC_DIR_TEMPLATES;
-                string[] FileDirValues = { TOCdir, ModelDir, ComponentsDir, TMPdir, DebugDir, macroDir, IFCschemaDir};
+                string[] FileDirValues = { TOCdir, ModelDir, ComponentsDir, TMPdir, DebugDir, macroDir, IFCschema};
                 int i = 0;
                 foreach (var v in FileDirTemplates)
                     Templates.Add(new Template(FileDirTemplates[i], FileDirValues[i++]));
@@ -397,7 +404,8 @@ namespace TSmatch.Startup
         ////        {
         ////            if (entry.FullName.EndsWith(".txt", StringComparison.OrdinalIgnoreCase))
         ////            {
-        ////                entry.ExtractToFile(Path.Combine(extractPath, entry.FullName));
+        ////                entry.ExtractToFile(Path.Combine(extractPath, entry.FullName)); 	TSmatch.exe!TSmatch.Program.Main(string[] args)Строка 19	C#
+
         ////            }
         ////        }
         ////    }

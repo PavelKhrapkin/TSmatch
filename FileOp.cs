@@ -45,6 +45,7 @@ namespace match.FileOp
         private static Excel.Worksheet _sh = null;
         private static Excel.Range _rng = null;
 
+        #region --- File Open / Rename / Delete / Save / Copy / Move
         /// <summary>
         /// fileOpen(dir,name[,create_ifnotexist]) - открываем файл Excel по имени name
         /// </summary>
@@ -114,12 +115,47 @@ namespace match.FileOp
         {
             File.Delete(path);
         }
-        public static void fileDelete(string dir, string name)
-        {
-            File.Delete(Path.Combine(dir, name));
-        }
         public static void DisplayAlert(bool val) { _app.DisplayAlerts = val; }
         public static void fileSave(Excel.Workbook Wb) { Wb.Save(); }
+        /// <summary>
+        /// CopyFile(FrDir, FileName, ToDir [,overwrite]) - copy FileName from FrDir to ToDir 
+        /// </summary>
+        /// <param name="FrDir">copy from FrDir Directory</param>
+        /// <param name="FileName">file to copy</param>
+        /// <param name="ToDir">destination Directory</param>
+        /// <param name="overwrite">obligatory flag - true - allow overwrite</param>
+        /// <returns>bool result -- true if copy was succesful</returns>
+        /// <history>20.3.2016 PKh</history>
+        public static bool CopyFile(string FrDir, string FileName, string ToDir, bool overwrite = false)
+        {
+            bool result = false;
+            if (!isFileExist(FrDir, FileName)) Msg.F("ERR_02.2_COPY_NOFILEFROM", FrDir, FileName);
+            string From = FrDir + "\\" + FileName;
+            string To = ToDir + "\\" + FileName;
+            if (isFileExist(ToDir, FileName))
+            {
+                string sav = "SAVED_" + FileName;
+                if (isFileExist(ToDir, sav)) Delete(ToDir, sav);
+                File.Move(To, ToDir + "\\" + sav);
+            }
+            try
+            {
+                File.Copy(From, To, overwrite);
+                result = true;
+            }
+            catch (Exception e) { Msg.F("ERR_02.3_FILENOTCOPIED", e, From, To); }
+            return result;
+        }
+        public static void Delete(string dir, string name)
+        { File.Delete(Path.Combine(dir, name)); }
+        public static void Move(string FrDir, string FrName, string ToDir, string ToName)
+        {
+            string fr = FrDir + "\\" + FrName;
+            string to = ToDir + "\\" + ToName;
+            File.Move(fr, to);
+        }
+        #endregion
+        #region --- isFileExist / isDirExist / isSheetExist / isNamedRangeExist
         public static bool isDirExist(string path)
         {
             return Directory.Exists(path);
@@ -138,9 +174,6 @@ namespace match.FileOp
         }
         public static bool isFileExist(string dir, string name)
         { return isFileExist(dir + "\\" + name); }
-        public static DateTime getFileDate(string dir, string name)
-        { return File.GetLastWriteTime(Path.Combine(dir, name)); } 
-        public static DateTime getFileDate(string path) { return File.GetLastWriteTime(path); }
         public static bool isSheetExist(Excel.Workbook Wb, string name)
         {
             try { Excel.Worksheet Sh = Wb.Worksheets[name]; return true; }
@@ -160,6 +193,13 @@ namespace match.FileOp
             }
             return result;
         }
+        #endregion
+        #region --- getFileDate
+        public static DateTime getFileDate(string dir, string name)
+        { return File.GetLastWriteTime(Path.Combine(dir, name)); }
+        public static DateTime getFileDate(string path) { return File.GetLastWriteTime(path); }
+        #endregion
+        #region --- Excel SheetReset
         public static Excel.Worksheet SheetReset(Excel.Workbook Wb, string name, bool QuietMode = false)
         {
             Log.set(@"SheetReset(" + Wb.Name + "/" + name + ")");
@@ -186,6 +226,8 @@ namespace match.FileOp
             Log.exit();
             return _sh;
         }
+        #endregion
+        #region --- Excel getRangeValue / setRangeValue / CopyRange
         public static Mtr getRngValue(Excel.Worksheet Sh, int r0, int c0, int r1, int c1, string msg = "")
         {
             Log.set("getRngValue");
@@ -285,67 +327,30 @@ namespace match.FileOp
         {
             Wb.Names.Item(NamedRange).RefersToRange.Copy(rng);
         }
-        /// <summary>
-        /// CopyFile(FrDir, FileName, ToDir [,overwrite]) - copy FileName from FrDir to ToDir 
-        /// </summary>
-        /// <param name="FrDir">copy from FrDir Directory</param>
-        /// <param name="FileName">file to copy</param>
-        /// <param name="ToDir">destination Directory</param>
-        /// <param name="overwrite">obligatory flag - true - allow overwrite</param>
-        /// <returns>bool result -- true if copy was succesful</returns>
-        /// <history>20.3.2016 PKh</history>
-        public static bool CopyFile(string FrDir, string FileName, string ToDir, bool overwrite = false)
-        {
-            bool result = false;
-            if (!isFileExist(FrDir, FileName)) Msg.F("ERR_02.2_COPY_NOFILEFROM", FrDir, FileName);
-            string From = FrDir + "\\" + FileName;
-            string To = ToDir + "\\" + FileName;
-            if (isFileExist(ToDir, FileName))
-            {
-                string sav = "SAVED_" + FileName;
-                if (isFileExist(ToDir, sav)) Delete(ToDir, sav);
-                File.Move(To, ToDir + "\\" + sav);
-            }
-            try
-            {
-                File.Copy(From, To, overwrite);
-                result = true;
-            }
-            catch (Exception e) { Msg.F("ERR_02.3_FILENOTCOPIED", e, From, To); }
-            return result;
-        }
-        public static void Delete(string dir, string name)
-        {
-            string file  = dir + "\\" + name;
-            File.Delete(file);
-        }
-        public static void Move(string FrDir, string FrName, string ToDir, string ToName)
-        {
-            string fr = FrDir + "\\" + FrName;
-            string to = ToDir + "\\" + ToName;
-            File.Move(fr, to);
-        }
+        #endregion
+
         public static void FormCol(char col, int dig = 0)
         {
         }
     }  // end class FileOp
 }  // end namespace FileOp
+#region NOT_IN_USE
 #if NOT_IN_USE
- /*
- * ........ Ќ≈ »—ѕќЋ№«”≈“—я ............
- * WrCSV(name)          - записывает CSV файл его дл€ дальнейшего ввод в SalesForce
- * WrReport(name,dt)    - записывает текстовый файл name в каталог ќтчетов
- * Quit()               - закрывает Excel - в основном дл€ UnitTest
- * -------- private методы ----------------
- * setDirDBs()          - провер€ет Windows Environment и устанавливает каталог dirDBs
- */   
-    /// <summary>
-    /// WrReport(name,dt)   - записывает текстовый файл name в каталог ќтчетов
-    /// </summary>
-    /// <param name="name">string name - им€ файла - отчета *.txt</param>
-    /// <param name="dt">DataTable dt - таблица с данными дл€ отчета</param>
-    /// <history>23.01.2015</history>
-    public static void WrReport(string name, DataTable dt)
+/*
+* ........ Ќ≈ »—ѕќЋ№«”≈“—я ............
+* WrCSV(name)          - записывает CSV файл его дл€ дальнейшего ввод в SalesForce
+* WrReport(name,dt)    - записывает текстовый файл name в каталог ќтчетов
+* Quit()               - закрывает Excel - в основном дл€ UnitTest
+* -------- private методы ----------------
+* setDirDBs()          - провер€ет Windows Environment и устанавливает каталог dirDBs
+*/
+/// <summary>
+/// WrReport(name,dt)   - записывает текстовый файл name в каталог ќтчетов
+/// </summary>
+/// <param name="name">string name - им€ файла - отчета *.txt</param>
+/// <param name="dt">DataTable dt - таблица с данными дл€ отчета</param>
+/// <history>23.01.2015</history>
+public static void WrReport(string name, DataTable dt)
     {
         setDirDBs();
         string fileName = dirDBs + @"\Reports\" + name + @".txt";
@@ -464,4 +469,5 @@ namespace match.FileOp
         var value = sh.UsedRange.Cells[row, col].Value2;
         return (value == null || value.ToString().Trim() == "");
     }
-#endif //end NOT_IN_USE
+#endif
+#endregion //end NOT_IN_USE

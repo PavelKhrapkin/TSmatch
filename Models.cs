@@ -1,7 +1,7 @@
 ﻿/*------------------------------------------------------------------------------------------
  * Model -- класс управления моделями, ведет Журнал Моделей и управляет их сохранением
  * 
- *  5.4.2016 П.Храпкин
+ *  21.6.2016 П.Храпкин
  *  
  *--- журнал ---
  * 18.1.2016 заложено П.Храпкин, А.Пасс, А.Бобцов
@@ -10,6 +10,8 @@
  * 15.3.2016 flag wrToFile in Model class - if true-> we must write down it to file
  * 19.3.2016 use Suppliers and Components classes
  *  5.4.2016 add to Model string field Current Phase; add Mgroup class
+ *  5.6.2016 OpenModel modified; UpdateFrIFC created
+ * 21.6.2016 Group and Mgroup classes moved to ElmAttSet module
  * -----------------------------------------------------------------------------------------
  *      КОНСТРУКТОРЫ: загружают Журнал Моделей из листа Models в TSmatch или из параметров
  * Model(DateTime, string, string, string, string md5, List<Mtch.Rule> r)   - простая инициализация
@@ -22,16 +24,17 @@
  * getModel(name)  - ищет модель по имени name в журнале моделей
  * setModel(name)  - подготавливает обработку модели name; читает все файлы компонентов
  * saveModel(name) - сохраняет модель с именем name
- * UpdateFrTekla   - обновление модели из данных в C# в файловую систему (ЕЩЕ НЕ ОТЛАЖЕНО!!)
+ * UpdateFrTekla() - обновление модели из данных в C# в файловую систему (ЕЩЕ НЕ ОТЛАЖЕНО!!)
  * modelListUpdate(name, dir, Made, MD5) - update list of models in TSmatch.xlsx/Models
  ! openModel()      - open model with OpenFileDialog from File System
  ! readModel(doc)   - read model (TSmatchINFO.xlsx) from dDocument
  * ReсentModel(List<Model> models) - return most recent model in list
  * IsModelCahanged - проверяет, изменилась ли Модель относительно сохраненного MD5
- * lngGroup(atr)   - группирует элементы модели по парам <Материал, Профиль> возвращая массивы длинны 
+ ! lngGroup(atr)   - группирует элементы модели по парам <Материал, Профиль> возвращая массивы длинны 
  */
 using System.Collections.Generic;
 using System;
+using System.IO;
 using System.Windows.Forms;
 using System.Linq;
 //!!using System.Text.RegularExpressions;
@@ -41,8 +44,13 @@ using Lib = match.Lib.MatchLib;
 using Docs = TSmatch.Document.Document;
 using Mtch = TSmatch.Matcher.Matcher;
 using TS = TSmatch.Tekla.Tekla;
+using Ifc = TSmatch.IFC.IFC;
 using Log = match.Lib.Log;
 using Msg = TSmatch.Message.Message;
+using Elm = TSmatch.ElmAttSet.ElmAttSet;
+using ElmMTGr = TSmatch.ElmAttSet.MaterialTypeGroup;
+using ElmMGr  = TSmatch.ElmAttSet.Mgroup;
+using ElmGr   = TSmatch.ElmAttSet.Group;
 using Supplier = TSmatch.Suppliers.Supplier;
 using Component = TSmatch.Components.Component;
 using CmpSet = TSmatch.Components.CompSet;
@@ -53,8 +61,9 @@ namespace TSmatch.Model
 {
     public class Model : IComparable<Model>
     {
+        #region --- Definitions and Constructors
         static List<Model> Models = new List<Model>();  // collection stored in TSmatchINFO.xlsx/Models
-        static List<TS.AttSet> Elements = new List<TS.AttSet>();    
+ /////       static List<TS.AttSet> Elements = new List<TS.AttSet>();    
 
         private DateTime date;      // дата и время последнего обновления модели
         public string name;         // название модели
@@ -104,6 +113,8 @@ namespace TSmatch.Model
             this.Rules = _rules; 
         }
         public Model(int i) : this(Docs.getDoc(Decl.MODELS), i) { }
+        #endregion
+
         /// <summary>
         /// Model.Start() - начинает работу со списком моделей, инициализирует структуры данных
         /// </summary>
@@ -122,16 +133,20 @@ namespace TSmatch.Model
             return strLst;
         }
         /// <summary>
-        /// getModel(name) - ищет модель по имени name в журнале моделей 
+        /// getModel(name) - get Model by name in TSmatch.xlsx/Model Journal  
         /// </summary>
-        /// <param name="name">имя искомой модели</param>
-        /// <returns>найденную в журнале Модель</returns>
+        /// <param name="name">Model name</param>
+        /// <returns>found Model</returns>
+        /// <history>5.6.2016</history>
         public static Model getModel(string name)
         {
             Log.set("Model(\"" + name + "\")");
             Model result = null;
-            foreach (var md in Models)
-                if (md.name == name) { result = md; break; }
+            if (string.IsNullOrEmpty(name)) result = RecentModel();
+            else
+            {
+                result = Models.Find(x => x.name == name);
+            }
             Log.exit();
             return result;
         }
@@ -160,18 +175,18 @@ namespace TSmatch.Model
         public static Model UpdateFrTekla()
         {
             Log.set(@"UpdateFrTekla()");
-            Elements = TS.Read();
-            new Log(@"Модель = " + TS.ModInfo.ModelName + "\t" + Elements.Count + " компонентов.");
+            Elm.Elements = TS.Read();
+            new Log(@"Модель = " + TS.ModInfo.ModelName + "\t" + Elm.Elements.Count + " компонентов.");
             string mod_name = TS.ModInfo.ModelName;
             string mod_dir = TS.ModInfo.ModelPath;
             string mod_phase = TS.ModInfo.CurrentPhase.ToString();
-            Model mod = modelListUpdate(mod_name, mod_dir, TS.MyName, TS.ModAtrMD5(), mod_phase);
+            Model mod = modelListUpdate(mod_name, mod_dir, TS.MyName, Elm.ElementsMD5(), mod_phase);
             if (mod.wrToFile) 
             {
                 mod.wrModel(Decl.RAW);
                 mod.wrModel(Decl.MODELINFO);
-                setGroups();            // Group Elements by Materials and Profile
-                Mgroup.setMgr();        // Additionally group Groups by Material 
+                ////ElmGr.setGroups();            // Group Elements by Materials and Profile
+                ////ElmMGr.setMgr();        // Additionally group Groups by Material 
                 setModel(mod.name);     // Load price-list for the model
                 Mtch.UseRules(mod);     // Search for Model Groups matching Components
                 mod.wrModel(Decl.REPORT);
@@ -179,7 +194,7 @@ namespace TSmatch.Model
                 saveModel(mod.name);    // а теперь запишем в Журнал Моделей обновленную информацию
             }
             else new Log("------- Эта модель уже есть в TSmatch. Ничего не записываем --------");
-            Elements.Clear();
+            Elm.Elements.Clear();
             mod.wrToFile = false;
             Log.exit();
             return mod;
@@ -247,44 +262,78 @@ namespace TSmatch.Model
             foreach (var v in mod.CompSets) v.doc.Close();
             Log.exit();
         }
-        public static void openModel()
+        /// <summary>
+        /// OpenModel(name) - open model name from Excel file, Tekla, or ifc file. Selection, when necessary
+        /// </summary>
+        /// <param name="name">Model name. If empty - open most recent model; when not found -- dialog browth</param>
+        /// <history> 5.6.2016 </history>
+        const string RECENT_MODEL = "My most recent model";
+        /// <summary>
+        /// OpenModel(name) - open Model in Tekla, IFC or Excel file
+        /// </summary>
+        /// <param name="name"></param>
+        /// <history>5.6.2016</history>
+        public static void openModel(string name = RECENT_MODEL)
         {
-            Log.set("openModel");
-            FolderBrowserDialog ffd = new FolderBrowserDialog();
-            string dir = ffd.SelectedPath = ReсentModel(Models).dir;
-            DialogResult result = ffd.ShowDialog();
-            if (result == DialogResult.OK) dir = ffd.SelectedPath;
-
-            string FileName = "TSmatchINFO.xlsx";
+            Log.set("openModel(\"" + name + "\")");
+            Model mod = null;
             bool ok = false;
-            do
+            if (TS.isTeklaActive())
             {
-                if (!FileOp.isFileExist(dir, FileName))
+                //!! here we could upload over API in Tekla another model it differ from requested name
+                //!! if (TS.isTeklaModel(mod.name))
+                //!! implement it later on 23/6/2016
+                UpdateFrTekla();
+            }
+            if (name == RECENT_MODEL) mod = RecentModel();
+                                 else mod = getModel(name);
+
+            string dir = mod.dir;
+            string FileName = "TSmatchINFO.xlsx";
+            if (mod.Made == "IFC") FileName = "out.ifc";
+            if (mod != null) ok = FileOp.isFileExist(dir, FileName);
+
+            if (!ok)
+            {           //-- Folder or File Browth dialog
+                FolderBrowserDialog ffd = new FolderBrowserDialog();
+                dir = ffd.SelectedPath = mod.dir;
+                DialogResult result = ffd.ShowDialog();
+                if (result == DialogResult.OK) dir = ffd.SelectedPath;
+                do
                 {
-                    Msg.W("W20.4_opMod_NO_TSmINFO", dir);
-                    OpenFileDialog ofd = new OpenFileDialog();
-                    ofd.InitialDirectory = dir;
-                    if (ofd.ShowDialog() == DialogResult.OK)
+                    if (!FileOp.isFileExist(dir, FileName))
                     {
-                        FileName = ofd.FileName;
-// !!!!!!                       dir = ofd.Sel
+                        Msg.W("W20.4_opMod_NO_TSmINFO", dir);
+                        OpenFileDialog ofd = new OpenFileDialog();
+                        ofd.InitialDirectory = dir;
+                        if (ofd.ShowDialog() == DialogResult.OK)
+                        {
+                            FileName = ofd.FileName;
+                            // !!!!!!                       dir = ofd.Sel
+                        }
                     }
-                }
-                ok = readModel(out Elements, dir, FileName);
-//!!!                if(!ok) Msg.Ask(Еще раз?) break;
-            } while (!ok);
+                    ok = readModel(dir, FileName);
+                    //!!!                if(!ok) Msg.Ask(Еще раз?) break;
+                } while (!ok);
+            }
+            else
+            {
+                string ext = Path.GetExtension(FileName);
+                if ( ext == ".ifc") Ifc.Read(dir, FileName); //!!
+                if (ext == ".xlsx") dir= "";//!! readModel();
+            }
             Log.exit();
         }
-        private static bool readModel(out List<TS.AttSet> elm, string dir = null, string FileName = "TSmatchINFO.xlsx")
+        private static bool readModel(string dir = null, string FileName = "TSmatchINFO.xlsx")
         {
             Log.set("readModel(" + dir + ", " + FileName + ")");
             bool ok = false;
 //!!            Docs.setDocTemplate(Decl.TEMPL_TMP, dir);
             Docs tmp = Docs.getDoc(Decl.TMP_RAW);
             Docs tmpINFO = Docs.getDoc(Decl.TMP_MODELINFO);
-            List<TS.AttSet> diff = new List<TS.AttSet>();
+//!!            List<TS.AttSet> diff = new List<TS.AttSet>();
             throw new NotImplementedException(); //!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            elm = diff;
+//!!            elm = diff;
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             Log.exit();
             return ok;
@@ -306,11 +355,11 @@ namespace TSmatch.Model
             {
                 case Decl.RAW:
                     int B = 1000, ii = 0, tostr = 1; DateTime t0 = DateTime.Now;
-                    foreach (var elm in Elements)
+                    foreach (var elm in Elm.Elements)
                     {
                         double w = elm.weight;                          // elm.weight - weight [kg];
                         double v = elm.volume / 1000 / 1000 / 1000;     // elm.volume [mm3] -> [m3] 
-                        doc.wrDoc(1, elm.guid, elm.mat, elm.mat_type, elm.prf, elm.lng, w, v);
+                        doc.wrDoc(1, elm.guid, elm.mat, elm.mat_type, elm.prf, elm.length, w, v);
                     }
                     ////////while (ii < Elements.Count)
                     ////////{
@@ -332,10 +381,16 @@ namespace TSmatch.Model
                     new Log("Время записи в файл (помимо чтения из Tekla) t=" + (DateTime.Now - t0).ToString() + " сек");
                     doc.isChanged = true;
                     Model mod = getModel(TS.ModInfo.ModelName);
-                    doc.saveDoc(BodySave: false, MD5: mod.MD5, EOL: Elements.Count + 1);
+                    doc.saveDoc(BodySave: false, MD5: mod.MD5, EOL: Elm.Elements.Count + 1);
                     break;
                 case Decl.MODELINFO:
-                    doc.wrDoc(1, name, dir, "фаза?", date, MD5, Elements.Count, strListRules);
+                    doc.wrDocSetForm("HDR_ModelINFO", 1, AutoFit:true);
+                    doc.wrDocForm(name, dir, "фаза?", date, MD5, Elm.Elements.Count);
+                    ElmMTGr.getMatTypeGrSummary();
+                    doc.wrDocSetForm("FORM_ModelINFO_MatTypeGr", 8, AutoFit: false);
+                    doc.wrDocForm(ElmMTGr.MatTypeGrSummary);
+
+//!!                    doc.wrDoc(1, name, dir, "фаза?", date, MD5, Elm.Elements.Count, strListRules);
                     foreach (var rule in this.Rules)
                     {
                         string supplier = rule.Supplier.name;
@@ -347,7 +402,7 @@ namespace TSmatch.Model
                 case Decl.REPORT:
                     double sumWgh = 0, sumPrice = 0;
                     int iGr = doc.i0;
-                    foreach (var gr in Groups)
+//21/6/2016 в отладке                    foreach (var gr in Groups)
                     {
                         double? w = doc.Body.Double(iGr, Decl.REPORT_SUPL_WGT);
                         double? p = doc.Body.Double(iGr++, Decl.REPORT_SUPL_PRICE);
@@ -390,109 +445,10 @@ namespace TSmatch.Model
             Models.Sort();
             return Models[0].dir;
         }
-        public struct Group : IComparable<Group>
+        public static Model RecentModel()
         {
-            public string mat, mat_type, prf;
-            public double lng, wgt, vol;
-            public readonly List<string> GUIDs; // List of ID Parts in the Group
-
-            public Group(string _mat, string _mat_type, string _prf,
-                         double _lng, double _wgt, double _vol,
-                         List<string> _guids) : this()
-            {
-                mat = Lib.ToLat(_mat); mat_type = _mat_type; prf = Lib.ToLat(_prf);
-                lng = _lng; wgt = _wgt; vol = _vol;
-                GUIDs = _guids;
-            }
-            public int CompareTo(Group grp)     //to Sort Groups by Material and Profile
-            {
-                int x = this.mat.CompareTo(grp.mat);
-                if (x == 0) x = this.prf.CompareTo(grp.prf);
-                return x;
-            }
+            Models.Sort();
+            return Models[0];
         }
-        public static List<Group> Groups = new List<Group>();
-        public static List<Group> setGroups()
-        {
-            string mat = "", mat_type = "", prf = "";
-            double lng = 0.0, wgt = 0.0, vol = 0.0;
-            List<string> guids = new List<string>();
-            foreach (var v in Elements)
-            {
-                if (v.lng == 0.0) continue;
-                if (mat == v.mat && prf == v.prf)
-                {
-                    lng += v.lng;
-                    wgt += v.weight/1000;
-                    vol += v.volume/1000/1000/1000;
-                    guids.Add(v.guid);
-                }
-                else
-                {
-                    if (lng > 0.0) Groups.Add(new Group(mat, mat_type, prf, lng, wgt, vol, guids));
-                    mat = v.mat; mat_type = v.mat_type; prf = v.prf; lng = v.lng; wgt = v.weight/1000;
-                    vol = v.volume/1000/1000/1000;
-                    guids.Clear(); guids.Add(v.guid);
-                }
-            }
-            if (lng > 0.0) Groups.Add(new Group(mat, mat_type, prf, lng, wgt, vol, guids));
-            return Groups;
-        }
-        //public static void lngGroup(dynamic atr)
-        //{
-        //    Log.set("lngGroup");
-        //    if (atr.GetType() != typeof(List<TS.AttSet>)) Log.FATAL("ПОКА Я УМЕЮ РАБОТАТЬ ТОЛЬКО С TSread, но вскоре...");
-        //    List<TS.AttSet> Elements = atr;
-        //    Elements.Sort();
-        //    foreach (var elm in Elements)
-        //    {
-        //        Group grp = new Group(elm.mat, elm.prf);
-        //    }
-        //    Log.exit();
-        //}
-        public class Mgroup : IComparable<Mgroup>
-        {
-            static List<Mgroup> Mgroups = new List<Mgroup>();
-            
-            String mat;
-            double volume, weight;
-            List<Group> groups = new List<Group>();
-
-            public Mgroup(string mat, double vol, double wgt, List<Group> grps)
-            {
-                this.mat = mat;
-                this.volume = vol;
-                this.weight = wgt;
-            }
-
-            public int CompareTo(Mgroup mgr) { return mgr.mat.CompareTo(mgr); }    //to Sort Mgroups by Material
-
-            internal static void setMgr()
-            {
-                Log.set("setMgr");
-                Mgroups.Clear();
-                Groups.Sort();
-                string mat = "";
-                double vol = 0, wgt = 0;
-                List<Group> grps = new List<Group>();
-                foreach (var g in Groups)
-                {
-                    if (mat == g.mat)
-                    {
-                        grps.Add(g);
-                        vol += g.vol;
-                        wgt += g.wgt;
-                    }
-                    else
-                    {
-                        if (mat != "") Mgroups.Add(new Mgroup(mat, vol, wgt, grps));
-                        mat = g.mat; vol = 0; wgt = 0;
-                        grps = new List<Group>();
-                    }
-                }
-                if (vol > 0) Mgroups.Add(new Mgroup(mat, vol, wgt, grps));
-                Log.exit();
-            }
-        } // end class Mgroup
     } // end class Model
 } // end namespace Model
