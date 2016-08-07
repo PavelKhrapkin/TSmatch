@@ -159,9 +159,10 @@ namespace TSmatch.Tekla
                 }
             } //while
             progress.Close();
-            Elm.Elements.Sort();
+//            Elm.Elements.Sort();
             Log.exit();
-            return Elm.Elements;
+            //            return Elm.Elements;
+            return null;
         } // Read
 /*2016.6.21        /// <summary>
         /// ModAtrMD5() - calculate MD5 of the model read from Tekla in ModAtr

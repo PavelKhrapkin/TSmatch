@@ -1,7 +1,7 @@
 ﻿/*------------------------------------------------------------------------------------------
  * Model -- класс управления моделями, ведет Журнал Моделей и управляет их сохранением
  * 
- *  21.6.2016 П.Храпкин
+ *  6.8.2016 П.Храпкин
  *  
  *--- журнал ---
  * 18.1.2016 заложено П.Храпкин, А.Пасс, А.Бобцов
@@ -12,6 +12,11 @@
  *  5.4.2016 add to Model string field Current Phase; add Mgroup class
  *  5.6.2016 OpenModel modified; UpdateFrIFC created
  * 21.6.2016 Group and Mgroup classes moved to ElmAttSet module
+ *  6.8.2016 - Add field elements in Model class
+ *           - non static methos getModel, saveModel, setModel
+ *           - Read(modelName) -- by defaul if(modelName == "") read most recent model
+ * !!!!!!!!!!!!! -------------- TODO --------------
+ * ! избавиться от static в RecentModel, RecentModelDir 
  * -----------------------------------------------------------------------------------------
  *      КОНСТРУКТОРЫ: загружают Журнал Моделей из листа Models в TSmatch или из параметров
  * Model(DateTime, string, string, string, string md5, List<Mtch.Rule> r)   - простая инициализация
@@ -21,6 +26,7 @@
  *
  *      МЕТОДЫ:
  * Start()         - инициирует начальную загрузку Журнала Моделей; возвращает список имен моделей
+ * Read(modelName) - получение модели (списка элементов с атрибутами) из Tekla или IFC
  * getModel(name)  - ищет модель по имени name в журнале моделей
  * setModel(name)  - подготавливает обработку модели name; читает все файлы компонентов
  * saveModel(name) - сохраняет модель с именем name
@@ -71,11 +77,14 @@ namespace TSmatch.Model
         private string Made;        // выполненная процедуры TSmatch, после которой получен MD5
         private string Phase;       // текущая фаза проекта. В Tekla это int
         private string MD5;         // контрольная сумма отчета по модели
+        private List<Elm> elements = new List<Elm>();
         public readonly List<Mtch.Rule> Rules;  // список Правил, используемых с данной моделью
         private string strListRules;            // список Правил в виде текста вида "5,6,8"
         public List<Supplier> Suppliers = new List<Supplier>();
         public List<CmpSet> CompSets = new List<CmpSet>();
         private bool wrToFile = true;   // when true - we should write into the file
+
+        private Ifc ifc = null;
 
         public int CompareTo(Model mod) { return mod.date.CompareTo(date); }    //to Sort Models by time
 
@@ -93,6 +102,31 @@ namespace TSmatch.Model
         public Model(string _name, string _dir, string _made, string _phase, string _md5)
             : this(DateTime.Now, _name, _dir, _made, _phase, _md5, new List<Mtch.Rule>(), "")
         { }
+
+        /// <summary>
+        /// newModelOpenDialog(models) -- run when new Model must be open not exists in Model Journal models
+        /// </summary>
+        /// <param name="models">List<Models> to be updated after dialog</param>
+        /// <returns>List<Model></Model>sorted models list -- models[0] - just opened Model</returns>
+        /// <history>6.08.2016</history>
+        internal static Model newModelOpenDialog(out List<Model> models)
+        {
+            Model result = null;
+            string newFileDir = "", newFileName = "";
+
+            throw new NotImplementedException();
+
+            while (result != null)
+            {
+                if (FileOp.isFileExist(newFileDir, newFileName))
+                {
+                }
+                models = Start();
+//TODO                models.savModelJournal();
+            }
+            return result;
+        }
+
         public Model(string _name, string _dir, string _made, string _phase, string _md5
             , List<Mtch.Rule> _rules, string _strRuleList)
            : this(DateTime.Now, _name, _dir, _made, _phase, _md5, _rules, _strRuleList)
@@ -120,9 +154,10 @@ namespace TSmatch.Model
         /// </summary>
         /// <returns></returns>
         /// <history>12.2.2016<\history>
-        public static List<string> Start()
+        public static List<Model> Start()
         {
             Log.set("Model.Start");
+            Models.Clear();
             Docs doc = Docs.getDoc(Decl.MODELS);
             for (int i = doc.i0; i <= doc.il; i++)
                 if( doc.Body[i, Decl.MODEL_NAME] != null ) Models.Add(new Model(doc, i));
@@ -130,22 +165,45 @@ namespace TSmatch.Model
             foreach (var m in Models) strLst.Add(m.name);
             strLst.Sort();
             Log.exit();
-            return strLst;
+            return Models;
+        }
+        /// <summary>
+        /// Read(nameModel) - получение модели (списка элементов с атрибутами) из Tekla или IFC
+        /// </summary>
+        /// <param name="modelName">имя читаемой модели, по умолчанию - чтение самой свежей модели</param>
+        /// <returns>Model со списком прочитанных элементов в model.elements</returns>
+        public Model Read(string modelName = "")
+        {
+            Model mod = this;
+            if(mod.name != modelName)
+            {
+                mod = getModel(modelName);
+            }
+//6/8/16 UpdateFrTekla() не приводится к Model.Model (?)            if (TS.isTeklaActive()) mod.elements = UpdateFrTekla();
+            if (TS.isTeklaActive()) UpdateFrTekla();
+            else elements = Ifc.Read(mod.dir, mod.name);
+            return mod;
         }
         /// <summary>
         /// getModel(name) - get Model by name in TSmatch.xlsx/Model Journal  
         /// </summary>
-        /// <param name="name">Model name</param>
+        /// <param name="name">Model name; by default get most recent model</param>
         /// <returns>found Model</returns>
-        /// <history>5.6.2016</history>
-        public static Model getModel(string name)
+        /// <history>5.6.2016
+        /// 6.8.2016 - non static method</history>
+        public Model getModel(string name)
         {
             Log.set("Model(\"" + name + "\")");
             Model result = null;
             if (string.IsNullOrEmpty(name)) result = RecentModel();
             else
             {
-                result = Models.Find(x => x.name == name);
+                List<Model> models = Start();
+                result = models.Find(x => x.name == name);
+                while(result==null)
+                {
+                    result = newModelOpenDialog(out models);
+                }
             }
             Log.exit();
             return result;
@@ -154,9 +212,8 @@ namespace TSmatch.Model
         /// saveModel(Model md)  - записываем измененную модель в файловую систему
         /// </summary>
         /// <param name="name">имя модели для записи.</param>
-        /// используются вспемогательные перегруженные методы modJrnLine для записи в
-        /// существующую строку Models и для добавления новой модели
-        public static Model saveModel(string name)
+        /// <history>6.8.16 -- nonstatic method</history>
+        public Model saveModel(string name)
         {
             Log.set("saveModel(\"" + name + "\")");
             Docs doc = Docs.getDoc(Decl.MODELS);
@@ -172,10 +229,10 @@ namespace TSmatch.Model
             Log.exit();
             return getModel(name);
         }
-        public static Model UpdateFrTekla()
+        public Model UpdateFrTekla()
         {
             Log.set(@"UpdateFrTekla()");
-            Elm.Elements = TS.Read();
+ //           Elm.Elements = TS.Read();
             new Log(@"Модель = " + TS.ModInfo.ModelName + "\t" + Elm.Elements.Count + " компонентов.");
             string mod_name = TS.ModInfo.ModelName;
             string mod_dir = TS.ModInfo.ModelPath;
@@ -210,8 +267,9 @@ namespace TSmatch.Model
         /// <history> 6.3.2016 PKh
         /// 15.3.16 return Model instead of null in case of completely new model; wrToFile handle
         ///  5.4.16 Current Phase handling
+        ///  6.8.16 non static method
         /// </history>
-        static Model modelListUpdate(string name, string dir=null, string Made=null, 
+        Model modelListUpdate(string name, string dir=null, string Made=null, 
                                      string MD5=null, string Phase = null, string str=null)
         {
             Log.set("modelListUpdate");
@@ -248,7 +306,7 @@ namespace TSmatch.Model
         /// setModel(name) - подготавливает обработку модели name; читает все файлы компонентов
         /// </summary>
         /// <param name="name">имя модели</param>
-        public static void setModel(string name)
+        public void setModel(string name)
         {
             Log.set(@"setModel(" + name + ")");
             Model mod = getModel(name);
@@ -268,12 +326,7 @@ namespace TSmatch.Model
         /// <param name="name">Model name. If empty - open most recent model; when not found -- dialog browth</param>
         /// <history> 5.6.2016 </history>
         const string RECENT_MODEL = "My most recent model";
-        /// <summary>
-        /// OpenModel(name) - open Model in Tekla, IFC or Excel file
-        /// </summary>
-        /// <param name="name"></param>
-        /// <history>5.6.2016</history>
-        public static void openModel(string name = RECENT_MODEL)
+        public void openModel(string name = RECENT_MODEL)
         {
             Log.set("openModel(\"" + name + "\")");
             Model mod = null;
@@ -355,7 +408,7 @@ namespace TSmatch.Model
             {
                 case Decl.RAW:
                     int B = 1000, ii = 0, tostr = 1; DateTime t0 = DateTime.Now;
-                    foreach (var elm in Elm.Elements)
+                    foreach (var elm in Elm.Elements.Values)
                     {
                         double w = elm.weight;                          // elm.weight - weight [kg];
                         double v = elm.volume / 1000 / 1000 / 1000;     // elm.volume [mm3] -> [m3] 
@@ -428,7 +481,7 @@ namespace TSmatch.Model
         /// </summary>
         /// <param name="models">model list</param>
         /// <returns>most recently saved Model in the list</returns>
-        public static Model ReсentModel(List<Model> models)
+        public Model ReсentModel(List<Model> models)
         {
             Log.set("ReсentModel");
             Model mod = null;
@@ -437,6 +490,7 @@ namespace TSmatch.Model
                 models.Sort();
                 mod = models[0];
             }
+            else mod = newModelOpenDialog(out models);
             Log.exit();
             return mod;
         }

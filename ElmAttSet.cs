@@ -1,11 +1,12 @@
 ﻿/*--------------------------------------------------------------------------------------
  * ElmAttSet -- Definitions of Properties, and their Names of the Elements in the Model 
  * 
- *  21.6.2016  Pavel Khrapkin
+ *  2.8.2016  Pavel Khrapkin
  *  
  *----- History ------------------------------------------
  * 01.06.2016 - created from structure AttSet in Tekla.Open_API module
  * 19.06.2016 - move Group and Mgroup classes from module Model
+ *  2.08.2016 - adapt to IFC module
  * -------------------------------------------
  * public class ElmAttSet - set of model component attribuyes, extracted from Tekla or IFC by method Read
  * public class Group     - Group elements by Materials and Profile
@@ -21,6 +22,7 @@ using System.Threading.Tasks;
 using Decl = TSmatch.Declaration.Declaration;
 using Log = match.Lib.Log;
 using Lib = match.Lib.MatchLib;
+using Ifc = TSmatch.IFC.IfcManager.Core.IfcManager.IfcElement;
 
 namespace TSmatch.ElmAttSet
 {
@@ -33,9 +35,11 @@ namespace TSmatch.ElmAttSet
         public double length = 0.0;      
         public double weight = 0.0;    
         public double volume = 0.0;    
-        public double price  = 0.0;    
+        public double price  = 0.0;
 
-        public static List<ElmAttSet> Elements = new List<ElmAttSet>();
+        //        public static List<ElmAttSet> Elements = new List<ElmAttSet>();
+
+        public static Dictionary<string, ElmAttSet> Elements = new Dictionary<string, ElmAttSet>();
 
         public string[] TAG = { "GUID", "MATERIAL", "MATERIAL_TYPE", "PROFILE", "LENGTH", "WEIGHT", "VOLUME", "PRICE" };
         public enum sumFields { length, weight, volume, price }
@@ -52,7 +56,20 @@ namespace TSmatch.ElmAttSet
             volume = _volume;
             price  = _price;
 
-            Elements.Add(this);
+            Elements.Add(_guid, this);
+        }
+        public ElmAttSet(Ifc ifc_elm)
+        {
+            guid = ifc_elm.guid;
+            mat = ifc_elm.material;
+            mat_type = ifc_elm.type_material;
+            prf = ifc_elm.profile;
+            length = Lib.ToDouble(ifc_elm.length);
+            weight = Lib.ToDouble(ifc_elm.weight);
+            volume = Lib.ToDouble(ifc_elm.volume);
+            price = Lib.ToDouble(ifc_elm.price);
+
+            Elements.Add(guid, this);
         }
 
         public bool Equals(ElmAttSet other)
@@ -93,10 +110,10 @@ namespace TSmatch.ElmAttSet
             double val = 0.0;
             foreach (var id in guids)
             {
-                ElmAttSet elm = ElmAttSet.Elements.Find(x => x.guid == id);
+ /*               ElmAttSet elm = ElmAttSet.Elements.Find(x => x.guid == id);
                 if (atr == sumFields.length) val += elm.length;
                 if (atr == sumFields.volume) val += elm.volume;
-                if (atr == sumFields.weight) val += elm.weight;
+                if (atr == sumFields.weight) val += elm.weight;*/
             }
             return val;
         }
@@ -110,7 +127,7 @@ namespace TSmatch.ElmAttSet
         {
             //            DateTime t0 = DateTime.Now;  
             string str = "";
-            foreach (var elm in Elements) str += elm.mat + elm.prf + elm.length.ToString();
+            foreach (var elm in Elements.Values) str += elm.mat + elm.prf + elm.length.ToString();
             string ModelMD5 = Lib.ComputeMD5(str);
             return ModelMD5;
             //            new Log("MD5 time = " + (DateTime.Now - t0).ToString());
@@ -151,7 +168,7 @@ namespace TSmatch.ElmAttSet
         {
             string curMTG = "";
             List<string> curGuids = new List<string>();
-            foreach (var elm in ElmAttSet.Elements)
+            foreach (var elm in ElmAttSet.Elements.Values)
             {
                 if (elm.mat_type == curMTG) curGuids.Add(elm.guid);
                 else
@@ -245,7 +262,7 @@ namespace TSmatch.ElmAttSet
         {
             string curMat = "", curPrf = "";
             List<string> curGuids = new List<string>();
-            foreach (var elm in ElmAttSet.Elements)
+            foreach (var elm in ElmAttSet.Elements.Values)
             {
                 if (curMat == elm.mat && curPrf == elm.prf) curGuids.Add(elm.guid);
                 else

@@ -1,12 +1,17 @@
 ﻿/*-----------------------------------------------------------------------
  * IFC -- Interaction with model in IFC file.
  * 
- * 31.5.2016  Pavel Khrapkin
+ * 6.8.2016  Pavel Khrapkin
  *  
+ *------ ToDo ----------
+ * -ISSUE- в Read на входе "Desktop\MyColumb", а открывается файл "\Desktop\out.ifc"
+ * -ISSUE- в файле MyColumn getElementsByProperty("NetVolume") возвращает Count = 0
+ * - разобраться по документации и out.ifc с получением Профиля = IFCMEMBERTYPE
  *----- History ------------------------------------------
  * 13.5.2016 PKh start IFCenfine.dll use. Contact with Peter Bomsoms@rdf.bg http://rdf.bg/downloads/ifcengine-20160428.zip
  * 15.5.2016 Contact with Ph.D Lin Jiarui in Bejin ifcEngineCS https://github.com/LinJiarui/IfcEngineCS
  * 31.5.2016 Oleg Turetsky made sample based on incEngineCS. PKh started IFC class implementation for TSmatch
+ *  1.8.2016 Oleg has changed IfcManager code
  * -------------------------------------------
  * public Structure AttSet - set of model component attribuyes, extracted from Tekla by method Read
  *                           AttSet is Comparable, means Sort is applicable, and 
@@ -27,13 +32,19 @@ using System.Runtime.InteropServices;
 using IfcEngineCS;
 using IfcManager.Core;
 
+
 using FileOp = match.FileOp.FileOp;
+using Lib = match.Lib.MatchLib;
+using Msg = TSmatch.Message.Message;
 using ElmAttributes = TSmatch.ElmAttSet;
+using TSmatch.IFC.IfcManager.Core;
 
 namespace TSmatch.IFC
 {
     public class IFC
     {
+       
+
         static string schemaName;
         public static void Start(string _schemaName)
         {
@@ -45,18 +56,52 @@ namespace TSmatch.IFC
         {
             var manager = new IfcManager.Core.IfcManager();
 
-            //string dir = Path.GetDirectoryName(ifcFileName);
-            //string nam = Path.GetFileName(ifcFileName);
-            //FileOp.fileOpen(dir, nam);
+            if (!FileOp.isFileExist(ifcFileName)) Msg.F("IFC.Read: no file", ifcFileName);
 
             manager.init(ifcFileName, schemaName);
 
-            List<String> objectNameListNet = manager.getElementsByProperty("NetVolume");
- //           List<String> objectNameList = manager.getElementsByProperty("Volume");
+            List<IfcManager.Core.IfcManager.IfcElement> elements = new List<IfcManager.Core.IfcManager.IfcElement>();
+            elements = manager.getElementsByProperty("NetVolume");
+            IFC.MergeIfcToElmAttSet(elements);
 
-///            List<String> objectNameListGross = manager.getElementsByProperty("GrossVolume");
-            //            printList(objectNameList);
-            return null;
+            elements.Clear();
+            elements = manager.getElementsByProperty("Weight");
+            IFC.MergeIfcToElmAttSet(elements);
+
+            elements.Clear();
+            elements = manager.getElementsByMaterials();
+            IFC.MergeIfcToElmAttSet(elements);
+
+            elements.Clear();
+            elements = manager.getElementsByProperty("Profile");
+            IFC.MergeIfcToElmAttSet(elements);
+            return ElmAttributes.ElmAttSet.Elements.Values.ToList();
+        }
+
+        private static List<ElmAttributes.ElmAttSet> MergeIfcToElmAttSet(List<IfcManager.Core.IfcManager.IfcElement> elements)
+        {
+            foreach (var ifc_elm in elements)
+            {
+                string guid = ifc_elm.guid;
+                if (!ElmAttSet.ElmAttSet.Elements.ContainsKey(guid))
+                {
+                    ElmAttSet.ElmAttSet new_elm = new ElmAttSet.ElmAttSet(ifc_elm);
+//                    new_elm = new ElmAttSet.ElmAttSet(ifcElemOrg);
+                }
+                else
+                {
+                    ElmAttributes.ElmAttSet elm = null;
+                    ElmAttSet.ElmAttSet.Elements.TryGetValue(guid, out elm);
+                    if (!String.IsNullOrEmpty(ifc_elm.material)) elm.mat = ifc_elm.material;
+                    if (!String.IsNullOrEmpty(ifc_elm.type_material)) elm.mat_type = ifc_elm.type_material;
+                    if (!String.IsNullOrEmpty(ifc_elm.profile)) elm.prf = ifc_elm.profile;
+                    if (!String.IsNullOrEmpty(ifc_elm.length)) elm.length = Lib.ToDouble(ifc_elm.length);
+                    if (!String.IsNullOrEmpty(ifc_elm.weight)) elm.weight = Lib.ToDouble(ifc_elm.weight);
+                    if (!String.IsNullOrEmpty(ifc_elm.volume)) elm.volume = Lib.ToDouble(ifc_elm.volume);
+                    if (!String.IsNullOrEmpty(ifc_elm.price)) elm.price = Lib.ToDouble(ifc_elm.price);
+                }
+            }
+            return ElmAttSet.ElmAttSet.Elements.Values.ToList();
         }
     } // end class TSmatch.IFC
 
@@ -71,15 +116,44 @@ namespace IfcManager.Core
     {
         public class IfcManager
         {
+            public const string NETVOLUME = "NetVolume";
+
+
             IfcEngine _ifcEngine = null;
             IntPtr _ifcModel = IntPtr.Zero;
             String path = String.Empty;
+
+            public Dictionary<string, string> ifcProp2IfcPropType { get; set; }
+            public Dictionary<string, string> ifcProp2IfcPropValueType { get; set; }
+            public Dictionary<string, string> ifcPropSetTypeByIfcPropType{ get; set; }
+            public Dictionary<string, string> ifcElemntContainerTypeByIfcPropType { get; set; }
 
             #region init
             public void init(string ifcFile, string ifcSchema)
             {
                 _ifcEngine = new IfcEngine();
                 _ifcModel = _ifcEngine.OpenModel(IntPtr.Zero, ifcFile, ifcSchema);
+
+                ifcProp2IfcPropType = new Dictionary<string, string>();
+                ifcProp2IfcPropValueType = new Dictionary<string, string>();
+                ifcPropSetTypeByIfcPropType = new Dictionary<string, string>();
+                ifcElemntContainerTypeByIfcPropType = new Dictionary<string, string>();
+
+                ifcProp2IfcPropType.Add("NetVolume", "IfcQuantityVolume");
+                ifcProp2IfcPropValueType.Add("NetVolume", "VolumeValue");
+
+                ifcProp2IfcPropType.Add("Weight", "IfcPropertySingleValue");
+                ifcProp2IfcPropValueType.Add("Weight", "NominalValue");
+
+                ifcProp2IfcPropType.Add("Profile", "IfcPropertySingleValue");
+                ifcProp2IfcPropValueType.Add("Profile", "NominalValue");
+
+                ifcPropSetTypeByIfcPropType.Add("IfcQuantityVolume", "IfcElementQuantity");
+                ifcPropSetTypeByIfcPropType.Add("IfcPropertySingleValue", "IfcPropertySet");
+
+
+                ifcElemntContainerTypeByIfcPropType.Add("IfcElementQuantity", "Quantities");
+                ifcElemntContainerTypeByIfcPropType.Add("IfcPropertySet", "hasProperties");
                 #region commented Oleg' code
                 //if (!String.Empty.Equals(ifcFilePath))
                 //{
@@ -137,86 +211,6 @@ namespace IfcManager.Core
             #endregion convertIfcFile
 
             #region getElementsByProperty
-            public List<String> getElementsByProperty(String propertyName)
-            {
-                var objectNameList = new List<String>();
-                if (null != propertyName && !String.Empty.Equals(propertyName))
-                {
-                    System.Console.WriteLine("begin process");
-
-                    var propertyInstance = IntPtr.Zero;
-                    List<IntPtr> listPropSets = new List<IntPtr>();
-                    if ((propertyInstance = findProperty(propertyName)) != IntPtr.Zero)
-                    {
-                        if ((listPropSets = findPropertySets(propertyInstance)).Count() > 0)
-                        {
-                            objectNameList = createResult(findElements(listPropSets));
-                        }
-                    }
-                    else
-                    {
-                        throw new Exception("Model doesn't contain the property with name: " + propertyName);
-                    }
-
-                    System.Console.WriteLine("end process");
-                }
-                else
-                {
-                    throw new Exception("Property name is incorrect");
-                }
-                return objectNameList;
-            }
-
-            // find property
-            private IntPtr findProperty(String strPropertyName)
-            {
-                IntPtr iEntitiesCount;
-//16/6/16                IntPtr properties = getAggregator("ifcPropertySingleValue", out iEntitiesCount);
-                IntPtr properties = getAggregator("ifcQuantityVolume", out iEntitiesCount); //!!16/6/16
-                IntPtr propertyInstance = IntPtr.Zero;
-                foreach (IntPtr iPropertyInstance in findEntity(properties, iEntitiesCount))
-                {
-                    String strName = getAttrValueAsString(iPropertyInstance, "Name");
-                    if (strPropertyName.Equals(strName))
-                    {
-                        propertyInstance = iPropertyInstance;
-                        break;
-                    }
-                    else
-                    {
-                        propertyInstance = IntPtr.Zero;
-                    }
-                }
-                return propertyInstance;
-            }
-
-            // find propertySet that contains the property
-            private List<IntPtr> findPropertySets(IntPtr iPropertyInstance)
-            {
-                var listPropSetInst = new List<IntPtr>();
-                if (iPropertyInstance != IntPtr.Zero)
-                {
-                    IntPtr iPropertySetsCount;
-                    IntPtr propertySets = getAggregator("ifcPropertySet", out iPropertySetsCount);
-                    foreach (IntPtr iPropertySetInstance in findEntity(propertySets, iPropertySetsCount))
-                    {
-                        IntPtr propertiesInstance;
-                        _ifcEngine.GetAttribute(iPropertySetInstance, "HasProperties", IfcEngine.SdaiType.Aggregation, out propertiesInstance);
-                        if (propertiesInstance != IntPtr.Zero)
-                        {
-                            var iPropertiesCount = _ifcEngine.GetMemberCount(propertiesInstance);
-                            foreach (IntPtr iPropertyInst in findEntity(propertiesInstance, iPropertiesCount))
-                            {
-                                if (iPropertyInst.Equals(iPropertyInstance))
-                                {
-                                    listPropSetInst.Add(iPropertySetInstance);
-                                }
-                            }
-                        }
-                    }
-                }
-                return listPropSetInst;
-            }
 
             private List<IntPtr> findElements(List<IntPtr> listPropSets)
             {
@@ -240,7 +234,7 @@ namespace IfcManager.Core
                                 var iObjectCount = _ifcEngine.GetMemberCount(objectInstances);
                                 foreach (IntPtr iObjectInstance in findEntity(objectInstances, iObjectCount))
                                 {
-                                    objectList.Add(iObjectInstance);
+                                   objectList.Add(iObjectInstance);
                                 }
                             }
                         }
@@ -272,21 +266,209 @@ namespace IfcManager.Core
             {
                 IntPtr name;
                 _ifcEngine.GetAttribute(iObjectInstance, attrName, IfcEngine.SdaiType.Unicode, out name);
-                return Marshal.PtrToStringUni(name);
+                return Marshal.PtrToStringAuto(name);
             }
 
-            private List<String> createResult(List<IntPtr> objectList, String propValue = "")
+            private string getInstanceType(IntPtr instance)
             {
-                var result = new List<String>();
-                objectList.ForEach(objectInstance => result.Add(
-                    "Object Name: " +
-                    getAttrValueAsString(objectInstance, "Name") + " " +
-                    "GUID: " +
-                    getAttrValueAsString(objectInstance, "GlobalId") + " " +
-                    (propValue.Equals("") ? "" : "Property Value: " + propValue)));
+                IntPtr ifcTypeIns = _ifcEngine.GetInstanceType(instance);
+                IntPtr name = IntPtr.Zero;
+                _ifcEngine.GetEntityName(ifcTypeIns, IfcEngine.SdaiType.String, out name);
+                return Marshal.PtrToStringAnsi(name);
+            }
+  
+            #endregion utilities
+
+            #region Interface class
+            public class IfcElement
+            {
+                public string name;
+                public string guid;
+                public string material;
+                public string type_material;
+                public string profile;
+                public string length;
+                public string weight;
+                public string volume;
+                public string price;
+            }
+            #endregion Interface class
+
+            #region getElementsByProperty
+            public List<IfcElement> getElementsByProperty(string propertyName)
+            {
+                var result = new List<IfcElement>();
+                String propValue = string.Empty;
+                var propertyInstances = findProperty(propertyName);
+                if (propertyInstances.Count > 0)
+                {
+                    foreach (KeyValuePair<IntPtr, string> pair in propertyInstances)
+                    {
+                        var listPropSets = findPropertySets(pair.Key/*, propertySetType, containerName*/);
+                        if (listPropSets.Count() > 0)
+                        {
+                            var elements = findElements(listPropSets);
+                            result.AddRange(createRes(elements, propertyName, pair.Value));
+                        }
+                    }
+                }
+                else
+                {
+                    throw new Exception("Model doesn't contain the property with name: " + propertyName);
+                }
                 return result;
             }
-            #endregion utilities
+
+            private List<IfcElement> createRes(List<IntPtr> elements, string propertyName, string propertyValue)
+            {
+                List<IfcElement> result = new List<IfcElement>();
+                foreach(var element in elements)
+                {
+                    IfcElement ifcElement = new IfcElement();
+
+                    ifcElement.name = getAttrValueAsString(element, "Name");
+                    ifcElement.guid = getAttrValueAsString(element, "GlobalId");
+                    switch (propertyName)
+                    {
+                        case NETVOLUME:
+                            ifcElement.volume = propertyValue;
+                            break;
+                        case "Weight":
+                            ifcElement.weight = propertyValue;
+                            break;
+                        case "Material":
+                            ifcElement.material = propertyValue;
+                            break;
+                        case "Profile":
+                            ifcElement.profile = propertyValue;
+                            break;
+                    }
+                    result.Add(ifcElement);
+                }
+                return result;
+            }
+
+            private List<KeyValuePair<IntPtr, string>> findProperty(String strPropertyName)
+            {
+                IntPtr iEntitiesCount;
+                string propertyType = string.Empty;
+                var propertyInstances = new List<KeyValuePair<IntPtr, string>>();
+
+                ifcProp2IfcPropType.TryGetValue(strPropertyName, out propertyType);
+                if (!string.IsNullOrEmpty(propertyType))
+                {
+                    IntPtr properties = getAggregator(propertyType, out iEntitiesCount);
+                    
+                    foreach (IntPtr iPropertyInstance in findEntity(properties, iEntitiesCount))
+                    {
+                        String strName = getAttrValueAsString(iPropertyInstance, "Name");
+                        if (strPropertyName.Equals(strName))
+                        {
+                            string propValueType = string.Empty;
+                            ifcProp2IfcPropValueType.TryGetValue(strPropertyName, out propValueType);
+                            if (!string.IsNullOrEmpty(propValueType))
+                            {
+                                string propValue = getAttrValueAsString(iPropertyInstance, propValueType);
+                                if (strPropertyName.Equals("Profile"))
+                                {
+                                    propertyInstances.Add(new KeyValuePair<IntPtr, string>(iPropertyInstance, propValue));
+                                }
+                                else
+                                {
+                                    double x = Lib.ToDouble(propValue);
+                                    if (x != 0.0)
+                                    {
+                                        propertyInstances.Add(new KeyValuePair<IntPtr, string>(iPropertyInstance, propValue));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                return propertyInstances;
+            }
+
+            private List<IntPtr> findPropertySets(IntPtr iPropertyInstance /*, string propertySetType, string containerName */)
+            {
+                var listPropSetInst = new List<IntPtr>();
+                string propType = getInstanceType(iPropertyInstance);
+                string propertySetType = string.Empty;
+                ifcPropSetTypeByIfcPropType.TryGetValue(propType, out propertySetType);
+
+                if (iPropertyInstance != IntPtr.Zero)
+                {
+                    IntPtr iPropertySetsCount;
+                    IntPtr propertySets = getAggregator(propertySetType, out iPropertySetsCount);
+                    foreach (IntPtr iPropertySetInstance in findEntity(propertySets, iPropertySetsCount))
+                    {
+                        IntPtr propertiesInstance;
+                        string propSetType = getInstanceType(iPropertySetInstance);
+                        string containerName = string.Empty;
+                        ifcElemntContainerTypeByIfcPropType.TryGetValue(propSetType, out containerName);
+                        //                        _ifcEngine.GetAttribute(iPropertySetInstance, "HasProperties", IfcEngine.SdaiType.Aggregation, out propertiesInstance);
+                        //_ifcEngine.GetAttribute(iPropertySetInstance, "Quantities", IfcEngine.SdaiType.Aggregation, out propertiesInstance);
+                        _ifcEngine.GetAttribute(iPropertySetInstance, containerName, IfcEngine.SdaiType.Aggregation, out propertiesInstance);
+                       
+                        if (propertiesInstance != IntPtr.Zero)
+                        {
+                            var iPropertiesCount = _ifcEngine.GetMemberCount(propertiesInstance);
+                            foreach (IntPtr iPropertyInst in findEntity(propertiesInstance, iPropertiesCount))
+                            {
+                                if (iPropertyInst.Equals(iPropertyInstance))
+                                {
+                                    listPropSetInst.Add(iPropertySetInstance);
+                                }
+                            }
+                        }
+                    }
+                }
+                return listPropSetInst;
+            }
+            #endregion getElementsByPropert
+
+            #region getElementsByMaterials
+            public List<IfcElement> getElementsByMaterials()
+            {
+                var result = new List<IfcElement>();
+                IntPtr matCount = IntPtr.Zero;
+                IntPtr materials = getAggregator("IfcMaterial", out matCount);
+                for(int iEntity = 0; iEntity < matCount.ToInt32(); iEntity++)
+                {
+                    IntPtr matInstance = IntPtr.Zero;
+                    _ifcEngine.GetAggregationElement(materials, iEntity, IfcEngine.SdaiType.Instance, out matInstance);
+
+                    string matValue = getAttrValueAsString(matInstance, "Name");
+
+                    List<IntPtr> objects = getRelatedObjects(matInstance);
+                    result.AddRange(createRes(objects, "Material", matValue));
+                }
+                return result;
+            }
+            public List<IntPtr> getRelatedObjects(IntPtr matInstance)
+            {
+                var result = new List<IntPtr>();
+                var relAssCount = IntPtr.Zero;
+                var relAss = IntPtr.Zero;
+                IntPtr relAssociatesMats = getAggregator("IfcRelAssociatesMaterial", out relAssCount);
+                for( int i=0; i < relAssCount.ToInt32(); i++ )
+                {
+                    _ifcEngine.GetAggregationElement(relAssociatesMats, i, IfcEngine.SdaiType.Instance, out relAss);
+                    IntPtr relatingMaterial;
+                    _ifcEngine.GetAttribute(relAss, "RelatingMaterial", IfcEngine.SdaiType.Instance, out relatingMaterial);
+                    if (matInstance.Equals(relatingMaterial))
+                    {
+                        IntPtr objectInstances;
+                        _ifcEngine.GetAttribute(relAss, "RelatedObjects", IfcEngine.SdaiType.Aggregation, out objectInstances);
+                        var iObjectCount = _ifcEngine.GetMemberCount(objectInstances);
+                        foreach (IntPtr iObjectInstance in findEntity(objectInstances, iObjectCount))
+                        {
+                            result.Add(iObjectInstance);
+                        }
+                    }
+                }
+                return result;
+            }
+            #endregion getElementsByMaterials
         }
     }
 } // end namespace

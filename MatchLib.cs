@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------
  * MatchLib -- библиотека общих подпрограмм проекта match 3.0
  * 
- *  21.02.16 П.Храпкин, А.Пасс
+ *  2.08.16 П.Храпкин, А.Пасс
  *  
  * - 20.11.13 переписано с VBA на С#
  * - 1.12.13 добавлен метод ToIntList
@@ -17,6 +17,7 @@
  * - 22.1.16 добавил класс TextBoxWriter - систему вывода Log в окно формы
  * - 16.2.16 включил метод IContains(List<string>, v
  * - 21.2.16 убрал static class Matchlib; метод ToLat()
+ * -  2.8.16 добавлен метод ToDouble
  * -------------------------------------------
  *      ---- методы Match.Lib ----
  * fileOpen(dir, name[,OpenMode]) - открываем файл Excel по имени name в директории Dir, возвращает Workbook
@@ -24,6 +25,8 @@
  * isSheetExist(Wb, name)  - проверяет, есть ли в Workbook Wb лист name 
  * ToIntList(s, separator)  - возвращает List<int>, разбирая строку s с разделителями separator
  * ToStrList(s,[separator]) - возвращает List<string> из Range или из строки s с разделителем
+ * ToInt(s, [msg])          - разбор строки Int
+ * ToDouble(s)              - разбор строки double
  * IContains(List<string> lst, v) возвращает true, если в списке lst есть строка, содержащаяся в v
  * timeStr()                - возвращает строку, соответствующую текущнму времени
  * ComputeMD5(List>object> obj) - возвращает строку контрольной суммы MD5 по аргументу List<object>
@@ -191,6 +194,16 @@ namespace match.Lib
             if (int.TryParse(s, out v)) return v;
             Log.Warning(msg + " \"" + s + "\"");
             return -1;
+        }
+        public static double ToDouble(string s)
+        {
+            if (string.IsNullOrEmpty(s)) return 0;
+            double d;
+            if (double.TryParse(s, out d)) return d;
+            if ((int)s.Count(x => x == '.') != 1) Log.FATAL("Wrong string to be converted to Double" + s);
+            s = s.Replace(".", ",");
+            double.TryParse(s, out d);
+            return d;
         }
         /// <summary>
         /// isCellEmpty(sh,row,col)     - возвращает true, если ячейка листа sh[rw,col] пуста или строка с пробелами

@@ -30,9 +30,14 @@ namespace TSmatch.Declaration
     /// 19.4.16     - Resources chage
     ///  2.6.16     - Resource IFC2X3.exp add
     ///  2.7.16     - FORM Resourse add for TSmatch.xlsx
+    ///  6.8.16     - Module C# Code Names -- use them to avoid static in Module Classes by defining xxAdd in BootStrat.Init and every Module
     /// </history>
     class Declaration
     {
+        #region Module C# Code Names
+        public const string MODEL = "Model";     // Model -- класс управления моделями, ведет Журнал Моделей и управляет их сохранением
+        #endregion Modules C# Code Names
+
         #region ----------- GENERAL PURPASE CONSTANTS -----------------
         public const char STR_DELIMITER = ';';  // знак - резделитель в списке в строках
 

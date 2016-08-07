@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------------------
  * Bootstrap - provide initial start of TSmatch, when necessary - startup procedure
  * 
- *  2.7.2016  Pavel Khrapkin
+ *  6.8.2016  Pavel Khrapkin
  *
  *--- History ---
  * 25.3.2016 started 
@@ -9,9 +9,11 @@
  * 19.4.2016 - Resource recover, when it is absent or obsolete
  *  2.6.2016 - Add Resource IFC2X3, get this file when Tekla not active
  *  2.7.2016 - FORMS Resours check add
+ *  6.8.2016 - Add method Init to initiate the Modules of the C# code
  * ---------------------------------------------------------------------------
  *      Bootstrap Methods:
  * Bootstrap()      - check all resources and start all other modules
+ * Init(name)       - Inuitiate C# code Module name
  *      sub-class Resource Methods:
  * Start()              - initiate #templates, which would be used in TOC to adapt TSmatch to the user environment
  * checkResource([name]) - check Resource name or all Resources; if resource is absent or obsolete - Recover
@@ -56,12 +58,17 @@ namespace TSmatch.Startup
         static string TMPdir = "";          // temporary catalog
         static string macroDir = "";        // directory in Tekla\Environment to store button TSmatch
         static string IFCschema = "";       // IFC2X3.exd in Tekla Environment\common\inp as IFC schema 
-        static string desktop_path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-        static string DebugDir = desktop_path;
+        static string desktop_path = string.Empty;
+        static string DebugDir = string.Empty;
+        internal List<Model.Model> models;
+//        Resource resource;
 
-        public static void Bootsrap()
+        public void start()
         {
+            desktop_path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            DebugDir = desktop_path;
             Log.set("Bootstrap");
+//            resource = new Resource();
             Resource.Start();               // подготавливаем ресурсы - в Bootstrap
             Resource.checkResource(Decl.R_TEKLA);   // проверяем, активна ли Tekla
             Resource.checkResource(Decl.R_TSMATCH); // проверяем, доступен ли файл TSmach.xlsx
@@ -71,11 +78,28 @@ namespace TSmatch.Startup
             Resource.checkResource();       // проверяем все ресурсы, в частности, актуальность даты в [1,1]          
             Suppliers.Supplier.Start();     // инициируем список Поставщиков из TSmatch.xlsx/Suppliers
             Matcher.Matcher.Start();        // инициируем Правила из TSmatch.xlsx/Matcher
-            Model.Model.Start();            // инициируем Журнал Моделей, известных TSmatch в TSmatch.xlsx/Models
-            if(!isTeklaActive) ModelDir = Model.Model.RecentModelDir();
+            models = Model.Model.Start();            // инициируем Журнал Моделей, известных TSmatch в TSmatch.xlsx/Models
+            if (!isTeklaActive) ModelDir = Model.Model.RecentModelDir();
             Ifc.Start(IFCschema);           // инициируем IFC, используя файл схемы IFC
             Log.exit();
         }
+
+        internal object init(string name, string arg = "")
+        {         
+            object moduleApp = null;
+            switch (name)
+            {
+                case Decl.MODEL:
+                    moduleApp = arg == "" ? models[0] : models.Find(x => x.name == arg);
+                    if (moduleApp.Equals(null)) moduleApp = Model.Model.newModelOpenDialog(out models); 
+                    break;
+                default:
+                    Msg.F("Bootstrap: not defined Module", name);
+                    break;
+            }
+            return moduleApp;
+        }
+
         //////////static bool Renew(string dir, string name)
         //////////{
         //////////    bool ok = true;
@@ -301,7 +325,7 @@ namespace TSmatch.Startup
                 }
                 return ok;
             }
-            private static bool checkTOCdate(string path, Resource r)
+            private bool checkTOCdate(string path, Resource r)
             {
                 Docs toc = Docs.tocStart(path);
                 string realTOCdir = Path.GetDirectoryName(toc.Wb.FullName);

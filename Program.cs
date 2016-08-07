@@ -4,8 +4,8 @@ using System.Windows.Forms;
 using Ifc = TSmatch.IFC.IFC;  //Debug -- later -- remove
 
 using Log = match.Lib.Log;
-using Boot = TSmatch.Startup.Bootstrap;
-using Mod = TSmatch.Model.Model;
+//using TSmatch.Startup.Bootstrap;
+//using Model = TSmatch.Model.Model;
 using Mtch = TSmatch.Matcher.Matcher;
 using Supplier = TSmatch.Suppliers.Supplier;
 
@@ -16,21 +16,24 @@ namespace TSmatch
         [STAThread]
         static void Main(string[] args)
         {     
-            Log.START("TSmatch v22.06.2016");
-            Boot.Bootsrap();
+            Log.START("TSmatch v06.08.2016");
 
-            Mod.openModel();        // open most recent model - in Tekla, Excel File, orIFC file 
+            var bootApp = new TSmatch.Startup.Bootstrap();
+            bootApp.start();
 
-            //            Ifc.Read(@"F:\Pavel\match\matchCodes\С#\TSmatch\Look_around\Oleg\IfcManagerAppl\IfcManagerAppl\bin\Debug\out-2.ifc");
+            var model = (Model.Model) bootApp.init(Declaration.Declaration.MODEL);
+//            model.Read("MyColumn.ifc");   // IFC не парсируется
+            //--6.08.2016 model.Read("out.ifc") ниже написано для отладки IFC. В дальнейшем будет Read() - недавняя модель или выборка из каталога модели
+            model.Read("out3314.ifc");         // open most recent model - in Tekla, Excel File, or IFC file 
 
             Supplier.SupplReport();
 
             //Docs doc = Docs.getDoc("Уголок Стальхолдинг??");
             //Cmp.UpgradeFrExcel(doc, "DelEqPar1");
 
-            Mod mod = Mod.UpdateFrTekla();
-//            Mtch.UseRules(mod);
-//            Console.ReadLine();
+//6/8/16            Mod mod = Mod.UpdateFrTekla();
+            //            Mtch.UseRules(mod);
+            //            Console.ReadLine();
         }
     } // end class
 } // end namespace
