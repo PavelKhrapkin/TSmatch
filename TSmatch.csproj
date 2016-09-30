@@ -40,6 +40,10 @@
     <Reference Include="IfcManager">
       <HintPath>..\..\Look_around\Oleg\IfcManager\IfcManager\bin\Debug\IfcManager.dll</HintPath>
     </Reference>
+    <Reference Include="log4net, Version=1.2.15.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <HintPath>..\packages\log4net.2.0.5\lib\net45-full\log4net.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Microsoft.Office.Interop.Excel, Version=15.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <EmbedInteropTypes>True</EmbedInteropTypes>
@@ -74,6 +78,8 @@
   <ItemGroup>
     <Compile Include="Bootstrap.cs" />
     <Compile Include="ElmAttSet.cs" />
+    <Compile Include="Groups.cs" />
+    <Compile Include="Interface.cs" />
     <Compile Include="IFC.cs" />
     <Compile Include="TrimbleConnect.cs" />
     <Compile Include="Message.cs" />
@@ -93,6 +99,8 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="ClassDiagram2.cd" />
+    <None Include="ClassDiagram3.cd" />
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

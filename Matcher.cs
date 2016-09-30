@@ -2,7 +2,7 @@
  * Matcher -- contains important class Rule, which descride how to find Suppliers Components
  *            suit to the Model Elements. The result - set of foind matches - put in class OK
  *
- * 21.6.2016 П.Храпкин, А.Пасс, А.Бобцов
+ * 30.9.2016 П.Храпкин, А.Пасс, А.Бобцов
  *
  *--- History ---
  * 18.1.2016 заложено П.Храпкин, А.Пасс, А.Бобцов
@@ -15,6 +15,7 @@
  *  3.4.2016 adoption to the the Component, CompSet, and Supplier classes
  * 11.4.2016 Remove CompSet and Supplier not gives any match from Model in UseAllRules
  * 21.6.2016 adapt to the Groups, Mgroups etc in ElmAttSet
+ * 30.9.2016 elmGroups taken from mod
  * -----------------------------------------------------------------------------------------
  *      КОНСТРУКТОРЫ Правил - загружают Правила из листа Правил в TSmatch или из журнала моделей
  * Rule(дата, тип, текст Правила, документ-база сортаментов)    - простая инициализация из TSmatch
@@ -143,14 +144,15 @@ namespace TSmatch.Matcher
         /// <history>10.3.2016
         /// 15.3.2016 - get Rule list (Rules) from the Model mod
         ///  3.4.2016 - adoption to the updated CompSet class
+        /// 30.9.2016 - Groups taken from mod
         /// </history>
         public static void UseRules(Mod mod)
         {
             Log.set("UseRules(" + mod.name + ")");
             Rules = mod.Rules;
-            Docs Report = Docs.getDoc(Decl.REPORT); // output result in ModelINFO Document
+            Docs Report = Docs.getDoc(Decl.TSMATCHINFO_REPORT); // output result in ModelINFO Document
             int nstr = 0;                           // nstr - string number in Groupr
-            foreach(var gr in ElmGr.Groups)
+            foreach(var gr in mod.elmGroups)
             {
                 bool found = false;                 // true, when matching Component found
 

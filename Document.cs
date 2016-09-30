@@ -1,7 +1,7 @@
 ﻿/*-------------------------------------------------------------------------------------------------------
  * Document -- works with all Documents in the system basing on TOC - Table Of Content
  * 
- *   2.7.2016  Pavel Khrapkin, Alex Pass, Alex Bobtsov
+ * 22.8.2016  Pavel Khrapkin, Alex Pass, Alex Bobtsov
  *
  *--------- History ----------------  
  * 2013-2015 заложена система управления документами на основе TOC и Штампов
@@ -22,6 +22,7 @@
  * 27.4.16 - getDoc(.. [bool load=true]) - not real document load, when load fag = false
  *  2.5.16 - remove work with Registry Environment value from TOCstart to Bootstrap for DirRelocation Recovery if need
  *  2.7.16 - wrDoc nStrBody argument add
+ * 22.8.16 - wrDoc workout
  * -------------------------------------------
  *      METHODS:
  * Start()              - Load from directory TOCdir of TOC all known Document attributes, prepare everithing
@@ -307,7 +308,7 @@ namespace TSmatch.Document
             form = Form.getFormByName(this, formName);
             form.AutoFit = AutoFit;
             Form.last_name = "";
-            Form.nStr = nStrBody == -1 ? Body.iEOL(): nStrBody ;
+            Form.nStr = nStrBody == -1 ? Body.iEOL()+1: nStrBody; // defualt nStr = Body.iEOL()+1
 ///            Form.getFormByName(this, formName).AutoFit = AutoFit;
             Log.exit();
         }
@@ -322,17 +323,6 @@ namespace TSmatch.Document
                 //               wrDoc(form.name, ob);
             }
             else wrDoc(form.name, obj);
-            ////{
-            ////    wrdoc
-            ////}
-            ////if (obj is Array)
-            ////{
-            ////    if (obj[0] is Array)
-            ////    {
-
-            ////    }
-            ////}
-            ////wrDoc(form.name, obj);
         }
         //internal void wrDoсForm(string dir, string v, DateTime date, string mD5, int count, string strListRules)
         //{
@@ -348,25 +338,26 @@ namespace TSmatch.Document
         /// 26.3.2016 - output HDR_ form with time.Now in [1,1]
         ///  3.4.2016 - multiple line output support with last_name
         /// 13.4.2016 - Internal error message, when form not found
+        /// 22.8.2016 - auditted: if(obj is Array); i0+1
         /// </history>
-        public void wrDoc(string str, params object[] obj)
+        public void wrDoc(string formName, params object[] obj)
         {
-            Log.set("wrDoc(" + str + ", obj[])");
+            Log.set("wrDoc(" + formName + ", obj[])");
 
             if(obj is Array)
             {
-                if( obj[0] is Array)
+                int objLng = obj.Length;
+                object[] _obj = obj;
+                //--------------- not implemented yet
+                if ( obj[0] is Array)
                 {
-                    
-                }
 
+                }
             }
-            int objLng = obj.Length;
-            object[] _obj = obj;
  //           Type ob = typeof(obj);  //.IsAssignableFrom(type); 
 
-            Form frm = forms.Find(x => x.name == str);
-            if (frm == null) Msg.F("Document.wrDoc no form", str, this.name);
+            Form frm = forms.Find(x => x.name == formName);
+            if (frm == null) Msg.F("Document.wrDoc no form", formName, this.name);
             if (frm.name == Form.last_name)
             {
                 Body.AddRow(obj);
@@ -374,16 +365,16 @@ namespace TSmatch.Document
             else
             {
                 saveDoc();
-                int i0 = Form.nStr < 1 ? Body.iEOL() + 1 : Form.nStr;   //line to write in Body
-                Excel.Range rng = FileOp.setRange(Sheet, i0);
+                int lineInBodyToWrite = Form.nStr < 1 ? Body.iEOL() : Form.nStr;
+                Excel.Range rng = FileOp.setRange(Sheet, lineInBodyToWrite);
                 Document toc = getDoc(Decl.DOC_TOC);
-                FileOp.CopyRng(toc.Wb, str, rng);
+                FileOp.CopyRng(toc.Wb, formName, rng);
                 Body = FileOp.getSheetValue(Sheet);
                 FileOp.saveRngValue(Body);
                 int i = 0;
                 foreach (var v in obj)
                 {
-                    int r = frm.row[i] + i0 - 1;
+                    int r = frm.row[i] + lineInBodyToWrite - 1;
                     int c = frm.col[i++];
                     Body[r, c] = v;
                 }

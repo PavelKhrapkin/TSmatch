@@ -1,10 +1,12 @@
 ﻿/*-----------------------------------------------------------------------
  * TS_OpenAPI -- Interaction with Tekla Structure over Open API
  * 
- * 30.6.2016  Pavel Khrapkin, Alex Bobtsov
- *  
+ * 22.8.2016  Pavel Khrapkin, Alex Bobtsov
+ *
+ *----- ToDo ---------------------------------------------
+ * - реализовать интерфейс IAdapterCAD, при этом избавится от static
  *----- History ------------------------------------------
- 3.1.2016 АБ получаем длину элемента
+ *  3.1.2016 АБ получаем длину элемента
  * 12.1.2016 PKh - добавлено вычисление MD5 по списку атрибутов модели, теперь это public string.
  *               - из имени модели удалено ".db1"
  * 14.1.2016 PKh - возвращаем в pulic string MyName версию этого метода
@@ -20,7 +22,8 @@
  *  4.6.2016 PKh - GetTeklaDir(Environment) add
  *  5.6.2016 PKh - isTeklaModel(name) add
  * 21.6.2016 PKh - ElmAttSet module keep all Elements instead of AttSet
- * 30.6/2016 PKh - IsTeklaActive() modified
+ * 30.6.2016 PKh - IsTeklaActive() modified
+ * 22.8.2018 PKh - Scale method to account unit in Model
  * -------------------------------------------
  * public Structure AttSet - set of model component attribuyes, extracted from Tekla by method Read
  *                           AttSet is Comparable, means Sort is applicable, and 
@@ -40,6 +43,7 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Diagnostics;
+using log4net.Config;
 
 using Tekla.Structures;
 using TSD = Tekla.Structures.Dialog.ErrorDialog;
@@ -53,55 +57,61 @@ using Elm = TSmatch.ElmAttSet.ElmAttSet;
 
 namespace TSmatch.Tekla
 {
-    class Tekla
+    class Tekla //: IAdapterCAD
     {
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger("Tekla:TS_OpenAPI");
+
         const string MYNAME = "Tekla.Read v2.0";
         public enum ModelDir { exceldesign, model, macro, environment };
-/* 21.6.2016 -- заменяем на ElmAttSet
-        public struct AttSet : IComparable<AttSet>
-        {
-            public string guid, mat, mat_type, prf;
-            public double lng, weight, volume;
-            public AttSet(string g, string m, string mt, string p, double l, double w, double v)
-            { guid = g; mat = m; mat_type = mt;  prf = p; lng = l; weight = w; volume = v; }
+        /* 21.6.2016 -- заменяем на ElmAttSet
+                public struct AttSet : IComparable<AttSet>
+                {
+                    public string guid, mat, mat_type, prf;
+                    public double lng, weight, volume;
+                    public AttSet(string g, string m, string mt, string p, double l, double w, double v)
+                    { guid = g; mat = m; mat_type = mt;  prf = p; lng = l; weight = w; volume = v; }
 
-            public int CompareTo(AttSet att)
-            {
-                int result = mat.CompareTo(att.mat);
-                if (result == 0) result = prf.CompareTo(att.prf);
-                if (result == 0) return -lng.CompareTo(att.lng);
-                return result;
-            }
-        }
-        public class AttSetCompararer : IEqualityComparer<AttSet>
-        {
-            public bool Equals(AttSet p1, AttSet p2)
-            {
-                if (p1.guid == p2.guid & p1.mat == p2.mat & p1.prf == p2.prf & p1.lng == p2.lng
-                    & p1.volume == p2.volume & p1.weight == p2.weight) return true;
-                else return false;
-            }
-            public int GetHashCode(AttSet p)
-            {
-                int hCode = (p.guid + p.mat + p.prf + p.lng.ToString()
-                    + p.volume.ToString() + p.weight.ToString()).GetHashCode();
-                return hCode.GetHashCode();
-            }
-        } // class AttSetCompararer
-        private static List<AttSet> ModAtr = new List<AttSet>();
-21/6/2016 заменяем на ElmAttSet */
+                    public int CompareTo(AttSet att)
+                    {
+                        int result = mat.CompareTo(att.mat);
+                        if (result == 0) result = prf.CompareTo(att.prf);
+                        if (result == 0) return -lng.CompareTo(att.lng);
+                        return result;
+                    }
+                }
+                public class AttSetCompararer : IEqualityComparer<AttSet>
+                {
+                    public bool Equals(AttSet p1, AttSet p2)
+                    {
+                        if (p1.guid == p2.guid & p1.mat == p2.mat & p1.prf == p2.prf & p1.lng == p2.lng
+                            & p1.volume == p2.volume & p1.weight == p2.weight) return true;
+                        else return false;
+                    }
+                    public int GetHashCode(AttSet p)
+                    {
+                        int hCode = (p.guid + p.mat + p.prf + p.lng.ToString()
+                            + p.volume.ToString() + p.weight.ToString()).GetHashCode();
+                        return hCode.GetHashCode();
+                    }
+                } // class AttSetCompararer
+                private static List<AttSet> ModAtr = new List<AttSet>();
+        21/6/2016 заменяем на ElmAttSet */
         public static TSM.ModelInfo ModInfo;
 
         public static string MyName = MYNAME;
-////        public static string ModelMD5;
+        ////        public static string ModelMD5;
 
-        public static List<Elm> Read()
+        ////public List<Elm> Read(string modName) { return Read(); }
+        ////public List<Elm> Read(this TSmatch.Model.Model _mod ) { return Read(_mod.name); }
+        public static List<Elm> Read(string dir = "", string name = "")
         {
             Log.set("TS_OpenAPI.Read");
-            Elm.Elements.Clear();
+            List<Elm> elements = new List<Elm>();
             TSM.Model model = new TSM.Model();
             List<Part> parts = new List<Part>();
             ModInfo = model.GetInfo();
+            if (    dir != "" && ModInfo.ModelPath != dir
+                || name != "" && ModInfo.ModelName != String.Concat(name, ".db1")) Msg.F("Tekla.Read: Another model loaded, not", name);
             ModInfo.ModelName = ModInfo.ModelName.Replace(".db1", "");
             TSM.ModelObjectSelector selector = model.GetModelObjectSelector();
             System.Type[] Types = new System.Type[1];
@@ -143,10 +153,11 @@ namespace TSmatch.Tekla
                     //ModAtr.Add(new AttSet(myPart.Material.MaterialString,
                     //                      profile, lng, weight, vol));
                     //21/6/2016 в отладке                    Elm.Elements.Add(new Elm());
-                    new Elm(guid, myPart.Material.MaterialString, mat_type,
-                                           myPart.Profile.ProfileString,
-                                           lng, weight, vol, price);
-                    if (ii % 500 == 0) // progress update every 500th items
+                    elements.Add(new Elm(guid, myPart.Material.MaterialString,
+                        mat_type,
+                        myPart.Profile.ProfileString,
+                        lng, weight, vol, price));
+ // !!                  if (ii % 500 == 0) // progress update every 500th items
                     {
                         if (progress.Canceled())
                         {
@@ -159,25 +170,33 @@ namespace TSmatch.Tekla
                 }
             } //while
             progress.Close();
-//            Elm.Elements.Sort();
+            Scale(elements);
+            elements.Sort();
             Log.exit();
-            //            return Elm.Elements;
-            return null;
+            return elements;
         } // Read
-/*2016.6.21        /// <summary>
-        /// ModAtrMD5() - calculate MD5 of the model read from Tekla in ModAtr
-        /// </summary>
-        /// <remarks>It could take few minutes for the large model</remarks>
-        public static string ModAtrMD5()
+        static void Scale(List<Elm> elements)
         {
-            //            DateTime t0 = DateTime.Now;  
-            string str = "";
-            foreach (var att in ModAtr) str += att.mat + att.prf + att.lng.ToString();
-            ModelMD5 = Lib.ComputeMD5(str);
-            return ModelMD5;
-            //            new Log("MD5 time = " + (DateTime.Now - t0).ToString());
-        } // ModAtrMD5
-2016.6.21 */
+            foreach (var elm in elements)
+            {
+                // weight [kg]; volume [mm3]->[m3]
+                elm.volume = elm.volume / 1000 / 1000 / 1000;     // elm.volume [mm3] -> [m3] 
+            }
+        }
+        /*2016.6.21        /// <summary>
+                /// ModAtrMD5() - calculate MD5 of the model read from Tekla in ModAtr
+                /// </summary>
+                /// <remarks>It could take few minutes for the large model</remarks>
+                public static string ModAtrMD5()
+                {
+                    //            DateTime t0 = DateTime.Now;  
+                    string str = "";
+                    foreach (var att in ModAtr) str += att.mat + att.prf + att.lng.ToString();
+                    ModelMD5 = Lib.ComputeMD5(str);
+                    return ModelMD5;
+                    //            new Log("MD5 time = " + (DateTime.Now - t0).ToString());
+                } // ModAtrMD5
+        2016.6.21 */
         public static string GetTeklaDir(ModelDir mode)
         {
             string TSdir = "";

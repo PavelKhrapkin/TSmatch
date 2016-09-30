@@ -48,27 +48,12 @@ using Decl = TSmatch.Declaration.Declaration;   // модуль с конста�
 
 namespace match.Lib
 {
-    /// <summary>
-    /// класс MatchLib  -- библиотека общих подпрограмм
-    /// </summary>
     public class MatchLib
     {
-        /// <summary>
-        /// fileOpen(dir, name[,OpenMode=Open])   - открываем файл Excel по имени name, возвращает Workbook
-        /// </summary>
-        /// <param dir="dir">каталог, где открываем файл</param>
-        /// <param name="name">имя файла</param>
-        /// <param optional OpenMode="OpenMode">режим Open. Если не существует - создать </param>
-        /// <returns>Excel.Workbook</returns>
-        /// <history>11.12.2013
-        /// 7.1.14  - единая точка выхода из метода с finally
-        /// 12.12.15 - перенес в matchLib, переписал для TSmatch
-        /// 2.1.2016 - добавил параметр OpenMode
-        /// 4.1.2016 - отделил dir от name
-        /// 10.1.16 - bug fix, Log.set/exit balance
-        /// </history>
         public static string dirDBs = null;             // имя каталога для Документов и базы данных
         private static Excel.Application _app = null;   // Application Excel
+
+        #region ToList
         /// <summary>
         /// ToStrList(Excel.Range)  - возвращает лист строк, содержащийся в ячейках
         /// </summary>
@@ -139,6 +124,8 @@ namespace match.Lib
             foreach (var item in ar) strs.Add(item);
             return strs;
         }
+        #endregion ToList
+
         /// <summary>
         /// IContains(List<string> lst, v) возвращает true, если в списке lst есть строка, содержащаяся в v
         /// </summary>
@@ -270,6 +257,7 @@ namespace match.Lib
         /// <param name="obj">входной параметр - список объектов</param>
         /// <returns></returns>
         /// <history>12.1.2016 PKh</history>
+///TODO 21/8/2016 - сделать нестатический метод ComputeMD5(this) c Sum 
         public static string ComputeMD5(List<object> obj)
         {
             string str = "";
@@ -312,17 +300,16 @@ namespace match.Lib
         }
     }   // конец класса MatchLib
     /// <summary>
-    /// Lib - библиотека нестатических методов
-    /// </summary>
-    /// <history> 21.2.2016 </history>
-    /// <summary>
     /// Log & Dump System
     /// </summary>
     /// <history> 30.12.2013 P.Khrapkin
     /// 1.1.2016 в FATAL выводим стек имен
+    /// 9.9.2016 use lof4net log&trace library
     /// </history>
     public class Log
     {
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         private static string _context;
         static Stack<string> _nameStack = new Stack<string>();
 
@@ -332,7 +319,11 @@ namespace match.Lib
             foreach (string name in _nameStack) _context = name + ">" + _context;
             _tx(DateTime.Now.ToLongTimeString() + " " + _context + " " + msg);
         }
-        public static void set(string sub) { _nameStack.Push(sub); }
+        public static void set(string sub)
+        {
+//            log.Info(sub);
+            _nameStack.Push(sub);
+        }
         public static void exit() { _nameStack.Pop(); }
         public static void FATAL(string msg)
         {
@@ -344,7 +335,7 @@ namespace match.Lib
         public static void Warning(string msg) { new Log("\n[warning] " + msg); }
         public static void START(string msg)
         {
-            Console.WriteLine(DateTime.Now.ToShortDateString() + " ---------< " + msg + " >---------");
+            log.Info(DateTime.Now.ToShortDateString() + " ---------< " + msg + " >---------");
         }
         private static void _tx(string tx) { Console.WriteLine(tx); }
     }

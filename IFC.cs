@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------
  * IFC -- Interaction with model in IFC file.
  * 
- * 6.8.2016  Pavel Khrapkin
+ * 19.8.2016  Pavel Khrapkin
  *  
  *------ ToDo ----------
  * -ISSUE- в Read на входе "Desktop\MyColumb", а открывается файл "\Desktop\out.ifc"
@@ -12,6 +12,7 @@
  * 15.5.2016 Contact with Ph.D Lin Jiarui in Bejin ifcEngineCS https://github.com/LinJiarui/IfcEngineCS
  * 31.5.2016 Oleg Turetsky made sample based on incEngineCS. PKh started IFC class implementation for TSmatch
  *  1.8.2016 Oleg has changed IfcManager code
+ * 19.8.2016 Implemented IAdapterCAD interface
  * -------------------------------------------
  * public Structure AttSet - set of model component attribuyes, extracted from Tekla by method Read
  *                           AttSet is Comparable, means Sort is applicable, and 
@@ -41,22 +42,28 @@ using TSmatch.IFC.IfcManager.Core;
 
 namespace TSmatch.IFC
 {
-    public class IFC
+
+    public class IFC : IAdapterCAD
     {
-       
+        
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger("IFC");
 
         static string schemaName;
-        public static void Start(string _schemaName)
+        public void init(string _schemaName)
         {
             schemaName = _schemaName;
+            if (string.IsNullOrEmpty(schemaName)) Msg.F("IFC.init: No schema");
         }
-        public static List<ElmAttributes.ElmAttSet> Read(string dir, string FileName)
-        { return Read(Path.Combine(dir, FileName)); }    
+       public static List<ElmAttributes.ElmAttSet> Read(string dir, string FileName)
+       { return Read(Path.Combine(dir, FileName)); }
+
         public static List<ElmAttributes.ElmAttSet> Read(string ifcFileName)
         {
             var manager = new IfcManager.Core.IfcManager();
 
             if (!FileOp.isFileExist(ifcFileName)) Msg.F("IFC.Read: no file", ifcFileName);
+
+            log.Info("TRACE: Read(\"" + ifcFileName + "\"");
 
             manager.init(ifcFileName, schemaName);
 
@@ -75,7 +82,30 @@ namespace TSmatch.IFC
             elements.Clear();
             elements = manager.getElementsByProperty("Profile");
             IFC.MergeIfcToElmAttSet(elements);
-            return ElmAttributes.ElmAttSet.Elements.Values.ToList();
+
+            List<ElmAttributes.ElmAttSet> result = new List<ElmAttributes.ElmAttSet>();
+            result = ElmAttributes.ElmAttSet.Elements.Values.ToList();
+            foreach (var elm in result)
+            {
+                string[] matToSplit = elm.mat.Split('/');
+                switch (matToSplit.Count())
+                {
+                    case 2:
+                        elm.mat_type = matToSplit[0];
+                        elm.mat = matToSplit[1];
+                        break;
+                    case 1:
+                        elm.mat_type = "STEEL";
+                        elm.prf = elm.mat;  // А400 - это арматура; почемуто ее марку указывают как материал
+                                            //..здесь еще надо разобраться с ГОСТ-5781 
+                                            //..и присвоить значения элемента mat, prf и др
+                        break;
+                    default: Msg.F("IFC error Material Parse", elm.mat);
+                        break;
+                }
+            }
+            result.Sort();
+            return result;
         }
 
         private static List<ElmAttributes.ElmAttSet> MergeIfcToElmAttSet(List<IfcManager.Core.IfcManager.IfcElement> elements)
@@ -103,6 +133,31 @@ namespace TSmatch.IFC
             }
             return ElmAttSet.ElmAttSet.Elements.Values.ToList();
         }
+
+        //public void init()
+        //{
+        //    throw new NotImplementedException();
+        //}
+
+        public List<ElmAttributes.ElmAttSet> Read()
+        {
+            throw new NotImplementedException();
+        }
+
+        public string getModelDir()
+        {
+            throw new NotImplementedException();
+        }
+
+        public string getModelName()
+        {
+            throw new NotImplementedException();
+        }
+
+        public string getModelMD5()
+        {
+            throw new NotImplementedException();
+        }
     } // end class TSmatch.IFC
 
 /* ***********************************************
@@ -116,8 +171,9 @@ namespace IfcManager.Core
     {
         public class IfcManager
         {
-            public const string NETVOLUME = "NetVolume";
+            private static readonly log4net.ILog log = log4net.LogManager.GetLogger("IfcManager");
 
+            public const string NETVOLUME = "NetVolume";
 
             IfcEngine _ifcEngine = null;
             IntPtr _ifcModel = IntPtr.Zero;

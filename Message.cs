@@ -1,16 +1,17 @@
 ﻿/*----------------------------------------------------------------------------
  * Message -- multilanguage message system
  * 
- * 20.3.2016  Pavel Khrapkin
+ * 20.8.2016  Pavel Khrapkin
  *
- *--- Journal ---
+ *--- History ---
  * Feb-2016 Created
  * 20.3.2016 - Error message Code display even when Message system is not initialysed yet
+ * 20.8.2016 - use log4net, bug fixes
  * ---------------------------------------------------------------------------------------
  *      Methods:
  * Start()    - Copy messages into the static list from TSmatch.xlsx/Messages Sheet
  * F(Code,..) - Fatal error message output
- * W(Code,..) - Warneng message output
+ * W(Code,..) - Warning message output
  * I(Code,..) - Information Message
  */
  using System;
@@ -19,6 +20,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Globalization;
+using log4net;
 
 using Docs = TSmatch.Document.Document;
 using Decl = TSmatch.Declaration.Declaration;
@@ -28,6 +30,7 @@ namespace TSmatch.Message
 {
     public class Message
     {
+        public static readonly ILog log = LogManager.GetLogger("Message");
         public enum Severity { INFO = 0, WARNING, FATAL};
 
         public static bool Trace = false;  // For TRACE mode chage to "true";
@@ -35,7 +38,7 @@ namespace TSmatch.Message
         readonly string MessageID;
         readonly string text;
 
-        public static List<Message> Messages = new List<Message>();
+        internal static List<Message> Messages = new List<Message>();
 
         Message(string _MessageID, string _text)
         {
@@ -91,7 +94,9 @@ namespace TSmatch.Message
             Message msg = Messages.Find(x => x.MessageID == msgcode);
             if (msg == null)
             {
-                new Log(msgcode);
+                log.Fatal("TSmatch internal Message system error: Message \n\t" + msgcode
+                    + "\nnot foung in collection Messages." 
+                    + " Possibly Message system not initiated yet, or this message not listed in TSmatch.xlsx/Message");
                 Log.FATAL("ERR_03 - Message Code Not Found");
             }
             string str = string.Format(msg.text, p0, p1, p2);

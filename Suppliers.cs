@@ -138,12 +138,14 @@ namespace TSmatch.Suppliers
         {
             Log.set("Supplier.Start");
             Docs doc = Docs.getDoc(Decl.SUPPLIERS);
+            Suppliers.Clear();
             for (int i = doc.i0; i <= doc.il; i++)
             {
                 int nPriceLists = doc.Body.Int(i, Decl.SUPL_LISTCOUNT);
                 if (nPriceLists <= 0) continue;
                 Suppliers.Add(new Supplier(i));
             }
+            Suppliers.Sort();
             //////////////-- check Suppliers/CompSets list with TOC -- Suppliers HealthCheck
             //////////////.. Initiate CompSet collections, however, not load them yet
             ////////////Docs toc = Docs.getDoc(Decl.DOC_TOC);

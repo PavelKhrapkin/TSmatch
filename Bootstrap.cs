@@ -50,6 +50,8 @@ namespace TSmatch.Startup
 {
     public class Bootstrap
     {
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger("Bootstrap");   //(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         static bool isTeklaActive = TS.isTeklaActive();
         static string MyPath;               // directory, where TSmatch.exe strated
         static string TOCdir;               // directory, where TSmatch.xlsx located. Usually in Tekla\..\exceldesign
@@ -60,7 +62,11 @@ namespace TSmatch.Startup
         static string IFCschema = "";       // IFC2X3.exd in Tekla Environment\common\inp as IFC schema 
         static string desktop_path = string.Empty;
         static string DebugDir = string.Empty;
-        internal List<Model.Model> models;
+        //------------ Main TSmatch classes --------------------------
+        internal List<Model.Model> models;                      // CAD model list used in TSmatch, model journal
+        internal List<Suppliers.Supplier> suppliers = new List<Suppliers.Supplier>();
+
+        Ifc ifc = null;
 //        Resource resource;
 
         public void start()
@@ -76,14 +82,27 @@ namespace TSmatch.Startup
             Docs.Start(TOCdir);             // инициируем Документы из TSmatch.xlsx/TOC
             Msg.Start();                    // инициируем Сообщения из TSmatch.xlsx/Messages
             Resource.checkResource();       // проверяем все ресурсы, в частности, актуальность даты в [1,1]          
-            Suppliers.Supplier.Start();     // инициируем список Поставщиков из TSmatch.xlsx/Suppliers
+            suppliers = Suppliers.Supplier.Start();     // инициируем полный список Поставщиков из TSmatch.xlsx/Suppliers
             Matcher.Matcher.Start();        // инициируем Правила из TSmatch.xlsx/Matcher
-            models = Model.Model.Start();            // инициируем Журнал Моделей, известных TSmatch в TSmatch.xlsx/Models
-            if (!isTeklaActive) ModelDir = Model.Model.RecentModelDir();
-            Ifc.Start(IFCschema);           // инициируем IFC, используя файл схемы IFC
+            models = Model.Model.Start();   // инициируем Журнал Моделей - список всех известных TSmatch моделей в TSmatch.xlsx/Models
+
+            if (!isTeklaActive)
+            {
+                ModelDir = Model.Model.RecentModelDir();
+                Template.Reset(Decl.TEMPL_MODEL, ModelDir);
+                ifc = new Ifc();
+                ifc.init(IFCschema);        // инициируем IFC, используя файл схемы IFC - обычно из Tekla
+            }
+
             Log.exit();
         }
-
+        /// <summary>
+        /// init(name [,arg]) - initiate TSmatch module name
+        /// </summary>
+        /// <param name="name">name of module</param>
+        /// <param name="arg">optional methop paramentr</param>
+        /// <returns>return one instnce of 'name' or List<instances> depending on module specifics and arg value</returns>
+        /// <history>30.8.2016</history>
         internal object init(string name, string arg = "")
         {         
             object moduleApp = null;
@@ -92,6 +111,9 @@ namespace TSmatch.Startup
                 case Decl.MODEL:
                     moduleApp = arg == "" ? models[0] : models.Find(x => x.name == arg);
                     if (moduleApp.Equals(null)) moduleApp = Model.Model.newModelOpenDialog(out models); 
+                    break;
+                case Decl.SUPPLIERS:
+                    moduleApp = suppliers;
                     break;
                 default:
                     Msg.F("Bootstrap: not defined Module", name);
@@ -349,7 +371,7 @@ namespace TSmatch.Startup
         /// Template - class for #template handling; it is used to substitute the Document Path with real value in Windows
         ///     #templates listed in Declaration to the moment:
         ///     - #TOC    - Path to TSmatch.xlxs
-        ///     - #Model  - Path to Tekla Model, used for TSmatchINFO.xlsx path
+        ///     - #Model  - Path to Tekla or IFC Model, used for TSmatchINFO.xlsx path
         ///     - #TMP    - temporary file directory; it could be used for Model transfer
         ///     - #Component - Path to Tekla\Environment\common\exceldesign\База комплектующих
         ///     - #Debug   - Path to debug report file
@@ -359,7 +381,8 @@ namespace TSmatch.Startup
         /// <example> Docs.Start(FileDirTemplates, FileDirValues);
         /// </</example>
         /// <history>30.3.2016
-        /// 23.6.29016 - bug fix - unnecessary IFC file name excluded from #Envir template
+        /// 23.6.2016 - bug fix - unnecessary IFC file name excluded from #Envir template
+        /// 18.8.2016 - Add constructor for reset #template functionality 
         /// </history>
         public class Template
         {
@@ -370,6 +393,11 @@ namespace TSmatch.Startup
 
             public Template(string _template, string _templ_val)
             { template = _template; templ_val = _templ_val; }
+            internal Template(string _template, string _templ_val, string command)
+            {
+                if (command == "Reset" && this.template == _template) templ_val = _templ_val;
+                else Msg.F("Err #template Reset command"); 
+            }
 
             /// <summary>
             /// Bootstrap.Templates.Start -- #templates Path filleng
@@ -415,6 +443,14 @@ namespace TSmatch.Startup
                 if (templ == null ) Msg.F("not found template", templ);
                 Log.exit();
                 return tstr.templ_val;
+            }
+            public static void Reset(string templateName, string newValue)
+            {
+                Template old = Templates.Find(x => x.template == templateName);
+                int ind = Templates.IndexOf(old);
+                Templates.RemoveAt(ind);
+                Template newTemplate = new Template(templateName, newValue);
+                Templates.Add(newTemplate);
             }
         } // end class Template
         ////static void ZZ()

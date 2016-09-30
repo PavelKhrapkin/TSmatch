@@ -30,7 +30,8 @@ namespace TSmatch.Declaration
     /// 19.4.16     - Resources chage
     ///  2.6.16     - Resource IFC2X3.exp add
     ///  2.7.16     - FORM Resourse add for TSmatch.xlsx
-    ///  6.8.16     - Module C# Code Names -- use them to avoid static in Module Classes by defining xxAdd in BootStrat.Init and every Module
+    ///  6.8.16     - Moule C# Code Names -- use them to avoid static in Module Classes by defining xxAdd in BootStrat.Init and every Module
+    /// 21.8.16     - re-defined Documents of TSmatchINFO.xlsx
     /// </history>
     class Declaration
     {
@@ -193,10 +194,11 @@ namespace TSmatch.Declaration
         public const int MODEL_DATE = 1;    // Дата и время записи в Журнал моделей
         public const int MODEL_NAME = 2;    // Имя модели
         public const int MODEL_DIR  = 3;    // Каталог модели
-        public const int MODEL_MADE = 4;    // Model exported as (Made)
-        public const int MODEL_PHASE = 5;   // Текущая фаза проекта
-        public const int MODEL_MD5  = 6;    // Контрольная сумма - MD5
-        public const int MODEL_R_LIST = 7;  // колонка - список номеров строк Правил
+        public const int MODEL_IFCPATH = 4; // Файл IFC, соответствующий модели
+        public const int MODEL_MADE = 5;    // Model exported as (Made)
+        public const int MODEL_PHASE = 6;   // Текущая фаза проекта
+        public const int MODEL_MD5  = 7;    // Контрольная сумма - MD5
+        public const int MODEL_R_LIST = 8;  // колонка - список номеров строк Правил
         #endregion
 
         #region ----------- константы правил Matching_Rules -------------------
@@ -214,15 +216,20 @@ namespace TSmatch.Declaration
         public const string ATT_PARAM = @"(?<param>(\$|p|р|п|P|Р|П)\w*\d)"; //параметры в Правилах
         #endregion
 
-        #region ----------- Файл TSmatchINFO.xlsx - записывается в каталог модели ----------
-        public const string MODELINFO = "ModelINFO";    //Лист общей информации по модели
-        public const string RAW = "Raw";                //Лист необработанных данных по компонентам модели
-        public const string MODEL_SUPPLIERS = "ModSuppliers";   // Лист поставщиков для проекта / модели
-        public const string REPORT = "Report";          //Лист - отчет по модели
-
-        public const string TMP_MODELINFO = "TMP_" + MODELINFO;
-        public const string TMP_RAW       = "TMP_" + RAW;
-        public const string TMP_REPORT    = "TMP_" + REPORT;
+        #region ----------- Документы файла TSmatchINFO.xlsx - записывается в каталог модели ----------
+        public const string TSMATCHINFO_MODELINFO = "ModelINFO";    // общая информация о модели: имя, директория, MD5 и др
+        public const string TSMATCHINFO_RAW       = "Raw";          // элементы с атрибутами, как они прочитаны из модели
+        public const string TSMATCHINFO_MATERIALS = "Materials";    // сводка по материалам, их типам (бетон, сталь и др)
+        public const string TSMATCHINFO_SUPPLIERS = "ModSuppliers"; // сводка по поставщикам проекта (контакты, URL прайс-листа, закупки)
+        public const string TSMATCHINFO_RULES     = "ModRules";     // перечень Правил, используемых для обработки модели
+        public const string TSMATCHINFO_REPORT    = "Report";       // отчет по сопоставлению групп <материал, профиль> 
+                                                                    //.. c прайс-листами поставщиков
+        public const string TMP_MODELINFO = "TMP_" + TSMATCHINFO_MODELINFO;
+        public const string TMP_RAW       = "TMP_" + TSMATCHINFO_RAW;
+        public const string TMP_MATERIALS = "TMP_" + TSMATCHINFO_MATERIALS;
+        public const string TMP_SUPPLIERS = "TMP_" + TSMATCHINFO_SUPPLIERS;
+        public const string TMP_RULES     = "TMP_" + TSMATCHINFO_RULES;
+        public const string TMP_REPORT    = "TMP_" + TSMATCHINFO_REPORT;
         #endregion
 
         #region ----------- TSmatchINFO.xlsx/Report - Отчет по результатам подбора сортамента ----------
