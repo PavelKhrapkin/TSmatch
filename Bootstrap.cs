@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------------------
  * Bootstrap - provide initial start of TSmatch, when necessary - startup procedure
  * 
- *  6.8.2016  Pavel Khrapkin
+ *  28.11.2016  Pavel Khrapkin
  *
  *--- History ---
  * 25.3.2016 started 
@@ -10,6 +10,7 @@
  *  2.6.2016 - Add Resource IFC2X3, get this file when Tekla not active
  *  2.7.2016 - FORMS Resours check add
  *  6.8.2016 - Add method Init to initiate the Modules of the C# code
+ ///!!* 28.11.2016 - HashSet<Rule> Rules is defined here
  * ---------------------------------------------------------------------------
  *      Bootstrap Methods:
  * Bootstrap()      - check all resources and start all other modules
@@ -64,7 +65,7 @@ namespace TSmatch.Startup
         static string DebugDir = string.Empty;
         //------------ Main TSmatch classes --------------------------
         internal List<Model.Model> models;                      // CAD model list used in TSmatch, model journal
-        internal List<Suppliers.Supplier> suppliers = new List<Suppliers.Supplier>();
+//29/11        internal List<Suppliers.Supplier> suppliers = new List<Suppliers.Supplier>();
 
         Ifc ifc = null;
 //        Resource resource;
@@ -82,9 +83,9 @@ namespace TSmatch.Startup
             Docs.Start(TOCdir);             // инициируем Документы из TSmatch.xlsx/TOC
             Msg.Start();                    // инициируем Сообщения из TSmatch.xlsx/Messages
             Resource.checkResource();       // проверяем все ресурсы, в частности, актуальность даты в [1,1]          
-            suppliers = Suppliers.Supplier.Start();     // инициируем полный список Поставщиков из TSmatch.xlsx/Suppliers
-            Matcher.Matcher.Start();        // инициируем Правила из TSmatch.xlsx/Matcher
-            models = Model.Model.Start();   // инициируем Журнал Моделей - список всех известных TSmatch моделей в TSmatch.xlsx/Models
+//29/11            suppliers = Suppliers.Supplier.Start();     // инициируем полный список Поставщиков из TSmatch.xlsx/Suppliers
+// 21.11.16           Matcher.Matcher.Start();        // инициируем Правила из TSmatch.xlsx/Matcher
+// 21.11.16           models = Model.Model.Start();   // инициируем Журнал Моделей - список всех известных TSmatch моделей в TSmatch.xlsx/Models
 
             if (!isTeklaActive)
             {
@@ -93,7 +94,6 @@ namespace TSmatch.Startup
                 ifc = new Ifc();
                 ifc.init(IFCschema);        // инициируем IFC, используя файл схемы IFC - обычно из Tekla
             }
-
             Log.exit();
         }
         /// <summary>
@@ -102,18 +102,20 @@ namespace TSmatch.Startup
         /// <param name="name">name of module</param>
         /// <param name="arg">optional methop paramentr</param>
         /// <returns>return one instnce of 'name' or List<instances> depending on module specifics and arg value</returns>
-        /// <history>30.8.2016</history>
+        /// <history>30.8.2016
+        /// 22.11.2016 use RecentModel() instead of Models[0]
+        /// </history>
         internal object init(string name, string arg = "")
         {         
             object moduleApp = null;
             switch (name)
             {
                 case Decl.MODEL:
-                    moduleApp = arg == "" ? models[0] : models.Find(x => x.name == arg);
+                    moduleApp = arg == "" ? Model.Model.RecentModel() : models.Find(x => x.name == arg);
                     if (moduleApp.Equals(null)) moduleApp = Model.Model.newModelOpenDialog(out models); 
                     break;
                 case Decl.SUPPLIERS:
-                    moduleApp = suppliers;
+//29/11                    moduleApp = suppliers;
                     break;
                 default:
                     Msg.F("Bootstrap: not defined Module", name);

@@ -21,7 +21,7 @@ namespace TSmatch
         [STAThread]
         static void Main(string[] args)
         {
-            Log.START("TSmatch v20.08.2016");
+            Log.START("TSmatch v2016.11.22");
 
             var bootApp = new Startup.Bootstrap();
             bootApp.start();

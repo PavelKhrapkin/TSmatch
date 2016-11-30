@@ -77,13 +77,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Bootstrap.cs" />
+    <Compile Include="Components.cs" />
+    <Compile Include="CompSet.cs" />
     <Compile Include="ElmAttSet.cs" />
     <Compile Include="Groups.cs" />
     <Compile Include="Interface.cs" />
     <Compile Include="IFC.cs" />
+    <Compile Include="Rule.cs" />
     <Compile Include="TrimbleConnect.cs" />
     <Compile Include="Message.cs" />
-    <Compile Include="Components.cs" />
     <Compile Include="Declaration.cs" />
     <Compile Include="Document.cs" />
     <Compile Include="FileOp.cs" />

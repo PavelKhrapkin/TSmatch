@@ -2,7 +2,7 @@
  * Matcher -- contains important class Rule, which descride how to find Suppliers Components
  *            suit to the Model Elements. The result - set of foind matches - put in class OK
  *
- * 30.9.2016 П.Храпкин, А.Пасс, А.Бобцов
+ * 17.10.2016 П.Храпкин, А.Пасс, А.Бобцов
  *
  *--- History ---
  * 18.1.2016 заложено П.Храпкин, А.Пасс, А.Бобцов
@@ -16,6 +16,7 @@
  * 11.4.2016 Remove CompSet and Supplier not gives any match from Model in UseAllRules
  * 21.6.2016 adapt to the Groups, Mgroups etc in ElmAttSet
  * 30.9.2016 elmGroups taken from mod
+ * 17.10.2016 parse Model rules in UseRules method
  * -----------------------------------------------------------------------------------------
  *      КОНСТРУКТОРЫ Правил - загружают Правила из листа Правил в TSmatch или из журнала моделей
  * Rule(дата, тип, текст Правила, документ-база сортаментов)    - простая инициализация из TSmatch
@@ -41,6 +42,7 @@
 
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using log4net;
 
 using Lib = match.Lib.MatchLib;
 using Log = match.Lib.Log;
@@ -51,8 +53,8 @@ using Docs = TSmatch.Document.Document;
 using Mod = TSmatch.Model.Model;
 using Elm = TSmatch.ElmAttSet.ElmAttSet;
 using ElmGr = TSmatch.ElmAttSet.Group;
-using Cmp = TSmatch.Components.Component;
-using CmpSet = TSmatch.Components.CompSet;
+// 30.11.2016 using Cmp = TSmatch.CompSet.Component.Component;
+using CmpSet = TSmatch.CompSet.CompSet;
 using Supl = TSmatch.Suppliers.Supplier;
 using System;
 
@@ -60,30 +62,9 @@ namespace TSmatch.Matcher
 {
     public class Matcher
     {
-        static List<Rule> Rules = new List<Rule>();
+        public static readonly ILog log = LogManager.GetLogger("Matcher");
 
-        public struct Rule // структура, описывающая правило работы Matcher'а
-        {
-            public readonly string name;        //название правила
-            public readonly string type;        //тип правила
-            public readonly string text;        //текст правила
-            public readonly CmpSet CompSet;     //список компонентов, с которыми работает правило
-            public readonly Supl Supplier;      //Поставщик
-
-            public Rule(Docs doc, int i) : this()
-            {
-                this.name = (string)doc.Body[i, Decl.RULE_NAME];
-                this.type = (string)doc.Body[i, Decl.RULE_TYPE];
-                this.text = Lib.ToLat((string)doc.Body[i, Decl.RULE_RULE]);
-                string csName = (string)doc.Body[i, Decl.RULE_COMPSETNAME];
-                string suplName = (string)doc.Body[i, Decl.RULE_SUPPLIERNAME];
-                this.Supplier = Supl.getSupplier(suplName);
-                this.CompSet = CmpSet.getCompSet( csName, Supplier.name );
-            }
-            // параметр doc не указан
-            public Rule(int n) : this(Docs.getDoc(Decl.RULES), n) {}
-        }
-        public struct OK    // структура даннsх, описывающая найденное соответствие..
+        public struct OK    // структура данных, описывающая найденное соответствие..
         {                   //..Правил, Прайс-листа комплектующих, и строки - Группы <mat,prf>
             public int gr_nstr; // номер строки Группы, для которой найдено соответствие
             string strComp;     // текст подходящей строки в Comp
@@ -125,6 +106,12 @@ namespace TSmatch.Matcher
         /// <summary>
         /// Start - initiate Rules - text lines, which describe match process
         /// </summary>
+        /// <ToDo>
+        /// 1.10.2016
+        /// Вообще говоря, метод Start не нужен, как и общий список Rules, поскольку Правила в Модели считываются
+        /// непосредственно из TSmatch.xlsx/Rules. В дальнейшем надо:
+        /// -!- в классе Rules добавть поля RuleMatList, RulePrfList и пр со стр.270-276 и здесь парсировать Правила
+        /// </ToDo>
         /// <history> Jan-2016
         /// 19.2.16 - переписано обращение к Documents.Start с инициализацией массивов FileDir
         /// 30.3.16 - Start other modules removed to Bootstrap
@@ -132,55 +119,44 @@ namespace TSmatch.Matcher
         public static void Start()
         {
             Log.set("Matcher.Start");
+            List<TSmatch.Rule.Rule> Rules = new List<TSmatch.Rule.Rule>();
             Docs rule = Docs.getDoc(Decl.RULES);   // инициируем список Правил Matcher'a
             for (int i = 4; i<=rule.Body.iEOL(); i++)
-                { if (rule.Body[i, Decl.RULE_NAME] != null) Rules.Add(new Rule(rule, i)); }
+                { if (rule.Body[i, Decl.RULE_NAME] != null) Rules.Add(new TSmatch.Rule.Rule(rule, i)); }
             Log.exit();
         }
         /// <summary>
         /// UserRules(mod) - Apply Model mod Rules to create TSmatchINFO.xlsx/Report
         /// </summary>
         /// <param name="mod">Model to de handled</param>
+        /// <ToDo>
+        /// 1.10.2016
+        /// -!- убрать все обращения к Report и obj, вместо этого заполнять struct OK
+        /// </ToDo>
         /// <history>10.3.2016
         /// 15.3.2016 - get Rule list (Rules) from the Model mod
         ///  3.4.2016 - adoption to the updated CompSet class
         /// 30.9.2016 - Groups taken from mod
+        ///  1.10.2016 - вместо печати TSmatchINFO/Report заполняем struct OK в mod.elmGroups
+        /// 17.10.2016 - parse Model Rules
         /// </history>
         public static void UseRules(Mod mod)
         {
             Log.set("UseRules(" + mod.name + ")");
-            Rules = mod.Rules;
-            Docs Report = Docs.getDoc(Decl.TSMATCHINFO_REPORT); // output result in ModelINFO Document
+            //////foreach (var r in mod.Rules)
+            //////{
+            //////    RuleParser(r.text);
+            //////}
             int nstr = 0;                           // nstr - string number in Groupr
             foreach(var gr in mod.elmGroups)
             {
-                bool found = false;                 // true, when matching Component found
-
-                object[] obj = new object[Report.Body.iEOC()];
-                obj[0] = nstr; obj[1] = gr.mat; obj[2] = gr.prf;
-//!! 21/6/2016                obj[3] = gr.lng; obj[4] = gr.wgt; obj[5] = gr.vol;
-
-                foreach (var r in Rules)
+                foreach (var r in mod.Rules)
                 {
-                    RuleParser(r.text);     // сейчас Правило r многократно разбирается каждый раз для каждой Группы..
-                                            // Возможно,списки Rule.List стоит перенести в класс Rule и обработать заранее
-                    if (SearchInComp(r.CompSet, nstr, gr.mat, gr.prf))
-                    {
-                        found = true;
-                        foreach (var ok in OKs)
-                            if( ok.gr_nstr == nstr) ok.okToObj(ok, ref obj, 6);
-                    }
-                    //////else
-                    //////{
-                    //////    mod.CompSets.Remove(r.CompSet);
-                    //////    mod.Rules.Remove(r);
-                    //////}
+                    if(!r.isRuleApplicable(gr.mat, gr.prf)) continue;
+                    ////RuleParser(r.text);     // сейчас Правило r многократно разбирается каждый раз для каждой Группы..
+                    ////                        // Возможно,списки Rule.List стоит перенести в класс Rule и обработать заранее
+                    SearchInComp(r.CompSet, nstr++, gr.mat, gr.prf);
                 }
-                //////if (found) Report.Body.AddRow(obj);
-                //////else Report.Body.AddRow(OK.clearObj(ref obj, 6));
-                if (!found) OK.clearObj(ref obj, 6);
-                Report.wrDoc(1, obj);
-                nstr++;
             }
             foreach (var ok in OKs)
             {
@@ -204,25 +180,25 @@ namespace TSmatch.Matcher
         /// <history>9.4.2016</history>
         static bool isRuleApplicable(string mat, string prf)
         { return Lib.IContains(RuleMatList, mat) && Lib.IContains(RulePrfList, prf); }
-        /// <summary>
-        /// GetPars(str) разбирает строку раздела компонента или Правила, выделяя числовые параметры.
-        ///         Названия материалов, профилей и другие нечисловые подстроки игнорируются.
-        /// </summary>
-        /// <param name="str">входная строка раздела компонента</param>
-        /// <returns>List<int>возвращаемый список найденых параметров</int></returns>
-        public static List<int> GetPars(string str)
-        {
-            const string VAL = @"\d+";
-            List<int> pars = new List<int>();
-            string[] pvals = Regex.Split(str, Decl.ATT_DELIM);
-            foreach (var v in pvals)
-            {
-                if (string.IsNullOrEmpty(v)) continue;
-                if (Regex.IsMatch(v, VAL))
-                    pars.Add(int.Parse(Regex.Match(v, VAL).Value));
-            }
-            return pars;
-        }
+        ///////////////////// <summary>
+        ///////////////////// GetPars(str) разбирает строку раздела компонента или Правила, выделяя числовые параметры.
+        /////////////////////         Названия материалов, профилей и другие нечисловые подстроки игнорируются.
+        ///////////////////// </summary>
+        ///////////////////// <param name="str">входная строка раздела компонента</param>
+        ///////////////////// <returns>List<int>возвращаемый список найденых параметров</int></returns>
+        //////////////////public static List<int> GetPars(string str)
+        //////////////////{
+        //////////////////    const string VAL = @"\d+";
+        //////////////////    List<int> pars = new List<int>();
+        //////////////////    string[] pvals = Regex.Split(str, Decl.ATT_DELIM);
+        //////////////////    foreach (var v in pvals)
+        //////////////////    {
+        //////////////////        if (string.IsNullOrEmpty(v)) continue;
+        //////////////////        if (Regex.IsMatch(v, VAL))
+        //////////////////            pars.Add(int.Parse(Regex.Match(v, VAL).Value));
+        //////////////////    }
+        //////////////////    return pars;
+        //////////////////}
         /// <описание>
         /// RuleParser разбирает текстовую строку - правило, выделяя и возвращая в списках 
         ///             MatList  - части Правила, относящиеся к Материалу компонента
@@ -263,6 +239,7 @@ namespace TSmatch.Matcher
         static double RuleRedundencyPerCent = 0.0;
         static List<int> RuleWildPars = new List<int>();
         static int RuleMatNpars = 0, RulePrfNpars = 0, RuleOthNpars = 0;
+
         static void RuleParser(string rule)
         {
             Log.set("RuleParser(\"" + rule + "\")");
@@ -287,7 +264,7 @@ namespace TSmatch.Matcher
             while (Regex.IsMatch(rule, rWild, RegexOptions.IgnoreCase))
             {
                 Match starPar = Regex.Match(rule, rWild);
-                List<int> p = GetPars(starPar.Value);
+                List<int> p = Lib.GetPars(starPar.Value);
                 RuleWildPars.Add(p[0] - 1);
                 rule = rule.Replace(starPar.Value, "");
             }
@@ -379,8 +356,8 @@ namespace TSmatch.Matcher
             mat = mat.ToUpper(); prf = prf.ToUpper();
             if (isRuleApplicable(mat, prf))
             { 
-                List<int> matPars = GetPars(mat);
-                List<int> prfPars = GetPars(prf);
+                List<int> matPars = Lib.GetPars(mat);
+                List<int> prfPars = Lib.GetPars(prf);
                 //-- если в Правиле есть * - используем заготовку с любым значением соотв.параметра
                 for (int nComp = cs.doc.i0, iComp = 0; nComp <= cs.doc.il; nComp++, iComp++)
                 {                                                       // все имеющиеся в элементе..
@@ -388,7 +365,7 @@ namespace TSmatch.Matcher
                     if (string.IsNullOrWhiteSpace(s)) continue;         //..совпадать с параметрами Comp..
                     if (!Lib.IContains(RuleMatList, mat)) continue;     //..если совпадают -> found = true
                     if (!Lib.IContains(RulePrfList, prf)) continue;
-                    List<int> CompPars = GetPars(s.ToUpper());
+                    List<int> CompPars = Lib.GetPars(s.ToUpper());
                     for (int i = 0, iW = 0; i < prfPars.Count; i++)        
                     {                                                   // check wild parameters 
                         if (iW < RuleWildPars.Count)

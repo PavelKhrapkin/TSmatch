@@ -1,13 +1,10 @@
 ﻿/*----------------------------------------------------------------------------
  * Components -- работа с документами - прайс-листами поставщиков компонентов
  * 
- * 14.4.2016  П.Храпкин
+ * 30.11.2016  П.Храпкин
  *
  *--- журнал ---
- * 28.2.2016 выделено из модуля Matcher
- *  5.3.2016 setComp(doc) - инициализация данных для базы компонентов из doc
- *  3.4.2016 setComp(doc_name) overload; getDoc() and Close price-list
- * 14.4.2016 Component.mat; CompSet.getMat()
+ * 30.11.2016 made as separate module, CompSet is now in another file
  * ---------------------------------------------------------------------------
  *      МЕТОДЫ:
  * getCompSet(name, Supplier) - getCompSet by  its name in Supplier' list
@@ -22,6 +19,7 @@
  * UpgradeFrExcel(doc, strToDo) - обновление Документа по правилу strToDo
  */
 
+using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
@@ -36,15 +34,15 @@ using Mod = TSmatch.Model.Model;
 using Mtch = TSmatch.Matcher.Matcher;
 using Supl = TSmatch.Suppliers.Supplier;
 
-namespace TSmatch.Components
+namespace TSmatch.Component
 {
     public class Component
     {
         public readonly string description; // строка вида "Угoлoк cтaльнoй paвнoпoл. 25 x 4 cт3cп/пc5"
         public readonly string mat;         // материал компонента. Извлекается из description или из прайс-листа
         public readonly double length;      // длина заготовки в м
-        public readonly double weight_m;    // вес погонного метра заготовки -- пока тут пусто
-        public readonly double? price;      // цена за 1 тонну в руб
+        public readonly double weight_m;    // ($W1) вес погонного метра заготовки или за кубометр (для бетона)
+        public readonly double? price;      // ($P1) цена за 1 тонну в руб
 
         public Component(string _description, string _mat, double _length, double _weight, double? _price)
         {
@@ -70,7 +68,7 @@ namespace TSmatch.Components
         public static List<Component> setComp(Docs doc)
         {
             Log.set("setComp(" + doc.name + ")");
-            List<int> docCompPars = Mtch.GetPars(doc.LoadDescription);
+            List<int> docCompPars = Lib.GetPars(doc.LoadDescription);
             //-- заполнение массива комплектующих Comps из прайс-листа металлопроката
             List<Component> Comps = new List<Component>();
             for (int i = doc.i0; i <= doc.il; i++)
@@ -80,15 +78,15 @@ namespace TSmatch.Components
                     string descr = doc.Body.Strng(i, docCompPars[0]);
                     double lng = 0;
                     //-- разбор параметров LoadDescription
-                    List<int> strPars = Mtch.GetPars(descr);
+                    List<int> strPars = Lib.GetPars(descr);
                     string docDescr = doc.LoadDescription;
                     int parShft = 0;
                     while (docDescr.Contains('/'))
                     {
                         string[] s = doc.LoadDescription.Split('/');
-                        List<int> c = Mtch.GetPars(s[0]);
+                        List<int> c = Lib.GetPars(s[0]);
                         int pCol = c[c.Count() - 1];    // колонка - последний параметр до '/'
-                        List<int> p = Mtch.GetPars(s[1]);
+                        List<int> p = Lib.GetPars(s[1]);
                         lng = strPars[p[0] - 1];    // длина заготовки = параметр в str; индекс - первое число после '/'
                         docDescr = docDescr.Replace("/", "");
                         parShft++;
@@ -186,92 +184,5 @@ namespace TSmatch.Components
             Log.exit();
             return doc;
         }
-    } // end class components
-    /// <summary>
-    /// CompSet - набор однотипных компонентов одного поставщика, например, прайслист Стальхолдинга "Пластины"                                                          
-    /// </summary>
-    /// <history>27.3.2016
-    /// 14.4.2016 add List<string>mats in class fields and method getMat()
-    /// </history>
-    public class CompSet   
-    {
-        static List<CompSet> CompSets = new List<CompSet>();    // список всех наборов компонентов - ..
-                                                                //..возможно, с не уникальными названими
-        public string name;                 // название сортамента, например, "Уголок"
-        public List<Component> Components = new List<Component>();
-        public List<string> mats = new List<string>();  // перечень материалов, применяемых в Components
-        public Supl Supplier;               // организация - поставщик сортамента
-        public Docs doc;                    // Документ, содержащий набор компонентов, прайс-лист поставщика 
-
-        public CompSet(string _name, List<Component> _comps, List<string> _mats, Supl _supl, Docs _doc)
-        {
-            this.name       = _name;
-            this.Components = _comps;
-            this.mats       = _mats;
-            this.Supplier   = _supl;
-            this.doc        = _doc;
-        }
-        public CompSet(string _name, Supl _supl) : this(_name, null, null, _supl, null) { }
-        public CompSet(string _name, string _supplier_name) : this(_name, Supl.getSupplier(_supplier_name)) { }
-        public static CompSet setCompSet(string cs_name, string doc_name, Supl supl)
-        {
-            CompSet cs = new CompSet(cs_name, supl);
-            cs.doc = Docs.getDoc(doc_name, load: false);
-            return cs;
-        }
-        /// <summary>
-        /// getCompSet() - fill CompSet from price-list. With all overloader getCompSet() method,
-        ///                only one without parameters loaded price-list. Others set cs.name only.
-        /// </summary>
-        /// <param name="name"></param>
-        /// <param name="supl_name"></param>
-        /// <returns></returns>
-        /// <history>14.4.2016</history>
-        public static CompSet getCompSet(string name, string supl_name)
-        { return getCompSet(name, Supl.getSupplier(supl_name)); }
-        public static CompSet getCompSet(string name, Supl supplier)
-        {
-            CompSet cs = supplier.CompSets.Find(x => x.name == name);
-            if (cs == null) Msg.F("Err getCompSet No CompSet", supplier.name, name);
-            Docs toc = Docs.getDoc(Decl.DOC_TOC);
-            string doc_cs_name = ""; // get doc_cs_name from TOC, however, getDoc later on
-            for (int i = toc.i0; i <= toc.il; i++)
-            {
-                string supl = toc.Body.Strng(i, Decl.DOC_SUPPLIER);
-                if (supl != supplier.name) continue;
-                string cs_name = toc.Body.Strng(i, Decl.DOC_SHEET);
-                if (cs_name != name) continue;
-                doc_cs_name = toc.Body.Strng(i, Decl.DOC_NAME);
-                break;
-            }
-            cs.doc = new Docs(doc_cs_name);    // don't load CompSet Document yet, setup the name only, and real getDoc when necessary
-            return cs;
-        }
-        public CompSet getCompSet()
-        {
-            if (this.Components == null)
-            {
-                this.doc = Docs.getDoc(this.doc.name);
-                this.Components = Component.setComp(doc);
-                getMat();
-            }
-            return this;
-        }
-        /// <summary>
-        /// getMat() - setup mats - List of materials used in Components
-        /// </summary>
-        /// <history>14.4.2016</history>
-        /// <description>
-        /// mats taken from Component.description
-        /// </description>
-        public void getMat()
-        {
-            Log.set("CompSet.getMat()");
-            foreach (var cs in Components)
-            {
-                string s = cs.description;
-            }
-            Log.exit();
-        }
-    } // end class CompSet
-} // end namespace
+    } // end class Component
+} // end namespace Component

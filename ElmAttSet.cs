@@ -33,6 +33,7 @@ using Msg = TSmatch.Message.Message;
 using Log = match.Lib.Log;
 using Lib = match.Lib.MatchLib;
 using Ifc = TSmatch.IFC.IfcManager.Core.IfcManager.IfcElement;
+using Mtch = TSmatch.Matcher.Matcher;
 
 
 namespace TSmatch.ElmAttSet
@@ -298,6 +299,7 @@ namespace TSmatch.ElmAttSet
         public double totalWeight;
         public double totalVolume;
         public double totalPrice;
+        public Mtch.OK matchRef;        // Reference to the matched supply source (i.e.line in price list)
 
         public Group(Dictionary<string, ElmAttSet>Els, string _mat, string _prf, List<string> _guids)
         {

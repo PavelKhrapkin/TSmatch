@@ -1,7 +1,7 @@
 ﻿/*------------------------------------------------------------------------------------------
  * Model -- класс управления моделями, ведет Журнал Моделей и управляет их сохранением
  * 
- *  29.9.2016 П.Храпкин
+ *  29.11.2016 П.Храпкин
  *  
  *--- журнал ---
  * 18.1.2016 заложено П.Храпкин, А.Пасс, А.Бобцов
@@ -17,6 +17,8 @@
  *           - Read(modelName) -- by defaul if(modelName == "") read most recent model
  * 22.8.2016 - Field ifcPath add to Model Journal
  * 29.9.2016 - re-written getGroups()
+ * 22.11.2016 - get Recent model from TXmatch.xlsx, not from Models collection
+ * 29.11.2016 - HashSet instead of List for Rules and Supplier collections
  * !!!!!!!!!!!!! -------------- TODO --------------
  * ! избавиться от static в RecentModel, RecentModelDir 
  * -----------------------------------------------------------------------------------------
@@ -62,8 +64,8 @@ using Elm = TSmatch.ElmAttSet.ElmAttSet;
 using ElmMGr  = TSmatch.ElmAttSet.Mgroup;
 using ElmGr   = TSmatch.ElmAttSet.Group;
 using Supplier = TSmatch.Suppliers.Supplier;
-using Component = TSmatch.Components.Component;
-using CmpSet = TSmatch.Components.CompSet;
+// 30/11 using Component = TSmatch.CompSet.Component;
+using CmpSet = TSmatch.CompSet.CompSet;
 
 using FileOp = match.FileOp.FileOp;
 
@@ -87,9 +89,11 @@ namespace TSmatch.Model
         ////        private Dictionary<string, List<Elm>> elmMatTypeGroups = new Dictionary<string, List<Elm>>();
         private List<ElmMGr> elmMgroups = new List<ElmMGr>();
         public List<ElmGr> elmGroups = new List<ElmGr>();   // will be used in Matcher
-        public readonly List<Mtch.Rule> Rules;  // список Правил, используемых с данной моделью
-        private string strListRules;            // список Правил в виде текста вида "5,6,8"
-        public List<Supplier> Suppliers = new List<Supplier>();       
+//28.11                                                            //        public readonly List<TSmatch.Rule.Rule> Rules;      // список Правил, используемых с данной моделью
+        public readonly HashSet<Rule.Rule> Rules = new HashSet<Rule.Rule>();
+        private string strListRules;                        // список Правил в виде текста вида "5,6,8"
+//29.11        public List<Supplier> Suppliers = new List<Supplier>();    
+        public readonly HashSet<Supplier> Suppliers = new HashSet<Supplier>();
         public List<CmpSet> CompSets = new List<CmpSet>();
         private bool wrToFile = true;   // when true- we should write into the file TSmatchINFO.xlsx, else- no changes
 
@@ -97,7 +101,7 @@ namespace TSmatch.Model
 
         public int CompareTo(Model mod) { return mod.date.CompareTo(date); }    //to Sort Models by time
 
-        public Model(DateTime t, string n, string d, string ifc, string m, string p, string md5, List<Mtch.Rule> r, string s)
+        public Model(DateTime t, string n, string d, string ifc, string m, string p, string md5, HashSet<Rule.Rule> r, string s)
         {
             this.date = t;
             this.name = n;
@@ -110,7 +114,7 @@ namespace TSmatch.Model
             this.strListRules = s;
         }
         public Model(string _name, string _dir, string _ifc, string _made, string _phase, string _md5)
-            : this(DateTime.Now, _name, _dir, _ifc, _made, _phase, _md5, new List<Mtch.Rule>(), "")
+            : this(DateTime.Now, _name, _dir, _ifc, _made, _phase, _md5, new HashSet<Rule.Rule>(), "")
         { }
 
         /// <summary>
@@ -138,7 +142,7 @@ namespace TSmatch.Model
         }
 
         public Model(string _name, string _dir, string _ifc, string _made, string _phase, string _md5
-            , List<Mtch.Rule> _rules, string _strRuleList)
+            , HashSet<Rule.Rule> _rules, string _strRuleList)
            : this(DateTime.Now, _name, _dir, _ifc, _made, _phase, _md5, _rules, _strRuleList)
         { }
         public Model(Docs doc, int i)
@@ -151,11 +155,15 @@ namespace TSmatch.Model
             this.Phase = doc.Body.Strng(i, Decl.MODEL_PHASE);
             this.MD5   =  doc.Body.Strng(i, Decl.MODEL_MD5);
             // преобразуем список Правил из вида "5,6,8" в List<Rule>
-            List<Mtch.Rule> _rules = new List<Mtch.Rule>();
-            this.strListRules = doc.Body.Strng(i, Decl.MODEL_R_LIST);
-            foreach (int n in Mtch.GetPars(this.strListRules))
-                _rules.Add(new Mtch.Rule(n));
-            this.Rules = _rules; 
+            /////            List<TSmatch.Rule.Rule> _rls = new List<TSmatch.Rule.Rule>();
+//28.11            HashSet<Rule.Rule> _rls = new HashSet<Rule.Rule>();
+            strListRules = doc.Body.Strng(i, Decl.MODEL_R_LIST);    // Rules of the Model as "4, 5, 8"
+            foreach (int n in Lib.GetPars(strListRules))
+            {
+                //28.11               _rls.Add(new TSmatch.Rule.Rule(n));
+                Rules.Add(new Rule.Rule(n));
+            }
+//28.11            this.Rules = _rls; 
         }
         public Model(int i) : this(Docs.getDoc(Decl.MODELS), i) { }
         #endregion
@@ -171,7 +179,7 @@ namespace TSmatch.Model
             Models.Clear();
             Docs doc = Docs.getDoc(Decl.MODELS);
             for (int i = doc.i0; i <= doc.il; i++)
-                if( doc.Body[i, Decl.MODEL_NAME] != null ) Models.Add(new Model(doc, i));
+                if( doc.Body[i, Decl.MODEL_NAME] != null )Models.Add(new Model(doc, i));
             List<string> strLst = new List<string>();
             foreach (var m in Models) strLst.Add(m.name);
             strLst.Sort();
@@ -299,8 +307,8 @@ namespace TSmatch.Model
                 if (str != null)
                 {
                     mod.strListRules = str;
-                    foreach (int n in Mtch.GetPars(str))
-                        mod.Rules.Add(new Mtch.Rule(n));
+                    foreach (int n in Lib.GetPars(str))
+                        mod.Rules.Add(new TSmatch.Rule.Rule(n));
                 }
                 //!!!!!!!!!!!!!!!!!!!!!!!!!!!! ЗДЕСЬ
                 // 1) проверить, доступен ли каталог dir? Если нет -> запустить FileWindowsDialog, потом рекурсивно вызвать modelListUpdate
@@ -496,6 +504,9 @@ namespace TSmatch.Model
         /// </summary>
         /// <param name="models">model list</param>
         /// <returns>most recently saved Model in the list</returns>
+        /// <history>
+        /// 2016.11.21 - get RecentModel from TOC, not from memory
+        /// </history>
         public Model ReсentModel(List<Model> models)
         {
             Log.set("ReсentModel");
@@ -509,16 +520,26 @@ namespace TSmatch.Model
             Log.exit();
             return mod;
         }
-        public static string RecentModelDir()
-        {
-            Models.Sort();
-            return Models[0].dir;
-        }
         public static Model RecentModel()
         {
-            Models.Sort();
-            return Models[0];
+            string date = "1.1.52";
+            int iMod = 0;
+            Docs doc = Docs.getDoc(Decl.MODELS);
+            for (int i = doc.i0; i <= doc.il; i++)
+            {
+                if (doc.Body[i, Decl.MODEL_NAME] != null)
+                {
+                    string modDate = doc.Body.Strng(i, Decl.MODEL_DATE);
+                    if (Lib.getDateTime(modDate) > Lib.getDateTime(date))
+                    {
+                        date = modDate;
+                        iMod = i;
+                    }
+                }
+            }
+            return new Model(iMod);
         }
+        public static string RecentModelDir() { return RecentModel().dir; }
 
         internal void Handler()
         {
@@ -526,6 +547,7 @@ namespace TSmatch.Model
             if (!wrToFile) return;  // if model not changed -> no handing is necessary
 
             getGroups();
+            Mtch.UseRules(this);
             getSuppliers();
 //TODO 30.8.2016            getMatcher();
         }
@@ -588,7 +610,7 @@ namespace TSmatch.Model
         }
         private void getSuppliers()
         {
-            Suppliers = Supplier.Start(); //!! времянка - список всех Поставщиков
+//29.11            Suppliers = Supplier.Start(); //!! времянка - список всех Поставщиков
         }
         /// <summary>
         /// ifWrToFile() возвращает true, если модель изменилась относительно имеющейся в журнале записи о ней

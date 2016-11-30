@@ -94,11 +94,11 @@ namespace TSmatch.Declaration
 
         public const string R_SUPPLIERS = SUPPLIERS;        //TSmatch.xlsx/Suppliers - Поставщики         
         public const string R_SUPPLIERS_TYPE = TEMPL_TOC;
-        public const string R_SUPPLIERS_DATE = "2.4.2016 12:10";
+        public const string R_SUPPLIERS_DATE = "29.11.2016 9:10";
 
         public const string R_MSG = MESSAGES;               //TSmatch.xlsx/Messages - Сообщения       
         public const string R_MSG_TYPE = TEMPL_TOC;
-        public const string R_MSG_DATE = "2.6.2016 22:40";
+        public const string R_MSG_DATE = "20.11.2016 22:40";
 
         public const string R_FORM = FORMS;                //TSmatch.xlsx/Forms - Формы
         public const string R_FORM_TYPE = TEMPL_TOC;
@@ -110,7 +110,7 @@ namespace TSmatch.Declaration
 
         public const string R_MODELS = MODELS;              //TSmatch.xlsx/Models - Модели
         public const string R_MODELS_TYPE = TEMPL_TOC;
-        public const string R_MODELS_DATE = "5.4.2016 13:00";
+        public const string R_MODELS_DATE = "5.11.2016 13:00";
 
         public const string R_CONST = CONST;               //TSmatch.xlsx/Constants - Таблицы и константы TSmatch
         public const string R_CONST_TYPE = TEMPL_TOC;

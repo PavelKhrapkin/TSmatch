@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------
  * MatchLib -- библиотека общих подпрограмм проекта match 3.0
  * 
- *  2.08.16 П.Храпкин, А.Пасс
+ *  17.10.16 П.Храпкин, А.Пасс
  *  
  * - 20.11.13 переписано с VBA на С#
  * - 1.12.13 добавлен метод ToIntList
@@ -18,6 +18,7 @@
  * - 16.2.16 включил метод IContains(List<string>, v
  * - 21.2.16 убрал static class Matchlib; метод ToLat()
  * -  2.8.16 добавлен метод ToDouble
+ * - 17.10.16 перенес GetPars из Matcher
  * -------------------------------------------
  *      ---- методы Match.Lib ----
  * fileOpen(dir, name[,OpenMode]) - открываем файл Excel по имени name в директории Dir, возвращает Workbook
@@ -30,12 +31,14 @@
  * IContains(List<string> lst, v) возвращает true, если в списке lst есть строка, содержащаяся в v
  * timeStr()                - возвращает строку, соответствующую текущнму времени
  * ComputeMD5(List>object> obj) - возвращает строку контрольной суммы MD5 по аргументу List<object>
- * ToLat(str) - замена в текстовой строке знаков кириллицы соотв.по написанию знаками латинского алфавита 
+ * ToLat(str) - замена в текстовой строке знаков кириллицы соотв.по написанию знаками латинского алфавита
+ * ToMtch(str, reg)         - return true, if str is in match with the regular expression reg. 
  */
 
 using System;
 using System.Data;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using System.IO;
 using System.Windows.Forms;
 
@@ -297,6 +300,25 @@ namespace match.Lib
                 if (st == null) lt += s; else lt += st;
             }
             return lt;
+        }
+        /// <summary>
+        /// GetPars(str) разбирает строку раздела компонента или Правила, выделяя числовые параметры.
+        ///         Названия материалов, профилей и другие нечисловые подстроки игнорируются.
+        /// </summary>
+        /// <param name="str">входная строка раздела компонента</param>
+        /// <returns>List<int>возвращаемый список найденых параметров</int></returns>
+        public static List<int> GetPars(string str)
+        {
+            const string VAL = @"\d+";
+            List<int> pars = new List<int>();
+            string[] pvals = Regex.Split(str, Decl.ATT_DELIM);
+            foreach (var v in pvals)
+            {
+                if (string.IsNullOrEmpty(v)) continue;
+                if (Regex.IsMatch(v, VAL))
+                    pars.Add(int.Parse(Regex.Match(v, VAL).Value));
+            }
+            return pars;
         }
     }   // конец класса MatchLib
     /// <summary>
