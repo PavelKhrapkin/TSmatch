@@ -143,10 +143,6 @@ namespace TSmatch.Matcher
         public static void UseRules(Mod mod)
         {
             Log.set("UseRules(" + mod.name + ")");
-            //////foreach (var r in mod.Rules)
-            //////{
-            //////    RuleParser(r.text);
-            //////}
             int nstr = 0;                           // nstr - string number in Groupr
             foreach(var gr in mod.elmGroups)
             {

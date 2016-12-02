@@ -1,7 +1,7 @@
 ﻿/*----------------------------------------------------------------------------------------------
  * Rule.cs -- Rule, which describes how to find Components used in Model in Supplier's price-list
  *
- * 17.10.2016 П.Храпкин
+ * 2.12.2016 П.Храпкин
  *
  *--- History ---
  * 17.10.2016 code file created from module Matcher
@@ -49,7 +49,7 @@ namespace TSmatch.Rule
 		public readonly string name;        //название правила
 		public readonly string type;        //тип правила
 		public readonly string text;        //текст правила
-        //---- references to other classes
+        //---- references to other classes - price-list conteners
 		public readonly CmpSet CompSet;     //список компонентов, с которыми работает правило
 		public readonly Supl Supplier;      //Поставщик
         //---- fileds of the Rule filled by Parser method
@@ -72,6 +72,7 @@ namespace TSmatch.Rule
             string csName = (string)doc.Body[i, Decl.RULE_COMPSETNAME];
             string suplName = (string)doc.Body[i, Decl.RULE_SUPPLIERNAME];
             Supplier = Supl.getSupplier(suplName);
+//1.12            Supplier = new Supl.Supplier(suplName);
             CompSet = CmpSet.getCompSet( csName, Supplier );
             RuleParser(text);
         }
@@ -83,29 +84,14 @@ namespace TSmatch.Rule
             if (other == null) return false;
             return (this._id == other._id);
         }
-        ////////////////////public override int GetHashCode()
-        ////////////////////{
-        ////////////////////    return _id;
-        ////////////////////}
-        ////////////////////public List<Rule> AddUnq(Rule r)
-        ////////////////////{
-        ////////////////////    if(Lib.IContains(this, this._id))
-
-
-        ////////////////////    this.Contains(r);
-        ////////////////////    if (this.Contains(r)) return this;
-        ////////////////////    r._hashCode = this.GetHashCode();
-        ////////////////////    this.AddUnq(r);
-        ////////////////////    return this;
-
-        ////////////////////}
         /// <summary>
         /// isRuleApplicable(mat, prf) - return true when parsed Rule is applicable to mat and prf values
         /// </summary>
         /// <param name="mat">Material in Model</param>
         /// <param name="prf">Profile in Model</param>
         /// <returns>true, if Rule after Parcing mentioned mat and prf</returns>
-        /// <history>9.4.2016</history>
+        /// <history>9.4.2016
+        /// </history>
         internal bool isRuleApplicable(string mat, string prf)
         {
             return Lib.IContains(RuleMatList, mat) && Lib.IContains(RulePrfList, prf);
@@ -167,77 +153,84 @@ namespace TSmatch.Rule
             string[] strs = rule.Split(';');
             foreach (var str in strs)
             {
-                if (str.Length == 0) break;
-                SectionParse(Section.Material, str, ref RuleMatList, ref RuleMatPar);
-                SectionParse(Section.Profile, str, ref RulePrfList, ref RulePrfPar);
-                SectionParse(Section.Cost, str, ref RuleCstList, ref RuleCstPar);
+                SectionParse(str);
             }
-            RuleTrace();
+            RuleLogInfo();
             Log.exit();
         }
 
-        private void RuleTrace()
+        private void RuleLogInfo()
         {
-            log.Info("----------- Parse Rule (\"" + text + "\") ---------------");
-            string matSynonyms = "", matParams = "", prfSymonyms = "", prfParams = "";
+            log.Info("----- Parse Rule (\"" + text + "\") -----");
+            string matSynonyms = "", matPars = "", prfSyns = "", prfPars = "", cstPars = "", cstSyns = "";
             foreach (string syn in RuleMatList) matSynonyms += " " + syn;
-            foreach (string par in RuleMatPar) matParams += " " + par;
+            foreach (string par in RuleMatPar) matPars += " " + par;
             log.Info("Material");
-            log.Info("\tSynonims:  " + matSynonyms);
-            log.Info("\tParametrs: " + matParams);
-            foreach (string syn in RulePrfList) prfSymonyms += " " + syn;
-            foreach (string par in RulePrfPar) prfParams += " " + par;
+            log.Info("\tSynonyms:  " + matSynonyms);
+            log.Info("\tParametrs: " + matPars);
+            foreach (string syn in RulePrfList) prfSyns += " " + syn;
+            foreach (string par in RulePrfPar) prfPars += " " + par;
             log.Info("Profile");
-            log.Info("\tSynonims:  " + prfSymonyms);
-            log.Info("\tParametrs: " + prfParams);
+            log.Info("\tSynonyms:  " + prfSyns);
+            log.Info("\tParametrs: " + prfPars);
+            log.Info("Price");
+            log.Info("\tSynonyms:  " + cstSyns);
+            log.Info("\tParametrs: " + cstPars);
+            foreach (string syn in RuleCstList) cstSyns += " " + syn;
+            foreach (string par in RuleCstPar) cstPars += " " + par;
         }
 
         /// <summary>
-        /// SectionParse(string, rSection) - parse Section - part of the Rule text. Result filled in Rule field
+        /// SectionParse(string) - parse Section - part of the Rule text. Result filled in Rule field
         /// Lists Synonims and Parameters. Regular Expressions used to parse input string.
-        /// /// </summary>
+        /// </summary>
         /// <param name="str">Part of the Rule string to be parsed</param>
-        /// <param name="rSection">Regular Expression template of the Section header</param>
-        /// <param name="synonym">List<string>of allowed alternatives - Material or Profile names</param>
-        /// <param name="params">List<string>of Section parameters</param>
-        /// <returns>List<string>List </returns>
         /// <history> 12.2.2016 PKh
         /// 19.10.2016 re-done from previous static attParse
         /// 23.10.2016 bug fix, Section header is parsing now in this module
         /// 23.11.2016 Cost Section parse for the Volume dependent calcalation
+        ///  2.12.2016 RecognizeSection
         /// <\history>
-        private void SectionParse(Section sectn, string str, ref List<string>synonym, ref List<string> parameter)
+        private void SectionParse(string str)
+        {
+            Section section = RecognyzeSection(ref str);
+
+            switch (section)
+            {
+                case Section.Material:
+                    RuleMatPar = Parameter(ref str);
+                    RuleMatList = Synonym(ref str);
+                    break;
+                case Section.Profile:
+                    RulePrfPar = Parameter(ref str);
+                    RulePrfList = Synonym(ref str);
+                    break;
+                case Section.Cost:
+                    RuleCstPar = Parameter(ref str);
+                    RuleCstList = Synonym(ref str);
+                    break;
+                default: Msg.F("Rule.SectionParse-- wrong Section arg");
+                    break;
+            }
+            if (str != "") Log.FATAL("строка \"" + str + "\" разобрана не полностью");
+        }
+
+        private Section RecognyzeSection(ref string str)
         {
             const string rMat = "m.*:";         //for "Profile" abbreviation must be at least "Pr", or "Пр"
             const string rPrf = "(пp|pr).*:";   //.. to avoid mixed parse of russian 'р' in "Материал"
             const string rCst = "(c|ц).*:";     //Cost (or Цена) Section
 
-            switch (sectn)
-            {
-                case Section.Material:
-                    if (!IsMtch(str, rMat)) return;
-                    log.Info("Section Material str=" + str);
-                    str = RemMtch(str, rMat);
-                    break;
-                case Section.Profile:
-                    if (!IsMtch(str, rPrf)) return;
-                    log.Info("Section Profile str=" + str);
-                    str = RemMtch(str, rPrf);
-                    break;
-                case Section.Cost:
-                    if (!IsMtch(str, rCst)) return;
-                    log.Info("Section Cost str=" + str);
-                    str = RemMtch(str, rCst);
-                    //this.RuleCstList = synonyms;
-                    //this.RuleCstPar = parameters;
-                    break;
-                default: Msg.F("Rule.SectionParse-- wrong Section arg");
-                    break;
-            }
-            parameter = Parameter(ref str);
-            synonym = Synonym(ref str);
-            if (str != "") Log.FATAL("строка \"" + str + "\" разобрана не полностью");
+            Section ?result = null;
+
+            if (IsMtch(str, rMat)) { result = Section.Material; str = RemMtch(str, rMat); }
+            if (IsMtch(str, rPrf)) { result = Section.Profile; str = RemMtch(str, rPrf); }
+            if (IsMtch(str, rCst)) { result = Section.Cost; str = RemMtch(str, rCst); }
+
+            if (result == null) Msg.F("Rule_Parse Section Not Recorgized", str);
+            return (Section) result;
         }
+
         /// <summary>
         /// IsMtch(string str, string reg) - return TRUE, if str contains regular expression reg.
         /// </summary>
@@ -298,200 +291,10 @@ namespace TSmatch.Rule
                     || string.IsNullOrWhiteSpace(par)
                     || !IsMtch(par, PARAM)   ) continue;
                 result.Add(par.ToUpper());
-                str = str.Replace(par, "");
+// 2/12               str = str.Replace(par, "");
             }
-            while (IsMtch(str, PAR_DELIM)) str = RemMtch(str, PAR_DELIM);
+// 2/12            while (IsMtch(str, PAR_DELIM)) str = RemMtch(str, PAR_DELIM);
             return result;
         }
-        /* 18.11.2016 --- попробую убрать весь разбор параметров в SectionParse
-                    const string rM = "(m|м).*:", rP = "(п|p).*:",           // Материал и Профиль
-                        rVal = @"#\d+", rWild = @"\*.*?\d+",                 // #- и *- параметры 
-                        rDec = @"(\d+)|(\d.\d*)|(\d,\d)",                    // десятичные числа с точкой или запятой
-                        rRedundancy = @"(изб|зaп|oтx|red|was|excess).*\d+%"; //Redundency|Waste|Excess|Отходы|Запас
-                    Regex regM = new Regex(rM, RegexOptions.IgnoreCase);
-                    Regex regP = new Regex(rP, RegexOptions.IgnoreCase);
-
-                    string strMat = Lib.ToLat("Материал:");
-                    string rMM = "m.*:";
-                    string rPP = "(п|p).*:";
-                    string rPR = "п.*:";
-                    bool b = Regex.IsMatch(strMat, rMM, RegexOptions.IgnoreCase);
-                    bool h = Regex.IsMatch(strMat, rPR, RegexOptions.IgnoreCase);
-
-                    //--- get #value parameters from the rule, put them in RuleValPars List
-                    while (Regex.IsMatch(rule, rVal, RegexOptions.IgnoreCase))
-                    {
-                        Match val = Regex.Match(rule, rVal);
-                        int x = int.Parse(val.Value.Replace("#", ""));
-                        RuleValPars.Add(x);
-                        rule = rule.Replace(val.Value, "");
-                    }
-                    //--- get List of * parameters from the rule, put them into RuleWildPars List
-                    while (Regex.IsMatch(rule, rWild, RegexOptions.IgnoreCase))
-                    {
-                        Match starPar = Regex.Match(rule, rWild);
-                        List<int> p = Lib.GetPars(starPar.Value);
-                        RuleWildPars.Add(p[0] - 1);
-                        rule = rule.Replace(starPar.Value, "");
-                    }
-                    //--- Redundency % handling, put them into RuleRedandencyPerCent List
-                    while (Regex.IsMatch(rule, rRedundancy, RegexOptions.IgnoreCase))
-                    {
-                        Match excess = Regex.Match(rule, rRedundancy, RegexOptions.IgnoreCase);
-                        Match perCent = Regex.Match(excess.ToString(), rDec);
-                        if (!double.TryParse(perCent.ToString(), out RuleRedundencyPerCent))
-                            RuleRedundencyPerCent = 0.0;
-                        rule = rule.Replace(excess.Value, "");
-                    }
-                    //--- Rule parsing by Sections (Material/Profile/Other). Разбор Правила по разделам
-        */ //18.11.2016
-           /* 18.11.2016
-                   /// <summary>
-                   /// attParse(str, reg, lst, ref n) - разбор раздела Правила в строке str
-                   /// </summary>
-                   /// <param name="str">разбираемый раздел Правила</param>
-                   /// <param name="reg">шаблон - заголовок раздела</param>
-                   /// <param name="lst">разбираемые параметры раздела</param>
-                   /// <param name="n">счетчик параметров</param>
-                   /// <returns>возвращает строку str после разбора - она должна быть пустой</returns>
-                   /// <history> 12.2.2016 PKh <\history>
-                   static string attParse(string str, Regex reg, List<string> lst, ref int n)
-                   {
-                       if (reg != null) str = reg.Replace(str, "");
-                       string[] parametrs = Regex.Split(str, Decl.ATT_DELIM);
-                       foreach (var par in parametrs)
-                       {
-                           if (string.IsNullOrEmpty(par)) continue;
-                           bool parPars = false;
-                           if (Regex.IsMatch(par, Decl.ATT_PARAM)) { n++; parPars = true; }
-                           if (!string.IsNullOrWhiteSpace(par)
-                               && !Regex.IsMatch(par, Decl.ATT_DELIM)
-                               && !parPars) lst.Add(par.ToUpper());
-                           str = str.Replace(par, "");
-                       }
-                       if (str != "") Log.FATAL("строка \"" + str + "\" разобрана не полностью");
-                       return str;
-                   }
-           */ ///////////////// 18.11.2016
-              /* !!!!!!!!!!!!!!!!!!!!!!!!!!! 17.10.2016
-                      /// <summary>
-                      /// Start - initiate Rules - text lines, which describe match process
-                      /// </summary>
-                      /// <ToDo>
-                      /// 1.10.2016
-                      /// Вообще говоря, метод Start не нужен, как и общий список Rules, поскольку Правила в Модели считываются
-                      /// непосредственно из TSmatch.xlsx/Rules. В дальнейшем надо:
-                      /// -!- в классе Rules добавть поля RuleMatList, RulePrfList и пр со стр.270-276 и здесь парсировать Правила
-                      /// </ToDo>
-                      /// <history> Jan-2016
-                      /// 19.2.16 - переписано обращение к Documents.Start с инициализацией массивов FileDir
-                      /// 30.3.16 - Start other modules removed to Bootstrap
-                      /// </history>
-                      public static void Start()
-                      {
-                          Log.set("Matcher.Start");
-                          List<Rule> Rules = new List<Rule>();
-                          Docs rule = Docs.getDoc(Decl.RULES);   // инициируем список Правил Matcher'a
-                          for (int i = 4; i<=rule.Body.iEOL(); i++)
-                              { if (rule.Body[i, Decl.RULE_NAME] != null) Rules.Add(new Rule(rule, i)); }
-                          Log.exit();
-                      }
-
-                      /// <summary>
-                      /// UserRules(mod) - Apply Model mod Rules to create TSmatchINFO.xlsx/Report
-                      /// </summary>
-                      /// <param name="mod">Model to de handled</param>
-                      /// <ToDo>
-                      /// 1.10.2016
-                      /// -!- убрать все обращения к Report и obj, вместо этого заполнять struct OK
-                      /// </ToDo>
-                      /// <history>10.3.2016
-                      /// 15.3.2016 - get Rule list (Rules) from the Model mod
-                      ///  3.4.2016 - adoption to the updated CompSet class
-                      /// 30.9.2016 - Groups taken from mod
-                      ///  1.10.2016 - вместо печати TSmatchINFO/Report заполняем struct OK в mod.elmGroups
-                      /// </history>
-                      public static void UseRules(Mod mod)
-                      {
-                          Log.set("UseRules(" + mod.name + ")");
-                          int nstr = 0;                           // nstr - string number in Groupr
-                          foreach(var gr in mod.elmGroups)
-                          {
-                              foreach (var r in mod.Rules)
-                              {
-                                  RuleParser(r.text);     // сейчас Правило r многократно разбирается каждый раз для каждой Группы..
-                                                          // Возможно,списки Rule.List стоит перенести в класс Rule и обработать заранее
-                                  SearchInComp(r.CompSet, nstr++, gr.mat, gr.prf);
-                              }
-                          }
-                          foreach (var ok in OKs)
-                          {
-                              Docs doc = ok.doc;  //подставить
-                              CmpSet cs = mod.CompSets.Find(x => x.doc == doc);
-                              if (cs == null) mod.CompSets.Remove(cs);
-                          }
-                          foreach (var sup in mod.Suppliers)
-                          {
-                              CmpSet cs = mod.CompSets.Find(x => x.Supplier == sup);
-                              if (cs == null) mod.Suppliers.Remove(sup);
-                          }
-                          Log.exit();
-                      }
-                      /// <summary>
-                      /// isRuleApplicable(mat, prf) - return true when parsed Rule is applicable to mat and prf values
-                      /// </summary>
-                      /// <param name="mat">Material</param>
-                      /// <param name="prf">Profile</param>
-                      /// <returns>true, if Rule after Parcing mentioned mat and prf</returns>
-                      /// <history>9.4.2016</history>
-                      static bool isRuleApplicable(string mat, string prf)
-                      { return Lib.IContains(RuleMatList, mat) && Lib.IContains(RulePrfList, prf); }
-                      /// <summary>
-                      /// GetPars(str) разбирает строку раздела компонента или Правила, выделяя числовые параметры.
-                      ///         Названия материалов, профилей и другие нечисловые подстроки игнорируются.
-                      /// </summary>
-                      /// <param name="str">входная строка раздела компонента</param>
-                      /// <returns>List<int>возвращаемый список найденых параметров</int></returns>
-                      public static List<int> GetPars(string str)
-                      {
-                          const string VAL = @"\d+";
-                          List<int> pars = new List<int>();
-                          string[] pvals = Regex.Split(str, Decl.ATT_DELIM);
-                          foreach (var v in pvals)
-                          {
-                              if (string.IsNullOrEmpty(v)) continue;
-                              if (Regex.IsMatch(v, VAL))
-                                  pars.Add(int.Parse(Regex.Match(v, VAL).Value));
-                          }
-                          return pars;
-                      }
-
-                      /// <summary>
-                      /// attParse(str, reg, lst, ref n) - разбор раздела Правила в строке str
-                      /// </summary>
-                      /// <param name="str">разбираемый раздел Правила</param>
-                      /// <param name="reg">шаблон - заголовок раздела</param>
-                      /// <param name="lst">разбираемые параметры раздела</param>
-                      /// <param name="n">счетчик параметров</param>
-                      /// <returns>возвращает строку str после разбора - она должна быть пустой</returns>
-                      /// <history> 12.2.2016 PKh <\history>
-                      static string attParse(string str, Regex reg, List<string> lst, ref int n)
-                      {
-                          if (reg != null) str = reg.Replace(str, "");
-                          string[] parametrs = Regex.Split(str, Decl.ATT_DELIM);
-                          foreach (var par in parametrs)
-                          {
-                              if (string.IsNullOrEmpty(par)) continue;
-                              bool parPars = false;
-                              if (Regex.IsMatch(par, Decl.ATT_PARAM)) { n++; parPars = true; }
-                              if (!string.IsNullOrWhiteSpace(par)
-                                  && !Regex.IsMatch(par, Decl.ATT_DELIM)
-                                  && !parPars) lst.Add(par.ToUpper());
-                              str = str.Replace(par, "");
-                          }
-                          if (str != "") Log.FATAL("строка \"" + str + "\" разобрана не полностью");
-                          return str;
-                      }
-               !!!!!!!!!!!!!!!!!!!! 17.10.2016 */
     } // end class Rule
 } // end namespace Rule

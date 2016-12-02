@@ -67,6 +67,8 @@ namespace TSmatch.CompSet
         public CompSet(string _name, Supl _supl, string doc_cs_name) : this(_name, _supl)
         {
             this.doc_cs_name = doc_cs_name;
+            this.doc = Docs.getDoc(doc_cs_name);
+            this.Components = Component.Component.setComp(doc);
         }
 
         //////////////////public static CompSet setCompSet(string cs_name,  Supl supl, string doc_name)
@@ -100,27 +102,6 @@ namespace TSmatch.CompSet
             }
             CompSet cs = new CompSet(cs_name, supplier, doc_cs_name);
             return cs;
-            Docs doc_cs = Docs.getDoc(doc_cs_name);
-                throw new NotImplementedException();
-
-
-
-
-            //////////CompSet cs = supplier.CompSets.Find(x => x.name == name);
-            //////////if (cs == null) Msg.F("Err getCompSet No CompSet", supplier.name, name);
-            //////////Docs toc = Docs.getDoc(Decl.DOC_TOC);
-            //////////string doc_cs_name = ""; // get doc_cs_name from TOC, however, getDoc later on
-            //////////for (int i = toc.i0; i <= toc.il; i++)
-            //////////{
-            //////////    string supl = toc.Body.Strng(i, Decl.DOC_SUPPLIER);
-            //////////    if (supl != supplier.name) continue;
-            //////////    string cs_name = toc.Body.Strng(i, Decl.DOC_SHEET);
-            //////////    if (cs_name != name) continue;
-            //////////    doc_cs_name = toc.Body.Strng(i, Decl.DOC_NAME);
-            //////////    break;
-            //////////}
-            //////////cs.doc = new Docs(doc_cs_name);    // don't load CompSet Document yet, setup the name only, and real getDoc when necessary
-            //////////return cs;
         }
         public CompSet getCompSet()
         {

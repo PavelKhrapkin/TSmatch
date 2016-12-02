@@ -36,6 +36,7 @@ namespace TSmatch.Declaration
     class Declaration
     {
         #region Module C# Code Names
+        public const string BOOTSTRAP = "Bootstrap";    //Bootstrap -- начальный запуск приложения TSmatch, проверка налиция нужных файлов
         public const string MODEL = "Model";     // Model -- класс управления моделями, ведет Журнал Моделей и управляет их сохранением
         #endregion Modules C# Code Names
 

@@ -21,12 +21,10 @@ namespace TSmatch
         [STAThread]
         static void Main(string[] args)
         {
-            Log.START("TSmatch v2016.11.22");
+            Log.START("TSmatch v2016.12.2");
 
-            var bootApp = new Startup.Bootstrap();
-            bootApp.start();
-
-            var model = (Model.Model) bootApp.init(Declaration.Declaration.MODEL);
+            var bootstrap = new Startup.Bootstrap();
+            var model = (Model.Model) bootstrap.init(Declaration.Declaration.MODEL);
             model.Read();   // Read() - загружаем модель, последнюю по времени
             model.Handler();
             model.Report();

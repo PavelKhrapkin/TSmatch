@@ -89,15 +89,11 @@ namespace TSmatch.Model
         ////        private Dictionary<string, List<Elm>> elmMatTypeGroups = new Dictionary<string, List<Elm>>();
         private List<ElmMGr> elmMgroups = new List<ElmMGr>();
         public List<ElmGr> elmGroups = new List<ElmGr>();   // will be used in Matcher
-//28.11                                                            //        public readonly List<TSmatch.Rule.Rule> Rules;      // список Правил, используемых с данной моделью
         public readonly HashSet<Rule.Rule> Rules = new HashSet<Rule.Rule>();
-        private string strListRules;                        // список Правил в виде текста вида "5,6,8"
-//29.11        public List<Supplier> Suppliers = new List<Supplier>();    
+        private string strListRules;                        // список Правил в виде текста вида "5,6,8"   
         public readonly HashSet<Supplier> Suppliers = new HashSet<Supplier>();
         public List<CmpSet> CompSets = new List<CmpSet>();
         private bool wrToFile = true;   // when true- we should write into the file TSmatchINFO.xlsx, else- no changes
-
-        private Ifc ifc = null;
 
         public int CompareTo(Model mod) { return mod.date.CompareTo(date); }    //to Sort Models by time
 
@@ -538,6 +534,10 @@ namespace TSmatch.Model
                 }
             }
             return new Model(iMod);
+        }
+        public string ModelDir()
+        {
+            return this.dir;
         }
         public static string RecentModelDir() { return RecentModel().dir; }
 

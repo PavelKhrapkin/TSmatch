@@ -65,10 +65,8 @@ namespace TSmatch.Startup
         static string DebugDir = string.Empty;
         //------------ Main TSmatch classes --------------------------
         internal List<Model.Model> models;                      // CAD model list used in TSmatch, model journal
-//29/11        internal List<Suppliers.Supplier> suppliers = new List<Suppliers.Supplier>();
-
-        Ifc ifc = null;
-//        Resource resource;
+        Ifc ifc;
+        private Model.Model recentModel;
 
         public void start()
         {
@@ -83,13 +81,10 @@ namespace TSmatch.Startup
             Docs.Start(TOCdir);             // инициируем Документы из TSmatch.xlsx/TOC
             Msg.Start();                    // инициируем Сообщения из TSmatch.xlsx/Messages
             Resource.checkResource();       // проверяем все ресурсы, в частности, актуальность даты в [1,1]          
-//29/11            suppliers = Suppliers.Supplier.Start();     // инициируем полный список Поставщиков из TSmatch.xlsx/Suppliers
-// 21.11.16           Matcher.Matcher.Start();        // инициируем Правила из TSmatch.xlsx/Matcher
-// 21.11.16           models = Model.Model.Start();   // инициируем Журнал Моделей - список всех известных TSmatch моделей в TSmatch.xlsx/Models
-
             if (!isTeklaActive)
             {
-                ModelDir = Model.Model.RecentModelDir();
+                recentModel = Model.Model.RecentModel();
+                ModelDir = recentModel.ModelDir();
                 Template.Reset(Decl.TEMPL_MODEL, ModelDir);
                 ifc = new Ifc();
                 ifc.init(IFCschema);        // инициируем IFC, используя файл схемы IFC - обычно из Tekla
@@ -111,7 +106,8 @@ namespace TSmatch.Startup
             switch (name)
             {
                 case Decl.MODEL:
-                    moduleApp = arg == "" ? Model.Model.RecentModel() : models.Find(x => x.name == arg);
+                    start();
+                    moduleApp = arg == "" ? recentModel : models.Find(x => x.name == arg);
                     if (moduleApp.Equals(null)) moduleApp = Model.Model.newModelOpenDialog(out models); 
                     break;
                 case Decl.SUPPLIERS:
