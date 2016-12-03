@@ -32,6 +32,7 @@ namespace TSmatch.Declaration
     ///  2.7.16     - FORM Resourse add for TSmatch.xlsx
     ///  6.8.16     - Moule C# Code Names -- use them to avoid static in Module Classes by defining xxAdd in BootStrat.Init and every Module
     /// 21.8.16     - re-defined Documents of TSmatchINFO.xlsx
+    /// 3.12.16     - Resource Recover NoTOCdirEnvVar
     /// </history>
     class Declaration
     {
@@ -79,7 +80,7 @@ namespace TSmatch.Declaration
         // Constants hereunder descripe the Resource name, type and date to be checked as "Actual".
         // We should set here (EXPECT DATE) time earlier, than it is written in [1,1] of the Document
         public enum RESOURCE_TYPES { Document, File, TeklaFile, Directory, Application };
-        public enum RESOURCE_FAULT_REASON { NoFile, Obsolete, NoTekla, DirRelocation };
+        public enum RESOURCE_FAULT_REASON { NoFile, Obsolete, NoTekla, DirRelocation, NoTOCdirEnvVar };
 
         public const string R_TEKLA = "Tekla";              //Application Tekla Structure is up an running
         public static readonly string R_TEKLA_TYPE = RESOURCE_TYPES.Application.ToString();

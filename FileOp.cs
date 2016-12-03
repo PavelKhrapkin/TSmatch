@@ -96,6 +96,37 @@ namespace match.FileOp
             Log.exit();
             return Wb;
         }
+        /// <summary>
+        /// fileOpenDir(name) - check if file name we need is already open in Windows
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public static string fileOpenDir(string name)
+        {
+            bool wasExcelFoundRunning = false;
+            string dir = "";
+            Excel.Application tApp = null;
+            try
+            {                       //Checks to see if excel is opened
+                tApp = (Excel.Application)System.Runtime.InteropServices.Marshal.GetActiveObject("Excel.Application");
+                wasExcelFoundRunning = true;
+            }
+            catch (Exception) { }   //Excel not open
+            finally
+            {
+                if (wasExcelFoundRunning)
+                {
+                    foreach (Excel.Workbook w in tApp.Workbooks)
+                    {
+                        if (w.Name != name) continue;
+                        dir = w.Path;
+                        break;
+                    }
+                }
+            }
+            return dir;
+        }
+
         public static void fileRename(string dir, string oldName, string newName)
         {
             Log.set("FileOp.fileRename");
@@ -194,7 +225,14 @@ namespace match.FileOp
             return result;
         }
         #endregion
-        #region --- getFileDate
+        #region ---getExcelFileDir & getFileDate
+
+        internal static string getExcelFileDir(string fileName)
+        {
+
+            throw new NotImplementedException();
+        }
+
         public static DateTime getFileDate(string dir, string name)
         { return File.GetLastWriteTime(Path.Combine(dir, name)); }
         public static DateTime getFileDate(string path) { return File.GetLastWriteTime(path); }
@@ -331,6 +369,7 @@ namespace match.FileOp
 
         public static void FormCol(char col, int dig = 0)
         {
+            throw new NotImplementedException();
         }
     }  // end class FileOp
 }  // end namespace FileOp

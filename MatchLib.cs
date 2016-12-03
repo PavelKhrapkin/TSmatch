@@ -41,6 +41,7 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.IO;
 using System.Windows.Forms;
+using System.Diagnostics;
 
 using System.Linq;
 using System.Text;
@@ -55,6 +56,17 @@ namespace match.Lib
     {
         public static string dirDBs = null;             // имя каталога для Документов и базы данных
         private static Excel.Application _app = null;   // Application Excel
+
+        internal static bool isWinAppExist(string nameApp)
+        {
+            bool ok = false;
+            foreach(var app in Process.GetProcesses())
+            {
+                if (app.ProcessName.ToUpper().Contains(nameApp)) return true;
+            }
+//            throw new NotImplementedException();
+            return ok;
+        }
 
         #region ToList
         /// <summary>

@@ -273,8 +273,16 @@ namespace TSmatch.Startup
                         break;
                     case Decl.RESOURCE_FAULT_REASON.NoTekla:
                         TOCdir = Environment.GetEnvironmentVariable(Decl.WIN_TSMATCH_DIR, EnvironmentVariableTarget.User);
-                        if (TOCdir == null) Msg.F("Windows Parametr TSmatch_Dir not defined." 
-                                            + "\n\rTry to run TSmatch.xlsx manualy and restart, or run Tekla.");
+                        if (TOCdir == null && !Recover(Decl.RESOURCE_FAULT_REASON.NoTOCdirEnvVar))
+                        {
+                            Msg.F("\n\r\n\r================================================================"
+                                + "\n\rWindows Parametr TSmatch_Dir not defined. It normally pointed by"
+                                + "\n\rWindows Environment Variable. On the virgin new PC you could"
+                                + "\n\rtry to setup it manualy. Alternatively, to make it automatically,"
+                                + "\n\rput TSmatch.xlsx in the directory, where it should be located,"
+                                + "\n\rthan restart the application TSmatch, or run Tekla, to setup it."
+                                + "\n\r================================================================\n\r\n\r");
+                        }
                         // other parameters for #template (f.e.ModelDir) get later from TSmatch.xlsx when necessary
                         // another Resource - IFC schema take from Tekla Environment; for inactive Tekla - get from TOCdir
                         string inp = Path.Combine(TOCdir, @"..\..", Decl.ENV_INP_DIR, Decl.IFC_SCHEMA);
@@ -287,9 +295,20 @@ namespace TSmatch.Startup
                         //  3) исправим переменную TOCdir в TSmatch и в переменной Registry
                         throw new NotImplementedException();
                         break;
+                    case Decl.RESOURCE_FAULT_REASON.NoTOCdirEnvVar:
+                        TOCdir = FileOp.fileOpenDir(Decl.F_MATCH);
+                        if (TOCdir == null) Msg.F("Bootstrap not found TSmatch.xlsx");
+                        ok = true;
+                        break;
                 }
                 return ok;
             }
+
+            private bool recoverTOCdir()
+            {
+                throw new NotImplementedException();
+            }
+
             private bool Recover()
             { return Recover(Decl.RESOURCE_FAULT_REASON.NoFile) && Recover(Decl.RESOURCE_FAULT_REASON.Obsolete); }
             /// <summary>
