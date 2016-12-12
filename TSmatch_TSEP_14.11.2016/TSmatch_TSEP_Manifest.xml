@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TEP Version ="1.0">
+
+  <Product Id="TSmatch" UpgradeCode="BB06E1E3-3AF6-4D76-AE53-06C9935D3065" Version="2016.11.01" Language="1033"
+          Name="TSmatch BOM Report Builder" Manufacturer="Pavel Khrapkin"
+          Description=
+                    "Application Extension TSmatch generate BOM (Bill Of Material) report
+                    from Model in Tekla or IFC. BOM is created with Supplier Price-List
+                    and matching Rules concideration."
+          IconPatch="%TEPDEFINITIONFILEFOLDER%\Button\TSmatch.bmp">
+    <TeklaVersions>
+      <TeklaVersion Name="2016i"/>
+      <MinTeklaVersion Name="21.0"/>
+      <MaxTeklaVersion Name="2017"/>
+    </TeklaVersions>
+  </Product>
+
+  <SourcePatthVariables>
+    <SourcePathVariable Id="TepOutputFolder" Value="%TEPDEFINITIONFOLDER%\output" Comment="This is to save package"/>
+    <SourcePathVariable Id="BinaryFolder"    Value="%TEPDEFINITIONFOLDER%"        Comment="This is package source dir"/>    
+  </SourcePatthVariables>
+
+  <TargetPathVariablrs>
+    <PathVariable Id="ModelsPluginDirectory"       Value="%ENVDIR\extensions\plugins\tekla\model\"/>
+    <PathVariable Id="ModelsApplicationsDirectory" Value="%ENVDIR\extensions\applications\tekla\model\"/>
+    <PathVariable Id="ExtensionsDir"               Value="%commonEnvFolder%\extensions\"/>
+    <PathVariable Id="BinariesTargetDirectory"     Value="%commonEnvFolder%\extensions\"/>
+    <PathVariable Id="BitmapsDirectory"            Value="%commonEnvFolder%\..\bitmaps\"/>
+    <PathVariable Id="AttributeFileDirectory"      Value="%commonEnvFolder%\system\"/>
+    <PathVariable Id="CommonMacroDirectory"        Value="%commonEnvFolder%\macros\modeling\"/>
+  </TargetPathVariablrs>
+  
+  <Component ID="TheExtensionComponent">
+    
+  </Component>
+  
+  <Feature Id="TheExtensionFeature" Title="ExtensionFeature">
+    <ComponentRef ReferenceId="TheExtensionComponent" />
+  </Feature>
+  
+</TEP>
