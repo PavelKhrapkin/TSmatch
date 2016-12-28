@@ -1,7 +1,7 @@
 ﻿/*------------------------------------------------------------------------------------------
  * Model -- класс управления моделями, ведет Журнал Моделей и управляет их сохранением
  * 
- *  29.11.2016 П.Храпкин
+ *  26.12.2016 П.Храпкин
  *  
  *--- журнал ---
  * 18.1.2016 заложено П.Храпкин, А.Пасс, А.Бобцов
@@ -19,6 +19,7 @@
  * 29.9.2016 - re-written getGroups()
  * 22.11.2016 - get Recent model from TXmatch.xlsx, not from Models collection
  * 29.11.2016 - HashSet instead of List for Rules and Supplier collections
+ * 26.12.2016 - get model from Tekla -- TEMPORAPY PATCH
  * !!!!!!!!!!!!! -------------- TODO --------------
  * ! избавиться от static в RecentModel, RecentModelDir 
  * -----------------------------------------------------------------------------------------
@@ -54,7 +55,7 @@ using log4net;
 using Decl = TSmatch.Declaration.Declaration;
 using Lib = match.Lib.MatchLib;
 using Docs = TSmatch.Document.Document;
-using Mtch = TSmatch.Matcher.Matcher;
+using Mtch = TSmatch.Matcher.Mtch;
 using TS = TSmatch.Tekla.Tekla;
 using Ifc = TSmatch.IFC.IFC;
 using Log = match.Lib.Log;
@@ -93,6 +94,7 @@ namespace TSmatch.Model
         private string strListRules;                        // список Правил в виде текста вида "5,6,8"   
         public readonly HashSet<Supplier> Suppliers = new HashSet<Supplier>();
         public List<CmpSet> CompSets = new List<CmpSet>();
+        List<Matcher.Mtch> matches = new List<Matcher.Mtch>();
         private bool wrToFile = true;   // when true- we should write into the file TSmatchINFO.xlsx, else- no changes
 
         public int CompareTo(Model mod) { return mod.date.CompareTo(date); }    //to Sort Models by time
@@ -185,7 +187,7 @@ namespace TSmatch.Model
         /// <summary>
         /// Read(nameModel) - получение модели (списка элементов с атрибутами) из Tekla или IFC
         /// </summary>
-        /// <param name="modelName">имя читаемой модели, по умолчанию - чтение самой свежей модели</param>
+        /// <param name="modelName">имя читаемой модели, по умолчанию - чтение того, что есть</param>
         /// <returns>Model со списком прочитанных элементов в model.elements</returns>
         public Model Read(string modelName = "")
         {
@@ -195,10 +197,24 @@ namespace TSmatch.Model
             log.Info(@"TRACE: Модель = " + mod.name + "\t" + Elm.Elements.Count + " компонентов.");
             return mod;
         }
+
+        internal static Model getModelFrTekla()
+        {
+            string modName = TS.getModInfo();
+            Docs doc = Docs.getDoc(Decl.MODELS);
+            for (int i = doc.i0; i <= doc.il; i++)
+            {
+                if (doc.Body.Strng(i, Decl.MODEL_NAME) != modName) continue;
+                return new TSmatch.Model.Model(i);
+            }
+            Msg.F("TEMPORARY: New model in Tekla! Put it in Model Jornal manually");
+            return null;
+        }
+
         /// <summary>
         /// getModel(name) - get Model by name in TSmatch.xlsx/Model Journal  
         /// </summary>
-        /// <param name="name">Model name; by default get most recent model</param>
+        /// <param name="name">Model name; by default get most recent model of model from Tekla</param>
         /// <returns>found Model</returns>
         /// <history>5.6.2016
         /// 6.8.2016 - non static method</history>
@@ -258,7 +274,7 @@ namespace TSmatch.Model
                 ////ElmGr.setGroups();            // Group Elements by Materials and Profile
                 ////ElmMGr.setMgr();        // Additionally group Groups by Material 
                 setModel(mod.name);     // Load price-list for the model
-                Mtch.UseRules(mod);     // Search for Model Groups matching Components
+//revision 2016.12.05                Mtch.UseRules(mod);     // Search for Model Groups matching Components
                 mod.wrModel(Decl.TSMATCHINFO_REPORT);
                 mod.wrModel(Decl.TSMATCHINFO_SUPPLIERS);
                 saveModel(mod.name);    // а теперь запишем в Журнал Моделей обновленную информацию
@@ -547,9 +563,15 @@ namespace TSmatch.Model
             if (!wrToFile) return;  // if model not changed -> no handing is necessary
 
             getGroups();
-            Mtch.UseRules(this);
+            foreach (var gr in elmGroups)
+            {
+                foreach (var rule in Rules)
+                {
+                    Matcher.Mtch _match = new Matcher.Mtch(gr, rule);
+                    if (_match.ok) matches.Add(_match);
+                }
+            }
             getSuppliers();
-//TODO 30.8.2016            getMatcher();
         }
         /// <summary>
         /// getGroups() - groupping of elements of Model by Material and Profile

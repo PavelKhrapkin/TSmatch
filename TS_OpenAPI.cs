@@ -110,7 +110,7 @@ namespace TSmatch.Tekla
             TSM.Model model = new TSM.Model();
             List<Part> parts = new List<Part>();
             ModInfo = model.GetInfo();
-            if (    dir != "" && ModInfo.ModelPath != dir
+            if (dir != "" && ModInfo.ModelPath != dir
                 || name != "" && ModInfo.ModelName != String.Concat(name, ".db1")) Msg.F("Tekla.Read: Another model loaded, not", name);
             ModInfo.ModelName = ModInfo.ModelName.Replace(".db1", "");
             TSM.ModelObjectSelector selector = model.GetModelObjectSelector();
@@ -240,6 +240,7 @@ namespace TSmatch.Tekla
                 if (clsProcess.ProcessName.ToLower().Contains(Tekla.ToLower()))
                 {
                     TSM.Model model = new TSM.Model();
+//20/12/2016                    if (!model.GetConnectionStatus()) Msg.W("===== No Tekla active =========");
                     try
                     {
                         ModInfo = model.GetInfo();
@@ -266,11 +267,22 @@ namespace TSmatch.Tekla
             {
                 TSM.Model model = new TSM.Model();
                 ModInfo = model.GetInfo();
-                ModInfo.ModelName = ModInfo.ModelName.Replace(".db1", "");
-                ok = ModInfo.ModelName == name;
+                name = Path.GetFileNameWithoutExtension(name);
+                //                ModInfo.ModelName = ModInfo.ModelName.Replace(".db1", "");
+                string inTS = Path.GetFileNameWithoutExtension(ModInfo.ModelName);
+                ok = Path.GetFileNameWithoutExtension(ModInfo.ModelName) == name;
             }
             Log.exit();
             return ok;
+        }
+        public static string getModInfo()
+        {
+            string result = String.Empty;
+            TSM.Model model = new TSM.Model();
+            ModInfo = model.GetInfo();
+            result = Path.GetFileNameWithoutExtension(ModInfo.ModelName);
+//            if (!isTeklaModel(result)) Msg.F("TS_Open API getModInfo error");
+            return result;
         }
     } //class Tekla
 } //namespace

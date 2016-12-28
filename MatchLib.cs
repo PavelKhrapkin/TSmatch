@@ -20,7 +20,7 @@
  * -  2.8.16 добавлен метод ToDouble
  * - 17.10.16 перенес GetPars из Matcher
  * -------------------------------------------
- *      ---- методы Match.Lib ----
+ *      ---- методы Mtch.Lib ----
  * fileOpen(dir, name[,OpenMode]) - открываем файл Excel по имени name в директории Dir, возвращает Workbook
  * isFileExist(name)        - возвращает true, если файл name существует
  * isSheetExist(Wb, name)  - проверяет, есть ли в Workbook Wb лист name 
@@ -364,7 +364,7 @@ namespace match.Lib
             new Log("\n\n[FATAL] " + msg);
             _tx("\n\tв стеке имен:");
             foreach (var s in _nameStack) _tx("\t-> " + s);
-            System.Diagnostics.Debugger.Break();
+            Debugger.Break();
         }
         public static void Warning(string msg) { new Log("\n[warning] " + msg); }
         public static void START(string msg)

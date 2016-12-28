@@ -36,11 +36,6 @@ namespace TSmatch.Declaration
     /// </history>
     class Declaration
     {
-        #region Module C# Code Names
-        public const string BOOTSTRAP = "Bootstrap";    //Bootstrap -- начальный запуск приложения TSmatch, проверка налиция нужных файлов
-        public const string MODEL = "Model";     // Model -- класс управления моделями, ведет Журнал Моделей и управляет их сохранением
-        #endregion Modules C# Code Names
-
         #region ----------- GENERAL PURPASE CONSTANTS -----------------
         public const char STR_DELIMITER = ';';  // знак - резделитель в списке в строках
 
@@ -172,11 +167,11 @@ namespace TSmatch.Declaration
 
         #region ----------- # шаблоны каталогов документов (поле doc.FileDirectory) --------------------
         public static readonly string[] TOC_DIR_TEMPLATES
-            = { TEMPL_TOC, TEMPL_MODEL, TEMPL_COMP, TEMPL_TMP, TEMPL_DEBUG, TEMPL_MACROS, TEMPL_ENVIRONMENTS};
-        public const string TEMPL_TOC   = "#TOC";           //каталог TSmatch.xlsx 
+            = { TEMPL_TOC, TEMPL_MODEL, TEMPL_COMP, TEMPL_TMP, TEMPL_DEBUG, TEMPL_MACROS, TEMPL_ENVIRONMENTS };
+        public const string TEMPL_TOC = "#TOC";           //каталог TSmatch.xlsx 
         public const string TEMPL_MODEL = "#Model";         //каталоги Моделей
-        public const string TEMPL_COMP  = "#Components";    //каталог файлов комплектующих - базы поставщиков
-        public const string TEMPL_TMP   = "#TMP";           //каталог временного файла
+        public const string TEMPL_COMP = "#Components";    //каталог файлов комплектующих - базы поставщиков
+        public const string TEMPL_TMP = "#TMP";           //каталог временного файла
         public const string TEMPL_DEBUG = "#DEBUG";         //каталог для собственной отладки
         public const string TEMPL_MACROS = "#Macros";       //каталог Tekla Macros - тут файлы для кнопки TSmatch
         public const string TEMPL_ENVIRONMENTS = "#Envir";  //каталог Tekla Environments

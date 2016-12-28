@@ -1,7 +1,7 @@
 ﻿/*-------------------------------------------------------------------------------------------------------
  * Document -- works with all Documents in the system basing on TOC - Table Of Content
  * 
- * 22.8.2016  Pavel Khrapkin, Alex Pass, Alex Bobtsov
+ * 22.12Fil.2016  Pavel Khrapkin, Alex Pass, Alex Bobtsov
  *
  *--------- History ----------------  
  * 2013-2015 заложена система управления документами на основе TOC и Штампов
@@ -23,6 +23,7 @@
  *  2.5.16 - remove work with Registry Environment value from TOCstart to Bootstrap for DirRelocation Recovery if need
  *  2.7.16 - wrDoc nStrBody argument add
  * 22.8.16 - wrDoc workout
+ * 22.12.16 - #Template class in Bootstrap replaced with Dictionary<> in Documents
  * -------------------------------------------
  *      METHODS:
  * Start()              - Load from directory TOCdir of TOC all known Document attributes, prepare everithing
@@ -56,13 +57,13 @@ using Mtr = match.Matrix.Matr;  // класс для работы с внутр�
 using Lib = match.Lib.MatchLib;
 using Log = match.Lib.Log;
 using Msg = TSmatch.Message.Message;
-using Templ = TSmatch.Startup.Bootstrap.Template;
 
 namespace TSmatch.Document
 {
     public class Document
     {
         private static Dictionary<string, Document> Documents = new Dictionary<string, Document>();   //коллекция Документов
+        static Dictionary<string, string> Templates = new Dictionary<string, string>();
 
         #region Document Declaration area
         public string name;
@@ -127,10 +128,11 @@ namespace TSmatch.Document
         /// 30.3.2016 - Start(TOCdir) and getDoc with #template interaction with Bootstrap
         /// 17.4.2016 - tocStart extracted from Start for initial TOC open
         /// </history>
-        public static void Start(string TOCdir)
+        public static void Start(Dictionary<string,string>_Templates)
         {
-            Log.set("Document.Start(" + TOCdir + ")");
-            Document toc = tocStart(TOCdir);
+            Log.set("Document.Start(#Templates)");
+            Templates = _Templates;
+            Document toc = tocStart(Templates["#TOC"]);
             Mtr mtr = toc.Body;
             for (int i = toc.i0; i <= toc.il; i++)
             {
@@ -249,8 +251,8 @@ namespace TSmatch.Document
             {
                 if (load)
                 {
-                    if (doc.FileDirectory.Contains("#"))    // #Template substitute with Path in Bootsrap.Templates
-                        doc.FileDirectory = Templ.getPath(doc.FileDirectory);
+                    if (doc.FileDirectory.Contains("#")) // #Template substitute with Path in Dictionary
+                        doc.FileDirectory = Templates[doc.FileDirectory];
                     //-------- Load Document from the file or create it ------------
                     bool create = !string.IsNullOrEmpty(doc.type) && doc.type[0] == 'N' ? true : false;
                     doc.Wb = FileOp.fileOpen(doc.FileDirectory, doc.FileName, create);

@@ -31,7 +31,7 @@ using Decl = TSmatch.Declaration.Declaration;
 using TS = TSmatch.Tekla.Tekla;
 using Docs = TSmatch.Document.Document;
 using Mod = TSmatch.Model.Model;
-using Mtch = TSmatch.Matcher.Matcher;
+using Mtch = TSmatch.Matcher.Mtch;
 using Supl = TSmatch.Suppliers.Supplier;
 
 namespace TSmatch.Component

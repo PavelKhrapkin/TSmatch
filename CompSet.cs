@@ -31,9 +31,11 @@ using Decl = TSmatch.Declaration.Declaration;
 using TS = TSmatch.Tekla.Tekla;
 using Docs = TSmatch.Document.Document;
 using Mod = TSmatch.Model.Model;
-using Mtch = TSmatch.Matcher.Matcher;
+using Mtch = TSmatch.Matcher.Mtch;
 using Supl = TSmatch.Suppliers.Supplier;
 using TSmatch.Suppliers;
+using TSmatch.Component;
+using TSmatch.ElmAttSet;
 
 namespace TSmatch.CompSet
 {
@@ -69,6 +71,14 @@ namespace TSmatch.CompSet
             this.doc_cs_name = doc_cs_name;
             this.doc = Docs.getDoc(doc_cs_name);
             this.Components = Component.Component.setComp(doc);
+        }
+
+        internal Component.Component CompMatch(ElmAttSet.Group gr)
+        {
+            foreach (var comp in Components)
+            {
+            }
+            throw new NotImplementedException();
         }
 
         //////////////////public static CompSet setCompSet(string cs_name,  Supl supl, string doc_name)

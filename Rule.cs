@@ -25,7 +25,7 @@
  * isRuleApplicable(r.text, gr.mat, gr.prf) - определяет, применимо ли Правило?
  * isOKexist(n) - возвращает true, если для группы n уже найдено соответствие в OKs
  */
-
+using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using log4net;
@@ -37,7 +37,7 @@ using Decl = TSmatch.Declaration.Declaration;
 using Docs = TSmatch.Document.Document;
 using CmpSet = TSmatch.CompSet.CompSet;
 using Supl = TSmatch.Suppliers.Supplier;
-using System;
+using FP = TSmatch.FingerPrint.FingerPrint;
 
 namespace TSmatch.Rule
 {
@@ -53,19 +53,20 @@ namespace TSmatch.Rule
 		public readonly CmpSet CompSet;     //список компонентов, с которыми работает правило
 		public readonly Supl Supplier;      //Поставщик
         //---- fileds of the Rule filled by Parser method
-        public List<string> RuleMatList = new List<string>();
-        public List<string> RuleMatPar  = new List<string>();
-        public List<string> RulePrfList = new List<string>();
-        public List<string> RulePrfPar  = new List<string>();
-        public List<string> RuleCstList = new List<string>();
-        public List<string> RuleCstPar  = new List<string>();
-        public readonly List<int> RuleValPars = new List<int>();
-        public readonly List<int> RuleWildPars = new List<int>();
+        public FP matFP, prfFP;
+
+        ////public List<string> RuleMatList = new List<string>();
+        ////public Dictionary<string,string> RuleMatPar  = new Dictionary<string, string>();
+        ////public List<string> RulePrfList = new List<string>();
+        ////public Dictionary<string, string> RulePrfPar  = new Dictionary<string, string>();
+        ////public List<string> RuleCstList = new List<string>();
+        ////public Dictionary<string, string> RuleCstPar  = new Dictionary<string, string>();
+        ////public readonly List<int> RuleValPars = new List<int>();
+        ////public readonly List<int> RuleWildPars = new List<int>();
         public double RuleRedundencyPerCent = 0.0;  //коэффициент избыточности, требуемый запас по данному материалу/профилю/Правилу
 
         public Rule(Docs doc, int i)
         {
-            log.Info("Constructor Rule(doc, i=" + i + ")");
             name = (string)doc.Body[i, Decl.RULE_NAME];
             type = (string)doc.Body[i, Decl.RULE_TYPE];
             text = Lib.ToLat((string)doc.Body[i, Decl.RULE_RULE]);
@@ -74,6 +75,7 @@ namespace TSmatch.Rule
             Supplier = Supl.getSupplier(suplName);
 //1.12            Supplier = new Supl.Supplier(suplName);
             CompSet = CmpSet.getCompSet( csName, Supplier );
+            log.Info("Constructor Rule(doc, i=" + i + ") text=<" + text + ">");
             RuleParser(text);
         }
         // параметр doc не указан, по умолчанию извлекаем Правила из TSmatch.xlsx/Rules
@@ -91,10 +93,14 @@ namespace TSmatch.Rule
         /// <param name="prf">Profile in Model</param>
         /// <returns>true, if Rule after Parcing mentioned mat and prf</returns>
         /// <history>9.4.2016
+        /// 29.12.2016 use FingerPrint
         /// </history>
+        /// <TODO>29.12.16 implement with FP</TODO>
         internal bool isRuleApplicable(string mat, string prf)
         {
-            return Lib.IContains(RuleMatList, mat) && Lib.IContains(RulePrfList, prf);
+            bool ok= false;
+//29.12.16            ok = Lib.IContains(RuleMatList, mat) && Lib.IContains(RulePrfList, prf);
+            return ok;
         }
 
         ///<summary>
@@ -142,8 +148,9 @@ namespace TSmatch.Rule
         /// 19.2.16 - #параметры
         /// 29.2.16 - *параметры
         /// 17.10.16 - перенос в Rule class
+        /// 28.12.12 - введены {..} правила. Остальные типы правил пока не разбираем
         /// </history>
-        /// <ToDo>23.11 реализовать разбор секции Cost</ToDo>
+        /// <ToDo>28.12.16 переписать <описание> выше в части параметров. И вообще пересмотреть</ToDo>
         enum Section { Material, Profile, Cost};
         private void RuleParser(string rule)
         {
@@ -162,22 +169,8 @@ namespace TSmatch.Rule
         private void RuleLogInfo()
         {
             log.Info("----- Parse Rule (\"" + text + "\") -----");
-            string matSynonyms = "", matPars = "", prfSyns = "", prfPars = "", cstPars = "", cstSyns = "";
-            foreach (string syn in RuleMatList) matSynonyms += " " + syn;
-            foreach (string par in RuleMatPar) matPars += " " + par;
-            log.Info("Material");
-            log.Info("\tSynonyms:  " + matSynonyms);
-            log.Info("\tParametrs: " + matPars);
-            foreach (string syn in RulePrfList) prfSyns += " " + syn;
-            foreach (string par in RulePrfPar) prfPars += " " + par;
-            log.Info("Profile");
-            log.Info("\tSynonyms:  " + prfSyns);
-            log.Info("\tParametrs: " + prfPars);
-            log.Info("Price");
-            log.Info("\tSynonyms:  " + cstSyns);
-            log.Info("\tParametrs: " + cstPars);
-            foreach (string syn in RuleCstList) cstSyns += " " + syn;
-            foreach (string par in RuleCstPar) cstPars += " " + par;
+            if (matFP != null) log.Info("MatFP:" + matFP.strINFO());
+            if (prfFP != null) log.Info("PrfFP:" + prfFP.strINFO());
         }
 
         /// <summary>
@@ -197,22 +190,18 @@ namespace TSmatch.Rule
 
             switch (section)
             {
-                case Section.Material:
-                    RuleMatPar = Parameter(ref str);
-                    RuleMatList = Synonym(ref str);
+                case Section.Material:  matFP = new FP(FP.type.Rule, str);
                     break;
-                case Section.Profile:
-                    RulePrfPar = Parameter(ref str);
-                    RulePrfList = Synonym(ref str);
+                case Section.Profile:   prfFP = new FP(FP.type.Rule, str);
                     break;
-                case Section.Cost:
-                    RuleCstPar = Parameter(ref str);
-                    RuleCstList = Synonym(ref str);
-                    break;
-                default: Msg.F("Rule.SectionParse-- wrong Section arg");
-                    break;
+                //case Section.Cost:      Parser(ref str, RuleCstList, RuleCstPar);
+                    //RuleCstPar = Parameter(ref str);
+                    //RuleCstList = Synonym(ref str);
+                    //break;
+                ////default: Msg.F("Rule.SectionParse-- wrong Section recognition", section);
+                ////    break;
             }
-            if (str != "") Log.FATAL("строка \"" + str + "\" разобрана не полностью");
+            ////////if (str != "") Log.FATAL("строка \"" + str + "\" разобрана не полностью");
         }
 
         private Section RecognyzeSection(ref string str)
@@ -221,14 +210,88 @@ namespace TSmatch.Rule
             const string rPrf = "(пp|pr).*:";   //.. to avoid mixed parse of russian 'р' in "Материал"
             const string rCst = "(c|ц).*:";     //Cost (or Цена) Section
 
-            Section ?result = null;
+            Section? result = null;
 
             if (IsMtch(str, rMat)) { result = Section.Material; str = RemMtch(str, rMat); }
             if (IsMtch(str, rPrf)) { result = Section.Profile; str = RemMtch(str, rPrf); }
             if (IsMtch(str, rCst)) { result = Section.Cost; str = RemMtch(str, rCst); }
 
             if (result == null) Msg.F("Rule_Parse Section Not Recorgized", str);
-            return (Section) result;
+            return (Section)result;
+        }
+
+        private void Parser(ref string str, List<string> synonym, Dictionary<string, string> parametr)
+        {
+            //--выделение параметров из строки str, как регулярных выражений PARAM
+            const string PARAM = @"(?<param>(\$|p|р|п|P|Р|П)\w*\d)"; //параметры в Правилах
+//            const string PAR_DELIM = @"(x|#)";
+            if (str.Length == 0) return;
+//12/12            string[] parametrs = Regex.Split(str, PARAM);
+            foreach (var par in Regex.Split(str, PARAM))
+            {
+                if (string.IsNullOrEmpty(par)
+                    || string.IsNullOrWhiteSpace(par)
+                    || !IsMtch(par, PARAM)) continue;
+                parametr.Add(par.ToUpper(), "");
+            }
+            //-- оформление списка синонимов по параметрам в Dictionary<str,str>parametr
+            const string DELIMETR = @"(${must}|,|=| |\t|\n|\*|x)";
+            string[] subStr = Regex.Split(str, DELIMETR);
+            foreach (var s in subStr)
+            {
+                if (string.IsNullOrEmpty(s)) continue;
+                if (!string.IsNullOrWhiteSpace(s) && !Regex.IsMatch(s, DELIMETR))
+                {
+                    string tmp = s;
+                    foreach (var par in parametr)
+                    {
+                        if (!tmp.Contains(par.Key)) continue;
+                        int fr = tmp.IndexOf(par.Key);
+                        tmp = tmp.Remove(fr, par.Key.Length);
+                    }
+                    synonym.Add(tmp);
+                }
+                str = str.Replace(s, "");
+            }
+        }
+
+        /// <summary>
+        /// Parse Section for the sub-strings - synonims, and return them as List<string> separated by Delimenters
+        /// </summary>
+        /// <param name="str">string to be parsed</param>
+        /// <returns>List of the synonyms</returns>
+        /// <ToDo>
+        /// 17.11 перенести определение ATT_DELIM сюда. Для этого надо убедиться Shft/F12, что ATT_DELIM используется только тут
+        /// 9.12.16 в список синонимов помещать текст без $*1. Для этого Parametr() надо вызывать отсюда!
+        /// </ToDo>
+        private List<string> Synonym(ref string str)
+        {
+            const string DELIMETR = @"(${must}|,|=| |\t|\n|\*|x)";
+            List<string> result = new List<string>();
+            string[] subStr = Regex.Split(str, DELIMETR);
+            foreach (var s in subStr)
+            {
+                if (string.IsNullOrEmpty(s)) continue;
+                if (!string.IsNullOrWhiteSpace(s) && !Regex.IsMatch(s, DELIMETR)) result.Add(s);
+                str = str.Replace(s, "");
+            }
+            return result;
+        }
+        private Dictionary<string, string> Parameter(ref string str)
+        {
+            const string PARAM = @"(?<param>(\$|p|р|п|P|Р|П)\w*\d)"; //параметры в Правилах
+            const string PAR_DELIM = @"(x|#)";
+            Dictionary<string, string> results = new Dictionary<string, string>();
+            if (str.Length == 0) return results;
+            string[] parametrs = Regex.Split(str, PARAM);
+            foreach (var par in parametrs)
+            {
+                if (string.IsNullOrEmpty(par)
+                    || string.IsNullOrWhiteSpace(par)
+                    || !IsMtch(par, PARAM)) continue;
+                results.Add(par.ToUpper(), "");
+            }
+            return results;
         }
 
         /// <summary>
@@ -255,46 +318,6 @@ namespace TSmatch.Rule
             ////reg = Lib.ToLat(reg).ToLower();
             Regex regHdr = new Regex(reg, RegexOptions.IgnoreCase);
             return regHdr.Replace(str, "");  // remove Section header
-        }
-
-        /// <summary>
-        /// Parse Section for the sub-strings - synonims, and return them as List<string> separated by Delimenters
-        /// </summary>
-        /// <param name="str">string to be parsed</param>
-        /// <returns>List of the synonyms</returns>
-        /// <ToDo>
-        /// 17.11 перенести определение ATT_DELIM сюда. Для этого надо убедиться Shft/F12, что ATT_DELIM используется только тут
-        /// </ToDo>
-        private List<string> Synonym(ref string str)
-        {
-            const string DELIMETR = @"(${must}|,|=| |\t|\n|\*|x)";
-            List<string> result = new List<string>();
-            string[] subStr = Regex.Split(str, DELIMETR);
-            foreach (var s in subStr)
-            {
-                if (string.IsNullOrEmpty(s)) continue;
-                if (!string.IsNullOrWhiteSpace(s) && !Regex.IsMatch(s, DELIMETR)) result.Add(s);
-                str = str.Replace(s, "");
-            }
-            return result;
-        }
-        private List<string> Parameter(ref string str)
-        {
-            const string PARAM = @"(?<param>(\$|p|р|п|P|Р|П)\w*\d)"; //параметры в Правилах
-            const string PAR_DELIM = @"(x|\*|#)";
-            List<string> result = new List<string>();
-            if (str.Length == 0) return result;
-            string[] parametrs = Regex.Split(str, PARAM);
-            foreach (var par in parametrs)
-            {
-                if(    string.IsNullOrEmpty(par)
-                    || string.IsNullOrWhiteSpace(par)
-                    || !IsMtch(par, PARAM)   ) continue;
-                result.Add(par.ToUpper());
-// 2/12               str = str.Replace(par, "");
-            }
-// 2/12            while (IsMtch(str, PAR_DELIM)) str = RemMtch(str, PAR_DELIM);
-            return result;
         }
     } // end class Rule
 } // end namespace Rule
