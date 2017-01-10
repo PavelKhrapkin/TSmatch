@@ -1,7 +1,7 @@
 ﻿/*----------------------------------------------------------------------------------------------
  * Rule.cs -- Rule, which describes how to find Components used in Model in Supplier's price-list
  *
- * 2.12.2016 П.Храпкин
+ * 10.12.2016 П.Храпкин
  *
  *--- History ---
  * 17.10.2016 code file created from module Matcher
@@ -35,9 +35,11 @@ using Log = match.Lib.Log;
 using Msg = TSmatch.Message.Message;
 using Decl = TSmatch.Declaration.Declaration;
 using Docs = TSmatch.Document.Document;
+using Comp = TSmatch.Component.Component;
 using CmpSet = TSmatch.CompSet.CompSet;
 using Supl = TSmatch.Suppliers.Supplier;
 using FP = TSmatch.FingerPrint.FingerPrint;
+using TSmatch.FingerPrint;
 
 namespace TSmatch.Rule
 {
@@ -49,11 +51,10 @@ namespace TSmatch.Rule
 		public readonly string name;        //название правила
 		public readonly string type;        //тип правила
 		public readonly string text;        //текст правила
-        //---- references to other classes - price-list conteners
+        //---- references to other classes - price-list conteiners
 		public readonly CmpSet CompSet;     //список компонентов, с которыми работает правило
 		public readonly Supl Supplier;      //Поставщик
-        //---- fileds of the Rule filled by Parser method
-        public FP matFP, prfFP;
+        public List<FP> ruleFPs = new List<FP>();   //identifiers of Materials, Profile, and others
 
         ////public List<string> RuleMatList = new List<string>();
         ////public Dictionary<string,string> RuleMatPar  = new Dictionary<string, string>();
@@ -70,13 +71,12 @@ namespace TSmatch.Rule
             name = (string)doc.Body[i, Decl.RULE_NAME];
             type = (string)doc.Body[i, Decl.RULE_TYPE];
             text = Lib.ToLat((string)doc.Body[i, Decl.RULE_RULE]);
+            ruleFPs = Parser(FP.type.Rule, text, Decl.SECTIONS_RULE);
             string csName = (string)doc.Body[i, Decl.RULE_COMPSETNAME];
             string suplName = (string)doc.Body[i, Decl.RULE_SUPPLIERNAME];
-            Supplier = Supl.getSupplier(suplName);
-//1.12            Supplier = new Supl.Supplier(suplName);
-            CompSet = CmpSet.getCompSet( csName, Supplier );
+            Supplier = new Suppliers.Supplier(suplName);
+            CompSet = new CmpSet(csName, Supplier, this); 
             log.Info("Constructor Rule(doc, i=" + i + ") text=<" + text + ">");
-            RuleParser(text);
         }
         // параметр doc не указан, по умолчанию извлекаем Правила из TSmatch.xlsx/Rules
         public Rule(int n) : this(Docs.getDoc(Decl.RULES), n) {}
@@ -86,6 +86,12 @@ namespace TSmatch.Rule
             if (other == null) return false;
             return (this._id == other._id);
         }
+
+//enum Section { Material=0, Profile=1, Cost=2 };
+        //////////////////// we faced the issue: "Материал" recognised with 'p' as Profile.
+        ////////////////////..So, for Profile recognition is necessary at least (pr|пр)
+        //////////////////List<string> ruleSectionRegs = new List<string>() { "m", "(пp|pr)", "(c|ц)" };
+
         /// <summary>
         /// isRuleApplicable(mat, prf) - return true when parsed Rule is applicable to mat and prf values
         /// </summary>
@@ -103,8 +109,7 @@ namespace TSmatch.Rule
             return ok;
         }
 
-        ///<summary>
-        /// private RuleParser(string) - Parse string text of Rule to fill Rule parameters.
+        ///<summary>        /// private RuleParser(string) - Parse string text of Rule to fill Rule parameters.
         ///                              Regular Expression methodisa are in use.
         ///</summary>
         /// <описание>
@@ -148,77 +153,73 @@ namespace TSmatch.Rule
         /// 19.2.16 - #параметры
         /// 29.2.16 - *параметры
         /// 17.10.16 - перенос в Rule class
-        /// 28.12.12 - введены {..} правила. Остальные типы правил пока не разбираем
+        /// 28.12.12 - введены Параметры вида {..} правила. Остальные типы правил пока не разбираем
         /// </history>
-        /// <ToDo>28.12.16 переписать <описание> выше в части параметров. И вообще пересмотреть</ToDo>
-        enum Section { Material, Profile, Cost};
-        private void RuleParser(string rule)
+        /// <ToDo>
+        /// 28.12.16 переписать <описание> выше в части параметров. И вообще пересмотреть
+        /// 30.12.16 написать полный разбор Секции
+        /// </ToDo>
+        internal List<FP> Parser(FP.type _type, string text, string[,]sectionRegs)  //List<string> ruleSectionRegs)
         {
-            Log.set("RuleParser(\"" + rule + "\")");
-            rule = Lib.ToLat(rule).ToUpper();
-
-            string[] strs = rule.Split(';');
-            foreach (var str in strs)
+            Log.set("Rule.Parser(" + _type + ", " + text + ")");
+            List<FP> result = new List<FP>();
+            string[] sections = Lib.ToLat(text).ToUpper().Split(';');
+            foreach (string sec in sections)
             {
-                SectionParse(str);
+                for (int ind=0; ind < sectionRegs.GetUpperBound(0); ind++)
+                {
+                    string reg = Lib.ToLat(sectionRegs[ind, 1]).ToUpper();
+                    if (!Regex.IsMatch(sec, reg, RegexOptions.IgnoreCase)) continue;
+                    result.Add(new FP(_type, sec));
+                    break;
+                }
             }
-            RuleLogInfo();
             Log.exit();
+            return result;          
         }
 
         private void RuleLogInfo()
         {
             log.Info("----- Parse Rule (\"" + text + "\") -----");
-            if (matFP != null) log.Info("MatFP:" + matFP.strINFO());
-            if (prfFP != null) log.Info("PrfFP:" + prfFP.strINFO());
+//            this.ruleFPs(x => x.);
+            //if (matFP != null) log.Info("MatFP:" + matFP.strINFO());
+            //if (prfFP != null) log.Info("PrfFP:" + prfFP.strINFO());
         }
 
-        /// <summary>
-        /// SectionParse(string) - parse Section - part of the Rule text. Result filled in Rule field
-        /// Lists Synonims and Parameters. Regular Expressions used to parse input string.
-        /// </summary>
-        /// <param name="str">Part of the Rule string to be parsed</param>
-        /// <history> 12.2.2016 PKh
-        /// 19.10.2016 re-done from previous static attParse
-        /// 23.10.2016 bug fix, Section header is parsing now in this module
-        /// 23.11.2016 Cost Section parse for the Volume dependent calcalation
-        ///  2.12.2016 RecognizeSection
-        /// <\history>
-        private void SectionParse(string str)
-        {
-            Section section = RecognyzeSection(ref str);
+        ///////////////////////////// <summary>
+        ///////////////////////////// SectionParse(string) - parse Section - part of the Rule text. Result filled in Rule field
+        ///////////////////////////// Lists Synonims and Parameters. Regular Expressions used to parse input string.
+        ///////////////////////////// </summary>
+        ///////////////////////////// <param name="str">Part of the Rule string to be parsed</param>
+        ///////////////////////////// <history> 12.2.2016 PKh
+        ///////////////////////////// 19.10.2016 re-done from previous static attParse
+        ///////////////////////////// 23.10.2016 bug fix, Section header is parsing now in this module
+        ///////////////////////////// 23.11.2016 Cost Section parse for the Volume dependent calcalation
+        /////////////////////////////  2.12.2016 RecognizeSection
+        ///////////////////////////// <\history>
+        //////////////////////////private void SectionParse(string str)
+        //////////////////////////{
+        //////////////////////////    Section section = RecognyzeSection(ref str);
 
-            switch (section)
-            {
-                case Section.Material:  matFP = new FP(FP.type.Rule, str);
-                    break;
-                case Section.Profile:   prfFP = new FP(FP.type.Rule, str);
-                    break;
-                //case Section.Cost:      Parser(ref str, RuleCstList, RuleCstPar);
-                    //RuleCstPar = Parameter(ref str);
-                    //RuleCstList = Synonym(ref str);
-                    //break;
-                ////default: Msg.F("Rule.SectionParse-- wrong Section recognition", section);
-                ////    break;
-            }
-            ////////if (str != "") Log.FATAL("строка \"" + str + "\" разобрана не полностью");
-        }
+        //////////////////////////    switch (section)
+        //////////////////////////    {
+        //////////////////////////        case Section.Material:  matFP = new FP(FP.type.Rule, str);
+        //////////////////////////            break;
+        //////////////////////////        case Section.Profile:   prfFP = new FP(FP.type.Rule, str);
+        //////////////////////////            break;
+        /////// 2.1.17 ///////////        //case Section.Cost:      Parser(ref str, RuleCstList, RuleCstPar);
+        //////////////////////////            //RuleCstPar = Parameter(ref str);
+        //////////////////////////            //RuleCstList = Synonym(ref str);
+        //////////////////////////            //break;
+        //////////////////////////        ////default: Msg.F("Rule.SectionParse-- wrong Section recognition", section);
+        //////////////////////////        ////    break;
+        //////////////////////////    }
+        //////////////////////////    ////////if (str != "") Log.FATAL("строка \"" + str + "\" разобрана не полностью");
+        //////////////////////////}
 
-        private Section RecognyzeSection(ref string str)
-        {
-            const string rMat = "m.*:";         //for "Profile" abbreviation must be at least "Pr", or "Пр"
-            const string rPrf = "(пp|pr).*:";   //.. to avoid mixed parse of russian 'р' in "Материал"
-            const string rCst = "(c|ц).*:";     //Cost (or Цена) Section
 
-            Section? result = null;
 
-            if (IsMtch(str, rMat)) { result = Section.Material; str = RemMtch(str, rMat); }
-            if (IsMtch(str, rPrf)) { result = Section.Profile; str = RemMtch(str, rPrf); }
-            if (IsMtch(str, rCst)) { result = Section.Cost; str = RemMtch(str, rCst); }
 
-            if (result == null) Msg.F("Rule_Parse Section Not Recorgized", str);
-            return (Section)result;
-        }
 
         private void Parser(ref string str, List<string> synonym, Dictionary<string, string> parametr)
         {

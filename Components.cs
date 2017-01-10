@@ -1,10 +1,13 @@
 ﻿/*----------------------------------------------------------------------------
  * Components -- работа с документами - прайс-листами поставщиков компонентов
  * 
- * 30.11.2016  П.Храпкин
+ * 30.12.2016  П.Храпкин
  *
- *--- журнал ---
+ *----- ToDo -----
+ * 29.12.2016 написать загрузку из прайс-листа setComp(..) c разбором LoadDescriptor
+ * --- журнал ---
  * 30.11.2016 made as separate module, CompSet is now in another file
+ * 30.12.2016 fill matFP, prfFP in setComp()
  * ---------------------------------------------------------------------------
  *      МЕТОДЫ:
  * getCompSet(name, Supplier) - getCompSet by  its name in Supplier' list
@@ -33,6 +36,9 @@ using Docs = TSmatch.Document.Document;
 using Mod = TSmatch.Model.Model;
 using Mtch = TSmatch.Matcher.Mtch;
 using Supl = TSmatch.Suppliers.Supplier;
+using FP = TSmatch.FingerPrint.FingerPrint;
+using TSmatch.Document;
+using TSmatch.Rule;
 
 namespace TSmatch.Component
 {
@@ -43,6 +49,7 @@ namespace TSmatch.Component
         public readonly double length;      // длина заготовки в м
         public readonly double weight_m;    // ($W1) вес погонного метра заготовки или за кубометр (для бетона)
         public readonly double? price;      // ($P1) цена за 1 тонну в руб
+        public readonly FP matFP, prfFP;
 
         public Component(string _description, string _mat, double _length, double _weight, double? _price)
         {
@@ -52,6 +59,45 @@ namespace TSmatch.Component
             weight_m = _weight;
             price = _price;
         }
+
+        public Component(Docs doc, int i, List<FP> fps)
+        {
+            Log.set("Constructor Component(\"" + doc.name + "\", " + i + ", fps.Count=" + fps.Count() + ")");
+            string parName; int col=0, ind=0;
+            foreach ( var fp in fps)
+            {
+                foreach(var p in fp.pars)
+                {       //2.1.2017 в принципе, может быть несколько параметров, то есть несколько колонок прайс-листа
+                        //..может использоваться для формирования компонента (например, профиля). Но здесь это запрещено!
+                    parName = p.Key;
+                    col = (int) p.Value;
+//////////////////////////if(fp.pars.Count() !=1 || !Int32.TryParse(p.Value, out col)
+//////////////////////////    || col < 1 || col > 20) Msg.F("Wrong LoadDescription parametr", doc.name, doc.LoadDescription);
+                }
+ //               int ind = fps.IndexOf(fp);
+                string priceString = doc.Body.Strng(i, col);
+                double? priceDouble = doc.Body.Double(i, col);
+                if (Decl.SECTIONS_PRICE[ind, 0] == "Material")    mat = priceString;
+                if (Decl.SECTIONS_PRICE[ind, 0] == "Description") description = priceString;
+                if (Decl.SECTIONS_PRICE[ind, 0] == "Weight")      weight_m = (double)priceDouble;
+//                if (Decl.SECTIONS_PRICE[ind, 0] == "Volume")      mat = priceValue;
+                if (Decl.SECTIONS_PRICE[ind, 0] == "Price")       price = priceDouble;
+                var dd = Decl.SECTIONS_PRICE;
+                //-- убедимся, что priceValue соответствует Rule
+                ind++;
+            }
+//            double? price = doc.Body.Double(i, docCompPars[2] + parShft);
+            //            List<Component>result = new 
+            throw new NotImplementedException();
+            Log.exit();
+        }
+
+/*----------------- потом переписать setComp() -----------------*/
+        internal static List<Component> setComp(Docs doc, Rule.Rule rule)
+        {
+            throw new NotImplementedException();
+        }
+
         /// <summary>
         /// setComp(doc) - fill price list of Components from doc
         /// setComp(doc_name) - overload
@@ -78,6 +124,7 @@ namespace TSmatch.Component
                     string descr = doc.Body.Strng(i, docCompPars[0]);
                     double lng = 0;
                     //-- разбор параметров LoadDescription
+
                     List<int> strPars = Lib.GetPars(descr);
                     string docDescr = doc.LoadDescription;
                     int parShft = 0;
