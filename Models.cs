@@ -1,7 +1,7 @@
 ﻿/*------------------------------------------------------------------------------------------
  * Model -- класс управления моделями, ведет Журнал Моделей и управляет их сохранением
  * 
- *  26.12.2016 П.Храпкин
+ *  25.1.2017 П.Храпкин
  *  
  *--- журнал ---
  * 18.1.2016 заложено П.Храпкин, А.Пасс, А.Бобцов
@@ -20,6 +20,7 @@
  * 22.11.2016 - get Recent model from TXmatch.xlsx, not from Models collection
  * 29.11.2016 - HashSet instead of List for Rules and Supplier collections
  * 26.12.2016 - get model from Tekla -- TEMPORAPY PATCH
+ * 25.01.2017 - add bool doInit argument to Model constructor to avoid Rule int at doInit=false
  * !!!!!!!!!!!!! -------------- TODO --------------
  * ! избавиться от static в RecentModel, RecentModelDir 
  * -----------------------------------------------------------------------------------------
@@ -49,7 +50,6 @@ using System;
 using System.IO;
 using System.Windows.Forms;
 using System.Linq;
-//!!using System.Text.RegularExpressions;
 using log4net;
 
 using Decl = TSmatch.Declaration.Declaration;
@@ -61,11 +61,9 @@ using Ifc = TSmatch.IFC.IFC;
 using Log = match.Lib.Log;
 using Msg = TSmatch.Message.Message;
 using Elm = TSmatch.ElmAttSet.ElmAttSet;
-//using ElmMTGr = TSmatch.ElmAttSet.MaterialTypeGroup;
 using ElmMGr  = TSmatch.ElmAttSet.Mgroup;
 using ElmGr   = TSmatch.ElmAttSet.Group;
 using Supplier = TSmatch.Suppliers.Supplier;
-// 30/11 using Component = TSmatch.CompSet.Component;
 using CmpSet = TSmatch.CompSet.CompSet;
 
 using FileOp = match.FileOp.FileOp;
@@ -143,7 +141,7 @@ namespace TSmatch.Model
             , HashSet<Rule.Rule> _rules, string _strRuleList)
            : this(DateTime.Now, _name, _dir, _ifc, _made, _phase, _md5, _rules, _strRuleList)
         { }
-        public Model(Docs doc, int i)
+        public Model(Docs doc, int i, bool doInit = true)
         {
             this.date  = Lib.getDateTime(doc.Body[i, Decl.MODEL_DATE]);
             this.name  = doc.Body.Strng(i, Decl.MODEL_NAME);
@@ -153,17 +151,14 @@ namespace TSmatch.Model
             this.Phase = doc.Body.Strng(i, Decl.MODEL_PHASE);
             this.MD5   =  doc.Body.Strng(i, Decl.MODEL_MD5);
             // преобразуем список Правил из вида "5,6,8" в List<Rule>
-            /////            List<TSmatch.Rule.Rule> _rls = new List<TSmatch.Rule.Rule>();
-//28.11            HashSet<Rule.Rule> _rls = new HashSet<Rule.Rule>();
-            strListRules = doc.Body.Strng(i, Decl.MODEL_R_LIST);    // Rules of the Model as "4, 5, 8"
-            foreach (int n in Lib.GetPars(strListRules))
+            strListRules = doc.Body.Strng(i, Decl.MODEL_R_LIST);
+            if (doInit)
             {
-                //28.11               _rls.Add(new TSmatch.Rule.Rule(n));
-                Rules.Add(new Rule.Rule(n));
+                foreach (int n in Lib.GetPars(strListRules))
+                    Rules.Add(new Rule.Rule(n));
             }
-//28.11            this.Rules = _rls; 
         }
-        public Model(int i) : this(Docs.getDoc(Decl.MODELS), i) { }
+        public Model(int i, bool doInit = true) : this(Docs.getDoc(Decl.MODELS), i, doInit) { }
         #endregion
 
         /// <summary>
@@ -342,8 +337,8 @@ namespace TSmatch.Model
             //-- setComp for all Rules of the Model
             foreach (var r in mod.Rules)
             {
-                CmpSet cs = r.CompSet.getCompSet();
-                mod.CompSets.Add(cs);
+                //11.1.17                CmpSet cs = r.CompSet.getCompSet();
+                //11.1.17                mod.CompSets.Add(cs);
                 if (!mod.Suppliers.Contains(r.CompSet.Supplier)) mod.Suppliers.Add(r.Supplier);
             }
             foreach (var v in mod.CompSets) v.doc.Close();
@@ -549,7 +544,7 @@ namespace TSmatch.Model
                     }
                 }
             }
-            return new Model(iMod);
+            return new Model(iMod, doInit: false);
         }
         public string ModelDir()
         {

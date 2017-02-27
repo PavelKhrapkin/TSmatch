@@ -1,7 +1,7 @@
 ﻿/*-------------------------------------------------------------------------------------------------------
  * Document -- works with all Documents in the system basing on TOC - Table Of Content
  * 
- * 22.12Fil.2016  Pavel Khrapkin, Alex Pass, Alex Bobtsov
+ * 13.01.2017  Pavel Khrapkin, Alex Pass, Alex Bobtsov
  *
  *--------- History ----------------  
  * 2013-2015 заложена система управления документами на основе TOC и Штампов
@@ -24,6 +24,7 @@
  *  2.7.16 - wrDoc nStrBody argument add
  * 22.8.16 - wrDoc workout
  * 22.12.16 - #Template class in Bootstrap replaced with Dictionary<> in Documents
+ * 13.01.17 - getDoc() = getDoc(Decl.DOC_TOC)
  * -------------------------------------------
  *      METHODS:
  * Start()              - Load from directory TOCdir of TOC all known Document attributes, prepare everithing
@@ -214,7 +215,7 @@ namespace TSmatch.Document
         /// <history>19.3.2016</history>
         void EOL(int tocRow)
         {
-            Document toc = (name == Decl.DOC_TOC) ? this : getDoc(Decl.DOC_TOC);
+            Document toc = (name == Decl.DOC_TOC) ? this : getDoc();
             EOLinTOC = EOLstr(toc.Body.Strng(tocRow, Decl.DOC_EOL));
             this.i0 = EOLstr(toc.Body.Strng(tocRow, Decl.DOC_I0));
             this.il = EOLstr(toc.Body.Strng(tocRow, Decl.DOC_IL));
@@ -240,7 +241,7 @@ namespace TSmatch.Document
         /// 19.4.16 - use Templ.getPath in getDoc()
         /// 27.4.16 - optional flag load - if false -> don't load contents from the file
         /// </history>
-        public static Document getDoc(string name, bool fatal = true, bool load = true)
+        public static Document getDoc(string name = Decl.DOC_TOC, bool fatal = true, bool load = true)
         {
             Log.set("getDoc(" + name + ")");
             Document doc = null;
@@ -284,7 +285,7 @@ namespace TSmatch.Document
         public void Reset(string str = "")
         {
             Log.set("Reset(" + this.name + ")");
-            Document toc = getDoc(Decl.DOC_TOC);
+            Document toc = getDoc();
             this.Sheet = FileOp.SheetReset(this.Wb, this.SheetN);
             Excel.Range rng = FileOp.setRange(this.Sheet);
             if (this.forms.Count == 0) Msg.F("Document.Reset no HDR form", this.name);
@@ -369,7 +370,7 @@ namespace TSmatch.Document
                 saveDoc();
                 int lineInBodyToWrite = Form.nStr < 1 ? Body.iEOL() : Form.nStr;
                 Excel.Range rng = FileOp.setRange(Sheet, lineInBodyToWrite);
-                Document toc = getDoc(Decl.DOC_TOC);
+                Document toc = getDoc();
                 FileOp.CopyRng(toc.Wb, formName, rng);
                 Body = FileOp.getSheetValue(Sheet);
                 FileOp.saveRngValue(Body);
@@ -694,7 +695,7 @@ namespace TSmatch.Document
             /// </history>
             public Stamp(int i0, int i1)
             {
-                Document doc_toc = getDoc(Decl.DOC_TOC);
+                Document doc_toc = getDoc();
                 if (doc_toc.Body.Strng(i0, Decl.DOC_STMPTYPE) != Decl.DOC_TYPE_N)
                 {
                     for (int i = i0; i <= i1; i++) stamps.Add(new OneStamp(doc_toc, i));

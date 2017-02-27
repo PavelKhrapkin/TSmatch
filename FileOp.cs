@@ -1,7 +1,7 @@
 /*--------------------------------------------
  * FileOp - File System primitives
  * 
- *  17.04.2016  Pavel Khrapkin, Alex Pass
+ *  13.01.2017  Pavel Khrapkin, Alex Pass
  *
  *--- History ---
  * 2013 - 2013 - created
@@ -9,6 +9,7 @@
  * 20.3.2016 - CopyFile, Delete, Move
  * 27.3.2016 - use DisplayAlert in fileOpen for new created file -- now create or reopen silently
  * 17.4.2016 - isDirExist(path) created; fileRename(..); fileRenSAV(); fileDelete
+ * 13.1.2016 - getRange(str)
  * -------------------------------------------        
  * fileOpen(dir,name[,create])  - Open or Create file name in dir catalog
  * fileRename(dir, oldName, newName) - rename file in the same Directory
@@ -18,11 +19,12 @@
  * isDirExist(path)             - return true if Directory available at the path
  * isFileExist(name)            - return true if file name exists
  * isSheetExist(Wb, name)       - return true if Worksheet name exists in Workbook Wb
- * isNamedRangeExist(Wb, name)  - return true when named range name exists in Wb 
+ * isNamedRangeExist(Wb, name)  - return true when named range name exists in Wb
+ * getRange(str)                - get Named Rage from TSmatch.xlsx
  * getRngValue(Sheet,r0c0, r1c1, msg)   - return Mtr-Range content from Sheet in Range [r0c0r1c1]
  * getSheetValue(Sheet,msg)             - return Mtr-Range from UsedRange in Sheet
  * saveRngValue(Body [,row_to_ins) - write Document Body content to Excel file 
- * setRange(..)                 - few overloaded methods to set Renge -- preparation for saveRngValue(..)
+ * setRange(..)                 - few overloaded methods to set Range for getRngValue(..) and saveRngValue(..)
  * CopyRng(Wb,NamedRange,rng)   - copy named range NamedRange into rng in Workbook Wb
  * CopyFile(FrDir,FileName,ToDir[,overwrite]) - Copy File from FrDir to ToDir
  * Delete(dir, name)            - Detete file with Path dir
@@ -34,6 +36,7 @@ using Excel = Microsoft.Office.Interop.Excel;
 using match.Lib;
 using Mtr = match.Matrix.Matr;
 using Msg = TSmatch.Message.Message;
+using Docs = TSmatch.Document.Document;
 
 namespace match.FileOp
 {
@@ -265,7 +268,13 @@ namespace match.FileOp
             return _sh;
         }
         #endregion
-        #region --- Excel getRangeValue / setRangeValue / CopyRange
+        #region --- Excel getRange(..) / getRangeValue / setRangeValue / CopyRange
+        internal static Mtr getRange(string str)
+        {
+            Excel.Workbook Wb = Docs.getDoc().Wb;
+            return new Mtr(Wb.Names.Item(str).RefersToRange.Value);
+        }
+
         public static Mtr getRngValue(Excel.Worksheet Sh, int r0, int c0, int r1, int c1, string msg = "")
         {
             Log.set("getRngValue");

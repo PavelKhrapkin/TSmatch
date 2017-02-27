@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using FP = TSmatch.FingerPrint.FingerPrint;
+
 namespace TSmatch.Declaration
 {
     /// <summary>
@@ -33,6 +35,8 @@ namespace TSmatch.Declaration
     ///  6.8.16     - Moule C# Code Names -- use them to avoid static in Module Classes by defining xxAdd in BootStrat.Init and every Module
     /// 21.8.16     - re-defined Documents of TSmatchINFO.xlsx
     /// 3.12.16     - Resource Recover NoTOCdirEnvVar
+    ///  1.1.17     - ruleSection/elmAttSection/priceSections declaration area add
+    /// 15.1.17     - remove Section constants to FingerPrint
     /// </history>
     class Declaration
     {
@@ -276,6 +280,5 @@ namespace TSmatch.Declaration
         public const int STEP_INPDOCS = 6;    // Входные Документы Шага
         public const int STEP_OUTDOCS = 7;    // Выходные Документы Шага
         #endregion
-
     }
 }

@@ -86,6 +86,9 @@
       <EmbedInteropTypes>True</EmbedInteropTypes>
       <HintPath>..\..\..\..\..\..\..\..\Program Files\Microsoft Office\root\VFS\ProgramFilesX86\Microsoft Office\Office16\DCF\Microsoft.Office.Interop.Excel.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.VisualStudio.TestPlatform.UnitTestFramework">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Microsoft SDKs\Windows\v8.1\ExtensionSDKs\MSTestFramework\14.0\References\CommonConfiguration\neutral\Microsoft.VisualStudio.TestPlatform.UnitTestFramework.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.IO.Compression" />
@@ -113,7 +116,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="FingerPring.cs" />
+    <Compile Include="TEST.cs" />
+    <Compile Include="FingerPrint.cs" />
     <Compile Include="vpproject\Bootstrap.cs" />
     <Compile Include="Components.cs" />
     <Compile Include="CompSet.cs" />

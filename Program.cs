@@ -24,10 +24,12 @@ namespace TSmatch
         [STAThread]
         static void Main(string[] args)
         {
-            Log.START("TSmatch v2016.12.22");
-
+            Log.START("TSmatch v2017.01.24");
             var bootstrap = new Bootstrap.Bootstrap();
             var model = (Model.Model) bootstrap.init(BootMode.Model);
+
+            Test.Test.TSmatchTEST();
+
             model.Read();   // Read() - загружаем модель, последнюю по времени или ту, что в САПР
             model.Handler();
             model.Report();

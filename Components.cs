@@ -26,7 +26,9 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using log4net;
 
+using TST = TSmatch.Test.assert;
 using Lib = match.Lib.MatchLib;
 using Log = match.Lib.Log;
 using Msg = TSmatch.Message.Message;
@@ -44,12 +46,16 @@ namespace TSmatch.Component
 {
     public class Component
     {
+        public static readonly ILog log = LogManager.GetLogger("Component");
+
         public readonly string description; // строка вида "Угoлoк cтaльнoй paвнoпoл. 25 x 4 cт3cп/пc5"
         public readonly string mat;         // материал компонента. Извлекается из description или из прайс-листа
         public readonly double length;      // длина заготовки в м
         public readonly double weight_m;    // ($W1) вес погонного метра заготовки или за кубометр (для бетона)
         public readonly double? price;      // ($P1) цена за 1 тонну в руб
-        public readonly FP matFP, prfFP;
+        public readonly double vol_m;
+        public readonly List<FP> fps = new List<FP>();
+//        public readonly FP matFP, prfFP;
 
         public Component(string _description, string _mat, double _length, double _weight, double? _price)
         {
@@ -60,42 +66,47 @@ namespace TSmatch.Component
             price = _price;
         }
 
-        public Component(Docs doc, int i, List<FP> fps)
+        public Component(Docs doc, int i, List<FP> cs_fps, List<FP>rule_fps)
         {
-            Log.set("Constructor Component(\"" + doc.name + "\", " + i + ", fps.Count=" + fps.Count() + ")");
-            string parName; int col=0, ind=0;
-            foreach ( var fp in fps)
+            string[] sections = Lib.ToLat(doc.LoadDescription).ToLower().Split(';');
+            bool flag = false;
+            foreach (string sec in sections)
             {
-                foreach(var p in fp.pars)
-                {       //2.1.2017 в принципе, может быть несколько параметров, то есть несколько колонок прайс-листа
-                        //..может использоваться для формирования компонента (например, профиля). Но здесь это запрещено!
-                    parName = p.Key;
-                    col = (int) p.Value;
-//////////////////////////if(fp.pars.Count() !=1 || !Int32.TryParse(p.Value, out col)
-//////////////////////////    || col < 1 || col > 20) Msg.F("Wrong LoadDescription parametr", doc.name, doc.LoadDescription);
-                }
- //               int ind = fps.IndexOf(fp);
-                string priceString = doc.Body.Strng(i, col);
-                double? priceDouble = doc.Body.Double(i, col);
-                if (Decl.SECTIONS_PRICE[ind, 0] == "Material")    mat = priceString;
-                if (Decl.SECTIONS_PRICE[ind, 0] == "Description") description = priceString;
-                if (Decl.SECTIONS_PRICE[ind, 0] == "Weight")      weight_m = (double)priceDouble;
-//                if (Decl.SECTIONS_PRICE[ind, 0] == "Volume")      mat = priceValue;
-                if (Decl.SECTIONS_PRICE[ind, 0] == "Price")       price = priceDouble;
-                var dd = Decl.SECTIONS_PRICE;
-                //-- убедимся, что priceValue соответствует Rule
-                ind++;
+                if (string.IsNullOrEmpty(sec)) continue;
+// 13/2 /       FP csFP = cs_fps.Find(x => x.section == x.RecognyseSection(sec));
+// 13/2 /       if (csFP == null) Msg.F("Component constructor: no CompSet.FP with doc.LoadDescription", sec);
+// 13/2 /       int col = csFP.Col();               
+// 13/2 /       FP compFP = new FP(str, csFP, ref flag);
+                FP compFP = new FP(sec, cs_fps, ref flag);
+                int col = compFP.Col();
+                string str = doc.Body.Strng(i, col);
+                if (flag) fps.Add(compFP);
             }
-//            double? price = doc.Body.Double(i, docCompPars[2] + parShft);
-            //            List<Component>result = new 
-            throw new NotImplementedException();
-            Log.exit();
-        }
 
-/*----------------- потом переписать setComp() -----------------*/
-        internal static List<Component> setComp(Docs doc, Rule.Rule rule)
-        {
-            throw new NotImplementedException();
+
+
+            ////////////////////////Dictionary<FP.Section, string> tmp_sec = new Dictionary<FP.Section, string>(); 
+            ////////////////////////foreach (var fp in cs_fps)
+            ////////////////////////{
+            ////////////////////////    //                log.Info(fp.Info());
+            ////////////////////////    int col = fp.Col();
+            ////////////////////////    string str = Lib.ToLat(doc.Body.Strng(i, col));
+            ////////////////////////    if (fp.section == FP.Section.Material) mat = str;
+            ////////////////////////    if (fp.section == FP.Section.Description) description = str; 
+            ////////////////////////    double? val = doc.Body.Double(i, col);
+            // 23/1 ////////////////    if (fp.section == FP.Section.Price) price = val;
+            ////////////////////////    if (fp.section == FP.Section.WeightPerUnit) weight_m = (double)val;
+            ////////////////////////    if (fp.section == FP.Section.LengthPerUnit) length = (double)val;
+            ////////////////////////    if (fp.section == FP.Section.VolPerUnit) vol_m = (double)val;
+            ////////////////////////    tmp_sec.Add(fp.section, str);
+            ////////////////////////}
+            ////////////////////////foreach (FP fp in rule_fps)
+            ////////////////////////{
+            ////////////////////////    string str = tmp_sec[fp.section];
+            ////////////////////////    FP ruleTx = rule_fps.Find(x => x.section == fp.section);
+            ////////////////////////    if (ruleTx == null) Msg.F("Component constructor has no the Rule Section", doc.name);
+            ////////////////////////    // 17.1 //                fps.Add(new FP(FP.type.Component, str, fp.section, rule_fps));
+            ////////////////////////}
         }
 
         /// <summary>
@@ -231,5 +242,27 @@ namespace TSmatch.Component
             Log.exit();
             return doc;
         }
+
+        #region ------ test Component -----
+#if DEBUG
+        public static void testComponent()
+        {
+            Log.set("testComponent");
+            //-- test environment preparation: set csFPs and doc - price list "ГК Монолит"
+            Docs doc = Docs.getDoc("ГК Монолит");
+            List<FP> csFPs = new List<FP>();
+            Rule.Rule rule = new Rule.Rule(15);
+            csFPs = rule.Parser(FP.type.CompSet, doc.LoadDescription);
+            TST.Eq(csFPs.Count, 3);
+
+            Component comp = new Component(doc, 8 + 3, csFPs, rule.ruleFPs);
+            TST.Eq(comp.fps[0].txs[0], "b");
+            TST.Eq(comp.fps[0].txs.Count, 1);
+            TST.Eq(comp.fps[0].pars[0].ToString(), "20");
+            TST.Eq(comp.fps[0].pars.Count, 1);
+            Log.exit();
+        }
+#endif //#if DEBUG
+        #endregion ------ test Component ------
     } // end class Component
 } // end namespace Component

@@ -1,0 +1,785 @@
+<Project>
+  <Name>TSmatch</Name>
+  <ProjectItem type="NClass.DiagramEditor.ClassDiagram.Diagram" assembly="NClass.DiagramEditor, Version=2.4.1823.0, Culture=neutral, PublicKeyToken=null">
+    <Name>Bootstrap</Name>
+    <Language>CSharp</Language>
+    <Entities>
+      <Entity type="Class">
+        <Name>Document</Name>
+        <Access>Public</Access>
+        <Location left="344" top="709" />
+        <Size width="162" height="216" />
+        <Collapsed>False</Collapsed>
+        <Member type="Field">string name</Member>
+        <Member type="Field">Matrix Body</Member>
+        <Member type="Field">List&lt;Document&gt; Documents</Member>
+        <Member type="Method">public void Start()</Member>
+        <Member type="Method">public Document getDoc()</Member>
+        <Modifier>None</Modifier>
+      </Entity>
+      <Entity type="Class">
+        <Name>TeklaOpenAPI</Name>
+        <Access>Public</Access>
+        <Location left="1149" top="75" />
+        <Size width="194" height="216" />
+        <Collapsed>False</Collapsed>
+        <Member type="Method">publicList&lt;AttSet&gt; Read()</Member>
+        <Member type="Method">public string GetTeklaDir()</Member>
+        <Modifier>None</Modifier>
+      </Entity>
+      <Entity type="Comment">
+        <Text>BOOTSTRAP</Text>
+        <Location left="440" top="12" />
+        <Size width="95" height="50" />
+      </Entity>
+      <Entity type="Comment">
+        <Text>Модуль Bootstrap производит начальный запуск TSmatch:
+1. проверяет язык, используемый в Windows, и в зависимости от полученного значения работает с русскими или с английскими сообщениями и формами.
+2. проверяет целостность системы, то есть наличие файлов TSmatch  в среде Tekla. Для этого Bootstrap обращается к Tekla.getDirectory(), а если Tekla не 
+    активна - пытается открыть TSmatch.xlsx из текущей директории.
+3. Если какого-либо компонента из пункта выше нет, то есть setup системы не завершен - пытается скопировать нужные файлы из ZIP.
+4. запускает инициализацию модулей Messages, Documents, затем Models, Rules, Suppliers</Text>
+        <Location left="369" top="991" />
+        <Size width="820" height="106" />
+      </Entity>
+      <Entity type="Class">
+        <Name>Bootstrap</Name>
+        <Access>Public</Access>
+        <Location left="573" top="108" />
+        <Size width="187" height="162" />
+        <Collapsed>False</Collapsed>
+        <Member type="Method">private bool HealthChek()</Member>
+        <Member type="Method">public void readZip(string name)</Member>
+        <Modifier>None</Modifier>
+      </Entity>
+      <Entity type="Class">
+        <Name>Message</Name>
+        <Access>Public</Access>
+        <Location left="53" top="542" />
+        <Size width="162" height="216" />
+        <Collapsed>False</Collapsed>
+        <Member type="Field">public List&lt;Message&gt; Messages</Member>
+        <Member type="Method">public void Start()</Member>
+        <Member type="Method">public void F(string err, object p0, object p1, object p2)</Member>
+        <Member type="Method">public void W(string err, object p0, object p1, object p2)</Member>
+        <Member type="Method">public void I(string err, object p0, object p1, object p2)</Member>
+        <Modifier>None</Modifier>
+      </Entity>
+      <Entity type="Class">
+        <Name>Supplier</Name>
+        <Access>Public</Access>
+        <Location left="585" top="709" />
+        <Size width="162" height="216" />
+        <Collapsed>False</Collapsed>
+        <Member type="Method">public void Start()</Member>
+        <Modifier>None</Modifier>
+      </Entity>
+      <Entity type="Class">
+        <Name>Rules</Name>
+        <Access>Public</Access>
+        <Location left="832" top="710" />
+        <Size width="162" height="216" />
+        <Collapsed>False</Collapsed>
+        <Member type="Method">public void Start()</Member>
+        <Modifier>None</Modifier>
+      </Entity>
+      <Entity type="Class">
+        <Name>Model</Name>
+        <Access>Public</Access>
+        <Location left="1034" top="710" />
+        <Size width="162" height="216" />
+        <Collapsed>False</Collapsed>
+        <Member type="Method">public void Start()</Member>
+        <Modifier>None</Modifier>
+      </Entity>
+      <Entity type="Comment">
+        <Text>30.3.2016</Text>
+        <Location left="10" top="12" />
+        <Size width="74" height="50" />
+      </Entity>
+      <Entity type="Comment">
+        <Text>METHOD: bool HealthCheck()
+возвращает true, когда есть все нужные файлы Resource и они актуальны. Для этого проверяется наличие нужных файлов и их даты по таблице из Declaration</Text>
+        <Location left="798" top="229" />
+        <Size width="319" height="75" />
+      </Entity>
+      <Entity type="Class">
+        <Name>Resource</Name>
+        <Access>Public</Access>
+        <Location left="10" top="307" />
+        <Size width="203" height="216" />
+        <Collapsed>False</Collapsed>
+        <Member type="Field">staticList&lt;Resource&gt; Resources</Member>
+        <Member type="Field">string type</Member>
+        <Member type="Field">string name</Member>
+        <Member type="Field">DateTime date</Member>
+        <Member type="Method">private bool checkResource(string name)</Member>
+        <Modifier>None</Modifier>
+      </Entity>
+      <Entity type="Class">
+        <Name>Template</Name>
+        <Access>Public</Access>
+        <Location left="122" top="47" />
+        <Size width="206" height="216" />
+        <Collapsed>False</Collapsed>
+        <Member type="Field">readonly string template</Member>
+        <Member type="Field">readonly string templ_value</Member>
+        <Member type="Field">static List&lt;TemplateVal&gt; TemplateVals</Member>
+        <Modifier>None</Modifier>
+      </Entity>
+    </Entities>
+    <Relationships>
+      <Relationship type="Dependency" first="4" second="1">
+        <Label>
+        </Label>
+        <StartOrientation>Horizontal</StartOrientation>
+        <EndOrientation>Horizontal</EndOrientation>
+      </Relationship>
+      <Relationship type="Dependency" first="4" second="5">
+        <Label>
+        </Label>
+        <StartOrientation>Horizontal</StartOrientation>
+        <EndOrientation>Horizontal</EndOrientation>
+      </Relationship>
+      <Relationship type="Dependency" first="4" second="0">
+        <Label>
+        </Label>
+        <StartOrientation>Vertical</StartOrientation>
+        <EndOrientation>Vertical</EndOrientation>
+      </Relationship>
+      <Relationship type="Dependency" first="4" second="6">
+        <Label>
+        </Label>
+        <StartOrientation>Vertical</StartOrientation>
+        <EndOrientation>Vertical</EndOrientation>
+      </Relationship>
+      <Relationship type="Dependency" first="4" second="7">
+        <Label>
+        </Label>
+        <StartOrientation>Vertical</StartOrientation>
+        <EndOrientation>Vertical</EndOrientation>
+      </Relationship>
+      <Relationship type="Dependency" first="4" second="8">
+        <Label>
+        </Label>
+        <StartOrientation>Vertical</StartOrientation>
+        <EndOrientation>Vertical</EndOrientation>
+      </Relationship>
+      <Relationship type="Dependency" first="4" second="11">
+        <StartOrientation>Horizontal</StartOrientation>
+        <EndOrientation>Horizontal</EndOrientation>
+      </Relationship>
+    </Relationships>
+  </ProjectItem>
+  <ProjectItem type="NClass.DiagramEditor.ClassDiagram.Diagram" assembly="NClass.DiagramEditor, Version=2.4.1823.0, Culture=neutral, PublicKeyToken=null">
+    <Name>Start_Suppliers,Rules,Models</Name>
+    <Language>CSharp</Language>
+    <Entities>
+      <Entity type="Class">
+        <Name>Model</Name>
+        <Access>Public</Access>
+        <Location left="912" top="85" />
+        <Size width="190" height="281" />
+        <Collapsed>False</Collapsed>
+        <Member type="Field">string name</Member>
+        <Member type="Field">DateTime date</Member>
+        <Member type="Field">string dir</Member>
+        <Member type="Field">List&lt;Rule&gt; rules</Member>
+        <Member type="Field">string strListRules</Member>
+        <Member type="Field">string Made</Member>
+        <Member type="Field">string MD5</Member>
+        <Member type="Field">List&lt;Supplier&gt; Suppliers</Member>
+        <Member type="Method">public Model getModel(string name)</Member>
+        <Member type="Method">private void setModel(Model mod)</Member>
+        <Member type="Method">public void saveModel()</Member>
+        <Member type="Method">public static Model UpdateFrTekla()</Member>
+        <Modifier>None</Modifier>
+      </Entity>
+      <Entity type="Class">
+        <Name>Rule</Name>
+        <Access>Public</Access>
+        <Location left="566" top="95" />
+        <Size width="191" height="216" />
+        <Collapsed>False</Collapsed>
+        <Member type="Field">string name</Member>
+        <Member type="Field">string text</Member>
+        <Member type="Field">string made</Member>
+        <Member type="Field">Supplier Supplier</Member>
+        <Member type="Field">CompSet CompSet</Member>
+        <Member type="Method">public void UseRules(Model mod)</Member>
+        <Modifier>None</Modifier>
+      </Entity>
+      <Entity type="Class">
+        <Name>Document</Name>
+        <Access>Public</Access>
+        <Location left="87" top="659" />
+        <Size width="162" height="216" />
+        <Collapsed>False</Collapsed>
+        <Member type="Field">string name</Member>
+        <Member type="Field">Matrix Body</Member>
+        <Member type="Method">public Document getDoc()</Member>
+        <Modifier>None</Modifier>
+      </Entity>
+      <Entity type="Class">
+        <Name>Supplier</Name>
+        <Access>Public</Access>
+        <Location left="150" top="84" />
+        <Size width="212" height="216" />
+        <Collapsed>False</Collapsed>
+        <Member type="Field">string name</Member>
+        <Member type="Field">public hyperlink URL</Member>
+        <Member type="Field">public string City</Member>
+        <Member type="Field">public List&lt;CompSet&gt; CompSets</Member>
+        <Member type="Field">public List&lt;string&gt; doc_names</Member>
+        <Member type="Method">public Supplier getSupplier(string name)</Member>
+        <Modifier>None</Modifier>
+      </Entity>
+      <Entity type="Class">
+        <Name>CompSet</Name>
+        <Access>Public</Access>
+        <Location left="363" top="402" />
+        <Size width="225" height="216" />
+        <Collapsed>False</Collapsed>
+        <Member type="Field">public string name</Member>
+        <Member type="Field">Document doc</Member>
+        <Member type="Field">Component Comp</Member>
+        <Member type="Method">public CompSet getCompSet(string name)</Member>
+        <Modifier>None</Modifier>
+      </Entity>
+      <Entity type="Comment">
+        <Text>При начальной инициализации классов Supplier, CompSet, Rule, Model (как и служебных классов Message, Documens, Samp, Form), происходит чтение файла общего "диспетчерского" файла TSmatch.xlsx и его интерпретация. Все другие файлы, в частности - многочисленные прайс-листы Поставщиков из "Базы комплектующих", не читаются, чтобы не загромождать память программы ненужными данными. Эти данные будут прочитаны позже (см.диаграмму Handle Model) лишь в том случае, когда это необходимо для работы с выбранной моделью.
+
+Статические коллекции:
+* Suppliers - списки всех Поставщиков
+* Models - Журнал известных моделей
+* Rules - список всех правил
+
+Каждый Supplier содержит списки имен документов doc_names и список CompSets - коллекцию наборов компонентов той же длинны, что список имен документов
+
+Каждая модель в Журнале содержит перечень относящихся к ней правил, а также набор поставщиков и  перечень прайс-листов CompSet соответствующих правилам.
+
+Таким образом, каждое правило должно содержать необходимые данные о поставщиках для того, чтобы можно было инициализировать список моделей.
+
+Цель этого этапа работы TSmatch - подготовить все необходимое для дальнейшей работы, занимая при этом лишь минимально необходимые ресурсы - время, оперативную память и место на экране компьютера.
+
+Однако, уже этот подготовительный этап позволяет выбрать модель из журнала моделей в TSmatch и приступить к ее чтению из файловой системы и обработке, или прочитать модель из Tekla Structures.
+
+Все ощибки TSmatch на этом эатапе работы - внутренние ошибки системы, они, обычно, связаны с несоблюдением целостности системы при занесении новых данных - документов Поставщиков.</Text>
+        <Location left="703" top="402" />
+        <Size width="582" height="460" />
+      </Entity>
+      <Entity type="Comment">
+        <Text>ИНИЦИАЛИЗАЦИЯ TSmatch</Text>
+        <Location left="406" top="10" />
+        <Size width="160" height="50" />
+      </Entity>
+    </Entities>
+    <Relationships>
+      <Relationship type="Association" first="0" second="1">
+        <StartOrientation>Horizontal</StartOrientation>
+        <EndOrientation>Horizontal</EndOrientation>
+        <Direction>Unidirectional</Direction>
+        <AssociationType>Aggregation</AssociationType>
+        <StartMultiplicity>1</StartMultiplicity>
+        <EndMultiplicity>0..*</EndMultiplicity>
+      </Relationship>
+      <Relationship type="Association" first="1" second="3">
+        <StartOrientation>Horizontal</StartOrientation>
+        <EndOrientation>Horizontal</EndOrientation>
+        <Direction>Unidirectional</Direction>
+        <AssociationType>Aggregation</AssociationType>
+        <StartMultiplicity>1</StartMultiplicity>
+        <EndMultiplicity>1</EndMultiplicity>
+      </Relationship>
+      <Relationship type="Association" first="3" second="4">
+        <StartOrientation>Vertical</StartOrientation>
+        <EndOrientation>Vertical</EndOrientation>
+        <Direction>Unidirectional</Direction>
+        <AssociationType>Composition</AssociationType>
+        <StartMultiplicity>1</StartMultiplicity>
+        <EndMultiplicity>0..*</EndMultiplicity>
+      </Relationship>
+      <Relationship type="Association" first="3" second="2">
+        <StartOrientation>Vertical</StartOrientation>
+        <EndOrientation>Vertical</EndOrientation>
+        <Direction>Unidirectional</Direction>
+        <AssociationType>Aggregation</AssociationType>
+        <StartRole>nothing but doc_names ai init</StartRole>
+        <StartMultiplicity>0..*</StartMultiplicity>
+        <EndMultiplicity>0..*</EndMultiplicity>
+      </Relationship>
+      <Relationship type="Dependency" first="3" second="2">
+        <Label>
+        </Label>
+        <StartOrientation>Vertical</StartOrientation>
+        <EndOrientation>Vertical</EndOrientation>
+      </Relationship>
+    </Relationships>
+  </ProjectItem>
+  <ProjectItem type="NClass.DiagramEditor.ClassDiagram.Diagram" assembly="NClass.DiagramEditor, Version=2.4.1823.0, Culture=neutral, PublicKeyToken=null">
+    <Name>Handle Model</Name>
+    <Language>CSharp</Language>
+    <Entities>
+      <Entity type="Class">
+        <Name>Model</Name>
+        <Access>Public</Access>
+        <Location left="912" top="85" />
+        <Size width="190" height="281" />
+        <Collapsed>False</Collapsed>
+        <Member type="Field">string name</Member>
+        <Member type="Field">DateTime date</Member>
+        <Member type="Field">string dir</Member>
+        <Member type="Field">List&lt;Rule&gt; rules</Member>
+        <Member type="Field">string strListRules</Member>
+        <Member type="Field">string Made</Member>
+        <Member type="Field">string MD5</Member>
+        <Member type="Field">List&lt;Supplier&gt; Suppliers</Member>
+        <Member type="Method">public Model getModel(string name)</Member>
+        <Member type="Method">private void setModel(Model mod)</Member>
+        <Member type="Method">public void saveModel()</Member>
+        <Member type="Method">public static Model UpdateFrTekla()</Member>
+        <Modifier>None</Modifier>
+      </Entity>
+      <Entity type="Class">
+        <Name>Component</Name>
+        <Access>Public</Access>
+        <Location left="727" top="677" />
+        <Size width="162" height="216" />
+        <Collapsed>False</Collapsed>
+        <Member type="Field">string description</Member>
+        <Member type="Field">double length</Member>
+        <Member type="Field">double weight</Member>
+        <Member type="Field">double price</Member>
+        <Modifier>None</Modifier>
+      </Entity>
+      <Entity type="Class">
+        <Name>Rule</Name>
+        <Access>Public</Access>
+        <Location left="566" top="95" />
+        <Size width="191" height="216" />
+        <Collapsed>False</Collapsed>
+        <Member type="Field">string name</Member>
+        <Member type="Field">string text</Member>
+        <Member type="Field">string made</Member>
+        <Member type="Field">Supplier Supplier</Member>
+        <Member type="Field">CompSet CompSet</Member>
+        <Member type="Method">public void UseRules(Model mod)</Member>
+        <Modifier>None</Modifier>
+      </Entity>
+      <Entity type="Class">
+        <Name>TeklaOpenAPI</Name>
+        <Access>Public</Access>
+        <Location left="1169" top="95" />
+        <Size width="194" height="216" />
+        <Collapsed>False</Collapsed>
+        <Member type="Method">publicList&lt;AttSet&gt; Read()</Member>
+        <Modifier>None</Modifier>
+      </Entity>
+      <Entity type="Class">
+        <Name>Document</Name>
+        <Access>Public</Access>
+        <Location left="87" top="659" />
+        <Size width="162" height="216" />
+        <Collapsed>False</Collapsed>
+        <Member type="Field">string name</Member>
+        <Member type="Field">Matrix Body</Member>
+        <Member type="Method">public Document getDoc()</Member>
+        <Modifier>None</Modifier>
+      </Entity>
+      <Entity type="Class">
+        <Name>Supplier</Name>
+        <Access>Public</Access>
+        <Location left="150" top="84" />
+        <Size width="212" height="216" />
+        <Collapsed>False</Collapsed>
+        <Member type="Field">string name</Member>
+        <Member type="Field">public hyperlink URL</Member>
+        <Member type="Field">public string City</Member>
+        <Member type="Field">public List&lt;CompSet&gt; CompSets</Member>
+        <Member type="Field">public List&lt;string&gt; doc_names</Member>
+        <Member type="Method">public Supplier getSupplier(string name)</Member>
+        <Modifier>None</Modifier>
+      </Entity>
+      <Entity type="Class">
+        <Name>CompSet</Name>
+        <Access>Public</Access>
+        <Location left="363" top="402" />
+        <Size width="225" height="216" />
+        <Collapsed>False</Collapsed>
+        <Member type="Field">public string name</Member>
+        <Member type="Field">Document doc</Member>
+        <Member type="Field">Component Comp</Member>
+        <Member type="Method">public CompSet getCompSet(string name)</Member>
+        <Modifier>None</Modifier>
+      </Entity>
+      <Entity type="Comment">
+        <Text>ОБРАБОТКА МОДЕЛИ</Text>
+        <Location left="428" top="7" />
+        <Size width="133" height="50" />
+      </Entity>
+      <Entity type="Comment">
+        <Text>Конкретная модель для обработки должна быть выбрана из "Журнала моделей" и прочитана из файловой системы readModel() или прочитана из Tekla.OpenAPI.Read()
+
+При этом:
+1. setModel(name) заполняет нужные для обработки модели данные, отсутствующие после инициализации - читает нужные прайс-листы из Базы комплектующих.
+После подготовки запускается метод UseRules(mod) 
+
+2. saveModel() сохраняет прочитанную и обработанную модель в файле TSmatchINFO.xlsx в папке модели.
+    2.1 Лист ModelINFO - общая информация о модели: имя, стадия проекта, место каталога на диске, MD5,  список
+          использованных Правил
+    2.2 Лист Raw - полный список всех прочитанных из модели данных по всем элементам - еще "сырой" - не обработанный.
+    2.3 Лист Report - Элементы из Raw сгруппированы по значениям Материала и Профиля (Groups). Для каждой группы 
+          подбирается, если возможно, соответвующий компонент - строчка в прайс-листе CompSet с использованием одного из 
+          правил модели.
+    2.4 Лист Suppliers - перечень Поставщиков по данной модели с указанимем суммарных объемов закупаемых стали и бетона, 
+          а также цена по этим объемам материалов.</Text>
+        <Location left="678" top="389" />
+        <Size width="685" height="266" />
+      </Entity>
+    </Entities>
+    <Relationships>
+      <Relationship type="Dependency" first="3" second="0">
+        <Label>
+        </Label>
+        <StartOrientation>Horizontal</StartOrientation>
+        <EndOrientation>Horizontal</EndOrientation>
+      </Relationship>
+      <Relationship type="Association" first="0" second="2">
+        <StartOrientation>Horizontal</StartOrientation>
+        <EndOrientation>Horizontal</EndOrientation>
+        <Direction>Unidirectional</Direction>
+        <AssociationType>Aggregation</AssociationType>
+        <StartMultiplicity>1</StartMultiplicity>
+        <EndMultiplicity>0..*</EndMultiplicity>
+      </Relationship>
+      <Relationship type="Association" first="2" second="5">
+        <StartOrientation>Horizontal</StartOrientation>
+        <EndOrientation>Horizontal</EndOrientation>
+        <Direction>Unidirectional</Direction>
+        <AssociationType>Aggregation</AssociationType>
+        <StartMultiplicity>1</StartMultiplicity>
+        <EndMultiplicity>1</EndMultiplicity>
+      </Relationship>
+      <Relationship type="Association" first="6" second="1">
+        <StartOrientation>Horizontal</StartOrientation>
+        <EndOrientation>Horizontal</EndOrientation>
+        <Direction>Unidirectional</Direction>
+        <AssociationType>Composition</AssociationType>
+        <StartMultiplicity>1</StartMultiplicity>
+        <EndMultiplicity>1..*</EndMultiplicity>
+      </Relationship>
+      <Relationship type="Association" first="6" second="4">
+        <Label>fill Comp at getCompSet</Label>
+        <StartOrientation>Horizontal</StartOrientation>
+        <EndOrientation>Horizontal</EndOrientation>
+        <Direction>Unidirectional</Direction>
+        <AssociationType>Aggregation</AssociationType>
+        <StartRole>doc_name at init</StartRole>
+        <StartMultiplicity>1</StartMultiplicity>
+        <EndMultiplicity>1</EndMultiplicity>
+      </Relationship>
+      <Relationship type="Association" first="5" second="6">
+        <StartOrientation>Vertical</StartOrientation>
+        <EndOrientation>Vertical</EndOrientation>
+        <Direction>Unidirectional</Direction>
+        <AssociationType>Composition</AssociationType>
+        <StartMultiplicity>1</StartMultiplicity>
+        <EndMultiplicity>0..*</EndMultiplicity>
+      </Relationship>
+    </Relationships>
+  </ProjectItem>
+  <ProjectItem type="NClass.DiagramEditor.ClassDiagram.Diagram" assembly="NClass.DiagramEditor, Version=2.4.1823.0, Culture=neutral, PublicKeyToken=null">
+    <Name>FingerPrint</Name>
+    <Language>CSharp</Language>
+    <Entities>
+      <Entity type="Comment">
+        <Text>27.02.2017
+Pavel Khrapkin</Text>
+        <Location left="12" top="21" />
+        <Size width="97" height="50" />
+      </Entity>
+      <Entity type="Class">
+        <Name>FingerPrint</Name>
+        <Access>Public</Access>
+        <Location left="12" top="73" />
+        <Size width="440" height="366" />
+        <Collapsed>False</Collapsed>
+        <Member type="Field">public readonly type typeFP</Member>
+        <Member type="Field">public readonly Section section</Member>
+        <Member type="Field">public readonly List&lt;string&gt; txs</Member>
+        <Member type="Field">public readonly List&lt;object&gt; pars</Member>
+        <Member type="Field">public readonly List&lt;string&gt; synonyms</Member>
+        <Member type="Constructor">static FingerPrint()</Member>
+        <Member type="Constructor">public FingerPrint(type _type, string str, Section? _section = null, FingerPrint ruleFP = null)</Member>
+        <Member type="Constructor">public FingerPrint(string str, FingerPrint csFP)</Member>
+        <Member type="Method">public bool Equals(FingerPrint other)</Member>
+        <Member type="Method">private string getPar(string str, ref int startIndex, out bool isBrackets)</Member>
+        <Member type="Method">private ParType getParType(string str, ref int ind)</Member>
+        <Member type="Method">private bool isSynonym(string tx, int iTx)</Member>
+        <Member type="Method">private string synParser(string tx, ref int iTx)</Member>
+        <Member type="Method">public Section recognizeSection(string str)</Member>
+        <Member type="Method">internal int Int(int parNumber = 0)</Member>
+        <Member type="Method">internal int Col(int parNumber = 0)</Member>
+        <Member type="Method">public string strINFO()</Member>
+        <Modifier>None</Modifier>
+      </Entity>
+      <Entity type="Comment">
+        <Text>FingerPrint (FP) - класс "отпечатков пальцев".
+ 
+FP предназначен для идентификации экземпляров Components, ElmAttSet и т.п. по уникальным для этого экземпляра данным - параметрам (pars), фрагментам текста txs и отдельным вариантам альтернативных фрагментов текста synonym.
+- type - тип FP, его назначение:
+        - Rule - правила управляют созданием отчетов TSmatchINFO.xlsx/Report
+                     хранится в TSmatch.xlsx/Rules, инициализируется при выборе модели
+        - CompSet = LoadDescriptor - описывает чтение прайс-листа в поля Component
+                     хранится в TSmatch.xlsx/TOC в строке Докуметнта, инициализируется
+                     из Rule при загрузке Поставщика; специфичен для Rule и Supplier
+        - Component - класс, содержащий поля из прайс листа, формируется при
+                     загрузке CompSet - каждый экземпляр Component по одной строке
+                     из Excel. Неподходящие по Rule строки игнорируются. FP cодержит
+                     значения параметров, определенных в Rule, по которым происходит
+                     идентификация (Equal) в Match 
+- Секции разделяются знаком ';'
+- Для каждой секции должен быть свой уникальный FP.
+- Секция имеет "заголовок", отделяемый от тела секции ':'
+- Заголовки секций распознаются, т.е. ставятся в соответствие с enum Section,
+  по таблице в Named Range, которая хранится в   TSmatch.xlsx/Constant/TabSynonyms
+- текст секции всегда переводится Lib.ToLat() и string.Upper()
+- в теле секции есть "параметры", т.е. конструкции вида {.*?}
+        - для Rule в {} - имена параметров,
+        - для CompSet и LoadDescriptor - номера колонок прайс- листа
+        - для Component - string, double или integer значения в прайс листе
+              При этом строки прайс-листа разбираются по CompSet.FP:
+              {s~1} - в колонке 1 текстовая строка, и также по умолчанию "s~" 
+              {d~4} - в колонке 4 - double. Вместо десятичной запятой распознается точка
+              {i~9}  - integer параметр в колонке 9 
+- "синонимы", т.е. фрагмента текста с предшествующими знаками '=' или ',' и 
+- остальныме фрагменты текста, собираемые в List&lt;string&gt;txs служат шаблоном</Text>
+        <Location left="473" top="21" />
+        <Size width="467" height="452" />
+      </Entity>
+      <Entity type="Comment">
+        <Text>Об идентификации FP.Equal(otherFP)
+
+Поле enum type {Rule, ElmAttSet, Component} определят поведение при идентификации по FingerPrint: 
+    - FP является "образцовым" для Rule; это шаблон для Components и Match
+    - "действительным" для Component, т.е. pars и txs заполняется в 
+      соответствии с Rule именами и значениями по строке прайс-листа
+    - "указателем" для ComSet, т.е. содержит номера колонок прайс-листа,
+      заполняемым в FP по LoadDescriptor
+
+Если Component или ElmAttSet содержат бOльшее количество деталей - txs и pars по сравнению с Rule - они игнорируются. Но если нет одного из tx или par, упомянутых в Rule - результат идентификации FALSE.
+Требование "отсутствующие детали игнорируются" ведет к тому, что X.Equals(null) всегда TRUE (??).</Text>
+        <Location left="473" top="483" />
+        <Size width="467" height="225" />
+      </Entity>
+      <Entity type="Comment">
+        <Text> *--- &lt;ToDo&gt; 2017.1.10:
+ *  - реализовать разбор синонимов в конструкторе
+
+- &lt;ToDo&gt; 2017.1.21 - дописать, отладить и оттестировать FP конструктор для Component для разбора параметров в строчках прайс-листа (s~, d~, i~)
+    - дописывать конструктор для компонент
+    - разбор и интерпретация именныx параметров {имя}
+      Пока Constructor FP Lib.ToLat делает Msg.W и Col=-1,
+      потом параметры {имя} нада будет хранить и 
+      распознавать.
+
+- &lt;ToDo&gt; 2017.1.25 - переписать и оттестировать Equals
+
+-- &lt;ToDo&gt; 2017.1.29 - заново осмыслить роль и применение RuleFP В частности, что делать с FP=NULL? По требованию Equals = FALSE, а мне надо "годятся все"
+
+--&lt;ToDo&gt; 2017.2.7 - изменить интерфейс конструртора2 на с FP csFP на List&lt;FP&gt;csFPs
+- исправить NClass
+- внести изменения в
+     - FingerPrint стр36,
+     - Component стр.33,
+     - Matcher стр.36
+- проверить тесты
+ISSUE:  Str="M:B12,2" - параметр не распознается
+
+-&lt;ToDo&gt; 2017.02.27 по-прежнему отладка FP с бетоном и уголками
+- getPar(str, ref int startIndex, out bool isBrackets) - отладка и тестирование</Text>
+        <Location left="954" top="401" />
+        <Size width="466" height="307" />
+      </Entity>
+      <Entity type="Enum">
+        <Name>Section</Name>
+        <Access>Public</Access>
+        <Location left="241" top="459" />
+        <Size width="162" height="214" />
+        <Collapsed>False</Collapsed>
+        <Value>Material</Value>
+        <Value>Profile</Value>
+        <Value>Description</Value>
+        <Value>Price</Value>
+        <Value>Use</Value>
+        <Value>Unit</Value>
+        <Value>WeightPerUnit</Value>
+        <Value>LengthPerUnit</Value>
+        <Value>VolPerUnit</Value>
+      </Entity>
+      <Entity type="Enum">
+        <Name>type</Name>
+        <Access>Public</Access>
+        <Location left="12" top="447" />
+        <Size width="162" height="113" />
+        <Collapsed>False</Collapsed>
+        <Value>Rule</Value>
+        <Value>CompSet</Value>
+        <Value>Component</Value>
+      </Entity>
+      <Entity type="Comment">
+        <Text>Tаким образом, все значения из прайс-листа сохраняются в List&lt;FP&gt;Component.FPs
+
+Следовательно, LoadDescriptor должен быть достаточно полным, чтобы обеспечить просмотр элементов модели САПР и выдачу отчета TSmatchINFO.xlsx/Report. Иначе в Match выводится сообщение об ошибке.
+
+Неясно, как разбирать конструкции вида Х*{i^5}.
+Например, "Уголок равнополочный 100 х 7" с LoadDescription  "Уголок*Х{i^3}" -- как получить параметр 100?
+Может быть стоит составлять Excel файл прайс-листа с ввыделенными параметрами уголков вручную?  Вообще, Data Exchange и, видимо, многие другие, работают со своей SQL базой прайс-листов. В TSmatch заложена идея двухступенчатой работы:
+    1. Данные из Internet в форматах Excel (прямые
+         ссылки для, загрузки прайс-листов), html, PDF или
+         MS Word а также фрагменты договоров, коммерческих
+         соглашений и/или баз данных предприятия,
+         загружаются в TSmatch Components при помощи Loader
+         в соответствии с LoadDescriptor. Часто Loader пустой.
+    2. TSmatch сопоставляет компоненты модели из САПР с 
+         Components с учетом Rule и выводит в отчеты 
+         TSmatchINFO.xlsx
+Пока предлагаю не использовать LoadDescriptor'ы вида X*{3}
+Тогда базы типа монолитного бетона просто считываются,
+а для металлопроката с несколькоми профилями можно будет  специально подготовить Excel-файлы прайс листов.</Text>
+        <Location left="954" top="21" />
+        <Size width="451" height="373" />
+      </Entity>
+      <Entity type="Enum">
+        <Name>ParType</Name>
+        <Access>Public</Access>
+        <Location left="12" top="571" />
+        <Size width="162" height="112" />
+        <Collapsed>False</Collapsed>
+        <Value>String</Value>
+        <Value>Double</Value>
+        <Value>Integer</Value>
+      </Entity>
+    </Entities>
+    <Relationships />
+  </ProjectItem>
+  <ProjectItem type="NClass.DiagramEditor.ClassDiagram.Diagram" assembly="NClass.DiagramEditor, Version=2.4.1823.0, Culture=neutral, PublicKeyToken=null">
+    <Name>CompSet</Name>
+    <Language>CSharp</Language>
+    <Entities>
+      <Entity type="Comment">
+        <Text>2016.01.16
+Pavel Khrapkin</Text>
+        <Location left="7" top="8" />
+        <Size width="99" height="50" />
+      </Entity>
+      <Entity type="Class">
+        <Name>CompSet</Name>
+        <Access>Public</Access>
+        <Location left="297" top="245" />
+        <Size width="211" height="216" />
+        <Collapsed>False</Collapsed>
+        <Member type="Field">internal string name</Member>
+        <Member type="Field">internal List&lt;Component&gt; Components</Member>
+        <Member type="Field">internal Supplier Supplier</Member>
+        <Member type="Field">internal Document doc</Member>
+        <Member type="Field">internal List&lt;FingerPrint&gt; fps</Member>
+        <Modifier>None</Modifier>
+      </Entity>
+      <Entity type="Class">
+        <Name>Supplier</Name>
+        <Access>Public</Access>
+        <Location left="28" top="96" />
+        <Size width="162" height="216" />
+        <Collapsed>False</Collapsed>
+        <Member type="Field">public string name</Member>
+        <Member type="Field">public string Url</Member>
+        <Member type="Field">public string City</Member>
+        <Member type="Field">public List&lt;CompSet&gt; CompSets</Member>
+        <Modifier>None</Modifier>
+      </Entity>
+      <Entity type="Class">
+        <Name>Component</Name>
+        <Access>Public</Access>
+        <Location left="662" top="361" />
+        <Size width="162" height="216" />
+        <Collapsed>False</Collapsed>
+        <Member type="Field">public readonly string description</Member>
+        <Member type="Field">public readonly string mat</Member>
+        <Member type="Field">public readonly double? price</Member>
+        <Member type="Field">public readonly List&lt;FingerPrint&gt; fps</Member>
+        <Modifier>None</Modifier>
+      </Entity>
+      <Entity type="Class">
+        <Name>Document</Name>
+        <Access>Public</Access>
+        <Location left="41" top="482" />
+        <Size width="162" height="216" />
+        <Collapsed>False</Collapsed>
+        <Member type="Field">public string name</Member>
+        <Member type="Field">public int i0</Member>
+        <Member type="Field">public int il</Member>
+        <Member type="Field">public string LoadDescription</Member>
+        <Member type="Field">public Array Body</Member>
+        <Modifier>None</Modifier>
+      </Entity>
+      <Entity type="Comment">
+        <Text>2017.1.16
+
+- нужен ли FP для CompSet? Если ДА - как он используется?
+- как будем использовать имена параметров для Component?
+</Text>
+        <Location left="316" top="10" />
+        <Size width="541" height="187" />
+      </Entity>
+    </Entities>
+    <Relationships>
+      <Relationship type="Association" first="1" second="4">
+        <Label>
+        </Label>
+        <StartOrientation>Horizontal</StartOrientation>
+        <EndOrientation>Horizontal</EndOrientation>
+        <BendPoint relativeToStartShape="True">
+          <X>272</X>
+          <Y>360</Y>
+        </BendPoint>
+        <Direction>Unidirectional</Direction>
+        <AssociationType>Aggregation</AssociationType>
+        <StartMultiplicity>1</StartMultiplicity>
+        <EndMultiplicity>1</EndMultiplicity>
+      </Relationship>
+      <Relationship type="Association" first="1" second="3">
+        <Label>
+        </Label>
+        <StartOrientation>Horizontal</StartOrientation>
+        <EndOrientation>Horizontal</EndOrientation>
+        <BendPoint relativeToStartShape="True">
+          <X>533</X>
+          <Y>324</Y>
+        </BendPoint>
+        <BendPoint relativeToStartShape="False">
+          <X>637</X>
+          <Y>380</Y>
+        </BendPoint>
+        <Direction>Unidirectional</Direction>
+        <AssociationType>Composition</AssociationType>
+        <StartMultiplicity>*</StartMultiplicity>
+        <EndMultiplicity>0..*</EndMultiplicity>
+      </Relationship>
+      <Relationship type="Association" first="2" second="1">
+        <StartOrientation>Horizontal</StartOrientation>
+        <EndOrientation>Horizontal</EndOrientation>
+        <BendPoint relativeToStartShape="True">
+          <X>215</X>
+          <Y>209</Y>
+        </BendPoint>
+        <BendPoint relativeToStartShape="False">
+          <X>272</X>
+          <Y>267</Y>
+        </BendPoint>
+        <Direction>Unidirectional</Direction>
+        <AssociationType>Composition</AssociationType>
+      </Relationship>
+    </Relationships>
+  </ProjectItem>
+</Project>

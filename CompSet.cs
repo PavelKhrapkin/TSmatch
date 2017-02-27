@@ -1,10 +1,13 @@
 ﻿/*----------------------------------------------------------------------------
  * CompSet -- Set of Components got from the Supplier' price-list
  * 
- * 30.11.2016  P.Khrapkin
+ * 31.12.2016  P.Khrapkin
  *
- *--- history ---
+ * -- ToDo
+ * 31.12.16 использовать Rule.FPs и LoadDescription при конструировании CompSet
+ * --- history ---
  * 30.11.2016 made from previous edition of module Components
+ * 31.12.2016 Rule.FPs accounted 
  * ---------------------------------------------------------------------------
  *      Methods:
  * getCompSet(name, Supplier) - getCompSet by  its name in Supplier' list
@@ -23,6 +26,7 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using log4net;
 
 using Lib = match.Lib.MatchLib;
 using Log = match.Lib.Log;
@@ -36,50 +40,59 @@ using Supl = TSmatch.Suppliers.Supplier;
 using TSmatch.Suppliers;
 using TSmatch.Component;
 using TSmatch.ElmAttSet;
+using TSmatch.Rule;
+using FP = TSmatch.FingerPrint.FingerPrint;
 
 namespace TSmatch.CompSet
 {
-    /// <summary>
-    /// CompSet - набор однотипных компонентов одного поставщика, например, прайслист Стальхолдинга "Пластины"                                                          
-    /// </summary>
-    /// <history>27.3.2016
-    /// 14.4.2016 add List<string>mats in class fields and method getMat()
-    /// </history>
     public class CompSet   
     {
-        static List<CompSet> CompSets = new List<CompSet>();    // список всех наборов компонентов - ..
-                                                                //..возможно, с не уникальными названими
-        public string name;                 // название сортамента, например, "Уголок"
-        public List<Component.Component> Components = new List<Component.Component>();
-        public List<string> mats = new List<string>();  // перечень материалов, применяемых в Components
-        public Supl Supplier;               // организация - поставщик сортамента
-        public Docs doc;                    // Документ, содержащий набор компонентов, прайс-лист поставщика 
-        private string doc_cs_name;
+        public static readonly ILog log = LogManager.GetLogger("CompSet");
 
-        public CompSet(string _name, List<Component.Component> _comps, List<string> _mats, Supl _supl, Docs _doc)
-        {
-            this.name       = _name;
-            this.Components = _comps;
-            this.mats       = _mats;
-            this.Supplier   = _supl;
-            this.doc        = _doc;
-        }
-        public CompSet(string _name, Supl _supl) : this(_name, null, null, _supl, null) { }
-        public CompSet(string _name, string _supplier_name) : this(_name, Supl.getSupplier(_supplier_name)) { }
-        public CompSet(string _name, Supl _supl, string doc_cs_name) : this(_name, _supl)
-        {
-            this.doc_cs_name = doc_cs_name;
-            this.doc = Docs.getDoc(doc_cs_name);
-            this.Components = Component.Component.setComp(doc);
-        }
+        internal string name;       // название сортамента, например, "Уголок"
+        internal List<Component.Component> Components = new List<Component.Component>();
+        internal Supl Supplier;     // организация - поставщик сортамента
+        internal Docs doc;          // Документ, содержащий набор компонентов, прайс-лист поставщика 
+        internal List<FP> csFPs = new List<FP>();    // parsed LoadDescriptor of price list Document
 
-        internal Component.Component CompMatch(ElmAttSet.Group gr)
+        ////////////////public CompSet(string _name, List<Component.Component> _comps, Supl _supl, Docs _doc, List<FP> _csFPs)
+        ////////////////{
+        ////////////////    this.name       = _name;
+        ////////////////    this.Components = _comps;
+        ////////////////    this.Supplier   = _supl;
+        ////////////////    this.doc        = _doc;
+        ////////////////    this.csFPs      = _csFPs;
+        ////////////////}
+        public CompSet(string _name, Supl _supl, Rule.Rule _rule) //: this {_name, null, _supl, null, null }
         {
-            foreach (var comp in Components)
+            name = _name;
+            Supplier = _supl;
+            //-- get cs doc from TOC by cs_name and Supplier in Rule
+            Docs toc = Docs.getDoc();
+            for (int i = toc.i0; i <= toc.il; i++)
             {
+                string suplName = toc.Body.Strng(i, Decl.DOC_SUPPLIER);
+                string csSheet = toc.Body.Strng(i, Decl.DOC_SHEET);
+                if (suplName != Supplier.name || csSheet != name) continue;
+                string docName = toc.Body.Strng(i, Decl.DOC_NAME);
+                doc = Docs.getDoc(docName);
+                break;
             }
-            throw new NotImplementedException();
+            csFPs = _rule.Parser(FP.type.CompSet, doc.LoadDescription);
+            for (int i=doc.i0; i < doc.il; i++)
+            {
+                Component.Component comp = new Component.Component(doc, i, csFPs, _rule.ruleFPs);
+                Components.Add(comp);
+            }
         }
+
+        ////////internal Component.Component CompMatch(ElmAttSet.Group gr)
+        ////////{
+        ////////    foreach (var comp in Components)
+        ////////    {
+        ////////    }
+        ////////    throw new NotImplementedException();
+        ////////}
 
         //////////////////public static CompSet setCompSet(string cs_name,  Supl supl, string doc_name)
         //////////////////{
@@ -99,45 +112,45 @@ namespace TSmatch.CompSet
         /// </history>
         ////////////////public static CompSet getCompSet(string name, string supl_name)
         ////////////////{ return getCompSet(name, Supl.getSupplier(supl_name)); }
-        public static CompSet getCompSet(string cs_name, Supl supplier)
-        {
-            Docs toc = Docs.getDoc(Decl.DOC_TOC);
-            string doc_cs_name = "";
-            for (int i = toc.i0; i <= toc.il; i++)
-            {
-                if (toc.Body.Strng(i, Decl.DOC_SUPPLIER) != supplier.name) continue;
-                if (toc.Body.Strng(i, Decl.DOC_SHEET) != cs_name) continue;
-                doc_cs_name = toc.Body.Strng(i, Decl.DOC_NAME);
-                break;
-            }
-            CompSet cs = new CompSet(cs_name, supplier, doc_cs_name);
-            return cs;
-        }
-        public CompSet getCompSet()
-        {
-            if (this.Components == null)
-            {
-                this.doc = Docs.getDoc(this.doc.name);
-//30/11                this.Components = Component.setComp(doc);
-                getMat();
-            }
-            return this;
-        }
-        /// <summary>
-        /// getMat() - setup mats - List of materials used in Components
-        /// </summary>
-        /// <history>14.4.2016</history>
-        /// <description>
-        /// mats taken from Component.description
-        /// </description>
-        public void getMat()
-        {
-            Log.set("CompSet.getMat()");
-            foreach (var cs in Components)
-            {
-                string s = cs.description;
-            }
-            Log.exit();
-        }
+//////////////        public static CompSet getCompSet(string cs_name, Supl supplier)
+//////////////        {
+//////////////            Docs toc = Docs.getDoc(Decl.DOC_TOC);
+//////////////            string doc_cs_name = "";
+//////////////            for (int i = toc.i0; i <= toc.il; i++)
+//////////////            {
+//////////////                if (toc.Body.Strng(i, Decl.DOC_SUPPLIER) != supplier.name) continue;
+//////////////                if (toc.Body.Strng(i, Decl.DOC_SHEET) != cs_name) continue;
+//////////////                doc_cs_name = toc.Body.Strng(i, Decl.DOC_NAME);
+//////////////                break;
+//////////////            }
+//////////////            CompSet cs = new CompSet(cs_name, supplier, doc_cs_name);
+//////////////            return cs;
+//////////////        }
+//////////////        public CompSet getCompSet()
+//////////////        {
+//////////////            if (this.Components == null)
+//////////////            {
+//////////////                this.doc = Docs.getDoc(this.doc.name);
+////////////////30/11                this.Components = Component.setComp(doc);
+//////////////                getMat();
+//////////////            }
+//////////////            return this;
+//////////////        }
+//////////////        /// <summary>
+//////////////        /// getMat() - setup mats - List of materials used in Components
+//////////////        /// </summary>
+//////////////        /// <history>14.4.2016</history>
+//////////////        /// <description>
+//////////////        /// mats taken from Component.description
+//////////////        /// </description>
+//////////////        public void getMat()
+//////////////        {
+//////////////            Log.set("CompSet.getMat()");
+//////////////            foreach (var cs in Components)
+//////////////            {
+//////////////                string s = cs.description;
+//////////////            }
+//////////////            Log.exit();
+//////////////        }
     } // end class CompSet
 } // end namespace CompSet

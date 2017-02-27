@@ -158,7 +158,7 @@ namespace TSmatch.Suppliers
                 doc.wrDoc(1, s.date, s.name, s.Url, s.City, s.index, s.street, s.telephone, s.CompSets.Count);
                 foreach (var cs in s.CompSets) 
                 {
-                    cs.getCompSet();
+                    //11.1.17                    cs.getCompSet();
                     //////CmpSet.getCompSet(cs.name, s);
                     //////Docs w = Docs.getDoc(cs.doc.name);
                     //////cs.doc = w;

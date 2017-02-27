@@ -361,7 +361,8 @@ namespace match.Lib
         public static void exit() { _nameStack.Pop(); }
         public static void FATAL(string msg)
         {
-            new Log("\n\n[FATAL] " + msg);
+            //26/1            new Log("\n\n[FATAL] " + msg);
+            log.Fatal("\n\n[FATAL] " + msg);
             _tx("\n\tв стеке имен:");
             foreach (var s in _nameStack) _tx("\t-> " + s);
             Debugger.Break();

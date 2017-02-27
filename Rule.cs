@@ -71,12 +71,12 @@ namespace TSmatch.Rule
             name = (string)doc.Body[i, Decl.RULE_NAME];
             type = (string)doc.Body[i, Decl.RULE_TYPE];
             text = Lib.ToLat((string)doc.Body[i, Decl.RULE_RULE]);
-            ruleFPs = Parser(FP.type.Rule, text, Decl.SECTIONS_RULE);
+//// 24/1 //////            log.Info("Constructor Rule(doc, i=" + i + ") text=<" + text + ">");
+            ruleFPs = Parser(FP.type.Rule, text);    /////////   , Decl.SECTIONS_RULE);
             string csName = (string)doc.Body[i, Decl.RULE_COMPSETNAME];
             string suplName = (string)doc.Body[i, Decl.RULE_SUPPLIERNAME];
             Supplier = new Suppliers.Supplier(suplName);
             CompSet = new CmpSet(csName, Supplier, this); 
-            log.Info("Constructor Rule(doc, i=" + i + ") text=<" + text + ">");
         }
         // параметр doc не указан, по умолчанию извлекаем Правила из TSmatch.xlsx/Rules
         public Rule(int n) : this(Docs.getDoc(Decl.RULES), n) {}
@@ -158,22 +158,37 @@ namespace TSmatch.Rule
         /// <ToDo>
         /// 28.12.16 переписать <описание> выше в части параметров. И вообще пересмотреть
         /// 30.12.16 написать полный разбор Секции
+        /// 11.01.17 replace cols with real pars handling for pars.count != 1
         /// </ToDo>
-        internal List<FP> Parser(FP.type _type, string text, string[,]sectionRegs)  //List<string> ruleSectionRegs)
+        internal List<FP> Parser(FP.type _type, string text) //, string[,]sectionRegs)  //List<string> ruleSectionRegs)
         {
-            Log.set("Rule.Parser(" + _type + ", " + text + ")");
+            Log.set("Rule.Parser(" + _type + ", " + text + ", sectionReg)");
             List<FP> result = new List<FP>();
-            string[] sections = Lib.ToLat(text).ToUpper().Split(';');
+            string[] sections = Lib.ToLat(text).ToLower().Split(';');
             foreach (string sec in sections)
             {
-                for (int ind=0; ind < sectionRegs.GetUpperBound(0); ind++)
-                {
-                    string reg = Lib.ToLat(sectionRegs[ind, 1]).ToUpper();
-                    if (!Regex.IsMatch(sec, reg, RegexOptions.IgnoreCase)) continue;
-                    result.Add(new FP(_type, sec));
-                    break;
-                }
+                if (string.IsNullOrEmpty(sec)) continue;
+                FP xx = new FP(_type, sec);
+                object col = sec;
+                if (col.GetType() == typeof(string)) col = "\"" + col + "\"";
+//// 24/1 //////                log.Info("=============> " + _type + "\tsec = " + sec + "\tcol=" + col);
+                result.Add(xx);
+
+                //////////////for (int ind=0; ind < sectionRegs.GetUpperBound(0); ind++)
+                //////////////{
+                //////////////    string reg = Lib.ToLat(sectionRegs[ind, 1]).ToUpper();
+                //////////////    if (!Regex.IsMatch(sec, reg, RegexOptions.IgnoreCase)) continue;
+                //////////////    result.Add(new FP(_type, sec));
+                //////////////    break;
+                //////////////}
             }
+////////////////            int column = -1;
+////////////////            foreach (var fp in result)
+////////////////            {
+//// 24/1 //////                foreach (var p in fp.pars)
+////////////////                    // 17.1 //                    if (p.Value.GetType() ==typeof(int)) column = (int)p.Value;
+////////////////                    log.Info("-----------------> " + _type + "\tsec = " + fp.section.ToString() + "\tcolumn=" + column);
+////////////////            }
             Log.exit();
             return result;          
         }
@@ -199,7 +214,7 @@ namespace TSmatch.Rule
         ///////////////////////////// <\history>
         //////////////////////////private void SectionParse(string str)
         //////////////////////////{
-        //////////////////////////    Section section = RecognyzeSection(ref str);
+        //////////////////////////    Section section = RecognyseSection(ref str);
 
         //////////////////////////    switch (section)
         //////////////////////////    {

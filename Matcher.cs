@@ -46,6 +46,7 @@ using Rule = TSmatch.Rule.Rule;
 using TSmatch.ElmAttSet;
 using TSmatch.Rule;
 using Msg = TSmatch.Message.Message;
+using FP = TSmatch.FingerPrint.FingerPrint;
 
 namespace TSmatch.Matcher
 {
@@ -57,19 +58,38 @@ namespace TSmatch.Matcher
         public ElmAttSet.Group group = null;    //reference to the Group<material, profile> being matched
         public Component.Component comp = null; //used Component in Match the Rule and Group
         public Rule.Rule rule = null;           //the rule, which manage the matching
-        public double Qty = 0.0;                //quantyty of the items to be Add to  the Quotation
+        public double Qty = 0.0;                //quantity of the items to be Add to  the Quotation
 
         public Mtch(ElmAttSet.Group gr, Rule.Rule rule)
         {
-            //--- вначале определим, приложимо ли Правило к данной Группе<mat,prf>
-//29.12.16////if (!isSectionMatch(gr.mat, rule.RuleMatList, ref rule.RuleMatPar)) return;
-//29.12.16////if (!isSectionMatch(gr.prf, rule.RulePrfList, ref rule.RulePrfPar)) return;
-            //--- затем с этими параметрами просматриваем список CompSet для выбора Component
+            // как сравнивать строку mat или prf c FP?? 
+            //.. mat и prf надо присвоить соответствующие FPs, а их уже сравнивать
+            //.. Для перевода строки в FP нужен шаблон. Это -- LoadDescription,
+            //.. поскольку мы будем сопоставлять Group с Component
+            bool flag = false;
+            FP fpGrMat = new FP("M:" + gr.mat, rule.CompSet.csFPs, ref flag);
+            FP fpGrPrf = new FP("PRF"+ gr.prf, rule.CompSet.csFPs, ref flag);
+
+            foreach (var comp in rule.CompSet.Components)
+            {
+                // тут надо определить, что группа gr находится в соответствии с comp
+                //..то есть gr.mat == comp.fp[Material] && gr.prf == comp.fp[Profile]
+                //!!!! если у comp нет fp для prf или mat - годятся все компоненты.
+                FP fp_mat = comp.fps.Find(x => x.section == FP.Section.Material);
+                FP fp_prf = comp.fps.Find(x => x.section == FP.Section.Profile);
+                if (fp_mat == null && fp_prf == null) Msg.F("Mtch no fp.Mat & fp.Prf", rule.text);
+                
+                ok  = fp_mat == null || fp_mat.Equals(fpGrMat);
+                ok &= fp_prf == null || fp_prf.Equals(fpGrPrf);
+//29/1 //                ok = fp_mat.Equals(fpGrMat) && fp_prf.Equals(fpGrPrf);
+// 25/1 //                ok = (fp_mat == fpGrMat) && (fp_prf == fpGrPrf);
+                if (ok) break;
+            }
             //--- если Component нашелся -> заполняем Mtch
             throw new NotImplementedException();
             CmpSet cs = rule.CompSet;
             group = gr;
-            comp = cs.CompMatch(gr);
+//11.1.17            comp = cs.CompMatch(gr);
 
             Docs doc = Docs.getDoc(cs.doc.name);
             
