@@ -116,6 +116,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Parameter.cs" />
+    <Compile Include="Section.cs" />
     <Compile Include="TEST.cs" />
     <Compile Include="FingerPrint.cs" />
     <Compile Include="vpproject\Bootstrap.cs" />

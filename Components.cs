@@ -1,13 +1,14 @@
 ﻿/*----------------------------------------------------------------------------
  * Components -- работа с документами - прайс-листами поставщиков компонентов
  * 
- * 30.12.2016  П.Храпкин
+ * 28.02.2017  П.Храпкин
  *
  *----- ToDo -----
  * 29.12.2016 написать загрузку из прайс-листа setComp(..) c разбором LoadDescriptor
  * --- журнал ---
  * 30.11.2016 made as separate module, CompSet is now in another file
  * 30.12.2016 fill matFP, prfFP in setComp()
+ * 28.02.2017 fill component fields incliding List<FP> from price-list in constructor
  * ---------------------------------------------------------------------------
  *      МЕТОДЫ:
  * getCompSet(name, Supplier) - getCompSet by  its name in Supplier' list
@@ -41,6 +42,7 @@ using Supl = TSmatch.Suppliers.Supplier;
 using FP = TSmatch.FingerPrint.FingerPrint;
 using TSmatch.Document;
 using TSmatch.Rule;
+using SecTYPE = TSmatch.Section.Section.Type;
 
 namespace TSmatch.Component
 {
@@ -65,48 +67,26 @@ namespace TSmatch.Component
             weight_m = _weight;
             price = _price;
         }
-
-        public Component(Docs doc, int i, List<FP> cs_fps, List<FP>rule_fps)
+        /// <summary>
+        /// constructor Component(doc, i, List<FP>cs_fps, List<FP>rule_fps) - get Component from price-list in doc line i
+        /// </summary>
+        /// <param name="doc">document - price-list</param>
+        /// <param name="i">line number in doc</param>
+        /// <param name="cs_fps">FP of CompSet</param>
+        public Component(Docs doc, int i, List<FP> cs_fps)
         {
             string[] sections = Lib.ToLat(doc.LoadDescription).ToLower().Split(';');
             bool flag = false;
             foreach (string sec in sections)
             {
-                if (string.IsNullOrEmpty(sec)) continue;
-// 13/2 /       FP csFP = cs_fps.Find(x => x.section == x.RecognyseSection(sec));
-// 13/2 /       if (csFP == null) Msg.F("Component constructor: no CompSet.FP with doc.LoadDescription", sec);
-// 13/2 /       int col = csFP.Col();               
-// 13/2 /       FP compFP = new FP(str, csFP, ref flag);
-                FP compFP = new FP(sec, cs_fps, ref flag);
-                int col = compFP.Col();
-                string str = doc.Body.Strng(i, col);
-                if (flag) fps.Add(compFP);
+                if (string.IsNullOrEmpty(sec)) continue;                                 
+                ////////////////////////FP csFP = cs_fps.Find(x => x.section == x.RecognyseSection(sec));
+                ////////////////////////if (csFP == null) Msg.F("Component constructor: no CompSet.FP with doc.LoadDescription", sec);
+                /////// 7/7/2017 ///////int col = csFP.Col();
+                ////////////////////////string str = doc.Body.Strng(i, col);
+                ////////////////////////FP compFP = new FP(str, csFP, out flag);
+                ////////////////////////if (flag) fps.Add(compFP);
             }
-
-
-
-            ////////////////////////Dictionary<FP.Section, string> tmp_sec = new Dictionary<FP.Section, string>(); 
-            ////////////////////////foreach (var fp in cs_fps)
-            ////////////////////////{
-            ////////////////////////    //                log.Info(fp.Info());
-            ////////////////////////    int col = fp.Col();
-            ////////////////////////    string str = Lib.ToLat(doc.Body.Strng(i, col));
-            ////////////////////////    if (fp.section == FP.Section.Material) mat = str;
-            ////////////////////////    if (fp.section == FP.Section.Description) description = str; 
-            ////////////////////////    double? val = doc.Body.Double(i, col);
-            // 23/1 ////////////////    if (fp.section == FP.Section.Price) price = val;
-            ////////////////////////    if (fp.section == FP.Section.WeightPerUnit) weight_m = (double)val;
-            ////////////////////////    if (fp.section == FP.Section.LengthPerUnit) length = (double)val;
-            ////////////////////////    if (fp.section == FP.Section.VolPerUnit) vol_m = (double)val;
-            ////////////////////////    tmp_sec.Add(fp.section, str);
-            ////////////////////////}
-            ////////////////////////foreach (FP fp in rule_fps)
-            ////////////////////////{
-            ////////////////////////    string str = tmp_sec[fp.section];
-            ////////////////////////    FP ruleTx = rule_fps.Find(x => x.section == fp.section);
-            ////////////////////////    if (ruleTx == null) Msg.F("Component constructor has no the Rule Section", doc.name);
-            ////////////////////////    // 17.1 //                fps.Add(new FP(FP.type.Component, str, fp.section, rule_fps));
-            ////////////////////////}
         }
 
         /// <summary>
@@ -255,11 +235,34 @@ namespace TSmatch.Component
             csFPs = rule.Parser(FP.type.CompSet, doc.LoadDescription);
             TST.Eq(csFPs.Count, 3);
 
-            Component comp = new Component(doc, 8 + 3, csFPs, rule.ruleFPs);
+            //-- simple Component line "B20" in col 1
+            Component comp = new Component(doc, 8 + 3, csFPs);
             TST.Eq(comp.fps[0].txs[0], "b");
             TST.Eq(comp.fps[0].txs.Count, 1);
             TST.Eq(comp.fps[0].pars[0].ToString(), "20");
             TST.Eq(comp.fps[0].pars.Count, 1);
+            //////////////////////var bb = SecTYPE.Material;
+            //////////////////////var aa = Section.Section.type.Material;
+            //////////////////////bool comp.fps[0].section == SecTYPE.Material;
+            ////// 7/3/2017 //////SecTYPE comp.fps[0].section 
+            //////////////////////TST.Eq(comp.fps[0].section == FP.Section.Material, true);
+            //////////////////////TST.Eq(comp.fps[1].section == FP.Section.Description, true);
+            //////////////////////TST.Eq(comp.fps[1].pars.Count, 1);
+            //////////////////////TST.Eq(comp.fps[2].txs[0].ToString(), "");
+            //////////////////////TST.Eq(comp.fps[2].section == FP.Section.Price, true);
+            doc.Close();
+
+            //-- Уголок равнополочный Стальхолдинг -- разбор LoadDescription L{1}x{1}
+            doc = Docs.getDoc("Уголок Стальхолдинг");
+            rule = new Rule.Rule(4);
+            csFPs = rule.Parser(FP.type.CompSet, doc.LoadDescription);
+            TST.Eq(csFPs.Count, 3);
+            TST.Eq(csFPs[0].pars[0], 1);
+
+            comp = new Component(doc, 42, csFPs);
+            TST.Eq(comp.fps[0].txs[0], "");
+// 6/3/17   TST.Eq(comp.fps[0].pars[0], "");
+
             Log.exit();
         }
 #endif //#if DEBUG

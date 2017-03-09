@@ -1,25 +1,27 @@
 ﻿/*----------------------------------------------------------------
  * FingerPrin (FP) -- characteristic name fragments and parameters
- *                    of model element attribute, Component, Rule
+ *                    of CAD-model element attribute, Component, Rule
  *
- * 17.01.2017 Pavel Khrapkin
+ * 9.02.2017 Pavel Khrapkin
  *
  *--- History ---
  * 28.12.2016 made from other module fragments
  * 17.01.2017 class fields and identification method changed
+ *  9.03.2017 Section class used
+ *  
  *--- <ToDo> 2017.1.10:
  *  - реализовать разбор синонимов в конструкторе 
  *  - реализовать Equals - идентификацию
- *--- <ToDo> 2017.1.16
- *  - заменить string tx на List<string>txs. Реализовать заполнение txs в конструкторе FingerPrint
+ *--- <ToDo> 2017.3.7
+ *  - реализовать взаимодействие с Section. Чистить
  * --- Constructors ---  
- * static FingerPrint() - initialyze static Dictionary Sections for RecognizeSection
+ ---* static FingerPrint() - initialyze static Dictionary Sections for RecognizeSection
  * public FingerPrint(type, str)            - initialyze FP of all types, but Components (constructor 1)
  * public FingerPrint(str, csFP, ref flag)  - initialyze FP for Component; return flag=true if OK (constructor 2)
  * ----- Methods: -----
  * - FP1.Equals.FP2 - FP1 and FP2 have same FP or, at least one of them (Rule) is in match with another
  *    --- miscelleneous ---
- * - getPar(str, ref startIndex)            - return parametr string in {..}, shift startIndex after }
+ * - getPar(str, ref startIndex, out bool isBrackets) - return parametr string in {..}, or string value
  * - getParType(str)                        - return enum {string, double, int} type of parametr sting
  * - RecognyseSection(string str)           - return enum Section, which matches to str
  * - synParser(string tx, ref int iTx)      - return synonym, ended with = from tx, starting from iTx char
@@ -54,61 +56,63 @@ namespace TSmatch.FingerPrint
         public static readonly ILog log = LogManager.GetLogger("FingerPrint");
 
         public enum type { Rule, CompSet, Component }
-        static Dictionary<string, List<string>> Sections = new Dictionary<string, List<string>>();
 
         public readonly type typeFP;
-        public readonly Section section;
+        public readonly Section.Section section;
         public readonly List<string> txs = new List<string>();
         public readonly List<object> pars = new List<object>();
         public readonly List<string> synonyms = new List<string>();
 
-        static FingerPrint()
-        {
-            //-- Columns in "TSmatch.xlsc/Constants/TabSynonyn"
-            const int SECTION_NAME = 1;
-            const int SECTION_DEF  = 2;
-            const int SECTION_DESCR= 3; //this colunn used as a comment only
-            const int SECTION_SYNS = 4;
-
-            Mtr rawTab = FileOp.getRange("TabSynonym");
-            for (int i=1; i<=rawTab.iEOL(); i++)
-            {
-                string sectionHdr = rawTab.Strng(i, SECTION_NAME);
-                string[] synonymsRaw = rawTab.Strng(i, SECTION_SYNS).Split(',');
-                List<string> synonym = new List<string>();
-                synonym.Add(Lib.ToLat(rawTab.Strng(i, SECTION_DEF).ToLower()));
-                foreach (string syn in synonymsRaw)
-                    synonym.Add(Lib.ToLat(syn).ToLower().Trim());
-                Sections.Add(sectionHdr, synonym);
-            }
-        }
         public FingerPrint(type _type, string str)
         {
-            str = Lib.ToLat(str.Replace(";", "")).ToLower();
             typeFP = _type;
-            section = (Section)RecognyseSection(str);
-            int ind = str.IndexOf(':') + 1;
-            string sectionBody = str.Substring(ind).Trim();
-            while(ind < str.Length)
+            section = new Section.Section(str);
+            if (typeFP.Equals(type.Rule)) { pars.Add(section.body); return; }
+            int ind = 0;           
+            while(ind < section.body.Length)
             {
-                int iStart = ind, lng;
+                int iStart = ind, lng = 0;
                 bool isBrackets;
-                string par = getPar(str, ref ind, out isBrackets);
+                string par = getPar(section.body, ref ind, out isBrackets);
                 if (isBrackets && par.Length > 0)
                 {
-//                    if (isBrackets && typeFP == type.Component) Msg.F("FP TMP unexpected {}");
-                    if (typeFP == type.CompSet) pars.Add(Lib.ToInt(par));
-                    else pars.Add(par);
-                    lng = ind - iStart - par.Length - 2;
+                    ////////////if (typeFP == type.CompSet) pars.Add(Lib.ToInt(par));
+                    // 9.3.17 //else pars.Add(par);
+                    ////////////lng = ind - iStart - par.Length - 2;
+                    pars.Add(Lib.ToInt(par));
                 }
-                else lng = str.Length - iStart;
-                string tx = str.Substring(iStart, lng).Trim();
+                //////////////else lng = str.Length - iStart;
+                //////////////string tx = str.Substring(iStart, lng).Trim();
+                else lng = section.body.Length - ind;
+                string tx = section.body.Substring(ind, lng).Trim();
                 int iTx = 0;
                 while (isSynonym(tx, iTx)) synonyms.Add(synParser(tx, ref iTx));
                 txs.Add(tx.Substring(iTx));
             }
         }
 
+        //////////////public FingerPrint(Section sec, string ruleText, CompSet.CompSet cs, out bool flag)
+        //////////////{
+        //////////////    flag = true;
+        //////////////}
+        /// <summary>
+        /// ReverseFormat(str, template) - get fragmants os str where * wildcards are
+        ///     into List<string> result -- idea from stackowerflow.com
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="template"></param>
+        /// <returns></returns>
+        private static List<string> ReverseFomat(string str, string template)
+        {
+            List<string> parameters = new List<string>();
+            string pattern = "^" + template.Replace("*", @"(.*?)") + "$";
+            Match m = Regex.Match(str, pattern);
+            for (int i = 1; i < m.Groups.Count; i++)
+            {
+                parameters.Add(m.Groups[i].Value);
+            }
+            return parameters;
+        }
         /// <summary>
         /// FingerPrint(str, FP csFP, ref flag) -- FP constructor- specially for Component
         /// </summary>
@@ -120,30 +124,88 @@ namespace TSmatch.FingerPrint
         /// - quantity of tx in txs is always pars.Count (may be +1)
         /// - 
         /// </note>
-        public FingerPrint(string str, List<FingerPrint> csFPs, ref bool flag)
+            //////////////////public FingerPrint(string str, List<FingerPrint> csFPs, ref bool flag)
+            //////////////////{
+            //////////////////    typeFP = type.Component;
+            //////////////////    flag = false;
+            //////////////////    str = Lib.ToLat(str).ToLower();
+            //////////////////    section = (Section)RecognyseSection(str);
+            //////////////////    FingerPrint csFP = csFPs.Find(x => x.section == section);
+            //////////////////    if (csFP == null) Msg.F("No Section \"" + section + " in csFPs");
+            //////////////////    int ind = str.IndexOf(':') + 1;
+            //////////////////    foreach (var tx in csFP.txs)
+            //////////////////    {
+            //////////////////        int lng = Math.Min(str.Length, tx.Length);
+            /// 28/2/2017 ////        while (string.IsNullOrWhiteSpace(str[ind].ToString())) ind++;
+            //////////////////        string s_str = str.Substring(ind, lng);
+            //////////////////        string s_tx  = tx.Substring(0, lng);
+            //////////////////        if (!isMatchStr(s_str, s_tx)) return;   //по несоответствию tx надо разбираться с синонимами - потом
+            //////////////////        flag = true;
+            //////////////////        txs.Add(s_tx);
+            //////////////////        ind += tx.Length;
+            //////////////////        bool isBrackets;
+            //////////////////        string par = getPar(str, ref ind, out isBrackets);
+            //////////////////        pars.Add(par);
+            //////////////////        // 27/02 //                if (isBrackets) pars.Add(par); else txs.Add(par);
+            //////////////////    }
+            //////////////////}
+
+        public FingerPrint(string str, FingerPrint csFP, out bool flag)
         {
-            typeFP = type.Component;
             flag = false;
+            typeFP = type.Component;
+            if (string.IsNullOrEmpty(str) || csFP == null) return;
+            section = csFP.section;
             str = Lib.ToLat(str).ToLower();
-            section = (Section)RecognyseSection(str);
-            FingerPrint csFP = csFPs.Find(x => x.section == section);
-            if (csFP == null) Msg.F("No Section \"" + section + " in csFPs");
-            int ind = str.IndexOf(':') + 1;
-            foreach (var tx in csFP.txs)
+            int ind = 0;
+            foreach (string tx in csFP.txs)
             {
                 int lng = Math.Min(str.Length, tx.Length);
                 while (string.IsNullOrWhiteSpace(str[ind].ToString())) ind++;
                 string s_str = str.Substring(ind, lng);
-                string s_tx  = tx.Substring(0, lng);
+                string s_tx = tx.Substring(0, lng);
                 if (!isMatchStr(s_str, s_tx)) return;   //по несоответствию tx надо разбираться с синонимами - потом
                 flag = true;
+                ind += lng;         //если в str больше одного параметра - будут проблемы!!
+                pars.Add(str.Substring(ind));
                 txs.Add(s_tx);
-                ind += tx.Length;
-                bool isBrackets;
-                string par = getPar(str, ref ind, out isBrackets);
-                pars.Add(par);
-                // 27/02 //                if (isBrackets) pars.Add(par); else txs.Add(par);
             }
+        }
+
+        /// <summary>
+        /// FingerPrint() - for call this class only
+        /// </summary>
+        public FingerPrint() {}
+
+        public bool Equals(FingerPrint other)
+        {
+            bool ok = false;
+            if (this == other) return true;
+            if (this == null || other == null) return false;
+            ok = EqLst(txs, other.txs) 
+                && EqLst(synonyms, other.synonyms) 
+                && EqLst(pars, other.pars);
+            return ok;
+        }
+
+        private bool EqLst(List<object> pars1, List<object> pars2)
+        {
+            int lng = Math.Min(pars1.Count, pars2.Count);
+            for(int i=0; i<lng; i++)
+            {
+                if (pars1[i].ToString() != pars2[i].ToString()) return false;
+            }
+            return true;
+        }
+
+        bool EqLst(List<string> str1, List<string> str2)
+        {
+            int lng = Math.Min(str1.Count, str2.Count);
+            for (int i = 0; i < lng; i++)
+            {
+                if (str1[i].ToString() != str2[i].ToString()) return false;
+            }
+            return true;
         }
 
         private string getPar(string str, ref int startIndex, out bool isBrackets)
@@ -181,25 +243,6 @@ namespace TSmatch.FingerPrint
                 case 'i': result = ParType.Integer; break;
             }
             return result;
-        }
-
-        public enum Section
-        {
-            Material, Profile, Description, Price,
-            Use, Unit, WeightPerUnit, LengthPerUnit, VolPerUnit
-        }
-        public Section? RecognyseSection(string str)  
-        {
-            foreach (Section sec in Enum.GetValues(typeof(Section)))
-            {
-                List<string> synonyms = Sections[sec.ToString()].ToList();
-                foreach (string syn in synonyms)
-                {
-                    if (Regex.IsMatch(str, syn + ".*?:", RegexOptions.IgnoreCase)) return sec;
-                }
-            }
-            Msg.F("Section Not Recorgized", str);
-            return null;
         }
 
         private string synParser(string tx, ref int iTx)
@@ -244,27 +287,6 @@ namespace TSmatch.FingerPrint
             return result;
         }
 
-        //TODO 10.1.17 переписать!
-        public bool Equals(FingerPrint other)
-        {
-            bool ok = false;
-            if (this == other) return true;
-            if (this == null || other == null) return false;
-//!!            ok = EqLst(txs, other.txs) && EqLst(synonyms, other.synonyms);
-            
-            return ok;
-        }
-
-        bool EqLst(List<object> str1, List<object> str2)
-        {
-            int lng = Math.Min(str1.Count, str2.Count);
-            for (int i = 0; i < lng; i++)
-            {
-                if (str1[i].ToString() != str2[i].ToString()) return false;
-            }
-            return true;
-        } 
-
         internal string Info()
         {
             string result = "FP.Info: " + typeFP.ToString();
@@ -303,15 +325,22 @@ namespace TSmatch.FingerPrint
         internal static void testFP()
         {
             Log.set("testFP");
-            FingerPrint fp = new FingerPrint(type.Rule, "M:");
+            FingerPrint fp = new FingerPrint();
+            //-- Main constructors test:
+            testFP_constuctor1(fp); // Rule and CompSet test
+            testFP_constuctor2(fp); // Component test
+
+            //-- Equal test
+            testFP_Equals(fp);
+            testFP_testEqLst(fp);
+
+            //-- other FP servise methods 
+//7/3            testFP_RecognizeSection(fp);
             testFP_Int_Col();
             testFP_getPar(fp);
             testFP_isMatchStr(fp);
             testFP_synonym(fp);
-            testFP_constuctor1(fp);
-            testFP_constuctor2(fp);
-            testFP_testEqLst(fp);
-            testFP_Equals(fp);
+
             Log.exit();
         }
 
@@ -334,8 +363,8 @@ namespace TSmatch.FingerPrint
         {
             Log.set("testFP_testEqLst");
 
-            List<object> str1 = new List<object>();
-            List<object> str2 = new List<object>();
+            List<string> str1 = new List<string>();
+            List<string> str2 = new List<string>();
             str1.Add("A"); str1.Add("B");
             str2.Add("A"); str2.Add("B"); str2.Add("C");
 
@@ -355,13 +384,13 @@ namespace TSmatch.FingerPrint
             str2.Add("X");
             TST.Eq(fp.EqLst(str1, str2), false);
 
-            str1.Clear(); str2.Clear();
-            str1.Add(1); str2.Add("1");
-            TST.Eq(fp.EqLst(str1, str2), true);
-            str1.Add(2.58); str2.Add("2,58");
-            string z1 = str1[1].ToString();
-            string z2 = str2[1].ToString();
-            TST.Eq(fp.EqLst(str1, str2), true);
+            //-- test with int and double elements
+            List<object> p1 = new List<object>();
+            List<object> p2 = new List<object>();
+            p1.Add(1); p2.Add("1");
+            TST.Eq(fp.EqLst(p1, p2), true);
+            p1.Add(2.58); p2.Add("2,58");
+            TST.Eq(fp.EqLst(p1, p2), true);
 
             Log.exit();
         }
@@ -369,40 +398,64 @@ namespace TSmatch.FingerPrint
         private static void testFP_constuctor1(FingerPrint fp)
         {
             Log.set("testFP_constructor1");
+            //-- Rule tests
+            Log.set(" * тест: Уголок constructor1 FP(type.Rule, Проф: L * x *)");
+            FingerPrint xr2 = new FingerPrint(type.Rule, "Проф: L * x *");
+            TST.Eq(xr2.section.type.ToString(), "Profile");
+            TST.Eq(xr2.pars.Count, 1);
+            TST.Eq(xr2.pars[0].ToString(), "l*x*");
+            TST.Eq(xr2.txs.Count, 0);
+            Log.exit();
 
-            FingerPrint xr2 = new FingerPrint(type.Rule, "Проф: L{сторона1}x{сторона2}x{длина} сварной");
-            TST.Eq(xr2.section, "Profile");
-            TST.Eq(xr2.pars.Count, 3);
-            TST.Eq(xr2.txs.Count, 4);
-            TST.Eq(xr2.txs[3], Lib.ToLat("сварной"));
+            // Уголок с материалом
+            Log.set(" * тест: Уголок constructor1 FP(type.Rule, Проф: L * x * cт *)");
+            xr2 = new FingerPrint(type.Rule, "Проф: L * x * cт *");
+            TST.Eq(xr2.section.type.ToString(), "Profile");
+            TST.Eq(xr2.pars.Count, 1);
+            TST.Eq(xr2.pars[0].ToString(), "l*x*cт*");
+            TST.Eq(xr2.txs.Count, 0);
+            Log.exit();
 
-            FingerPrint rule = new FingerPrint(type.Rule, "M:B{класс бетона};");
+            // Rule 4 из TSmatch.xlsx/Rules
+            Rule.Rule r = new Rule.Rule(4);
+            Log.set(" * тест: Уголок по Rules 4:" + r.text);
+            string[] sections = r.text.Split(';');
+            xr2 = new FingerPrint(type.Rule, sections[0]);  // Профиль
+            TST.Eq(xr2.section.type.ToString(), "Profile");
+            TST.Eq(xr2.pars.Count, 1);
+            TST.Eq(xr2.pars[0].ToString(), "l*x*cт*");
+            TST.Eq(xr2.txs.Count, 0);
+            FingerPrint xrLng = new FingerPrint(type.Rule, sections[1]);    // длина м
+            TST.Eq(xrLng.pars.Count, 1);
+            TST.Eq(xrLng.section.type.ToString(), "LengthPerUnit");
+            FingerPrint xrMat = new FingerPrint(type.Rule, sections[2]);    // Материал
+            TST.Eq(xrMat.section.type.ToString(), "Material");
+            Log.exit();
+
+            // Бетон - монолит
+            Log.set(" * тест: Бетон -монолит constructor1 FP(type.Rule, М:В*)");
+            FingerPrint rule = new FingerPrint(type.Rule, "M:B*;");
             TST.Eq(rule.pars.Count, 1);
             TST.Eq(rule.typeFP, "Rule");
-            TST.Eq(rule.section.ToString(), "Material");
-            TST.Eq(rule.pars[0], Lib.ToLat("класс бетона"));
-            TST.Eq(rule.txs.Count, 1);
-            TST.Eq(rule.txs[0], "b");
-
-            xr2 = new FingerPrint(type.Rule, "M:B12,5");
-            TST.Eq(xr2.section.ToString(), "Material");
-            TST.Eq(xr2.pars.Count, 0);
-            TST.Eq(xr2.txs.Count, 1);
-            TST.Eq(xr2.txs[0].ToString(), "b12,5");
+            TST.Eq(rule.section.type.ToString(), "Material");
+            TST.Eq(rule.pars[0], "b*");
+            TST.Eq(rule.txs.Count, 0);
+            Log.exit();
 
             xr2 = new FingerPrint(type.Rule, "Профиль:");
-            TST.Eq(xr2.section.ToString(), "Profile");
+            TST.Eq(xr2.section.type.ToString(), "Profile");
 
             FingerPrint xr1 = new FingerPrint(type.CompSet, "Описание: {3}");
             TST.Eq(xr1.pars.Count, 1);
             TST.Eq(xr1.typeFP, "CompSet");
-            TST.Eq(xr1.section, "Description");
+            TST.Eq(xr1.section.type.ToString(), "Description");
             TST.Eq(xr1.Col(), 3);
 
+            //-- CompSet tests
             xr1 = new FingerPrint(type.CompSet, "Цена: {4} если нет другого материала в описании");
             TST.Eq(xr1.pars.Count, 1);
             TST.Eq(xr1.typeFP, "CompSet");
-            TST.Eq(xr1.section.ToString(), "Price");
+            TST.Eq(xr1.section.type.ToString(), "Price");
             TST.Eq(xr1.Col(), 4);
             TST.Eq(xr1.txs.Count, 2);
             TST.Eq(xr1.txs[0], "");
@@ -415,7 +468,7 @@ namespace TSmatch.FingerPrint
             TST.Eq(xr1.txs.Count, 4);
             TST.Eq(xr1.txs[3], "%");
             TST.Eq(xr1.typeFP, "CompSet");
-            TST.Eq(xr1.section.ToString(), "Price");
+            TST.Eq(xr1.section.type.ToString(), "Price");
             TST.Eq(xr1.Col(), 4);
 
             Log.exit();
@@ -433,11 +486,18 @@ namespace TSmatch.FingerPrint
             List<FingerPrint> csFPs = new List<FingerPrint>();
             csFPs.Add(csMonolit);
             bool flag = false;
-//13/2            FingerPrint comp = new FingerPrint("В12,5", csMonolit, ref flag);
-            FingerPrint comp = new FingerPrint("M:В12,5", csFPs, ref flag);
+            FingerPrint comp = new FingerPrint("В12,5", csMonolit, out flag);
             TST.Eq(flag, true);
             TST.Eq(comp.pars.Count, 1);
             TST.Eq(comp.pars[0], "12,5");
+
+            comp = new FingerPrint("", csMonolit, out flag);
+            TST.Eq(flag, false);
+
+            string sL = "Угoлoк cтaльнoй paвнoпoл. 100 x 8 cт3cп / пc5";
+            Docs doc = Docs.getDoc("Уголок Стальхолдинг");
+            FingerPrint csAngle = new FingerPrint(type.CompSet, doc.LoadDescription);
+            comp = new FingerPrint(sL, csAngle, out flag);
 
             //////////////////string sL = "Профиль: L=Уголок*{1}x{2}{материал уголков};";
             //////////////////FingerPrint LoadDescriptor = new FingerPrint(type.CompSet, sL);

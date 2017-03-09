@@ -563,11 +563,31 @@ namespace TSmatch.Model
                 foreach (var rule in Rules)
                 {
                     Matcher.Mtch _match = new Matcher.Mtch(gr, rule);
-                    if (_match.ok) matches.Add(_match);
+                    if (_match.ok == Mtch.OK.Match) matches.Add(_match);
+                    else log.Info("No Match Group. Material = " + gr.mat);
                 }
             }
             getSuppliers();
+            getPricing();
         }
+
+        private void getPricing()
+        {
+            Log.set("Models.getPricing()");
+            foreach(var mgr in elmMgroups)
+            {
+                foreach(string id in mgr.guids)
+                {
+                    mgr.totalPrice += Elm.Elements[id].price;
+                }
+            }
+            foreach(var elm in ElmAttSet.ElmAttSet.Elements)
+            {
+
+            }
+            Log.exit();
+        }
+
         /// <summary>
         /// getGroups() - groupping of elements of Model by Material and Profile
         /// </summary>

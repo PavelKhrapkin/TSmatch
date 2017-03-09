@@ -247,7 +247,7 @@ namespace TSmatch.ElmAttSet
         public readonly List<string> guids;
         public readonly double totalWeight;
         public readonly double totalVolume;
-        public readonly double totalPrice;
+        public double totalPrice;
 
         public Mgroup(Dictionary<string, ElmAttSet> Els, string material, List<string> guids)
         {
@@ -279,6 +279,15 @@ namespace TSmatch.ElmAttSet
             return mat.CompareTo(mgr.mat);
         }
 
+        ////////public double setMgrPrice(List<ElmAttSet> Els, List<string> guids)
+        ////////{
+        ////////    totalPrice = 0;
+        ////////    foreach (string id in guids)
+        ////////    {
+        ////////        totalPrice += Els[id].;
+        ////////    }
+        ////////    return totalPrice;
+        ////////}
         ////internal class Build : Mgroup
         ////{
         ////    private List<ElmAttSet> elements;
@@ -309,6 +318,7 @@ namespace TSmatch.ElmAttSet
             totalLength = totalWeight = totalVolume = totalPrice = 0.0;
             foreach(var id in guids)
             {
+                if (Els[id].mat != mat) continue;
                 totalLength += Els[id].length;
                 totalVolume += Els[id].volume;
                 totalWeight += Els[id].weight;

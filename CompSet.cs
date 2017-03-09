@@ -81,7 +81,7 @@ namespace TSmatch.CompSet
             csFPs = _rule.Parser(FP.type.CompSet, doc.LoadDescription);
             for (int i=doc.i0; i < doc.il; i++)
             {
-                Component.Component comp = new Component.Component(doc, i, csFPs, _rule.ruleFPs);
+                Component.Component comp = new Component.Component(doc, i, csFPs);
                 Components.Add(comp);
             }
         }

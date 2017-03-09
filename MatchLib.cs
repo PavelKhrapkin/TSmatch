@@ -303,6 +303,7 @@ namespace match.Lib
         {
             const string cyr = "АВЕКМНОРСТХаеорсух";
             const string lat = "ABEKMHOPCTXaeopcyx";
+            if (string.IsNullOrEmpty(str)) return str;
             string lt = "";
             foreach (var s in str)
             {

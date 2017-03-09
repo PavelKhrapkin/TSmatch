@@ -160,7 +160,7 @@ namespace TSmatch.Rule
         /// 30.12.16 написать полный разбор Секции
         /// 11.01.17 replace cols with real pars handling for pars.count != 1
         /// </ToDo>
-        internal List<FP> Parser(FP.type _type, string text) //, string[,]sectionRegs)  //List<string> ruleSectionRegs)
+        internal List<FP> Parser(FP.type _type, string text)
         {
             Log.set("Rule.Parser(" + _type + ", " + text + ", sectionReg)");
             List<FP> result = new List<FP>();

@@ -16,18 +16,28 @@ namespace TSmatch.Test
     [TestClass]
     class Test
     {
-        [TestMethod]
-// 26/2 //        public static readonly ILog log = LogManager.GetLogger("TEST");
+//28/02        [TestMethod]
+        public static readonly ILog log = LogManager.GetLogger("TEST");
 
         public static void TSmatchTEST()
         {
-// 26/2 //            log.Info("\n\n-------------- TSmatch TEST track v2017.01.24 --------");
-// 24/1 //            var bootstrap = new Bootstrap.Bootstrap();
+            log.Info("\n\n-------------- TSmatch TEST track v2017.03.7 --------");
+            // 24/1 //            var bootstrap = new Bootstrap.Bootstrap();
+            Section.Section.testSection();
+            log.Info("Test Section\t\t\tOK");
+
+            Parameter.Parameter.testParameter();
+            log.Info("Test Parameter\t\tOK");
+
             FP.testFP();
-// 26/2 //            log.Info("Test FingerPrint\t\tOK");
+            log.Info("Test FingerPrint\t\tOK");
 
             Component.Component.testComponent();
-// 26/2 //            log.Info("Test Components\t\tOK");
+            log.Info("Test Components\t\tOK");
+
+            Matcher.Mtch.testMtch();
+            log.Info("Test Matcher\t\t\tOK");
+
         }
     }
 

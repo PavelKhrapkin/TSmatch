@@ -130,42 +130,32 @@
     </Entities>
     <Relationships>
       <Relationship type="Dependency" first="4" second="1">
-        <Label>
-        </Label>
         <StartOrientation>Horizontal</StartOrientation>
         <EndOrientation>Horizontal</EndOrientation>
       </Relationship>
       <Relationship type="Dependency" first="4" second="5">
-        <Label>
-        </Label>
         <StartOrientation>Horizontal</StartOrientation>
         <EndOrientation>Horizontal</EndOrientation>
       </Relationship>
       <Relationship type="Dependency" first="4" second="0">
-        <Label>
-        </Label>
         <StartOrientation>Vertical</StartOrientation>
         <EndOrientation>Vertical</EndOrientation>
       </Relationship>
       <Relationship type="Dependency" first="4" second="6">
-        <Label>
-        </Label>
         <StartOrientation>Vertical</StartOrientation>
         <EndOrientation>Vertical</EndOrientation>
       </Relationship>
       <Relationship type="Dependency" first="4" second="7">
-        <Label>
-        </Label>
         <StartOrientation>Vertical</StartOrientation>
         <EndOrientation>Vertical</EndOrientation>
       </Relationship>
       <Relationship type="Dependency" first="4" second="8">
-        <Label>
-        </Label>
         <StartOrientation>Vertical</StartOrientation>
         <EndOrientation>Vertical</EndOrientation>
       </Relationship>
       <Relationship type="Dependency" first="4" second="11">
+        <Label>
+        </Label>
         <StartOrientation>Horizontal</StartOrientation>
         <EndOrientation>Horizontal</EndOrientation>
       </Relationship>
@@ -276,6 +266,8 @@
     </Entities>
     <Relationships>
       <Relationship type="Association" first="0" second="1">
+        <Label>
+        </Label>
         <StartOrientation>Horizontal</StartOrientation>
         <EndOrientation>Horizontal</EndOrientation>
         <Direction>Unidirectional</Direction>
@@ -284,6 +276,8 @@
         <EndMultiplicity>0..*</EndMultiplicity>
       </Relationship>
       <Relationship type="Association" first="1" second="3">
+        <Label>
+        </Label>
         <StartOrientation>Horizontal</StartOrientation>
         <EndOrientation>Horizontal</EndOrientation>
         <Direction>Unidirectional</Direction>
@@ -292,6 +286,8 @@
         <EndMultiplicity>1</EndMultiplicity>
       </Relationship>
       <Relationship type="Association" first="3" second="4">
+        <Label>
+        </Label>
         <StartOrientation>Vertical</StartOrientation>
         <EndOrientation>Vertical</EndOrientation>
         <Direction>Unidirectional</Direction>
@@ -300,6 +296,8 @@
         <EndMultiplicity>0..*</EndMultiplicity>
       </Relationship>
       <Relationship type="Association" first="3" second="2">
+        <Label>
+        </Label>
         <StartOrientation>Vertical</StartOrientation>
         <EndOrientation>Vertical</EndOrientation>
         <Direction>Unidirectional</Direction>
@@ -309,8 +307,6 @@
         <EndMultiplicity>0..*</EndMultiplicity>
       </Relationship>
       <Relationship type="Dependency" first="3" second="2">
-        <Label>
-        </Label>
         <StartOrientation>Vertical</StartOrientation>
         <EndOrientation>Vertical</EndOrientation>
       </Relationship>
@@ -439,12 +435,12 @@
     </Entities>
     <Relationships>
       <Relationship type="Dependency" first="3" second="0">
-        <Label>
-        </Label>
         <StartOrientation>Horizontal</StartOrientation>
         <EndOrientation>Horizontal</EndOrientation>
       </Relationship>
       <Relationship type="Association" first="0" second="2">
+        <Label>
+        </Label>
         <StartOrientation>Horizontal</StartOrientation>
         <EndOrientation>Horizontal</EndOrientation>
         <Direction>Unidirectional</Direction>
@@ -453,6 +449,8 @@
         <EndMultiplicity>0..*</EndMultiplicity>
       </Relationship>
       <Relationship type="Association" first="2" second="5">
+        <Label>
+        </Label>
         <StartOrientation>Horizontal</StartOrientation>
         <EndOrientation>Horizontal</EndOrientation>
         <Direction>Unidirectional</Direction>
@@ -461,6 +459,8 @@
         <EndMultiplicity>1</EndMultiplicity>
       </Relationship>
       <Relationship type="Association" first="6" second="1">
+        <Label>
+        </Label>
         <StartOrientation>Horizontal</StartOrientation>
         <EndOrientation>Horizontal</EndOrientation>
         <Direction>Unidirectional</Direction>
@@ -479,6 +479,8 @@
         <EndMultiplicity>1</EndMultiplicity>
       </Relationship>
       <Relationship type="Association" first="5" second="6">
+        <Label>
+        </Label>
         <StartOrientation>Vertical</StartOrientation>
         <EndOrientation>Vertical</EndOrientation>
         <Direction>Unidirectional</Direction>
@@ -493,31 +495,34 @@
     <Language>CSharp</Language>
     <Entities>
       <Entity type="Comment">
-        <Text>27.02.2017
+        <Text>7.03.2017
 Pavel Khrapkin</Text>
-        <Location left="12" top="21" />
+        <Location left="12" top="10" />
         <Size width="97" height="50" />
       </Entity>
       <Entity type="Class">
         <Name>FingerPrint</Name>
         <Access>Public</Access>
-        <Location left="12" top="73" />
-        <Size width="440" height="366" />
+        <Location left="12" top="70" />
+        <Size width="440" height="434" />
         <Collapsed>False</Collapsed>
         <Member type="Field">public readonly type typeFP</Member>
         <Member type="Field">public readonly Section section</Member>
         <Member type="Field">public readonly List&lt;string&gt; txs</Member>
         <Member type="Field">public readonly List&lt;object&gt; pars</Member>
         <Member type="Field">public readonly List&lt;string&gt; synonyms</Member>
+        <Member type="Constructor">public FingerPrint()</Member>
         <Member type="Constructor">static FingerPrint()</Member>
-        <Member type="Constructor">public FingerPrint(type _type, string str, Section? _section = null, FingerPrint ruleFP = null)</Member>
-        <Member type="Constructor">public FingerPrint(string str, FingerPrint csFP)</Member>
+        <Member type="Constructor">public FingerPrint(type _type, string str)</Member>
+        <Member type="Constructor">public FingerPrint(string str, FingerPrint csFP, out bool flag)</Member>
         <Member type="Method">public bool Equals(FingerPrint other)</Member>
+        <Member type="Method">private bool EqLst(List &lt;object&gt; str1, List&lt;object&gt; str2)</Member>
         <Member type="Method">private string getPar(string str, ref int startIndex, out bool isBrackets)</Member>
         <Member type="Method">private ParType getParType(string str, ref int ind)</Member>
-        <Member type="Method">private bool isSynonym(string tx, int iTx)</Member>
         <Member type="Method">private string synParser(string tx, ref int iTx)</Member>
-        <Member type="Method">public Section recognizeSection(string str)</Member>
+        <Member type="Method">private bool isSynonym(string tx, int iTx)</Member>
+        <Member type="Method">private bool isMatchStr(string str1, string str2)</Member>
+        <Member type="Method">private string synParser(string tx, ref int iTx)</Member>
         <Member type="Method">internal int Int(int parNumber = 0)</Member>
         <Member type="Method">internal int Col(int parNumber = 0)</Member>
         <Member type="Method">public string strINFO()</Member>
@@ -528,7 +533,9 @@ Pavel Khrapkin</Text>
  
 FP предназначен для идентификации экземпляров Components, ElmAttSet и т.п. по уникальным для этого экземпляра данным - параметрам (pars), фрагментам текста txs и отдельным вариантам альтернативных фрагментов текста synonym.
 - type - тип FP, его назначение:
-        - Rule - правила управляют созданием отчетов TSmatchINFO.xlsx/Report
+        - Rule - шаблон строки - компонента из прайс-листа и из модели САПР, вида
+                     "текст1 * текст2 * текст3". Значения текста, замещающего '*' попадает
+                     в параметры pars при работе конструктора. List txs - части шаблона
                      хранится в TSmatch.xlsx/Rules, инициализируется при выборе модели
         - CompSet = LoadDescriptor - описывает чтение прайс-листа в поля Component
                      хранится в TSmatch.xlsx/TOC в строке Докуметнта, инициализируется
@@ -538,12 +545,9 @@ FP предназначен для идентификации экземпляр
                      из Excel. Неподходящие по Rule строки игнорируются. FP cодержит
                      значения параметров, определенных в Rule, по которым происходит
                      идентификация (Equal) в Match 
-- Секции разделяются знаком ';'
-- Для каждой секции должен быть свой уникальный FP.
-- Секция имеет "заголовок", отделяемый от тела секции ':'
-- Заголовки секций распознаются, т.е. ставятся в соответствие с enum Section,
-  по таблице в Named Range, которая хранится в   TSmatch.xlsx/Constant/TabSynonyms
-- текст секции всегда переводится Lib.ToLat() и string.Upper()
+
+
+?????????????????????????????????????????
 - в теле секции есть "параметры", т.е. конструкции вида {.*?}
         - для Rule в {} - имена параметров,
         - для CompSet и LoadDescriptor - номера колонок прайс- листа
@@ -554,7 +558,7 @@ FP предназначен для идентификации экземпляр
               {i~9}  - integer параметр в колонке 9 
 - "синонимы", т.е. фрагмента текста с предшествующими знаками '=' или ',' и 
 - остальныме фрагменты текста, собираемые в List&lt;string&gt;txs служат шаблоном</Text>
-        <Location left="473" top="21" />
+        <Location left="473" top="10" />
         <Size width="467" height="452" />
       </Entity>
       <Entity type="Comment">
@@ -585,26 +589,14 @@ FP предназначен для идентификации экземпляр
 
 - &lt;ToDo&gt; 2017.1.25 - переписать и оттестировать Equals
 
--- &lt;ToDo&gt; 2017.1.29 - заново осмыслить роль и применение RuleFP В частности, что делать с FP=NULL? По требованию Equals = FALSE, а мне надо "годятся все"
-
---&lt;ToDo&gt; 2017.2.7 - изменить интерфейс конструртора2 на с FP csFP на List&lt;FP&gt;csFPs
-- исправить NClass
-- внести изменения в
-     - FingerPrint стр36,
-     - Component стр.33,
-     - Matcher стр.36
-- проверить тесты
-ISSUE:  Str="M:B12,2" - параметр не распознается
-
--&lt;ToDo&gt; 2017.02.27 по-прежнему отладка FP с бетоном и уголками
-- getPar(str, ref int startIndex, out bool isBrackets) - отладка и тестирование</Text>
-        <Location left="954" top="401" />
-        <Size width="466" height="307" />
+-- &lt;ToDo&gt; 2017.1.29 - заново осмыслить роль и применение RuleFP В частности, что делать с FP=NULL? По требованию Equals = FALSE, а мне надо "годятся все"</Text>
+        <Location left="954" top="451" />
+        <Size width="451" height="257" />
       </Entity>
       <Entity type="Enum">
         <Name>Section</Name>
         <Access>Public</Access>
-        <Location left="241" top="459" />
+        <Location left="235" top="509" />
         <Size width="162" height="214" />
         <Collapsed>False</Collapsed>
         <Value>Material</Value>
@@ -620,7 +612,7 @@ ISSUE:  Str="M:B12,2" - параметр не распознается
       <Entity type="Enum">
         <Name>type</Name>
         <Access>Public</Access>
-        <Location left="12" top="447" />
+        <Location left="12" top="497" />
         <Size width="162" height="113" />
         <Collapsed>False</Collapsed>
         <Value>Rule</Value>
@@ -631,6 +623,8 @@ ISSUE:  Str="M:B12,2" - параметр не распознается
         <Text>Tаким образом, все значения из прайс-листа сохраняются в List&lt;FP&gt;Component.FPs
 
 Следовательно, LoadDescriptor должен быть достаточно полным, чтобы обеспечить просмотр элементов модели САПР и выдачу отчета TSmatchINFO.xlsx/Report. Иначе в Match выводится сообщение об ошибке.
+
+Если конструируется FP от пустой строки прайс-листа или csFP==null, создается FP с pars.Count = txs.Count = 0
 
 Неясно, как разбирать конструкции вида Х*{i^5}.
 Например, "Уголок равнополочный 100 х 7" с LoadDescription  "Уголок*Х{i^3}" -- как получить параметр 100?
@@ -646,14 +640,15 @@ ISSUE:  Str="M:B12,2" - параметр не распознается
          TSmatchINFO.xlsx
 Пока предлагаю не использовать LoadDescriptor'ы вида X*{3}
 Тогда базы типа монолитного бетона просто считываются,
-а для металлопроката с несколькоми профилями можно будет  специально подготовить Excel-файлы прайс листов.</Text>
+а для металлопроката с несколькоми профилями можно будет  специально подготовить Excel-файлы прайс листов.
+</Text>
         <Location left="954" top="21" />
-        <Size width="451" height="373" />
+        <Size width="451" height="416" />
       </Entity>
       <Entity type="Enum">
         <Name>ParType</Name>
         <Access>Public</Access>
-        <Location left="12" top="571" />
+        <Location left="12" top="617" />
         <Size width="162" height="112" />
         <Collapsed>False</Collapsed>
         <Value>String</Value>
@@ -735,8 +730,6 @@ Pavel Khrapkin</Text>
     </Entities>
     <Relationships>
       <Relationship type="Association" first="1" second="4">
-        <Label>
-        </Label>
         <StartOrientation>Horizontal</StartOrientation>
         <EndOrientation>Horizontal</EndOrientation>
         <BendPoint relativeToStartShape="True">
@@ -749,8 +742,6 @@ Pavel Khrapkin</Text>
         <EndMultiplicity>1</EndMultiplicity>
       </Relationship>
       <Relationship type="Association" first="1" second="3">
-        <Label>
-        </Label>
         <StartOrientation>Horizontal</StartOrientation>
         <EndOrientation>Horizontal</EndOrientation>
         <BendPoint relativeToStartShape="True">
@@ -767,6 +758,8 @@ Pavel Khrapkin</Text>
         <EndMultiplicity>0..*</EndMultiplicity>
       </Relationship>
       <Relationship type="Association" first="2" second="1">
+        <Label>
+        </Label>
         <StartOrientation>Horizontal</StartOrientation>
         <EndOrientation>Horizontal</EndOrientation>
         <BendPoint relativeToStartShape="True">
@@ -781,5 +774,173 @@ Pavel Khrapkin</Text>
         <AssociationType>Composition</AssociationType>
       </Relationship>
     </Relationships>
+  </ProjectItem>
+  <ProjectItem type="NClass.DiagramEditor.ClassDiagram.Diagram" assembly="NClass.DiagramEditor, Version=2.4.1823.0, Culture=neutral, PublicKeyToken=null">
+    <Name>Components</Name>
+    <Language>CSharp</Language>
+    <Entities>
+      <Entity type="Comment">
+        <Text>28.02.2017
+Pavel Khrapkin</Text>
+        <Location left="16" top="10" />
+        <Size width="97" height="50" />
+      </Entity>
+      <Entity type="Class">
+        <Name>Component</Name>
+        <Access>Public</Access>
+        <Location left="16" top="75" />
+        <Size width="497" height="230" />
+        <Collapsed>False</Collapsed>
+        <Member type="Field">public readonly string description</Member>
+        <Member type="Field">public readonly string mat</Member>
+        <Member type="Field">public readonly double length</Member>
+        <Member type="Field">public readonly double weight_m</Member>
+        <Member type="Field">public readonly double? price</Member>
+        <Member type="Field">public readonly double vol_m</Member>
+        <Member type="Field">public readonly List&lt;FingerPrint&gt; fps</Member>
+        <Member type="Constructor">public Component(string _description, string _mat, double _length, double _weignt, double? price)</Member>
+        <Member type="Constructor">public Component(Doc doc, int i, List &lt;FingerPring&gt; cs_fps)</Member>
+        <Modifier>None</Modifier>
+      </Entity>
+      <Entity type="Comment">
+        <Text>- В классе Component нет поля Профиль, поскольку все данные для профиля беруться из description, и записываются в List&lt;FP&gt;fps с распределением по секциям &lt;материал&gt;, &lt;профиль&gt; и т.д.</Text>
+        <Location left="546" top="10" />
+        <Size width="380" height="75" />
+      </Entity>
+      <Entity type="Comment">
+        <Text>--&lt;ToDo&gt;2017.02.28 отлаживать конструктор Component
+- пришлось сделать свой конструктор FP для Component с csFP вместо List&lt;FP&gt;csFPs. Надо разобраться, нужен ли конструктор с сигнатурой List?-- НЕ НУЖЕН!! Отобразить это в NClass FP!
+</Text>
+        <Location left="546" top="131" />
+        <Size width="377" height="107" />
+      </Entity>
+    </Entities>
+    <Relationships />
+  </ProjectItem>
+  <ProjectItem type="NClass.DiagramEditor.ClassDiagram.Diagram" assembly="NClass.DiagramEditor, Version=2.4.1823.0, Culture=neutral, PublicKeyToken=null">
+    <Name>Matcher</Name>
+    <Language>CSharp</Language>
+    <Entities>
+      <Entity type="Comment">
+        <Text>7.03.2017
+Pavel Khrapkin</Text>
+        <Location left="10" top="12" />
+        <Size width="97" height="50" />
+      </Entity>
+      <Entity type="Class">
+        <Name>Mtch</Name>
+        <Access>Public</Access>
+        <Location left="10" top="82" />
+        <Size width="329" height="216" />
+        <Collapsed>False</Collapsed>
+        <Member type="Field">public OK ok = OK.NoMatch</Member>
+        <Member type="Field">public ElmAttSet.Group group = null</Member>
+        <Member type="Field">public Component comp = null</Member>
+        <Member type="Field">public Rule rule = null</Member>
+        <Member type="Field">public new double Qty = 0.0</Member>
+        <Member type="Field">public double price = 0</Member>
+        <Member type="Constructor">public Mtch(ElmEttSey.Group gr, Rule rule)</Member>
+        <Member type="Method">private bool isSectiomMatch(Section sec, string grPar, string text)</Member>
+        <Modifier>None</Modifier>
+      </Entity>
+      <Entity type="Comment">
+        <Text>Mtch - класс, используемый для выяснения соответствия - Match - группы элементов некоторому компоненту из прайс-листа. 
+
+По результатам перебора компонентов:
+    - Mtch.ok == OK.Match         - соответствие установленно, компонент найден
+    - Mtch.ok == OK.NoMatch    - компонент не найден, соответствия по FP нет
+    - Mtch.ok == OK.NoSection  - CompSet не содержит секции Материал или Профиль.
+                                               Это значит - подходит любой компонент из прайс-листа
+    - Mtch.ok == OK.NoGroup   - нет элементов в проверяемой группе - gr.Count &lt; 1
+
+Для проверки соответствия между группой и компонентом, используется сравнение их FingerPrint, построенных для группы (fpGrMat и fpGrPrf) и для каждого компонента. При переборе компонентов нужны csFPmat и csFPprf, их берут из csFPs в соответствующих секциях. Если оба FP  - csFPmat и csFPprf отсутствуют - это фатальная ошибка в описании прайс-листа в LoadDescription.
+</Text>
+        <Location left="383" top="12" />
+        <Size width="475" height="238" />
+      </Entity>
+      <Entity type="Comment">
+        <Text>--&lt;ToDo&gt;2017.3.1 test Matcher
+
+--&lt;ToDo&gt;2017.03.2 добавить поле price в Mtch
+
+--&lt;ToDo&gt;2017.03.03 реализовать enum ok
+ВОЗМОЖНО (doubts):
+- вместо rule использовать CompSet. После отладки Mtch нужно посмотреть, везде ли используется образение _rele.CompSet; если везде - заменить на CompSet
+- нужна ли возможность OK.NoSectiom? Может быть из Mtch никогда не выходят с таким статусом, просто - OK.NoMatch ?
+
+--&lt;ToDo&gt; 2017.03.07 реализовать (переписать из существующего) isSectionMatch
+- удалить isRuleMatch()</Text>
+        <Location left="383" top="271" />
+        <Size width="486" height="208" />
+      </Entity>
+      <Entity type="Enum">
+        <Name>OK</Name>
+        <Access>Public</Access>
+        <Location left="10" top="318" />
+        <Size width="162" height="129" />
+        <Collapsed>False</Collapsed>
+        <Value>Match</Value>
+        <Value>NoMatch</Value>
+        <Value>NoSection</Value>
+        <Value>NoGroup</Value>
+      </Entity>
+    </Entities>
+    <Relationships />
+  </ProjectItem>
+  <ProjectItem type="NClass.DiagramEditor.ClassDiagram.Diagram" assembly="NClass.DiagramEditor, Version=2.4.1823.0, Culture=neutral, PublicKeyToken=null">
+    <Name>Section</Name>
+    <Language>CSharp</Language>
+    <Entities>
+      <Entity type="Comment">
+        <Text>7.03.2017
+Pavel Khrapkin</Text>
+        <Location left="20" top="21" />
+        <Size width="97" height="50" />
+      </Entity>
+      <Entity type="Class">
+        <Name>Section</Name>
+        <Access>Public</Access>
+        <Location left="20" top="99" />
+        <Size width="248" height="174" />
+        <Collapsed>False</Collapsed>
+        <Member type="Field">public Type type</Member>
+        <Member type="Field">public string body</Member>
+        <Member type="Field">static Dictionary&lt;string, List&lt;string&gt;&gt; Sections</Member>
+        <Member type="Constructor">static Section()</Member>
+        <Member type="Constructor">public Section(string str)</Member>
+        <Modifier>None</Modifier>
+      </Entity>
+      <Entity type="Comment">
+        <Text>Section - класс для работы с частями строки - секциями - нужными для Rules, прайс-листов и т.п.
+
+- Секции разделяются знаком ';'. Если в тексте несколько знаков ';',  обрабатывается только
+  текст до первой слева  ';', остальное игнорируется. При отсутствии ';' обрабатываем до конца строки
+- Секция имеет "заголовок", отделяемый от тела секции двоеточием  ':'
+- Заголовки секций распознаются  по таблице в Named Range, которая хранится в TSmatch.xlsx/Constant/TabSections.
+  Эту таблицу считывает в static Dectionary Sections статический конструктор при первом обращении к классу Section.
+  При этом распознование происходит по строкам- синонимам из таблицы и ставятся в соответствие с enum type.
+  Если секция не распознана, Section.type == NOT_DEFINED.
+- текст секции всегда переводится Lib.ToLat() и string.ToLower(). Пробелы удаляются;
+- Для каждой секции должен быть свой уникальный FP.</Text>
+        <Location left="347" top="21" />
+        <Size width="633" height="253" />
+      </Entity>
+      <Entity type="Enum">
+        <Name>Type</Name>
+        <Access>Public</Access>
+        <Location left="20" top="292" />
+        <Size width="162" height="197" />
+        <Collapsed>False</Collapsed>
+        <Value>Material</Value>
+        <Value>Profile</Value>
+        <Value>Price</Value>
+        <Value>Desctiption</Value>
+        <Value>LengthPerUnit</Value>
+        <Value>VolPerUnit</Value>
+        <Value>WeightPerUnit</Value>
+        <Value>NOT_DEFINED</Value>
+      </Entity>
+    </Entities>
+    <Relationships />
   </ProjectItem>
 </Project>
