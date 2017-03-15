@@ -13,11 +13,23 @@ using Docs = TSmatch.Document.Document;
 
 namespace TSmatch.Test
 {
-    [TestClass]
-    class Test
+    [TestClass()]
+    public class Test
     {
-//28/02        [TestMethod]
         public static readonly ILog log = LogManager.GetLogger("TEST");
+
+        [TestMethod()]
+        public void TSmatch_Test()
+        {
+            // arrange
+
+            // act
+
+            // assert
+            int i = 55;
+            Assert.AreEqual(i, 55);
+ //           Assert.Fail();
+        }
 
         public static void TSmatchTEST()
         {
@@ -32,8 +44,8 @@ namespace TSmatch.Test
             FP.testFP();
             log.Info("Test FingerPrint\t\tOK");
 
-            Component.Component.testComponent();
-            log.Info("Test Components\t\tOK");
+//13/3            Component.Component.testComponent();
+//13/3            log.Info("Test Components\t\tOK");
 
             Matcher.Mtch.testMtch();
             log.Info("Test Matcher\t\t\tOK");

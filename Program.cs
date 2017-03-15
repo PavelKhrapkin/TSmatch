@@ -24,7 +24,7 @@ namespace TSmatch
         [STAThread]
         static void Main(string[] args)
         {
-            Log.START("TSmatch v2017.01.24");
+            Log.START("TSmatch v2017.03.13");
             var bootstrap = new Bootstrap.Bootstrap();
             var model = (Model.Model) bootstrap.init(BootMode.Model);
 
@@ -34,7 +34,7 @@ namespace TSmatch
             model.Handler();
             model.Report();
 
-
+#region ----------- for future IFC testing ----------------
             //            model.Read("out.ifc");    // файл "out.ifc" создан Tekla Артемом Литвиновым только из стандартных элементов. IFC его не может прочитать
             //            model.Read("MyColumn.ifc");   // IFC не парсируется
             //--6.08.2016 model.Read("out.ifc")
@@ -47,8 +47,7 @@ namespace TSmatch
 
             //6/8/16            Mod mod = Mod.UpdateFrTekla();
             //            Mtch.UseRules(mod);
-            //            Console.ReadLine();
-
+#endregion 
             Console.ReadKey();
         }
     } // end class
