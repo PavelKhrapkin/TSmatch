@@ -562,7 +562,7 @@ namespace TSmatch.Model
             {
                 foreach (var rule in Rules)
                 {
-                    Matcher.Mtch _match = new Matcher.Mtch(gr, rule);
+                    Mtch _match = new Mtch(gr, rule);
                     if (_match.ok == Mtch.OK.Match) matches.Add(_match);
                     else log.Info("No Match Group. Material = " + gr.mat);
                 }

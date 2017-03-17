@@ -1,7 +1,7 @@
 ﻿/*----------------------------------------------------------------
  * Unit Test Module 
  *
- * 14.03.2017 Pavel Khrapkin
+ * 15.03.2017 Pavel Khrapkin
  *
  *--- History ---
  * 14.03.2017 Unit Test implemented
@@ -10,9 +10,11 @@
  * ---- Tested Modules: ------------
  * Parameter    2017.03.14 OK
  */
- using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+//using TSmatch.Matcher
 using UT_Par = TSmatch.Parameter.utp;
 using UT_Sec = TSmatch.Section.uts;
+//using UT_Mtch = TSmatch..
 using Lib = match.Lib.MatchLib;
 
 namespace TSmatch.Tests
@@ -79,10 +81,24 @@ namespace TSmatch.Tests
         [TestMethod()]
         public void UT_Section_Test()
         {
-            var uts = new UT_Sec("ff");
+            var u1 = new UT_Sec.ut_isSetionMatch(UT_Sec.Type.Material, "jhgjhg", "jhgjhg");
+
+//            var uts = new UT_Sec("ff");
             int i = 223;
             Assert.AreEqual(i, 223);
 //            Assert.Fail();
         }
     }
+
+ //////   [TestClass()]
+ //////   public class Matcher_Test
+ //////   {
+ //////       [TestMethod()]
+ //////       public void UT_Mtch_Test()
+ //////       {
+ //////           // arrange
+ //////           TSmatch.ElmAttSet.
+ ////////           vat mtch = new TSmatch.Rule
+ //////       }
+ //////   }
 }

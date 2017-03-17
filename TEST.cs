@@ -35,11 +35,11 @@ namespace TSmatch.Test
         {
             log.Info("\n\n-------------- TSmatch TEST track v2017.03.7 --------");
             // 24/1 //            var bootstrap = new Bootstrap.Bootstrap();
-            Section.Section.testSection();
-            log.Info("Test Section\t\t\tOK");
+            ////Section.Section.testSection();
+            ////log.Info("Test Section\t\t\tOK");
 
-            Parameter.Parameter.testParameter();
-            log.Info("Test Parameter\t\tOK");
+//15/3            Parameter.Parameter.testParameter();
+//15/3            log.Info("Test Parameter\t\tOK");
 
             FP.testFP();
             log.Info("Test FingerPrint\t\tOK");

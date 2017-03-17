@@ -86,6 +86,14 @@ namespace TSmatch.CompSet
             }
         }
 
+#if DEBUG
+        //this overload for Unit Test purpases only
+        public CompSet(List<Component.Component> _comps)
+        {
+            Components = _comps;
+        }
+#endif
+
         ////////internal Component.Component CompMatch(ElmAttSet.Group gr)
         ////////{
         ////////    foreach (var comp in Components)
@@ -112,45 +120,45 @@ namespace TSmatch.CompSet
         /// </history>
         ////////////////public static CompSet getCompSet(string name, string supl_name)
         ////////////////{ return getCompSet(name, Supl.getSupplier(supl_name)); }
-//////////////        public static CompSet getCompSet(string cs_name, Supl supplier)
-//////////////        {
-//////////////            Docs toc = Docs.getDoc(Decl.DOC_TOC);
-//////////////            string doc_cs_name = "";
-//////////////            for (int i = toc.i0; i <= toc.il; i++)
-//////////////            {
-//////////////                if (toc.Body.Strng(i, Decl.DOC_SUPPLIER) != supplier.name) continue;
-//////////////                if (toc.Body.Strng(i, Decl.DOC_SHEET) != cs_name) continue;
-//////////////                doc_cs_name = toc.Body.Strng(i, Decl.DOC_NAME);
-//////////////                break;
-//////////////            }
-//////////////            CompSet cs = new CompSet(cs_name, supplier, doc_cs_name);
-//////////////            return cs;
-//////////////        }
-//////////////        public CompSet getCompSet()
-//////////////        {
-//////////////            if (this.Components == null)
-//////////////            {
-//////////////                this.doc = Docs.getDoc(this.doc.name);
-////////////////30/11                this.Components = Component.setComp(doc);
-//////////////                getMat();
-//////////////            }
-//////////////            return this;
-//////////////        }
-//////////////        /// <summary>
-//////////////        /// getMat() - setup mats - List of materials used in Components
-//////////////        /// </summary>
-//////////////        /// <history>14.4.2016</history>
-//////////////        /// <description>
-//////////////        /// mats taken from Component.description
-//////////////        /// </description>
-//////////////        public void getMat()
-//////////////        {
-//////////////            Log.set("CompSet.getMat()");
-//////////////            foreach (var cs in Components)
-//////////////            {
-//////////////                string s = cs.description;
-//////////////            }
-//////////////            Log.exit();
-//////////////        }
+        //////////////        public static CompSet getCompSet(string cs_name, Supl supplier)
+        //////////////        {
+        //////////////            Docs toc = Docs.getDoc(Decl.DOC_TOC);
+        //////////////            string doc_cs_name = "";
+        //////////////            for (int i = toc.i0; i <= toc.il; i++)
+        //////////////            {
+        //////////////                if (toc.Body.Strng(i, Decl.DOC_SUPPLIER) != supplier.name) continue;
+        //////////////                if (toc.Body.Strng(i, Decl.DOC_SHEET) != cs_name) continue;
+        //////////////                doc_cs_name = toc.Body.Strng(i, Decl.DOC_NAME);
+        //////////////                break;
+        //////////////            }
+        //////////////            CompSet cs = new CompSet(cs_name, supplier, doc_cs_name);
+        //////////////            return cs;
+        //////////////        }
+        //////////////        public CompSet getCompSet()
+        //////////////        {
+        //////////////            if (this.Components == null)
+        //////////////            {
+        //////////////                this.doc = Docs.getDoc(this.doc.name);
+        ////////////////30/11                this.Components = Component.setComp(doc);
+        //////////////                getMat();
+        //////////////            }
+        //////////////            return this;
+        //////////////        }
+        //////////////        /// <summary>
+        //////////////        /// getMat() - setup mats - List of materials used in Components
+        //////////////        /// </summary>
+        //////////////        /// <history>14.4.2016</history>
+        //////////////        /// <description>
+        //////////////        /// mats taken from Component.description
+        //////////////        /// </description>
+        //////////////        public void getMat()
+        //////////////        {
+        //////////////            Log.set("CompSet.getMat()");
+        //////////////            foreach (var cs in Components)
+        //////////////            {
+        //////////////                string s = cs.description;
+        //////////////            }
+        //////////////            Log.exit();
+        //////////////        }
     } // end class CompSet
 } // end namespace CompSet

@@ -57,7 +57,7 @@ namespace TSmatch.ElmAttSet
         //public enum sumFields { length, weight, volume, price }
 
         public ElmAttSet(string _guid, string _mat, string _mat_type, string _prf
-            , double _lng, double _weight, double _volume, double _price)
+            , double _lng = 0.0, double _weight = 0.0, double _volume = 0.0, double _price = 0.0)
         {
             guid = _guid;
             mat  = _mat;

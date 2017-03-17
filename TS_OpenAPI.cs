@@ -240,7 +240,7 @@ namespace TSmatch.Tekla
                 if (clsProcess.ProcessName.ToLower().Contains(Tekla.ToLower()))
                 {
                     TSM.Model model = new TSM.Model();
-//20/12/2016                    if (!model.GetConnectionStatus()) Msg.W("===== No Tekla active =========");
+                    if (!model.GetConnectionStatus()) Msg.W("===== No Tekla active =========");
                     try
                     {
                         ModInfo = model.GetInfo();

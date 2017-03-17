@@ -1,7 +1,7 @@
 ﻿/*----------------------------------------------------------------------------------------------
  * Matcher -- module fulfill matching Group of the Elements with CompSet in accrding with Rule
  *
- * 7.3.2017 Pavel Khrapkin
+ * 16.3.2017 Pavel Khrapkin
  *
  *--- History ---
  * 2016 previous editions P.Khrapkin, A.Pass, A.Bobtsov
@@ -50,6 +50,8 @@ using TSmatch.ElmAttSet;
 using TSmatch.Rule;
 using Msg = TSmatch.Message.Message;
 using FP = TSmatch.FingerPrint.FingerPrint;
+using Sec = TSmatch.Section.Section;
+using SType = TSmatch.Section.Section.Type;
 using TST = TSmatch.Test.assert;
 using TSmatch.FingerPrint;
 
@@ -78,8 +80,8 @@ namespace TSmatch.Matcher
             if (gr == null || gr.guids.Count < 1) return;
             ok = OK.NoMatch;
             //-- check if Group in match with the Rule
-            //////////////////////if (!isSectionMatch(FP.Section.Material, gr.mat, _rule.text)) return;
-            //// 7/3/17 //////////if (!isSectionMatch(FP.Section.Profile, gr.prf, _rule.text)) return;
+            if (!Sec.isSectionMatch(SType.Material, gr.mat, _rule.text)) return;
+            if (!Sec.isSectionMatch(SType.Profile, gr.prf, _rule.text)) return;
 
             //////////////////////bool flagMat = false, flagPrf = false;
             //////////////////////FP csFPmat = _rule.CompSet.csFPs.Find(x => x.section == FP.Section.Material);
@@ -210,7 +212,7 @@ namespace TSmatch.Matcher
         {
             Log.set("isSectionMatch(Section.Material, C245, rule.text)");
 
-            /////// 7/3/2017 /////////////////             bool ok = isSectionMatch(FP.Section.Material, "C245", "Профиль: L * x * ст*; длина: * = * м; M: ст *;");
+            /////// 7/3/2017 ////            bool ok = isSectionMatch(FP.Section.Material, "C245", "Профиль: L * x * ст*; длина: * = * м; M: ст *;");
 
             Log.exit();
         }
@@ -593,4 +595,11 @@ namespace TSmatch.Matcher
         } // end SearchInComp
         2016.12.05 revision */
     } // end class Matcher
+    public class ut_mtch
+    {
+        public ut_mtch(ElmAttSet.Group gr, Rule.Rule rule)
+        {
+
+        }
+    }
 } // end namespace Matcher

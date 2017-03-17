@@ -80,6 +80,10 @@ namespace TSmatch.Rule
         }
         // параметр doc не указан, по умолчанию извлекаем Правила из TSmatch.xlsx/Rules
         public Rule(int n) : this(Docs.getDoc(Decl.RULES), n) {}
+#if DEBUG
+        // for unit test purpases only
+        public Rule(string str, CmpSet cs) { text = str; CompSet = cs; }
+#endif
 
         public bool Equals(Rule other)
         {
