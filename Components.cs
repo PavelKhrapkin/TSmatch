@@ -40,9 +40,11 @@ using Mod = TSmatch.Model.Model;
 using Mtch = TSmatch.Matcher.Mtch;
 using Supl = TSmatch.Suppliers.Supplier;
 using FP = TSmatch.FingerPrint.FingerPrint;
+using TypeFP = TSmatch.FingerPrint.FingerPrint.type;
 using TSmatch.Document;
 using TSmatch.Rule;
-using SecTYPE = TSmatch.Section.Section.Type;
+using SecTYPE = TSmatch.Section.Section.SType;
+using TSmatch.ElmAttSet;
 
 namespace TSmatch.Component
 {
@@ -50,23 +52,35 @@ namespace TSmatch.Component
     {
         public static readonly ILog log = LogManager.GetLogger("Component");
 
-        public readonly string description; // строка вида "Угoлoк cтaльнoй paвнoпoл. 25 x 4 cт3cп/пc5"
-        public readonly string mat;         // материал компонента. Извлекается из description или из прайс-листа
-        public readonly double length;      // длина заготовки в м
-        public readonly double weight_m;    // ($W1) вес погонного метра заготовки или за кубометр (для бетона)
-        public readonly double? price;      // ($P1) цена за 1 тонну в руб
-        public readonly double vol_m;
-        public readonly List<FP> fps = new List<FP>();
+////////////////public readonly string description; // строка вида "Угoлoк cтaльнoй paвнoпoл. 25 x 4 cт3cп/пc5"
+////////////////public readonly string mat;         // материал компонента. Извлекается из description или из прайс-листа
+////////////////public readonly double length;      // длина заготовки в м
+// 19/3/17 /////public readonly double weight_m;    // ($W1) вес погонного метра заготовки или за кубометр (для бетона)
+////////////////public readonly double? price;      // ($P1) цена за 1 тонну в руб
+////////////////public readonly double vol_m;
+////////////////public readonly List<FP> fps = new List<FP>();
+        public readonly Dictionary<SecTYPE, FP> fps = new Dictionary<SecTYPE, FP>(); 
 //        public readonly FP matFP, prfFP;
 
-        public Component(string _description, string _mat, double _length, double _weight, double? _price)
+        public Component(string description, string mat
+            , double length = 0, double weight = 0, double price = 0)
         {
-            description = Lib.ToLat(_description);
-            mat = _mat;
-            length = _length;
-            weight_m = _weight;
-            price = _price;
+            AddPar(SecTYPE.Description, description);
+            AddPar(SecTYPE.Material, mat);
+            AddPar(SecTYPE.Profile, description);   //возможно, потом изменится для других типов прайс-листов
+            AddPar(SecTYPE.Price, price);
+            AddPar(SecTYPE.LengthPerUnit, length);
+            AddPar(SecTYPE.WeightPerUnit, weight);
         }
+        void AddPar(SecTYPE stype, dynamic obj)
+        {
+            if(    obj.GetType() == typeof(string) && obj != string.Empty
+                || obj.GetType() == typeof(double) && (double)obj != 0)
+            {
+                fps.Add(stype, new FP(stype, obj));
+            }
+        }
+
         /// <summary>
         /// constructor Component(doc, i, List<FP>cs_fps, List<FP>rule_fps) - get Component from price-list in doc line i
         /// </summary>
@@ -89,6 +103,20 @@ namespace TSmatch.Component
             }
         }
 
+        public string viewComp(SecTYPE stype)
+        {
+            string str = "";
+            FP fp;
+            try { fp = fps[stype]; }
+            catch { return string.Empty; }
+            int i = 0;
+            foreach (Parameter.Parameter p in fp.pars)
+            {
+                if (i++ > 1) str += "x";
+                str += p.par.ToString();
+            }
+            return str;
+        }
         /// <summary>
         /// setComp(doc) - fill price list of Components from doc
         /// setComp(doc_name) - overload
@@ -131,7 +159,7 @@ namespace TSmatch.Component
                     }
                     if (lng == 0)
                         lng = doc.Body.Int(i, docCompPars[1]) / 1000;    // для lng указана колонка в LoadDescription   
-                    double? price = doc.Body.Double(i, docCompPars[2] + parShft);
+                    double price = doc.Body.Double(i, docCompPars[2] + parShft);
                     double wgt = 0.0;   //!!! времянка -- пока вес будем брать только из Tekla
                     string mat = "";    //!!! времянка -- материал нужно извлекать из description или описания - еще не написано!
                     Comps.Add(new Component(descr, mat, lng, wgt, price));
@@ -141,6 +169,26 @@ namespace TSmatch.Component
             Log.exit();
             return Comps; 
         }
+
+        public bool isMatch(string template)
+        {
+
+            return false;
+        }
+
+        public bool isMatch(ElmAttSet.Group gr)
+        {
+            FP compMatFP = fps[SecTYPE.Material];
+            string compMat = compMatFP.pars[0].par.ToString();
+            string grMat = gr.mat;
+            if (grMat != compMat) return false;
+            FP compPrfFP = fps[SecTYPE.Profile];
+            string compPrf = compPrfFP.pars[0].par.ToString();
+            string grPrf = gr.prf;
+            if (grPrf != compPrf) return false;
+            return true;
+        }
+
         /// <summary>
         /// getComp(CompSet cs) - загружает Документ - прайс-лист комплектующих
         /// </summary>
@@ -232,7 +280,7 @@ namespace TSmatch.Component
             Docs doc = Docs.getDoc("ГК Монолит");
             List<FP> csFPs = new List<FP>();
             Rule.Rule rule = new Rule.Rule(15);
-            csFPs = rule.Parser(FP.type.CompSet, doc.LoadDescription);
+//20/3            csFPs = rule.Parser(FP.type.CompSet, doc.LoadDescription);
             TST.Eq(csFPs.Count, 3);
 
             //-- simple Component line "B20" in col 1
@@ -255,7 +303,7 @@ namespace TSmatch.Component
             //-- Уголок равнополочный Стальхолдинг -- разбор LoadDescription L{1}x{1}
             doc = Docs.getDoc("Уголок Стальхолдинг");
             rule = new Rule.Rule(4);
-            csFPs = rule.Parser(FP.type.CompSet, doc.LoadDescription);
+//20/3            csFPs = rule.Parser(FP.type.CompSet, doc.LoadDescription);
             TST.Eq(csFPs.Count, 3);
             TST.Eq(csFPs[0].pars[0], 1);
 
@@ -264,6 +312,11 @@ namespace TSmatch.Component
 // 6/3/17   TST.Eq(comp.fps[0].pars[0], "");
 
             Log.exit();
+        }
+
+        public bool isMatch(ElmAttSet.Group group, object gr)
+        {
+            throw new NotImplementedException();
         }
 #endif //#if DEBUG
         #endregion ------ test Component ------

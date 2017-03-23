@@ -51,7 +51,7 @@ using TSmatch.Rule;
 using Msg = TSmatch.Message.Message;
 using FP = TSmatch.FingerPrint.FingerPrint;
 using Sec = TSmatch.Section.Section;
-using SType = TSmatch.Section.Section.Type;
+using SType = TSmatch.Section.Section.SType;
 using TST = TSmatch.Test.assert;
 using TSmatch.FingerPrint;
 
@@ -79,9 +79,13 @@ namespace TSmatch.Matcher
         {
             if (gr == null || gr.guids.Count < 1) return;
             ok = OK.NoMatch;
+#region ????
             //-- check if Group in match with the Rule
-            if (!Sec.isSectionMatch(SType.Material, gr.mat, _rule.text)) return;
-            if (!Sec.isSectionMatch(SType.Profile, gr.prf, _rule.text)) return;
+
+            //////////////////////Sec sec_mat = new Sec(_rule.text, SType.Material);
+            /////// 17/3/2017 ////Sec sec_prf = new Sec(_rule.text, SType.Profile);
+            //////////////////////if (!Sec.isSectionMatch(SType.Material, gr.mat, _rule.text)) return;
+            //////////////////////if (!Sec.isSectionMatch(SType.Profile, gr.prf, _rule.text)) return;
 
             //////////////////////bool flagMat = false, flagPrf = false;
             //////////////////////FP csFPmat = _rule.CompSet.csFPs.Find(x => x.section == FP.Section.Material);
@@ -92,9 +96,11 @@ namespace TSmatch.Matcher
             //// 7/3/17 //////////if (!flagMat) fpGrMat = null;
             //// 7/3/17 //////////FP fpGrPrf = new FP(gr.prf, csFPprf, out flagPrf);
             //// 7/3/17 //////////if (!flagPrf) fpGrPrf = null;
-
+#endregion ????
             foreach (var comp in _rule.CompSet.Components)
             {
+                if (!comp.isMatch(gr)) continue;
+                
                 //!!!! если у comp нет fp для prf или mat - годятся все компоненты.
                 //// 7/3/17 //////////                FP fp_mat = comp.fps.Find(x => x.section == FP.Section.Material);
                 //// 7/3/17 //////////FP fp_prf = comp.fps.Find(x => x.section == FP.Section.Profile);

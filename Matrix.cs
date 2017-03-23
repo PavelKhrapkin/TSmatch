@@ -108,7 +108,7 @@ namespace match.Matrix
             catch { }//!!! Log.FATAL(msg); }
             return 0;
         }
-        public double? Double(int i, int j, string msg = "wrong double")
+        public double Double(int i, int j, string msg = "wrong double")
         {
             object v = _matr[i, j];
             try
@@ -118,7 +118,7 @@ namespace match.Matrix
                 if (double.TryParse(val, out value)) return value;
             }
             catch { }//!!! Log.FATAL(msg); }
-            return null;
+            return 99999999;
         }
         public int iEOL() { return _matr.GetLength(0); }
         public int iEOC() { return _matr.GetLength(1); }

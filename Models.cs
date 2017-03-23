@@ -593,7 +593,7 @@ namespace TSmatch.Model
         /// </summary>
         /// <ToDo>30.9.2016 - попробовать перенести этот метод в ElmAttSet.Groups</ToDo>
         /// <history> 2016.09.29 </history>
-        private void getGroups()
+        public void getGroups()
         {
             Dictionary<string, ElmAttSet.ElmAttSet> Elements = new Dictionary<string, ElmAttSet.ElmAttSet>();
             foreach (var elm in elements) { Elements.Add(elm.guid, elm); }
@@ -644,6 +644,11 @@ namespace TSmatch.Model
                 chkSum += gr.guids.Count;
             }
             log.Info("-------------- CheckSum: total elements count in all groups = " + chkSum);
+        }
+        public void setElements(List<ElmAttSet.ElmAttSet> els)
+        {
+            elements.Clear();
+            foreach (var elm in els) elements.Add(elm);
         }
         private void getSuppliers()
         {

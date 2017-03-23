@@ -1,13 +1,14 @@
 ﻿/*----------------------------------------------------------------------------
  * CompSet -- Set of Components got from the Supplier' price-list
  * 
- * 31.12.2016  P.Khrapkin
+ * 21.3.2017  P.Khrapkin
  *
  * -- ToDo
  * 31.12.16 использовать Rule.FPs и LoadDescription при конструировании CompSet
- * --- history ---
+ * --- History ---
  * 30.11.2016 made from previous edition of module Components
- * 31.12.2016 Rule.FPs accounted 
+ * 31.12.2016 Rule.FPs accounted
+ * 21.03.2017 Section and FP use 
  * ---------------------------------------------------------------------------
  *      Methods:
  * getCompSet(name, Supplier) - getCompSet by  its name in Supplier' list
@@ -38,9 +39,11 @@ using Mod = TSmatch.Model.Model;
 using Mtch = TSmatch.Matcher.Mtch;
 using Supl = TSmatch.Suppliers.Supplier;
 using TSmatch.Suppliers;
-using TSmatch.Component;
+using Comp = TSmatch.Component.Component;
 using TSmatch.ElmAttSet;
 using TSmatch.Rule;
+using Sec = TSmatch.Section.Section;
+using SType = TSmatch.Section.Section.SType;
 using FP = TSmatch.FingerPrint.FingerPrint;
 
 namespace TSmatch.CompSet
@@ -49,12 +52,27 @@ namespace TSmatch.CompSet
     {
         public static readonly ILog log = LogManager.GetLogger("CompSet");
 
-        internal string name;       // название сортамента, например, "Уголок"
-        internal List<Component.Component> Components = new List<Component.Component>();
-        internal Supl Supplier;     // организация - поставщик сортамента
-        internal Docs doc;          // Документ, содержащий набор компонентов, прайс-лист поставщика 
-        internal List<FP> csFPs = new List<FP>();    // parsed LoadDescriptor of price list Document
+        public readonly string name;       // название сортамента, например, "Уголок"
+        public readonly List<Comp> Components = new List<Comp>();
+        public readonly Supl Supplier;     // организация - поставщик сортамента
+        public readonly Docs doc;          // Документ, содержащий набор компонентов, прайс-лист поставщика 
+                                    //        internal List<FP> csFPs = new List<FP>();    // parsed LoadDescriptor of price list Document
+        public readonly Dictionary<SType, FP> csFPs = new Dictionary<SType, FP>();
 
+        public CompSet(string _name, string LoadDescriptor, List <Comp> comps = null)
+        {
+            name = _name;
+            string[] sections = Lib.ToLat(LoadDescriptor).ToLower().Split(';');
+            foreach (string str in sections)
+            {
+                Sec s = new Sec(str);
+                if (s.type == SType.NOT_DEFINED) continue;
+                FP fp = new FP(FP.type.CompSet, str);
+                csFPs.Add(s.type, fp);
+            }
+            if (comps != null) Components = comps;
+        }
+        
         ////////////////public CompSet(string _name, List<Component.Component> _comps, Supl _supl, Docs _doc, List<FP> _csFPs)
         ////////////////{
         ////////////////    this.name       = _name;
@@ -78,11 +96,11 @@ namespace TSmatch.CompSet
                 doc = Docs.getDoc(docName);
                 break;
             }
-            csFPs = _rule.Parser(FP.type.CompSet, doc.LoadDescription);
+//20/3            csFPs = _rule.Parser(FP.type.CompSet, doc.LoadDescription);
             for (int i=doc.i0; i < doc.il; i++)
             {
-                Component.Component comp = new Component.Component(doc, i, csFPs);
-                Components.Add(comp);
+//20/3                Component.Component comp = new Component.Component(doc, i, csFPs);
+//20/3                Components.Add(comp);
             }
         }
 

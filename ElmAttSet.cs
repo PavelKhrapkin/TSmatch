@@ -67,8 +67,6 @@ namespace TSmatch.ElmAttSet
             weight = _weight;
             volume = _volume;
             price  = _price;
-
-            Elements.Add(_guid, this);
         }
         public ElmAttSet(Ifc ifc_elm)
         {
@@ -80,8 +78,6 @@ namespace TSmatch.ElmAttSet
             weight = Lib.ToDouble(ifc_elm.weight);
             volume = Lib.ToDouble(ifc_elm.volume);
             price = Lib.ToDouble(ifc_elm.price);
-
-            Elements.Add(guid, this);
         }
         public bool Equals(ElmAttSet other)
         {
@@ -312,8 +308,8 @@ namespace TSmatch.ElmAttSet
 
         public Group(Dictionary<string, ElmAttSet>Els, string _mat, string _prf, List<string> _guids)
         {
-            mat = Lib.ToLat(_mat);
-            prf = Lib.ToLat(_prf);
+            mat = Lib.ToLat(_mat).ToLower();
+            prf = Lib.ToLat(_prf).ToLower();
             guids = _guids;
             totalLength = totalWeight = totalVolume = totalPrice = 0.0;
             foreach(var id in guids)
@@ -330,6 +326,16 @@ namespace TSmatch.ElmAttSet
             int x = mat.CompareTo(gr.mat);
             if (x == 0) x = prf.CompareTo(gr.prf);
             return x;
+        }
+        public List<string> getGroupGuids(Dictionary<string, ElmAttSet> elements, string mat, string prf)
+        {
+            List<string> grGuids = new List<string>();
+            foreach (var elm in elements)
+            {
+                if (elm.Value.mat == mat && elm.Value.prf == prf)
+                    grGuids.Add(elm.Key);
+            }
+            return grGuids;
         }
     } // end class Group
     #endregion

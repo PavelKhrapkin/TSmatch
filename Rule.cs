@@ -39,6 +39,7 @@ using Comp = TSmatch.Component.Component;
 using CmpSet = TSmatch.CompSet.CompSet;
 using Supl = TSmatch.Suppliers.Supplier;
 using FP = TSmatch.FingerPrint.FingerPrint;
+using SType = TSmatch.Section.Section.SType;
 using TSmatch.FingerPrint;
 
 namespace TSmatch.Rule
@@ -72,7 +73,7 @@ namespace TSmatch.Rule
             type = (string)doc.Body[i, Decl.RULE_TYPE];
             text = Lib.ToLat((string)doc.Body[i, Decl.RULE_RULE]);
 //// 24/1 //////            log.Info("Constructor Rule(doc, i=" + i + ") text=<" + text + ">");
-            ruleFPs = Parser(FP.type.Rule, text);    /////////   , Decl.SECTIONS_RULE);
+//// 20/3            ruleFPs = Parser(FP.type.Rule, text);    /////////   , Decl.SECTIONS_RULE);
             string csName = (string)doc.Body[i, Decl.RULE_COMPSETNAME];
             string suplName = (string)doc.Body[i, Decl.RULE_SUPPLIERNAME];
             Supplier = new Suppliers.Supplier(suplName);
@@ -164,10 +165,10 @@ namespace TSmatch.Rule
         /// 30.12.16 написать полный разбор Секции
         /// 11.01.17 replace cols with real pars handling for pars.count != 1
         /// </ToDo>
-        internal List<FP> Parser(FP.type _type, string text)
+        internal Dictionary<SType,FP> Parser(FP.type _type, string text)
         {
             Log.set("Rule.Parser(" + _type + ", " + text + ", sectionReg)");
-            List<FP> result = new List<FP>();
+            Dictionary<SType, FP> result = new Dictionary<SType, FP>();
             string[] sections = Lib.ToLat(text).ToLower().Split(';');
             foreach (string sec in sections)
             {
@@ -176,7 +177,7 @@ namespace TSmatch.Rule
                 object col = sec;
                 if (col.GetType() == typeof(string)) col = "\"" + col + "\"";
 //// 24/1 //////                log.Info("=============> " + _type + "\tsec = " + sec + "\tcol=" + col);
-                result.Add(xx);
+                result.Add(SType.Description, xx);  //ЗАГЛУШКА!!
 
                 //////////////for (int ind=0; ind < sectionRegs.GetUpperBound(0); ind++)
                 //////////////{

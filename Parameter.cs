@@ -1,11 +1,13 @@
 ﻿/*----------------------------------------------------------------
  * Parameter -- class dealing a string like "tx{par}"
  *
- * 14.03.2017 Pavel Khrapkin
+ * 21.03.2017 Pavel Khrapkin
  *
  *--- History ---
  *  9.03.2017 made from FingerPrint code fragments
  * 14.03.2017 Unit Test implemented
+ * 20.03.2017 public constructor and fields inseat of internal
+ * 21.03.2017 par stored str after ':' till ';'
  * ------ Fields ------
  * tx - text before {par}
  * par - part of input string, recognized with 
@@ -13,63 +15,55 @@
  *          ~s or by default - string
  *          ~i - int
  *          ~d - double
- * type {string, int, double}
- *      type could be enum Type {string, int, double}; string by default
- * List<string> synonyms - possible alternative tx equivalents
+ * type {string, int, double, ANY}
+ *          ANY that any value of Parameter could be in match in Mtch
+ *      type is enum Type {string, int, double}; string by default
+ !! List<string> synonyms - possible alternative tx equivalents
  * --- Constructor ---  
- * internal Parameter(string str) - fill Parameter fields from string str
- * internal Parameter(string str, ParType _type) - convert str to _type
+ * public Parameter(string str) - fill Parameter fields from string str
+ * public Parameter(string str, ParType _type) - convert str to _type
  * ----- Methods: -----
  */
 
 using System.Text.RegularExpressions;
 using log4net;
-
-using TST = TSmatch.Test.assert;
-using Log = match.Lib.Log;
 using Lib = match.Lib.MatchLib;
-using FP = TSmatch.FingerPrint.FingerPrint;
 
 namespace TSmatch.Parameter
 {
-    internal class Parameter
+    public class Parameter
     {
-//        public static readonly ILog log = LogManager.GetLogger("Parameter");
+        public static readonly ILog log = LogManager.GetLogger("Parameter");
 
-        internal ParType type;
-        internal string tx;
-        internal object par;
-        private bool isBrackets = false;
+        public ParType ptype;
+        public string tx;
+        public object par;
 
-        internal Parameter(string str)
+        public Parameter(string str)
         {
-            const string PARAMETR = @"\{.+?\}";
-            Regex parametr = new Regex(PARAMETR, RegexOptions.IgnoreCase);
-            int indx = 0;
-            Match m = parametr.Match(str, indx);
             str = Lib.ToLat(str).ToLower().Replace(" ", "");
-            type = getParType(str);
+            int indx = str.IndexOf(':') + 1;
+            Regex parametr = new Regex(@"\{.+?\}");
+            Match m = parametr.Match(str, indx);
+            ptype = getParType(str);
             if (m.Value.Length > 0)
             {   // string like "{result}" with the Brackets
-                indx = m.Index + m.Value.Length;
-                isBrackets = true;
                 par = Regex.Replace(m.Value, @"\{.*?~|\{|\}", "");
-                tx = str.Substring(0, m.Index);
+                tx = str.Substring(indx, m.Index - indx);
             }
             else
             {   // result is part of str, recognised as a parameter value
-                par = str.Substring(indx);
-                indx = str.Length;
-                isBrackets = false;
-                tx = str;
+                int end = str.IndexOf(';');
+                if (end < indx) end = str.Length;
+                tx = str.Substring(indx, end - indx);
+                par = tx;
             }
         }
-        internal Parameter(string str, ParType _type)
+        public Parameter(string str, ParType _type) : this(str)
         {
-            type = _type;
-            if (type == ParType.Integer) par = Lib.ToInt(str);
-            if (type == ParType.Double) par = Lib.ToDouble(str);
-            if (type == ParType.String) par = str;
+            ptype = _type;
+            if (ptype == ParType.Integer) par = Lib.ToInt((string)par);
+            if (ptype == ParType.Double) par = Lib.ToDouble((string)par);
         }
         #region ?????? for future ??????????
         ////////////////internal Parameter(string str, int n, FingerPrint.FingerPrint ruleFP)
@@ -113,8 +107,8 @@ namespace TSmatch.Parameter
         ////////////////    return result;
         ////////////////}
         #endregion ?????? for future ??????????
-        internal enum ParType { String, Integer, Double, ANY }
-        private ParType getParType(string str)
+        public enum ParType { String, Integer, Double, ANY }
+        public ParType getParType(string str)
         {
             const string PAR_TYPE = @"\{(s|d|i).*?~";
             ParType result = ParType.String;
@@ -130,26 +124,4 @@ namespace TSmatch.Parameter
             return result;
         }
     } // end class Parameter
-    #region ------ test Section -----
-#if DEBUG
-    /// <summary>
-    /// utp - unit test class for Parameter aim is to get public visibility
-    ///       of internal class Parameter for Unit Testing
-    /// </summary>
-    public class utp
-    {
-        public string type;
-        public string tx;
-        public object par;
-
-        public utp(string str)
-        {
-            var parameter = new Parameter(str);
-            type = parameter.type.ToString();
-            tx = parameter.tx;
-            par = parameter.par;
-        }
-#endif //#if DEBUG
-        #endregion ------ test Section ------
-    }
 } // end namespace TSmatch.Parametr
