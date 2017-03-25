@@ -564,7 +564,7 @@ namespace TSmatch.Model
                 {
                     Mtch _match = new Mtch(gr, rule);
                     if (_match.ok == Mtch.OK.Match) matches.Add(_match);
-                    else log.Info("No Match Group. Material = " + gr.mat);
+                    else log.Info("No Match Group. mat= " + gr.mat + "\tprf=" + gr.prf);
                 }
             }
             getSuppliers();
@@ -574,12 +574,16 @@ namespace TSmatch.Model
         private void getPricing()
         {
             Log.set("Models.getPricing()");
-            foreach(var mgr in elmMgroups)
+            int cnt = 0;
+            var elms = new Dictionary<string, Elm>();
+            foreach (var elm in elements) elms.Add(elm.guid, elm);
+            foreach (var mgr in elmMgroups)
             {
                 foreach(string id in mgr.guids)
                 {
-                    mgr.totalPrice += Elm.Elements[id].price;
+                    mgr.totalPrice += elms[id].price;
                 }
+                cnt += mgr.guids.Count();
             }
             foreach(var elm in ElmAttSet.ElmAttSet.Elements)
             {

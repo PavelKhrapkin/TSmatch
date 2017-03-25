@@ -39,6 +39,7 @@ using Comp = TSmatch.Component.Component;
 using CmpSet = TSmatch.CompSet.CompSet;
 using Supl = TSmatch.Suppliers.Supplier;
 using FP = TSmatch.FingerPrint.FingerPrint;
+using Sec = TSmatch.Section.Section;
 using SType = TSmatch.Section.Section.SType;
 using TSmatch.FingerPrint;
 
@@ -55,16 +56,9 @@ namespace TSmatch.Rule
         //---- references to other classes - price-list conteiners
 		public readonly CmpSet CompSet;     //список компонентов, с которыми работает правило
 		public readonly Supl Supplier;      //Поставщик
-        public List<FP> ruleFPs = new List<FP>();   //identifiers of Materials, Profile, and others
-
-        ////public List<string> RuleMatList = new List<string>();
-        ////public Dictionary<string,string> RuleMatPar  = new Dictionary<string, string>();
-        ////public List<string> RulePrfList = new List<string>();
-        ////public Dictionary<string, string> RulePrfPar  = new Dictionary<string, string>();
-        ////public List<string> RuleCstList = new List<string>();
-        ////public Dictionary<string, string> RuleCstPar  = new Dictionary<string, string>();
-        ////public readonly List<int> RuleValPars = new List<int>();
-        ////public readonly List<int> RuleWildPars = new List<int>();
+        public Dictionary<SType, FP> ruleFPs;   //identifiers of Materials, Profile, and others
+        public Dictionary<SType, List<string>> synonyms = new Dictionary<SType, List<string>>();
+ 
         public double RuleRedundencyPerCent = 0.0;  //коэффициент избыточности, требуемый запас по данному материалу/профилю/Правилу
 
         public Rule(Docs doc, int i)
@@ -72,8 +66,8 @@ namespace TSmatch.Rule
             name = (string)doc.Body[i, Decl.RULE_NAME];
             type = (string)doc.Body[i, Decl.RULE_TYPE];
             text = Lib.ToLat((string)doc.Body[i, Decl.RULE_RULE]);
-//// 24/1 //////            log.Info("Constructor Rule(doc, i=" + i + ") text=<" + text + ">");
-//// 20/3            ruleFPs = Parser(FP.type.Rule, text);    /////////   , Decl.SECTIONS_RULE);
+            synonyms = RuleSynParse(text);
+            ruleFPs = Parser(FP.type.Rule, text);
             string csName = (string)doc.Body[i, Decl.RULE_COMPSETNAME];
             string suplName = (string)doc.Body[i, Decl.RULE_SUPPLIERNAME];
             Supplier = new Suppliers.Supplier(suplName);
@@ -83,7 +77,34 @@ namespace TSmatch.Rule
         public Rule(int n) : this(Docs.getDoc(Decl.RULES), n) {}
 #if DEBUG
         // for unit test purpases only
-        public Rule(string str, CmpSet cs) { text = str; CompSet = cs; }
+        public Rule(string str, CmpSet cs)
+        {
+            text = str;
+            synonyms = RuleSynParse(str);
+            CompSet = cs;
+        }
+
+        private Dictionary<SType,List<string>> RuleSynParse(string str)
+        {
+            var Syns = new Dictionary<SType, List<string>>();
+            string[] sections = str.Split(';');
+            foreach(var s in sections)
+            {
+                List<string> synLst = new List<string>();
+                Section.Section sect = new Section.Section(s);
+                string[] strs = sect.body.Split('=');
+                foreach(string tx in strs)
+                {
+                    int indxPar = tx.IndexOf('*');
+                    string stx;
+                    if (indxPar < 0) stx = tx;
+                    else stx = tx.Substring(0, indxPar);
+                    synLst.Add(stx);
+                }
+                if(synLst.Count > 1) Syns.Add(sect.type, synLst);
+            }
+            return Syns;
+        }
 #endif
 
         public bool Equals(Rule other)
@@ -154,48 +175,27 @@ namespace TSmatch.Rule
         ///               (избыток, запас, отходы, Redundency, Excess, Waste) по русски или 
         ///               по английски заглавными или строчными буквами.
         /// </описание>
-        /// <history> декабрь 2015 - январь 2016
+        /// <history> декабрь 2015 - январь 2016 предистория
         /// 19.2.16 - #параметры
         /// 29.2.16 - *параметры
         /// 17.10.16 - перенос в Rule class
-        /// 28.12.12 - введены Параметры вида {..} правила. Остальные типы правил пока не разбираем
+        /// 28.12.16 - введены Параметры вида {..} правила. Остальные типы правил пока не разбираем
+        /// 25.03.17 - переписал с использованием Section 
         /// </history>
-        /// <ToDo>
-        /// 28.12.16 переписать <описание> выше в части параметров. И вообще пересмотреть
-        /// 30.12.16 написать полный разбор Секции
-        /// 11.01.17 replace cols with real pars handling for pars.count != 1
-        /// </ToDo>
-        internal Dictionary<SType,FP> Parser(FP.type _type, string text)
+        public Dictionary<SType, FP> Parser(FP.type _type, string text)
         {
-            Log.set("Rule.Parser(" + _type + ", " + text + ", sectionReg)");
+            Log.set("Rule.Parser(" + _type + ", " + text);
             Dictionary<SType, FP> result = new Dictionary<SType, FP>();
             string[] sections = Lib.ToLat(text).ToLower().Split(';');
             foreach (string sec in sections)
             {
-                if (string.IsNullOrEmpty(sec)) continue;
-                FP xx = new FP(_type, sec);
-                object col = sec;
-                if (col.GetType() == typeof(string)) col = "\"" + col + "\"";
-//// 24/1 //////                log.Info("=============> " + _type + "\tsec = " + sec + "\tcol=" + col);
-                result.Add(SType.Description, xx);  //ЗАГЛУШКА!!
-
-                //////////////for (int ind=0; ind < sectionRegs.GetUpperBound(0); ind++)
-                //////////////{
-                //////////////    string reg = Lib.ToLat(sectionRegs[ind, 1]).ToUpper();
-                //////////////    if (!Regex.IsMatch(sec, reg, RegexOptions.IgnoreCase)) continue;
-                //////////////    result.Add(new FP(_type, sec));
-                //////////////    break;
-                //////////////}
+                Sec txSec = new Sec(sec);
+                if (txSec.type == SType.NOT_DEFINED) continue;
+                FP fp = new FP(_type, sec);
+                result.Add(txSec.type, fp);
             }
-////////////////            int column = -1;
-////////////////            foreach (var fp in result)
-////////////////            {
-//// 24/1 //////                foreach (var p in fp.pars)
-////////////////                    // 17.1 //                    if (p.Value.GetType() ==typeof(int)) column = (int)p.Value;
-////////////////                    log.Info("-----------------> " + _type + "\tsec = " + fp.section.ToString() + "\tcolumn=" + column);
-////////////////            }
             Log.exit();
-            return result;          
+            return result;
         }
 
         private void RuleLogInfo()

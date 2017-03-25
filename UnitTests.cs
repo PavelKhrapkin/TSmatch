@@ -18,7 +18,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Lib = match.Lib.MatchLib;
 using UT_Par = TSmatch.Parameter.Parameter;
 using ParType = TSmatch.Parameter.Parameter.ParType;
-using UT_Sec = TSmatch.Section.Section;
+using Sec = TSmatch.Section.Section;
 using SType = TSmatch.Section.Section.SType;
 using FP = TSmatch.FingerPrint.FingerPrint;
 using FPtype = TSmatch.FingerPrint.FingerPrint.type;
@@ -121,61 +121,71 @@ namespace TSmatch.Unit_Tests
             var SectionTab = new Bootstrap.Bootstrap.initSection().SectionTab;
             Assert.AreEqual(SectionTab != null, true);
 
-            var s = new UT_Sec("hh");
+            var s = new Sec("hh");
             Assert.AreEqual(s.type, SType.NOT_DEFINED);
             Assert.AreEqual(s.body, "");
 
-            s = new UT_Sec(string.Empty);
+            s = new Sec(string.Empty);
             Assert.AreEqual(s.type, SType.NOT_DEFINED);
             Assert.AreEqual(s.body, "");
 
-            s = new UT_Sec("M: qq");
+            s = new Sec("M: qq");
             Assert.AreEqual(s.type, SType.Material);
             Assert.AreEqual(s.body, "qq");
 
-            s = new UT_Sec("Prf: x; price: y;");
+            s = new Sec("мат: В20");
+            Assert.AreEqual(s.type, SType.Material);
+
+            s = new Sec("Prf: x; price: y;");
             Assert.AreEqual(s.type, SType.Profile);
             Assert.AreEqual(s.body, "x");
 
-            s = new UT_Sec("Описание: xx");
+            s = new Sec("Описание: xx");
             Assert.AreEqual(s.type, SType.Description);
             Assert.AreEqual(s.body, "xx");
 
-            s = new UT_Sec("длина: 5");
+            s = new Sec("длина: 5");
             Assert.AreEqual(s.type, SType.LengthPerUnit);
             Assert.AreEqual(s.body, "5");
 
-            s = new UT_Sec("Объем: 7");
-            Assert.AreEqual(s.type, SType.VolPerUnit);
+            s = new Sec("Объем: 7");    //Внимание!! Слово Объем содержит букву 'м'
+                                        //.. его нельзя употреблять в заголовках Секций
+            Assert.AreEqual(s.type, SType.Material);
             Assert.AreEqual(s.body, "7");
 
-            s = new UT_Sec("вес: 77");
+            s = new Sec("кубометров: ");
+            Assert.AreEqual(s.type, SType.Material);    //.. тоже нельзя
+
+            s = new Sec("v: заливка в кубометрах");
+            Assert.AreEqual(s.type, SType.VolPerUnit);  //..но можно использовать 'м' в теле
+
+            s = new Sec("вес: 77");
             Assert.AreEqual(s.type, SType.WeightPerUnit);
             Assert.AreEqual(s.body, "77");
 
-            s = new UT_Sec("единица: ");
+            s = new Sec("единица: ");
             Assert.AreEqual(s.type, SType.Unit);
             Assert.AreEqual(s.body, "");
 
             //----- error input text handling -----
-            s = new UT_Sec("Цена 2540");   // no ':'
+            s = new Sec("Цена 2540");   // no ':'
             Assert.AreEqual(s.type, SType.Price);
             Assert.AreEqual(s.body, "");
 
-            s = new UT_Sec("Цена 2540;");
+            s = new Sec("Цена 2540;");
             Assert.AreEqual(s.type, SType.Price);
             Assert.AreEqual(s.body, "");
 
-            s = new UT_Sec("; профиль: L");
+            s = new Sec("; профиль: L");
             Assert.AreEqual(s.type, SType.NOT_DEFINED);
             Assert.AreEqual(s.body, "");
 
             //--- construtor Section("..;..;", SType) test
-            s = new UT_Sec(";проф: Sec; Mat: n", SType.Profile);
+            s = new Sec(";проф: Sec; Mat: n", SType.Profile);
             Assert.AreEqual(s.type, SType.Profile);
             Assert.AreEqual(s.body, "sec");
 
-            s = new UT_Sec(";проф: Sec; Mat: n", SType.Unit);
+            s = new Sec(";проф: Sec; Mat: n", SType.Unit);
             Assert.AreEqual(s.type, SType.NOT_DEFINED);
             Assert.AreEqual(s.body, "");
         }
@@ -183,7 +193,7 @@ namespace TSmatch.Unit_Tests
         [TestMethod()]
         public void UT_isSectionMatch()
         {
-            var sec = new UT_Sec("Prf: L12x5");
+            var sec = new Sec("Prf: L12x5");
 
             bool b = sec.isSectionMatch("профиль:l*x*");
             Assert.AreEqual(b, true);
@@ -256,7 +266,7 @@ namespace TSmatch.Unit_Tests
         [TestMethod()]
         public void UT_FP_Section_Test()
         {
-            var sec = new UT_Sec("Prf: L12x5");
+            var sec = new Sec("Prf: L12x5");
             //19/3            FP fp = new FP(sec);
             Assert.Fail();
         }

@@ -95,7 +95,7 @@ namespace TSmatch.FingerPrint
 
         public FingerPrint(string str, Rule.Rule rule, Section.Section sec)
         {
-            FingerPrint ruleFP = rule.ruleFPs.Find(x => x.section.type == sec.type);
+            FingerPrint ruleFP = rule.ruleFPs[sec.type];
             //        FingerPrint csFP = rule.CompSet.csFPs.Find(x => x.section.type == sec.type);
             SType stype = sec.type;
             var vv = rule.CompSet.csFPs;
@@ -176,25 +176,14 @@ namespace TSmatch.FingerPrint
             //////////////////}
 
         public FingerPrint(string str, FingerPrint csFP, out bool flag)
-        {
+        { 
             flag = false;
             typeFP = type.Component;
             if (string.IsNullOrEmpty(str) || csFP == null) return;
+            flag = true;
             section = csFP.section;
-            str = Lib.ToLat(str).ToLower();
-            int ind = 0;
-            foreach (string tx in csFP.txs)
-            {
-                int lng = Math.Min(str.Length, tx.Length);
-                while (string.IsNullOrWhiteSpace(str[ind].ToString())) ind++;
-                string s_str = str.Substring(ind, lng);
-                string s_tx = tx.Substring(0, lng);
-                if (!isMatchStr(s_str, s_tx)) return;   //по несоответствию tx надо разбираться с синонимами - потом
-                flag = true;
-                ind += lng;         //если в str больше одного параметра - будут проблемы!!
- //21/3               pars.Add(str.Substring(ind));
-                txs.Add(s_tx);
-            }
+            Param par = new Param(str);
+            pars.Add(par);
         }
 
         /// <summary>

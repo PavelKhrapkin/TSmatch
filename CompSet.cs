@@ -44,7 +44,9 @@ using TSmatch.ElmAttSet;
 using TSmatch.Rule;
 using Sec = TSmatch.Section.Section;
 using SType = TSmatch.Section.Section.SType;
+using Par = TSmatch.Parameter.Parameter;
 using FP = TSmatch.FingerPrint.FingerPrint;
+using TSmatch.Document;
 
 namespace TSmatch.CompSet
 {
@@ -81,27 +83,34 @@ namespace TSmatch.CompSet
         ////////////////    this.doc        = _doc;
         ////////////////    this.csFPs      = _csFPs;
         ////////////////}
-        public CompSet(string _name, Supl _supl, Rule.Rule _rule) //: this {_name, null, _supl, null, null }
+        public CompSet(string _name, Supl _supl, Rule.Rule _rule)
         {
             name = _name;
             Supplier = _supl;
-            //-- get cs doc from TOC by cs_name and Supplier in Rule
+            doc = getCSdoc(Supplier, _name);
+            csFPs = _rule.Parser(FP.type.CompSet, doc.LoadDescription);
+            for (int i=doc.i0; i < doc.il; i++)
+            {
+                Comp comp = new Comp(doc, i, csFPs);
+                Components.Add(comp);
+            }
+        }
+
+        //-- get cs doc from TOC by cs_name and Supplier in TSmatch.xlsx/Rule
+        private Docs getCSdoc(Supl supplier, string _name)
+        {
+            string docName = string.Empty;
             Docs toc = Docs.getDoc();
             for (int i = toc.i0; i <= toc.il; i++)
             {
                 string suplName = toc.Body.Strng(i, Decl.DOC_SUPPLIER);
                 string csSheet = toc.Body.Strng(i, Decl.DOC_SHEET);
                 if (suplName != Supplier.name || csSheet != name) continue;
-                string docName = toc.Body.Strng(i, Decl.DOC_NAME);
-                doc = Docs.getDoc(docName);
+                docName = toc.Body.Strng(i, Decl.DOC_NAME);
                 break;
             }
-//20/3            csFPs = _rule.Parser(FP.type.CompSet, doc.LoadDescription);
-            for (int i=doc.i0; i < doc.il; i++)
-            {
-//20/3                Component.Component comp = new Component.Component(doc, i, csFPs);
-//20/3                Components.Add(comp);
-            }
+            if (string.IsNullOrEmpty(docName)) Msg.F("CompSet not found price list");
+            return Docs.getDoc(docName);
         }
 
 #if DEBUG

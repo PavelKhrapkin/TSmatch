@@ -43,7 +43,7 @@ using FP = TSmatch.FingerPrint.FingerPrint;
 using TypeFP = TSmatch.FingerPrint.FingerPrint.type;
 using TSmatch.Document;
 using TSmatch.Rule;
-using SecTYPE = TSmatch.Section.Section.SType;
+using SType = TSmatch.Section.Section.SType;
 using TSmatch.ElmAttSet;
 
 namespace TSmatch.Component
@@ -59,20 +59,20 @@ namespace TSmatch.Component
 ////////////////public readonly double? price;      // ($P1) цена за 1 тонну в руб
 ////////////////public readonly double vol_m;
 ////////////////public readonly List<FP> fps = new List<FP>();
-        public readonly Dictionary<SecTYPE, FP> fps = new Dictionary<SecTYPE, FP>(); 
+        public readonly Dictionary<SType, FP> fps = new Dictionary<SType, FP>(); 
 //        public readonly FP matFP, prfFP;
 
         public Component(string description, string mat
             , double length = 0, double weight = 0, double price = 0)
         {
-            AddPar(SecTYPE.Description, description);
-            AddPar(SecTYPE.Material, mat);
-            AddPar(SecTYPE.Profile, description);   //возможно, потом изменится для других типов прайс-листов
-            AddPar(SecTYPE.Price, price);
-            AddPar(SecTYPE.LengthPerUnit, length);
-            AddPar(SecTYPE.WeightPerUnit, weight);
+            AddPar(SType.Description, description);
+            AddPar(SType.Material, mat);
+            AddPar(SType.Profile, description);   //возможно, потом изменится для других типов прайс-листов
+            AddPar(SType.Price, price);
+            AddPar(SType.LengthPerUnit, length);
+            AddPar(SType.WeightPerUnit, weight);
         }
-        void AddPar(SecTYPE stype, dynamic obj)
+        void AddPar(SType stype, dynamic obj)
         {
             if(    obj.GetType() == typeof(string) && obj != string.Empty
                 || obj.GetType() == typeof(double) && (double)obj != 0)
@@ -87,23 +87,31 @@ namespace TSmatch.Component
         /// <param name="doc">document - price-list</param>
         /// <param name="i">line number in doc</param>
         /// <param name="cs_fps">FP of CompSet</param>
-        public Component(Docs doc, int i, List<FP> cs_fps)
+        public Component(Docs doc, int i, Dictionary<SType, FP> cs_fps)
         {
-            string[] sections = Lib.ToLat(doc.LoadDescription).ToLower().Split(';');
             bool flag = false;
-            foreach (string sec in sections)
+            foreach (var fpD in cs_fps)
             {
-                if (string.IsNullOrEmpty(sec)) continue;                                 
-                ////////////////////////FP csFP = cs_fps.Find(x => x.section == x.RecognyseSection(sec));
-                ////////////////////////if (csFP == null) Msg.F("Component constructor: no CompSet.FP with doc.LoadDescription", sec);
-                /////// 7/7/2017 ///////int col = csFP.Col();
-                ////////////////////////string str = doc.Body.Strng(i, col);
-                ////////////////////////FP compFP = new FP(str, csFP, out flag);
-                ////////////////////////if (flag) fps.Add(compFP);
+                FP csFP = fpD.Value;
+                string str = doc.Body.Strng(i, csFP.Col());
+                FP compFP = new FP(str, csFP, out flag);
+                if (flag) fps.Add(csFP.section.type, compFP);
             }
+            //////////////////////string[] sections = Lib.ToLat(doc.LoadDescription).ToLower().Split(';');
+            //////////////////////bool flag = false;
+            //////////////////////foreach (string sec in sections)
+            //////////////////////{
+            ///// 24/3 ///////////    if (string.IsNullOrEmpty(sec)) continue;                                 
+            //////////////////////    ////////////////////////FP csFP = cs_fps.Find(x => x.section == x.RecognyseSection(sec));
+            //////////////////////    ////////////////////////if (csFP == null) Msg.F("Component constructor: no CompSet.FP with doc.LoadDescription", sec);
+            //////////////////////    /////// 7/7/2017 ///////int col = csFP.Col();
+            //////////////////////    ////////////////////////string str = doc.Body.Strng(i, col);
+            //////////////////////    ////////////////////////FP compFP = new FP(str, csFP, out flag);
+            //////////////////////    ////////////////////////if (flag) fps.Add(compFP);
+            //////////////////////}
         }
 
-        public string viewComp(SecTYPE stype)
+        public string viewComp(SType stype)
         {
             string str = "";
             FP fp;
@@ -170,23 +178,43 @@ namespace TSmatch.Component
             return Comps; 
         }
 
-        public bool isMatch(string template)
+        public bool isMatch(ElmAttSet.Group gr, Rule.Rule rule = null) //25/3 Dictionary<SecTYPE,List<string>> ruleFPs = null)
         {
+            if (!isMatchGrRule(SType.Material, gr, rule)) return false;
+            if (!isMatchGrRule(SType.Profile,  gr, rule)) return false;
+            return true;
+        }
 
+        bool isMatchGrRule(SType stype, ElmAttSet.Group gr, Rule.Rule rule)
+        {
+            if (rule == null || !fps.ContainsKey(stype)) return true;
+            var ruleSyns = rule.synonyms;
+            string comMatPrf = fps[stype].pars[0].par.ToString();
+            string grMatPrf = stype == SType.Material ? gr.mat : gr.prf;
+            if( grMatPrf == comMatPrf ) return true;
+            if (ruleSyns != null && ruleSyns.ContainsKey(stype))
+            {
+                List<string> Syns = ruleSyns[stype].ToList();
+                if (!Lib.IContains(Syns, comMatPrf) || !Lib.IContains(Syns, grMatPrf)) return false;
+
+                var p1 = Par(Syns, comMatPrf);
+                var p2 = Par(Syns, grMatPrf);
+                bool b = p1 != p2  && stype == SType.Material;
+
+                return Par(Syns, comMatPrf) == Par(Syns, grMatPrf);
+            }
             return false;
         }
 
-        public bool isMatch(ElmAttSet.Group gr)
+        string Par(List<string> lst, string str)
         {
-            FP compMatFP = fps[SecTYPE.Material];
-            string compMat = compMatFP.pars[0].par.ToString();
-            string grMat = gr.mat;
-            if (grMat != compMat) return false;
-            FP compPrfFP = fps[SecTYPE.Profile];
-            string compPrf = compPrfFP.pars[0].par.ToString();
-            string grPrf = gr.prf;
-            if (grPrf != compPrf) return false;
-            return true;
+            foreach (string st in lst)
+            {
+                if (!str.Contains(st)) continue;
+                string result = str.Substring(st.Length);
+                return str.Substring(st.Length);
+            }
+            return null;
         }
 
         /// <summary>
@@ -271,54 +299,49 @@ namespace TSmatch.Component
             return doc;
         }
 
-        #region ------ test Component -----
-#if DEBUG
-        public static void testComponent()
-        {
-            Log.set("testComponent");
-            //-- test environment preparation: set csFPs and doc - price list "ГК Монолит"
-            Docs doc = Docs.getDoc("ГК Монолит");
-            List<FP> csFPs = new List<FP>();
-            Rule.Rule rule = new Rule.Rule(15);
-//20/3            csFPs = rule.Parser(FP.type.CompSet, doc.LoadDescription);
-            TST.Eq(csFPs.Count, 3);
+////////////////////////        #region ------ test Component -----
+////////////////////////#if DEBUG
+////////////////////////        public static void testComponent()
+////////////////////////        {
+////////////////////////            Log.set("testComponent");
+////////////////////////            //-- test environment preparation: set csFPs and doc - price list "ГК Монолит"
+////////////////////////            Docs doc = Docs.getDoc("ГК Монолит");
+////////////////////////            List<FP> csFPs = new List<FP>();
+////////////////////////            Rule.Rule rule = new Rule.Rule(15);
+//////////////////////////20/3            csFPs = rule.Parser(FP.type.CompSet, doc.LoadDescription);
+////////////////////////            TST.Eq(csFPs.Count, 3);
 
-            //-- simple Component line "B20" in col 1
-            Component comp = new Component(doc, 8 + 3, csFPs);
-            TST.Eq(comp.fps[0].txs[0], "b");
-            TST.Eq(comp.fps[0].txs.Count, 1);
-            TST.Eq(comp.fps[0].pars[0].ToString(), "20");
-            TST.Eq(comp.fps[0].pars.Count, 1);
-            //////////////////////var bb = SecTYPE.Material;
-            //////////////////////var aa = Section.Section.type.Material;
-            //////////////////////bool comp.fps[0].section == SecTYPE.Material;
-            ////// 7/3/2017 //////SecTYPE comp.fps[0].section 
-            //////////////////////TST.Eq(comp.fps[0].section == FP.Section.Material, true);
-            //////////////////////TST.Eq(comp.fps[1].section == FP.Section.Description, true);
-            //////////////////////TST.Eq(comp.fps[1].pars.Count, 1);
-            //////////////////////TST.Eq(comp.fps[2].txs[0].ToString(), "");
-            //////////////////////TST.Eq(comp.fps[2].section == FP.Section.Price, true);
-            doc.Close();
+////////////////////////            //-- simple Component line "B20" in col 1
+////////////////////////            Component comp = new Component(doc, 8 + 3, csFPs);
+////////////////////////            TST.Eq(comp.fps[0].txs[0], "b");
+////////////////////////            TST.Eq(comp.fps[0].txs.Count, 1);
+////////////////////////            TST.Eq(comp.fps[0].pars[0].ToString(), "20");
+////////////////////////            TST.Eq(comp.fps[0].pars.Count, 1);
+////////////////////////            //////////////////////var bb = SecTYPE.Material;
+////////////////////////            //////////////////////var aa = Section.Section.type.Material;
+////// 24/3 ////////////            //////////////////////bool comp.fps[0].section == SecTYPE.Material;
+////////////////////////            ////// 7/3/2017 //////SecTYPE comp.fps[0].section 
+////////////////////////            //////////////////////TST.Eq(comp.fps[0].section == FP.Section.Material, true);
+////////////////////////            //////////////////////TST.Eq(comp.fps[1].section == FP.Section.Description, true);
+////////////////////////            //////////////////////TST.Eq(comp.fps[1].pars.Count, 1);
+////////////////////////            //////////////////////TST.Eq(comp.fps[2].txs[0].ToString(), "");
+////////////////////////            //////////////////////TST.Eq(comp.fps[2].section == FP.Section.Price, true);
+////////////////////////            doc.Close();
 
-            //-- Уголок равнополочный Стальхолдинг -- разбор LoadDescription L{1}x{1}
-            doc = Docs.getDoc("Уголок Стальхолдинг");
-            rule = new Rule.Rule(4);
-//20/3            csFPs = rule.Parser(FP.type.CompSet, doc.LoadDescription);
-            TST.Eq(csFPs.Count, 3);
-            TST.Eq(csFPs[0].pars[0], 1);
+////////////////////////            //-- Уголок равнополочный Стальхолдинг -- разбор LoadDescription L{1}x{1}
+////////////////////////            doc = Docs.getDoc("Уголок Стальхолдинг");
+////////////////////////            rule = new Rule.Rule(4);
+//////////////////////////20/3            csFPs = rule.Parser(FP.type.CompSet, doc.LoadDescription);
+////////////////////////            TST.Eq(csFPs.Count, 3);
+////////////////////////            TST.Eq(csFPs[0].pars[0], 1);
 
-            comp = new Component(doc, 42, csFPs);
-            TST.Eq(comp.fps[0].txs[0], "");
-// 6/3/17   TST.Eq(comp.fps[0].pars[0], "");
+////////////////////////            comp = new Component(doc, 42, csFPs);
+////////////////////////            TST.Eq(comp.fps[0].txs[0], "");
+////////////////////////// 6/3/17   TST.Eq(comp.fps[0].pars[0], "");
 
-            Log.exit();
-        }
-
-        public bool isMatch(ElmAttSet.Group group, object gr)
-        {
-            throw new NotImplementedException();
-        }
-#endif //#if DEBUG
-        #endregion ------ test Component ------
+////////////////////////            Log.exit();
+////////////////////////        }
+////////////////////////#endif //#if DEBUG
+////////////////////////        #endregion ------ test Component ------
     } // end class Component
 } // end namespace Component

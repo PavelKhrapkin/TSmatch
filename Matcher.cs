@@ -67,11 +67,11 @@ namespace TSmatch.Matcher
         public ElmAttSet.Group group;           //reference to the Group<material, profile> being matched
         public Component.Component component;   //used Component in Match the Rule and Group
         public Rule.Rule rule;                  //the rule, which manage the matching
-        public double qty = 0;                  //quantity of the items to be Add to the Quotation
-        public double price = 0;                //total price of the matching group
-
+        
         /// <summary>
         /// Mtch(gr, _rule) - check if Group gr is in match with rule
+        ///    if Mtch.ok.Match - return Mtch.Component chousen from CompSet.Component
+        ///    else ok.NoMatch
         /// </summary>
         /// <param name="gr"></param>
         /// <param name="_rule"></param>
@@ -79,48 +79,20 @@ namespace TSmatch.Matcher
         {
             if (gr == null || gr.guids.Count < 1) return;
             ok = OK.NoMatch;
-#region ????
-            //-- check if Group in match with the Rule
-
-            //////////////////////Sec sec_mat = new Sec(_rule.text, SType.Material);
-            /////// 17/3/2017 ////Sec sec_prf = new Sec(_rule.text, SType.Profile);
-            //////////////////////if (!Sec.isSectionMatch(SType.Material, gr.mat, _rule.text)) return;
-            //////////////////////if (!Sec.isSectionMatch(SType.Profile, gr.prf, _rule.text)) return;
-
-            //////////////////////bool flagMat = false, flagPrf = false;
-            //////////////////////FP csFPmat = _rule.CompSet.csFPs.Find(x => x.section == FP.Section.Material);
-            //////////////////////FP csFPprf = _rule.CompSet.csFPs.Find(x => x.section == FP.Section.Profile);
-            //// 7/3/17 //////////if (csFPmat == null && csFPprf == null)
-            //// 7/3/17 //////////Msg.F("Mtch no fp.Mat & fp.Prf", _rule.text);
-            //// 7/3/17 //////////FP fpGrMat = new FP(gr.mat, csFPmat, out flagMat);
-            //// 7/3/17 //////////if (!flagMat) fpGrMat = null;
-            //// 7/3/17 //////////FP fpGrPrf = new FP(gr.prf, csFPprf, out flagPrf);
-            //// 7/3/17 //////////if (!flagPrf) fpGrPrf = null;
-#endregion ????
+            group = gr;
             foreach (var comp in _rule.CompSet.Components)
             {
-                if (!comp.isMatch(gr)) continue;
-                
-                //!!!! если у comp нет fp для prf или mat - годятся все компоненты.
-                //// 7/3/17 //////////                FP fp_mat = comp.fps.Find(x => x.section == FP.Section.Material);
-                //// 7/3/17 //////////FP fp_prf = comp.fps.Find(x => x.section == FP.Section.Profile);
-                //// 7/3/17 //////////if (fp_mat == null && fp_prf == null) Msg.F("Mtch no fp.Mat & fp.Prf", _rule.text);
-
-                //// 7/3/17 //////////if (fp_mat != null && !fp_mat.Equals(fpGrMat)) continue;
-                //// 7/3/17 //////////if (fp_prf != null && !fp_prf.Equals(fpGrPrf)) continue;
-
+                if (!comp.isMatch(gr, _rule)) continue;
                 //-- Component is found - fill Price for all Guids elemets
                 ok = OK.Match;
                 component = comp;
                 rule = _rule;
-                qty += gr.guids.Count;
-                foreach (var g in gr.guids)
+                gr.totalPrice = 0;
+                foreach (var id in gr.guids)
                 {
-                    //// 7/3/17 //////////                    FP xxx = component.fps.Find(x => x.section == FP.Section.Price);
-                    //// 7/3/17 //////////string parPrice = xxx.pars[0].ToString();
-                    //// 7/3/17 //////////double _price = Lib.ToDouble(parPrice);
-                    //// 7/3/17 //////////ElmAttSet.ElmAttSet.Elements[g].price = _price;
-                    //// 7/3/17 //////////price += _price;
+                    double price = Lib.ToDouble(comp.fps[SType.Price].pars[0].par.ToString());
+                    gr.Elements[id].price = price;
+                    gr.totalPrice += price;
                 }
                 break;
             }
@@ -227,14 +199,18 @@ namespace TSmatch.Matcher
         {
             Log.set("test_Mtch()");
 
-            Log.set(" * тест Rule 4 и Group<C255, L20x5>");
+            Log.set(" * тест Rule 4 и Group<C255, L75x6>");
             Rule.Rule rule = new Rule.Rule(4);
-            ElmAttSet.ElmAttSet el = new ElmAttSet.ElmAttSet("MyGuid", "C245", "Steel", "Уголок75X6", 0, 0, 0, 1000);
+//25/3            model.getGroups();
+            ElmAttSet.ElmAttSet el = new ElmAttSet.ElmAttSet(
+                "ID56A7442F-0000-0D70-3134-353338303236",
+                "C245", "Steel", "Уголок75X6", 0, 0, 0, 1000);
             Dictionary<string, ElmAttSet.ElmAttSet> els = new Dictionary<string, ElmAttSet.ElmAttSet>();
             els.Add(el.guid, el);
             List<string> guids = new List<string>(); guids.Add(el.guid);
             ElmAttSet.Group gr = new ElmAttSet.Group(els, "C245", "Уголок75X6", guids);
             Mtch match = new Mtch(gr, rule);
+            TST.Eq(match.ok == OK.Match, true);
             Log.exit();
             return;     //13/3 - заглушен остаток теста
 
@@ -264,7 +240,7 @@ namespace TSmatch.Matcher
             gr = new ElmAttSet.Group(els, "C235", null, guids);
             match = new Mtch(gr, rule);
             TST.Eq(match.ok == OK.NoMatch, true);
-            TST.Eq(match.price, 0.0);
+//            TST.Eq(match.price, 0.0);
             Log.exit();
         }
 #endif //#if DEBUG

@@ -66,6 +66,7 @@ namespace TSmatch.Section
         SType SecType(string text)
         {
             if (string.IsNullOrEmpty(text)) return SType.NOT_DEFINED;
+            if (text.Contains(':')) text = text.Substring(0, text.IndexOf(':'));
             foreach(SType sec in Enum.GetValues(typeof(SType)))
             {
                 if (sec == SType.NOT_DEFINED) continue;

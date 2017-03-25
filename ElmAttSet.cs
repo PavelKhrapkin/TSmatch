@@ -304,10 +304,12 @@ namespace TSmatch.ElmAttSet
         public double totalWeight;
         public double totalVolume;
         public double totalPrice;
-        public Mtch match;          // Reference to the matched supply source (i.e.line in price list)       
+        public Mtch match;          // Reference to the matched supply source (i.e.line in price list)   
+        public Dictionary<string, ElmAttSet> Elements = new Dictionary<string, ElmAttSet>();
 
         public Group(Dictionary<string, ElmAttSet>Els, string _mat, string _prf, List<string> _guids)
         {
+            Elements = Els;
             mat = Lib.ToLat(_mat).ToLower();
             prf = Lib.ToLat(_prf).ToLower();
             guids = _guids;
