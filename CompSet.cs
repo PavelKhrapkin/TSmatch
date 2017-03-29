@@ -61,20 +61,14 @@ namespace TSmatch.CompSet
                                     //        internal List<FP> csFPs = new List<FP>();    // parsed LoadDescriptor of price list Document
         public readonly Dictionary<SType, FP> csFPs = new Dictionary<SType, FP>();
 
-        public CompSet(string _name, string LoadDescriptor, List <Comp> comps = null)
+#if DEBUG   //29-Mar-2017 for UT only
+        public CompSet(string _name, Rule.Rule rule, string LoadDescriptor, List <Comp> comps = null)
         {
             name = _name;
-            string[] sections = Lib.ToLat(LoadDescriptor).ToLower().Split(';');
-            foreach (string str in sections)
-            {
-                Sec s = new Sec(str);
-                if (s.type == SType.NOT_DEFINED) continue;
-                FP fp = new FP(FP.type.CompSet, str);
-                csFPs.Add(s.type, fp);
-            }
+            csFPs = rule.Parser(FP.type.CompSet, LoadDescriptor);
             if (comps != null) Components = comps;
         }
-        
+#endif //DEBUG        
         ////////////////public CompSet(string _name, List<Component.Component> _comps, Supl _supl, Docs _doc, List<FP> _csFPs)
         ////////////////{
         ////////////////    this.name       = _name;
@@ -112,14 +106,6 @@ namespace TSmatch.CompSet
             if (string.IsNullOrEmpty(docName)) Msg.F("CompSet not found price list");
             return Docs.getDoc(docName);
         }
-
-#if DEBUG
-        //this overload for Unit Test purpases only
-        public CompSet(List<Component.Component> _comps)
-        {
-            Components = _comps;
-        }
-#endif
 
         ////////internal Component.Component CompMatch(ElmAttSet.Group gr)
         ////////{

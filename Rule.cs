@@ -76,11 +76,12 @@ namespace TSmatch.Rule
         // параметр doc не указан, по умолчанию извлекаем Правила из TSmatch.xlsx/Rules
         public Rule(int n) : this(Docs.getDoc(Decl.RULES), n) {}
 #if DEBUG
-        // for unit test purpases only
+        // 27/3/2017 пока - for unit test purpases only
         public Rule(string str, CmpSet cs)
         {
             text = str;
             synonyms = RuleSynParse(str);
+            ruleFPs = Parser(FP.type.Rule, text); 
             CompSet = cs;
         }
 
@@ -112,11 +113,6 @@ namespace TSmatch.Rule
             if (other == null) return false;
             return (this._id == other._id);
         }
-
-//enum Section { Material=0, Profile=1, Cost=2 };
-        //////////////////// we faced the issue: "Материал" recognised with 'p' as Profile.
-        ////////////////////..So, for Profile recognition is necessary at least (pr|пр)
-        //////////////////List<string> ruleSectionRegs = new List<string>() { "m", "(пp|pr)", "(c|ц)" };
 
         /// <summary>
         /// isRuleApplicable(mat, prf) - return true when parsed Rule is applicable to mat and prf values
@@ -191,7 +187,7 @@ namespace TSmatch.Rule
             {
                 Sec txSec = new Sec(sec);
                 if (txSec.type == SType.NOT_DEFINED) continue;
-                FP fp = new FP(_type, sec);
+                FP fp = new FP(_type, txSec.body);
                 result.Add(txSec.type, fp);
             }
             Log.exit();

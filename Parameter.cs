@@ -1,13 +1,14 @@
 ﻿/*----------------------------------------------------------------
  * Parameter -- class dealing a string like "tx{par}"
  *
- * 21.03.2017 Pavel Khrapkin
+ * 28.03.2017 Pavel Khrapkin
  *
  *--- History ---
  *  9.03.2017 made from FingerPrint code fragments
  * 14.03.2017 Unit Test implemented
  * 20.03.2017 public constructor and fields inseat of internal
  * 21.03.2017 par stored str after ':' till ';'
+ * 28.03.2017 ANY ParType implemented
  * ------ Fields ------
  * tx - text before {par}
  * par - part of input string, recognized with 
@@ -23,6 +24,7 @@
  * public Parameter(string str) - fill Parameter fields from string str
  * public Parameter(string str, ParType _type) - convert str to _type
  * ----- Methods: -----
+ * getParType(string str) - return ParType - type of parameter in str
  */
 
 using System.Text.RegularExpressions;
@@ -42,6 +44,13 @@ namespace TSmatch.Parameter
         public Parameter(string str)
         {
             str = Lib.ToLat(str).ToLower().Replace(" ", "");
+            if(string.IsNullOrWhiteSpace(str))
+            {
+                ptype = ParType.ANY;
+                tx = string.Empty;
+                par = str;
+                return;
+            }
             int indx = str.IndexOf(':') + 1;
             Regex parametr = new Regex(@"\{.+?\}");
             Match m = parametr.Match(str, indx);
@@ -122,6 +131,11 @@ namespace TSmatch.Parameter
                 case 'i': result = ParType.Integer; break;
             }
             return result;
+        }
+
+        public string parStr()
+        {
+            return par.ToString();
         }
     } // end class Parameter
 } // end namespace TSmatch.Parametr

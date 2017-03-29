@@ -65,6 +65,7 @@ using ElmMGr  = TSmatch.ElmAttSet.Mgroup;
 using ElmGr   = TSmatch.ElmAttSet.Group;
 using Supplier = TSmatch.Suppliers.Supplier;
 using CmpSet = TSmatch.CompSet.CompSet;
+using SType = TSmatch.Section.Section.SType;
 
 using FileOp = match.FileOp.FileOp;
 
@@ -96,6 +97,10 @@ namespace TSmatch.Model
         private bool wrToFile = true;   // when true- we should write into the file TSmatchINFO.xlsx, else- no changes
 
         public int CompareTo(Model mod) { return mod.date.CompareTo(date); }    //to Sort Models by time
+
+#if DEBUG
+        public Model() { }
+#endif
 
         public Model(DateTime t, string n, string d, string ifc, string m, string p, string md5, HashSet<Rule.Rule> r, string s)
         {
@@ -483,14 +488,18 @@ namespace TSmatch.Model
                 case WR_MODEL_REPORT:       // отчет по сопоставлению групп <материал, профиль> c прайс-листами поставщиков
                     doc.wrDocSetForm("FORM_Report", AutoFit: true);
                     int n = 1;
-                    foreach (var gr in this.elmGroups)
+                    foreach (var gr in elmGroups)
                     {
-                        doc.wrDocForm(n++, gr.mat, gr.prf, gr.totalLength, gr.totalWeight, gr.totalVolume, 0, 0, 0, 0, gr.totalPrice);
+                        var comp = gr.match.component;
+                        string compDescr = comp.fps[SType.Description].pars[0].par.ToString();
+                        doc.wrDocForm(n++, gr.mat, gr.prf
+                            , gr.totalLength, gr.totalWeight, gr.totalVolume
+                            , compDescr, 0, 0, 0, gr.totalPrice);
                     }
                     //--- string - Summary
                     double sumWgh = 0, sumPrice = 0;
                     int iGr = doc.i0;
-                    //21/6/2016 в отладке                    foreach (var gr in Groups)
+                    foreach (var gr in elmGroups)
                     {
                         double? w = doc.Body.Double(iGr, Decl.REPORT_SUPL_WGT);
                         double? p = doc.Body.Double(iGr++, Decl.REPORT_SUPL_PRICE);
@@ -560,12 +569,14 @@ namespace TSmatch.Model
             getGroups();
             foreach (var gr in elmGroups)
             {
+                bool b = false;
                 foreach (var rule in Rules)
                 {
                     Mtch _match = new Mtch(gr, rule);
-                    if (_match.ok == Mtch.OK.Match) matches.Add(_match);
-                    else log.Info("No Match Group. mat= " + gr.mat + "\tprf=" + gr.prf);
+                    if (_match.ok == Mtch.OK.Match) { matches.Add(_match); b = true; break; }
+//27/3                    else log.Info("No Match Group. mat= " + gr.mat + "\tprf=" + gr.prf);
                 }
+                if(!b) log.Info("No Match Group. mat= " + gr.mat + "\tprf=" + gr.prf);
             }
             getSuppliers();
             getPricing();
@@ -653,6 +664,11 @@ namespace TSmatch.Model
         {
             elements.Clear();
             foreach (var elm in els) elements.Add(elm);
+        }
+        public void setElements(Dictionary<string, Elm> els)
+        {
+            elements.Clear();
+            foreach (var elm in els) elements.Add(elm.Value);
         }
         private void getSuppliers()
         {

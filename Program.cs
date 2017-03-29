@@ -48,7 +48,7 @@ namespace TSmatch
             //6/8/16            Mod mod = Mod.UpdateFrTekla();
             //            Mtch.UseRules(mod);
 #endregion 
-            Console.ReadKey();
+//27/3            Console.ReadKey();
         }
     } // end class
 } // end namespace

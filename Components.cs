@@ -44,6 +44,7 @@ using TypeFP = TSmatch.FingerPrint.FingerPrint.type;
 using TSmatch.Document;
 using TSmatch.Rule;
 using SType = TSmatch.Section.Section.SType;
+using ParType = TSmatch.Parameter.Parameter.ParType;
 using TSmatch.ElmAttSet;
 
 namespace TSmatch.Component
@@ -52,35 +53,71 @@ namespace TSmatch.Component
     {
         public static readonly ILog log = LogManager.GetLogger("Component");
 
-////////////////public readonly string description; // строка вида "Угoлoк cтaльнoй paвнoпoл. 25 x 4 cт3cп/пc5"
-////////////////public readonly string mat;         // материал компонента. Извлекается из description или из прайс-листа
-////////////////public readonly double length;      // длина заготовки в м
-// 19/3/17 /////public readonly double weight_m;    // ($W1) вес погонного метра заготовки или за кубометр (для бетона)
-////////////////public readonly double? price;      // ($P1) цена за 1 тонну в руб
-////////////////public readonly double vol_m;
-////////////////public readonly List<FP> fps = new List<FP>();
-        public readonly Dictionary<SType, FP> fps = new Dictionary<SType, FP>(); 
-//        public readonly FP matFP, prfFP;
+        public readonly Dictionary<SType, FP> fps = new Dictionary<SType, FP>();
 
+#if DEBUG   //-- 29-Mar-2017 -- вариант конструктора только для тестирования 
         public Component(string description, string mat
-            , double length = 0, double weight = 0, double price = 0)
+            , double length = 0, double weight = 0, double price = 0
+            , Dictionary<SType,FP> csFPs = null)
         {
-            AddPar(SType.Description, description);
-            AddPar(SType.Material, mat);
-            AddPar(SType.Profile, description);   //возможно, потом изменится для других типов прайс-листов
-            AddPar(SType.Price, price);
-            AddPar(SType.LengthPerUnit, length);
-            AddPar(SType.WeightPerUnit, weight);
+            if (csFPs == null)
+            {
+                AddPar(SType.Description, description);
+                AddPar(SType.Material, mat);
+                AddPar(SType.Profile, description);   //возможно, потом изменится для других типов прайс-листов
+                AddPar(SType.Price, price);
+                AddPar(SType.LengthPerUnit, length);
+                AddPar(SType.WeightPerUnit, weight);
+            }
+            else
+            {
+                foreach(var sec in csFPs)
+                {
+                    FP csFP = csFPs[sec.Key];
+                    //UU тут надо разбирить строку прайс-листа по csFP
+                    // -- есть ли ссылка на соседнюю секцию?
+                    ////////////////////////string templ = sec.Value.section.body;
+                    ////////////////////////List<string> ps;
+                    ////////////////////////if (sec.Value.section.body.Contains("*"))
+                    ////////////////////////    ps = sec.Value.section.sectionPars(templ);
+                    foreach (var par in csFP.pars)
+                    {
+                        switch (sec.Key)
+                        {
+                            case SType.Description:
+                                AddPar(sec.Key, description);
+                                break;
+                            case SType.Material:
+                                AddPar(sec.Key, mat, csFP);
+                                break;
+
+
+                        }
+                    }
+                }
+            }
         }
-        void AddPar(SType stype, dynamic obj)
+        void AddPar(SType stype, dynamic obj, FP csFP = null)
         {
-            if(    obj.GetType() == typeof(string) && obj != string.Empty
+            if(csFP != null)
+            {
+                var sec = new Section.Section((string)obj);
+                List<Parameter.Parameter> ps = sec.secPars(csFP.parN());
+ //29/3               foreach (string str in ps)
+                {
+ //29/3                   FP newFP = new FP()
+                    fps.Add(stype, new FP(stype, obj));
+                }
+                return;
+            }
+
+            if (    obj.GetType() == typeof(string) && obj != string.Empty
                 || obj.GetType() == typeof(double) && (double)obj != 0)
             {
                 fps.Add(stype, new FP(stype, obj));
             }
         }
-
+#endif  // DEBUG -- вариант для тестирования
         /// <summary>
         /// constructor Component(doc, i, List<FP>cs_fps, List<FP>rule_fps) - get Component from price-list in doc line i
         /// </summary>
@@ -93,7 +130,7 @@ namespace TSmatch.Component
             foreach (var fpD in cs_fps)
             {
                 FP csFP = fpD.Value;
-                string str = doc.Body.Strng(i, csFP.Col());
+                string str = csFP.Int() == -1? "": doc.Body.Strng(i, csFP.Col());
                 FP compFP = new FP(str, csFP, out flag);
                 if (flag) fps.Add(csFP.section.type, compFP);
             }
@@ -125,58 +162,58 @@ namespace TSmatch.Component
             }
             return str;
         }
-        /// <summary>
-        /// setComp(doc) - fill price list of Components from doc
-        /// setComp(doc_name) - overload
-        /// </summary>
-        /// <param name="doc">price-list</param>
-        /// <returns>List of Components</returns>
-        /// <history>26.3.2016
-        ///  3.4.2016 - setComp(doc_name) overload
-        ///  8.4.2016 - remove unnecteesary fields - bug fix
-        /// 14.4.2016 - field mat = Material fill 
-        ///  </history>
-        public static List<Component> setComp(string doc_name)
-        { return setComp(Docs.getDoc(doc_name)); }
-        public static List<Component> setComp(Docs doc)
-        {
-            Log.set("setComp(" + doc.name + ")");
-            List<int> docCompPars = Lib.GetPars(doc.LoadDescription);
-            //-- заполнение массива комплектующих Comps из прайс-листа металлопроката
-            List<Component> Comps = new List<Component>();
-            for (int i = doc.i0; i <= doc.il; i++)
-            {
-                try
-                {
-                    string descr = doc.Body.Strng(i, docCompPars[0]);
-                    double lng = 0;
-                    //-- разбор параметров LoadDescription
+        ///////////////////// <summary>
+        ///////////////////// setComp(doc) - fill price list of Components from doc
+        ///////////////////// setComp(doc_name) - overload
+        ///////////////////// </summary>
+        ///////////////////// <param name="doc">price-list</param>
+        ///////////////////// <returns>List of Components</returns>
+        ///////////////////// <history>26.3.2016
+        /////////////////////  3.4.2016 - setComp(doc_name) overload
+        /////////////////////  8.4.2016 - remove unnecteesary fields - bug fix
+        ///////////////////// 14.4.2016 - field mat = Material fill 
+        /////////////////////  </history>
+        //////////////////public static List<Component> setComp(string doc_name)
+        //////////////////{ return setComp(Docs.getDoc(doc_name)); }
+        //////////////////public static List<Component> setComp(Docs doc)
+        //////////////////{
+        //////////////////    Log.set("setComp(" + doc.name + ")");
+        //////////////////    List<int> docCompPars = Lib.GetPars(doc.LoadDescription);
+        //////////////////    //-- заполнение массива комплектующих Comps из прайс-листа металлопроката
+        //////////////////    List<Component> Comps = new List<Component>();
+        //////////////////    for (int i = doc.i0; i <= doc.il; i++)
+        //////////////////    {
+        //////////////////        try
+        //////////////////        {
+        //////////////////            string descr = doc.Body.Strng(i, docCompPars[0]);
+        //////////////////            double lng = 0;
+        //////////////////            //-- разбор параметров LoadDescription
 
-                    List<int> strPars = Lib.GetPars(descr);
-                    string docDescr = doc.LoadDescription;
-                    int parShft = 0;
-                    while (docDescr.Contains('/'))
-                    {
-                        string[] s = doc.LoadDescription.Split('/');
-                        List<int> c = Lib.GetPars(s[0]);
-                        int pCol = c[c.Count() - 1];    // колонка - последний параметр до '/'
-                        List<int> p = Lib.GetPars(s[1]);
-                        lng = strPars[p[0] - 1];    // длина заготовки = параметр в str; индекс - первое число после '/'
-                        docDescr = docDescr.Replace("/", "");
-                        parShft++;
-                    }
-                    if (lng == 0)
-                        lng = doc.Body.Int(i, docCompPars[1]) / 1000;    // для lng указана колонка в LoadDescription   
-                    double price = doc.Body.Double(i, docCompPars[2] + parShft);
-                    double wgt = 0.0;   //!!! времянка -- пока вес будем брать только из Tekla
-                    string mat = "";    //!!! времянка -- материал нужно извлекать из description или описания - еще не написано!
-                    Comps.Add(new Component(descr, mat, lng, wgt, price));
-                }
-                catch { Msg.F("Err in setComp", doc.name); }
-            }
-            Log.exit();
-            return Comps; 
-        }
+        //////////////////            List<int> strPars = Lib.GetPars(descr);
+        //////////////////            string docDescr = doc.LoadDescription;
+        //////////////////            int parShft = 0;
+        //////////////////            while (docDescr.Contains('/'))
+        //////////////////            {
+        //////////////////                string[] s = doc.LoadDescription.Split('/');
+        //////////////////                List<int> c = Lib.GetPars(s[0]);
+        //////////////////                int pCol = c[c.Count() - 1];    // колонка - последний параметр до '/'
+        //////////////////                List<int> p = Lib.GetPars(s[1]);
+        //////////////////                lng = strPars[p[0] - 1];    // длина заготовки = параметр в str; индекс - первое число после '/'
+        // 29/3/2017 /////                docDescr = docDescr.Replace("/", "");
+        //  устарело /////                parShft++;
+        //////////////////            }
+        //////////////////            if (lng == 0)
+        //////////////////                lng = doc.Body.Int(i, docCompPars[1]) / 1000;    // для lng указана колонка в LoadDescription   
+        //////////////////            double price = doc.Body.Double(i, docCompPars[2] + parShft);
+        //////////////////            double wgt = 0.0;   //!!! времянка -- пока вес будем брать только из Tekla
+        //////////////////            string mat = "";    //!!! времянка -- материал нужно извлекать из description или описания - еще не написано!
+        //////////////////            Comps.Add(new Component(descr, mat, lng, wgt, price));
+        //////////////////        }
+        //////////////////        catch { Msg.F("Err in setComp", doc.name); }
+        //////////////////    }
+        //////////////////    Log.exit();
+        //////////////////    return Comps; 
+        //////////////////}
 
         public bool isMatch(ElmAttSet.Group gr, Rule.Rule rule = null) //25/3 Dictionary<SecTYPE,List<string>> ruleFPs = null)
         {
@@ -197,16 +234,31 @@ namespace TSmatch.Component
                 List<string> Syns = ruleSyns[stype].ToList();
                 if (!Lib.IContains(Syns, comMatPrf) || !Lib.IContains(Syns, grMatPrf)) return false;
 
-                var p1 = Par(Syns, comMatPrf);
-                var p2 = Par(Syns, grMatPrf);
-                bool b = p1 != p2  && stype == SType.Material;
+                string c = strExclude(comMatPrf, Syns);
+                string g = strExclude(grMatPrf, Syns);
+//27/3                if(c == g) return true;
+                return c.Contains(g);
+                ////////////////var p1 = Params(Syns, comMatPrf, );
+                //// 27/3 //////var p2 = Params(Syns, grMatPrf);
+                ////////////////bool b = p1 != p2  && stype == SType.Material;
 
-                return Par(Syns, comMatPrf) == Par(Syns, grMatPrf);
+                return Params(Syns, comMatPrf) == Params(Syns, grMatPrf);
             }
             return false;
         }
 
-        string Par(List<string> lst, string str)
+        private string strExclude(string str, List<string> syns)
+        {
+            foreach(string s in syns)
+            {
+                if (!str.Contains(s)) continue;
+                return str.Substring(s.Length);
+            }
+            Msg.F("Rule.strExclude error", str, syns);
+            return null;
+        }
+
+        string Params(List<string> lst, string str)
         {
             foreach (string st in lst)
             {

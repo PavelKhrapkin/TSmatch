@@ -52,7 +52,6 @@ using ParType = TSmatch.Parameter.Parameter.ParType;
 using Sec = TSmatch.Section.Section;
 using SType = TSmatch.Section.Section.SType;
 using TST = TSmatch.Test.assert;
-using TSmatch.Section;
 
 namespace TSmatch.FingerPrint
 {
@@ -66,7 +65,6 @@ namespace TSmatch.FingerPrint
         public readonly Sec section;
         public readonly List<string> txs = new List<string>();
         public readonly List<Param> pars = new List<Param>();
-        public readonly List<string> synonyms = new List<string>();
 
         //--- FP constructor 1 for Rule and CompSet
         public FingerPrint(type _type, string str)
@@ -77,23 +75,31 @@ namespace TSmatch.FingerPrint
         }
 
         //--- FP constructor 2 for Component
+#if DEBUG   //--- 29-Mar-2017 Вариант конструктора для UT
         public FingerPrint(SType stype, dynamic obj)
         {
             typeFP = type.Component;
+            if (stype == SType.Description)
+            {
+                Param p = new Param(obj);
+                p.par = p.tx = obj;
+                pars.Add(p);
+                return;
+            }
             section = new Sec(stype.ToString() + ":");
             string str = "";
             if (obj.GetType() == typeof(string)) str = (string)obj;
             if (obj.GetType() == typeof(double)) str = ((double)obj).ToString();
             pars.Add(new Param(str));
         }
-
+#endif      //--- 29-Mar-2017 Вариант конструктора для UT
         ////////////////public FingerPrint(Sec.SType stype, string str, ParType parType = ParType.String)
         ////////////////{
         // 21/3 ////////    Param par = new Param(str, parType);
         ////////////////    pars.Add(par);
         ////////////////}
 
-        public FingerPrint(string str, Rule.Rule rule, Section.Section sec)
+        public FingerPrint(string str, Rule.Rule rule, Sec sec)
         {
             FingerPrint ruleFP = rule.ruleFPs[sec.type];
             //        FingerPrint csFP = rule.CompSet.csFPs.Find(x => x.section.type == sec.type);
@@ -101,7 +107,7 @@ namespace TSmatch.FingerPrint
             var vv = rule.CompSet.csFPs;
 
 //20/3 ЗАГЛУШКА!!            FingerPrint csFP = rule.CompSet.csFPs[stype];
-            section.type = sec.type;
+            section = sec;
             string ruleText = sec.body;
             List<string> sPars = ReverseFomat(str, ruleText);
             int i = 0;
@@ -182,6 +188,10 @@ namespace TSmatch.FingerPrint
             if (string.IsNullOrEmpty(str) || csFP == null) return;
             flag = true;
             section = csFP.section;
+            if(str.Contains("*"))
+            {
+                pars = section.secPars(str);
+            }
             Param par = new Param(str);
             pars.Add(par);
         }
@@ -242,22 +252,6 @@ namespace TSmatch.FingerPrint
             }
             return result;
         }
-        //////////////////////////public enum ParType { String, Integer, Double }
-        //////////////////////////private ParType getParType(string str)
-        //////////////////////////{
-        //////////////////////////    const string PAR_TYPE = @"\{(s|d|i).*?~";
-        //////////////////////////    ParType result = ParType.String;
-        //////////////////////////    Regex parType = new Regex(PAR_TYPE, RegexOptions.IgnoreCase);
-        //////////////////////////    Match m = parType.Match(str);
-        // 20/3/17 ///////////////    if (m.Value == "") return result;
-        //////////////////////////    switch(m.Value[1])
-        //////////////////////////    {
-        //////////////////////////        case 's': break;
-        //////////////////////////        case 'd': result = ParType.Double; break;
-        //////////////////////////        case 'i': result = ParType.Integer; break;
-        //////////////////////////    }
-        //////////////////////////    return result;
-        //////////////////////////}
 
         private string synParser(string tx, ref int iTx)
         {
@@ -304,6 +298,10 @@ namespace TSmatch.FingerPrint
             return result;
         }
 
+        public string parN(int n = 0)
+        {
+            return pars[n].par.ToString();
+        }
         internal string Info()
         {
             string result = "FP.Info: " + typeFP.ToString();

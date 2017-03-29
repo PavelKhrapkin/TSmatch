@@ -2,15 +2,17 @@
  * Section -- class dealing with the fragment of string related to
  *            some section - f.e. Material, or Price
  *
- * 21.03.2017 Pavel Khrapkin
+ * 28.03.2017 Pavel Khrapkin
  *
  *--- History ---
  *  7.03.2017 made from other module fragments
  * 19.03.2017 re-written with SectionTab as a argument of Constructor
  * 21.03.2017 call Bootstrap.initSection() for SectionTab
+ * 28.03.2017 munli-header Section like "M: Def: body"
  * ------ Fields ------
  * type section - recognized enum Section type, f.e. Material, Price etc
  * string body  - text string, contained in Section between ':' and ';' or end
+ *                if no ':' found, return input string
  * --- Constructors ---  
  * public Section(string _text [, SType stype]) - if(SectionTab==null) initSection
  * ----- Methods: -----
@@ -18,11 +20,13 @@
  */
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text.RegularExpressions;
+using System.Linq;
 using log4net;
 using Lib = match.Lib.MatchLib;
 using Msg = TSmatch.Message.Message;
+using Par = TSmatch.Parameter.Parameter;
+using Boot = TSmatch.Bootstrap.Bootstrap;
 
 namespace TSmatch.Section
 {
@@ -44,7 +48,7 @@ namespace TSmatch.Section
 
         public Section(string _text, SType stype = SType.NOT_DEFINED)
         {
-            if (SectionTab == null) { SectionTab = new Bootstrap.Bootstrap.initSection().SectionTab; }
+            if (SectionTab == null) SectionTab = new Boot.initSection().SectionTab;
             string[] sections = Lib.ToLat(_text).ToLower().Replace(" ", "").Split(';');
             if (stype == SType.NOT_DEFINED)
             {
@@ -81,8 +85,9 @@ namespace TSmatch.Section
 
         string SecBody(string str)
         {
-            int ind = str.IndexOf(':') + 1;
-            if (ind == 0) ind = str.Length;
+            Match m = Regex.Match(str, ".*:");
+            int ind = m.Value.Length;
+ //29/3           if (ind == 0) ind = str.Length;
             return str.Substring(ind);
         }
 
@@ -99,14 +104,17 @@ namespace TSmatch.Section
             return false;
         }
 
-        //////public bool isSectionInStr(string str)
-        //////{
-        //////    foreach (SType sec in Enum.GetValues(typeof(SType)))
-        //////    {
-        //////        Section s = new Section(str);
-        //////        if
-        //////    }
-        //////        return ok;
-        //////}
+        public List<Par> secPars(string template)
+        {
+            List<Par> result = new List<Par>();
+            template = Lib.ToLat(template).ToLower().Replace(" ", "");
+            template = SecBody(template);
+            string pattern = "^" + template.Replace("*", @"(.*?)") + "$";
+            Regex r = new Regex(pattern);
+            Match m = r.Match(body);
+            for (int i = 1; i < m.Groups.Count; i++)
+                result.Add(new Par(m.Groups[i].Value));
+            return result;
+        }
     } // end class Section
 } // end namespace TSmatch.Section
