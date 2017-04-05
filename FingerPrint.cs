@@ -2,18 +2,16 @@
  * FingerPrin (FP) -- characteristic text fragments and parameters
  *                    of CAD-model element attribute, Component, Rule
  *
- * 21.03.2017 Pavel Khrapkin
+ * 31.03.2017 Pavel Khrapkin
  *
  *--- History ---
  * 28.12.2016 made from other module fragments
  * 17.01.2017 class fields and identification method changed
  *  9.03.2017 Section class used
- * 21.03.2017 Parameter class use 
- *--- <ToDo> 2017.1.10:
- *  - реализовать разбор синонимов в конструкторе 
- *  - реализовать Equals - идентификацию
- *--- <ToDo> 2017.3.7
- *  - реализовать взаимодействие с Section. Чистить
+ * 21.03.2017 Parameter class use
+ * 31.03.2017 Упрощенный FP c отделенным PRICE  
+ *--- <ToDo> 2017.03.31:
+ *  - упростить поля FP для работы только с уже обработанными прайс-листами
  * --- Constructors ---  
  ---* static FingerPrint() - initialyze static Dictionary Sections for RecognizeSection
  * public FingerPrint(type, str)            - initialyze FP of all types, but Components (constructor 1)
@@ -47,7 +45,7 @@ using Msg = TSmatch.Message.Message;
 using Mtr = match.Matrix.Matr;
 using FileOp = match.FileOp.FileOp;
 using Docs = TSmatch.Document.Document;
-using Param = TSmatch.Parameter.Parameter;
+using Par = TSmatch.Parameter.Parameter;
 using ParType = TSmatch.Parameter.Parameter.ParType;
 using Sec = TSmatch.Section.Section;
 using SType = TSmatch.Section.Section.SType;
@@ -59,19 +57,38 @@ namespace TSmatch.FingerPrint
     {
         public static readonly ILog log = LogManager.GetLogger("FingerPrint");
 
-        public enum type { Rule, CompSet, Component }
+        public string par;
 
-        public readonly type typeFP;
-        public readonly Sec section;
-        public readonly List<string> txs = new List<string>();
-        public readonly List<Param> pars = new List<Param>();
+        public FingerPrint(string str)
+        {
+            par = str;
+        }
+
+        public bool Equals(FingerPrint other)
+        {
+            if (other == null) return false;
+            return par == other.par;
+        }
+        public int Int() { return Lib.ToInt(par); }
+        public int Col() { return Int(); }
+#if OLD_FP
+        //31/3 попробую..        public enum type { Rule, CompSet, Component }
+
+        //31/3        public readonly type typeFP;
+        //31/3        public readonly Sec section;
+        //31/3        public readonly List<string> txs = new List<string>();
+        //31/3        public List<Par> pars = new List<Par>();
+        //31/3        public SType refSection;
 
         //--- FP constructor 1 for Rule and CompSet
         public FingerPrint(type _type, string str)
         {
             typeFP = _type;    
             section = new Sec(str);
-            pars.Add(new Param(str));
+            refSection = section.refSection;
+            Par p = new Par(str);
+            pars.Add(p);
+            txs.Add(p.tx);
         }
 
         //--- FP constructor 2 for Component
@@ -81,7 +98,7 @@ namespace TSmatch.FingerPrint
             typeFP = type.Component;
             if (stype == SType.Description)
             {
-                Param p = new Param(obj);
+                Par p = new Par(obj);
                 p.par = p.tx = obj;
                 pars.Add(p);
                 return;
@@ -90,7 +107,7 @@ namespace TSmatch.FingerPrint
             string str = "";
             if (obj.GetType() == typeof(string)) str = (string)obj;
             if (obj.GetType() == typeof(double)) str = ((double)obj).ToString();
-            pars.Add(new Param(str));
+            pars.Add(new Par(str));
         }
 #endif      //--- 29-Mar-2017 Вариант конструктора для UT
         ////////////////public FingerPrint(Sec.SType stype, string str, ParType parType = ParType.String)
@@ -192,7 +209,7 @@ namespace TSmatch.FingerPrint
             {
                 pars = section.secPars(str);
             }
-            Param par = new Param(str);
+            Par par = new Par(str);
             pars.Add(par);
         }
 
@@ -567,5 +584,6 @@ namespace TSmatch.FingerPrint
         }
 #endif //#if DEBUG
         #endregion ------ testFP ------
+#endif //OLD_FP
     } //end class Fingerprint
 } // end namespace

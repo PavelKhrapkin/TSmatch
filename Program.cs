@@ -24,7 +24,7 @@ namespace TSmatch
         [STAThread]
         static void Main(string[] args)
         {
-            Log.START("TSmatch v2017.03.13");
+            Log.START("TSmatch v2017.04.5");
             var bootstrap = new Bootstrap.Bootstrap();
             var model = (Model.Model) bootstrap.init(BootMode.Model);
 

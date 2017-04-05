@@ -39,9 +39,11 @@ using Comp = TSmatch.Component.Component;
 using CmpSet = TSmatch.CompSet.CompSet;
 using Supl = TSmatch.Suppliers.Supplier;
 using FP = TSmatch.FingerPrint.FingerPrint;
+using DP = TSmatch.DPar.DPar;
 using Sec = TSmatch.Section.Section;
 using SType = TSmatch.Section.Section.SType;
 using TSmatch.FingerPrint;
+using TSmatch.Section;
 
 namespace TSmatch.Rule
 {
@@ -53,10 +55,11 @@ namespace TSmatch.Rule
 		public readonly string name;        //название правила
 		public readonly string type;        //тип правила
 		public readonly string text;        //текст правила
+
         //---- references to other classes - price-list conteiners
-		public readonly CmpSet CompSet;     //список компонентов, с которыми работает правило
+        public readonly CmpSet CompSet;     //список компонентов, с которыми работает правило
 		public readonly Supl Supplier;      //Поставщик
-        public Dictionary<SType, FP> ruleFPs;   //identifiers of Materials, Profile, and others
+        public readonly DP ruleDP;          //identifiers of Materials, Profile, and others
         public Dictionary<SType, List<string>> synonyms = new Dictionary<SType, List<string>>();
  
         public double RuleRedundencyPerCent = 0.0;  //коэффициент избыточности, требуемый запас по данному материалу/профилю/Правилу
@@ -67,11 +70,11 @@ namespace TSmatch.Rule
             type = (string)doc.Body[i, Decl.RULE_TYPE];
             text = Lib.ToLat((string)doc.Body[i, Decl.RULE_RULE]);
             synonyms = RuleSynParse(text);
-            ruleFPs = Parser(FP.type.Rule, text);
+            ruleDP = new DP(text);  // template for identification
             string csName = (string)doc.Body[i, Decl.RULE_COMPSETNAME];
             string suplName = (string)doc.Body[i, Decl.RULE_SUPPLIERNAME];
             Supplier = new Suppliers.Supplier(suplName);
-            CompSet = new CmpSet(csName, Supplier, this); 
+            CompSet = new CmpSet(csName, Supplier); 
         }
         // параметр doc не указан, по умолчанию извлекаем Правила из TSmatch.xlsx/Rules
         public Rule(int n) : this(Docs.getDoc(Decl.RULES), n) {}
@@ -81,7 +84,7 @@ namespace TSmatch.Rule
         {
             text = str;
             synonyms = RuleSynParse(str);
-            ruleFPs = Parser(FP.type.Rule, text); 
+            ruleDP = new DP(str);
             CompSet = cs;
         }
 
@@ -113,7 +116,7 @@ namespace TSmatch.Rule
             if (other == null) return false;
             return (this._id == other._id);
         }
-
+#if OLD
         /// <summary>
         /// isRuleApplicable(mat, prf) - return true when parsed Rule is applicable to mat and prf values
         /// </summary>
@@ -336,5 +339,6 @@ namespace TSmatch.Rule
             Regex regHdr = new Regex(reg, RegexOptions.IgnoreCase);
             return regHdr.Replace(str, "");  // remove Section header
         }
+#endif //OLD
     } // end class Rule
 } // end namespace Rule

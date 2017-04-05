@@ -205,7 +205,7 @@ namespace TSmatch.Model
             for (int i = doc.i0; i <= doc.il; i++)
             {
                 if (doc.Body.Strng(i, Decl.MODEL_NAME) != modName) continue;
-                return new TSmatch.Model.Model(i);
+                return new Model(i);
             }
             Msg.F("TEMPORARY: New model in Tekla! Put it in Model Jornal manually");
             return null;
@@ -490,11 +490,12 @@ namespace TSmatch.Model
                     int n = 1;
                     foreach (var gr in elmGroups)
                     {
-                        var comp = gr.match.component;
-                        string compDescr = comp.fps[SType.Description].pars[0].par.ToString();
+                        string foundDescr = "";
+                        if(gr.match != null && gr.match.ok == Mtch.OK.Match)
+                            foundDescr = gr.match.component.Str(SType.Description);
                         doc.wrDocForm(n++, gr.mat, gr.prf
                             , gr.totalLength, gr.totalWeight, gr.totalVolume
-                            , compDescr, 0, 0, 0, gr.totalPrice);
+                            , foundDescr, 0, 0, 0, gr.totalPrice);
                     }
                     //--- string - Summary
                     double sumWgh = 0, sumPrice = 0;

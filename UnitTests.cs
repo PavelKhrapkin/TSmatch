@@ -1,7 +1,7 @@
 ﻿/*----------------------------------------------------------------
  * Unit Test Module 
  *
- * 29.03.2017 Pavel Khrapkin
+ * 31.03.2017 Pavel Khrapkin
  *
  *--- History ---
  * 14.03.2017 Unit Test implemented
@@ -10,8 +10,7 @@
  * ---- Tested Modules: ------------
  * Parameter    2017.03.29 OK
  * Section      2017.03.29 OK
- * FingerPrint  2017.03.17 частично - не все тесты перенесены из модуля TEST,
- *                         не распознается tx справа от параметра {n} - может и не надо??
+ * FingerPrint  2017.03.31 OK
  */
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
@@ -22,7 +21,7 @@ using ParType = TSmatch.Parameter.Parameter.ParType;
 using Sec = TSmatch.Section.Section;
 using SType = TSmatch.Section.Section.SType;
 using FP = TSmatch.FingerPrint.FingerPrint;
-using FPtype = TSmatch.FingerPrint.FingerPrint.type;
+using DP = TSmatch.DPar.DPar;
 
 using IMIT = TSmatch.Unit_Tests.Imitation._UT_Imitation;
 
@@ -153,6 +152,10 @@ namespace TSmatch.Unit_Tests
             Assert.AreEqual(s.type, SType.Description);
             Assert.AreEqual(s.body, "xx");
 
+            s = new Sec("Des:{1}");
+            Assert.AreEqual(s.type, SType.Description);
+            Assert.AreEqual(s.body, "{1}");
+
             s = new Sec("длина: 5");
             Assert.AreEqual(s.type, SType.LengthPerUnit);
             Assert.AreEqual(s.body, "5");
@@ -187,11 +190,11 @@ namespace TSmatch.Unit_Tests
 
             //----- error input text handling -----
             s = new Sec("Цена 2540");   // no ':'
-            Assert.AreEqual(s.type, SType.Price);
+            Assert.AreEqual(s.type, SType.NOT_DEFINED);
             Assert.AreEqual(s.body, "цeнa2540");
 
             s = new Sec("Цена 2540;");
-            Assert.AreEqual(s.type, SType.Price);
+            Assert.AreEqual(s.type, SType.NOT_DEFINED);
             Assert.AreEqual(s.body, "цeнa2540");
 
             s = new Sec("; профиль: L");
@@ -206,6 +209,37 @@ namespace TSmatch.Unit_Tests
             s = new Sec(";проф: Sec; Mat: n", SType.Unit);
             Assert.AreEqual(s.type, SType.NOT_DEFINED);
             Assert.AreEqual(s.body, "");
+        }
+
+        [TestMethod()]
+        public void UT_Section_Unit()
+        {
+            var s = new Sec("ед: руб/т");
+            Assert.AreEqual(s.type, SType.UNIT_Weight);
+
+            s = new Sec("ед: руб/тн");
+            Assert.AreEqual(s.type, SType.UNIT_Weight);
+
+            s = new Sec("ед: руб.за тонну");
+            Assert.AreEqual(s.type, SType.UNIT_Weight);
+
+            s = new Sec("un: руб.за пог.м");
+            Assert.AreEqual(s.type, SType.UNIT_Length);
+
+            s = new Sec("ед: за 1 штуку");
+            Assert.AreEqual(s.type, SType.UNIT_Qty);
+
+            //--- распознается неправильно
+            s = new Sec("un: руб. за метр");    //меТр - т=тонна дает UNIT_ Weight
+            Assert.AreEqual(s.type, SType.UNIT_Weight);
+        }
+
+        [TestMethod()]
+        public void UT_Section_SecRef()
+        {
+            var s = new Sec("Profile: Descr: Уголок *х*");
+            Assert.AreEqual(s.refSection, SType.Description);
+            Assert.AreEqual(s.type, SType.Profile);
         }
 
         [TestMethod()]
@@ -264,74 +298,65 @@ namespace TSmatch.Unit_Tests
     public class FingerPrint_Tests
     {
         [TestMethod()]
-        public void UT_FP_constr1_Test()
+        public void UT_FP()
         {
-            // * тест: Уголок constructor1 FP(type.Rule, Проф: L * x *)
-            FP xr2 = new FP(FPtype.Rule, "Проф: L * x *");
-            Assert.AreEqual(xr2.section.type.ToString(), "Profile");
-            Assert.AreEqual(xr2.pars.Count, 1);
-            Assert.AreEqual(xr2.pars[0].par.ToString(), "l*x*");
-            Assert.AreEqual(xr2.txs.Count, 0);
+            FP fp = new FP("hh");
+            Assert.AreEqual(fp.par, "hh");
 
-            // * Уголок с материалом constructor1 FP(type.Rule, Проф: L * x * cт *)");
-            xr2 = new FP(FPtype.Rule, "Проф: L * x * cт *");
-            Assert.AreEqual(xr2.section.type.ToString(), "Profile");
-            Assert.AreEqual(xr2.pars.Count, 1);
-            Assert.AreEqual(xr2.pars[0].par.ToString(), "l*x*cт*");
-            Assert.AreEqual(xr2.txs.Count, 0);
-
-            // * тест: Бетон -монолит constructor1 FP(type.Rule, М:В*)");
-            FP rule = new FP(FPtype.Rule, "M:B*;");
-            Assert.AreEqual(rule.pars.Count, 1);
-            Assert.AreEqual(rule.typeFP.ToString(), "Rule");
-            Assert.AreEqual(rule.section.type.ToString(), "Material");
-            Assert.AreEqual(rule.pars[0].par.ToString(), "b*");
-            Assert.AreEqual(rule.txs.Count, 0);
-
-            xr2 = new FP(FPtype.Rule, "Профиль:");
-            Assert.AreEqual(xr2.section.type.ToString(), "Profile");
-            Assert.AreEqual(xr2.pars[0].par.ToString(), string.Empty);
-
-            //-- CompSet tests
-            FP xr1 = new FP(FPtype.CompSet, "Описание: {3}");
-            Assert.AreEqual(xr1.pars.Count, 1);
-            Assert.AreEqual(xr1.typeFP.ToString(), "CompSet");
-            Assert.AreEqual(xr1.section.type.ToString(), "Description");
-            Assert.AreEqual(xr1.Col(), 3);
-
-            xr1 = new FP(FPtype.CompSet, "Цена: {4} если нет другого материала в описании");
-            Assert.AreEqual(xr1.pars.Count, 1);
-            Assert.AreEqual(xr1.typeFP.ToString(), "CompSet");
-            Assert.AreEqual(xr1.section.type.ToString(), "Price");
-            Assert.AreEqual(xr1.Col(), 4);
-            Assert.AreEqual(xr1.txs.Count, 0);  // решил tx справа от параметра игнорировать
+            FP fp1 = null;
+            FP fp2 = new FP("hh");
+            FP fp3 = new FP("hh2");
+            FP fp4 = new FP("");
+            Assert.AreEqual(fp.Equals(fp1), false);
+            Assert.AreEqual(fp.Equals(fp2), true);
+            Assert.AreEqual(fp.Equals(fp3), false);
+            Assert.AreEqual(fp4.Equals(fp1), false);
         }
+    }
 
+    [TestClass()]
+    public class UT_DPar_Tests
+    {
         [TestMethod()]
-        public void UT_FP_Component_constr2()
+        public void UT_DPar()
         {
-            var Im = new IMIT();
-            var rule = Im.IM_Rule("M:*;Проф:Уголок равнопол.=Уголок *x*c*");
-            var sec = new Sec("M:");
+            string ld = "M:1; Prf:2; Des:3;Price:4;";
 
-            var fpMat = new FP("Уголок 75х6 6м Ст3пс/сп5", rule, sec);
+            DP dp = new DP(ld);
+            var d = new DP(ld).dpar;
+            Assert.AreEqual(d.Count, 4);
+            Assert.AreEqual(d[SType.Material],    "1");
+            Assert.AreEqual(d[SType.Profile],     "2");
+            Assert.AreEqual(d[SType.Description], "3");
+            Assert.AreEqual(d[SType.Price],       "4");
 
-            //////////////////var csFPmat = new FP(FPtype.CompSet, "M:{2}");
-            // 27/3 //////////var csFPprf = new FP(FPtype.CompSet, "Prf:Уголок {1}");
-            //////////////////var csFPs = new List<FP> { csFPmat, csFPprf };
-            
-            // 23.3.2017 пока решил не позволять использовать несколько параметров в строке
-            //xr1 = new FP(FPtype.CompSet, "Цена: {4} НДС {12}{14}%");
-            //Assert.AreEqual(xr1.pars.Count, 3);
-            //Assert.AreEqual(xr1.txs[3], "%");
-            //Assert.AreEqual(xr1.Col(2), 14);
-            //Assert.AreEqual(xr1.txs.Count, 4);
-            //Assert.AreEqual(xr1.typeFP.ToString(), "CompSet");
-            //Assert.AreEqual(xr1.section.type.ToString(), "Price");
-            //Assert.AreEqual(xr1.Col(), 4);
-            //var sec = new Sec("Prf: L12x5");
-            //19/3            FP fp = new FP(sec);
-            Assert.Fail();
+            Assert.AreEqual(dp.Col(SType.Material),    1);
+            Assert.AreEqual(dp.Col(SType.Profile),     2);
+            Assert.AreEqual(dp.Col(SType.Description), 3);
+            Assert.AreEqual(dp.Col(SType.Price),       4);
+
+            dp = new DP("M:23");
+            Assert.AreEqual(dp.Col(SType.Description), -1);
+            Assert.AreEqual(dp.Col(SType.Material), 23);
+
+            dp = new DP(string.Empty);
+            Assert.AreEqual(dp.Col(SType.Material), -1);
+
+            dp = new DP("qwerty");
+            Assert.AreEqual(dp.Col(SType.Profile), -1);
+
+            dp = new DP("профиль:Уголок *");
+            Assert.AreEqual(dp.dpStr.Count, 1);
+            Assert.AreEqual(dp.dpStr[SType.Profile], "Уголок *");
+            Assert.AreEqual(dp.dpar[SType.Profile], "угoлoк*");
+            Assert.AreEqual(dp.dpar.ContainsKey(SType.Profile), true);
+            Assert.AreEqual(dp.dpStr.ContainsKey(SType.Profile), true);
+
+            dp.Ad(SType.Unit, "Замес");
+            Assert.AreEqual(dp.dpStr.Count, 2);
+            Assert.AreEqual(dp.dpar.Count, 2);
+            Assert.AreEqual(dp.dpStr[SType.Profile], "Уголок *");
+            Assert.AreEqual(dp.dpar[SType.Unit], Lib.ToLat("Замес").ToLower());
         }
     }
 } // end namespace TSmatch.Unit_Tests

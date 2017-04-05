@@ -310,8 +310,8 @@ namespace TSmatch.ElmAttSet
         public Group(Dictionary<string, ElmAttSet>Els, string _mat, string _prf, List<string> _guids)
         {
             Elements = Els;
-            mat = Lib.ToLat(_mat).ToLower();
-            prf = Lib.ToLat(_prf).ToLower();
+            mat = Lib.ToLat(_mat.ToLower());
+            prf = Lib.ToLat(_prf.ToLower());
             guids = _guids;
             totalLength = totalWeight = totalVolume = totalPrice = 0.0;
             foreach(var id in guids)

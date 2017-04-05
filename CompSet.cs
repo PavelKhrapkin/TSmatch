@@ -1,20 +1,20 @@
 ﻿/*----------------------------------------------------------------------------
  * CompSet -- Set of Components got from the Supplier' price-list
  * 
- * 21.3.2017  P.Khrapkin
+ * 2.4.2017  P.Khrapkin
  *
  * -- ToDo
  * 31.12.16 использовать Rule.FPs и LoadDescription при конструировании CompSet
  * --- History ---
  * 30.11.2016 made from previous edition of module Components
  * 31.12.2016 Rule.FPs accounted
- * 21.03.2017 Section and FP use 
+ * 21.03.2017 Section and FP use
+ *  2.04.2017 simplified with PRICE - DPar instead of FPs, don't use Rule.Parser
  * ---------------------------------------------------------------------------
  *      Methods:
  * getCompSet(name, Supplier) - getCompSet by  its name in Supplier' list
  * setComp(doc) - инициальзация данных для базы компонентов в doc
- * getComp(doc) - загружает Excel файл - список комплектующих от поставщика
- * UddateFrInternet() - обновляет документ комплектующих из Интернет  
+ * getComp(doc) - загружает Excel файл - список комплектующих от поставщика 
  * ----- class CompSet
  *      МЕТОДЫ:
  * getMat ()    - fill mat ftom CompSet.Components and Suplier.TOC
@@ -46,6 +46,7 @@ using Sec = TSmatch.Section.Section;
 using SType = TSmatch.Section.Section.SType;
 using Par = TSmatch.Parameter.Parameter;
 using FP = TSmatch.FingerPrint.FingerPrint;
+using DP = TSmatch.DPar.DPar;
 using TSmatch.Document;
 
 namespace TSmatch.CompSet
@@ -55,38 +56,29 @@ namespace TSmatch.CompSet
         public static readonly ILog log = LogManager.GetLogger("CompSet");
 
         public readonly string name;       // название сортамента, например, "Уголок"
-        public readonly List<Comp> Components = new List<Comp>();
         public readonly Supl Supplier;     // организация - поставщик сортамента
         public readonly Docs doc;          // Документ, содержащий набор компонентов, прайс-лист поставщика 
-                                    //        internal List<FP> csFPs = new List<FP>();    // parsed LoadDescriptor of price list Document
-        public readonly Dictionary<SType, FP> csFPs = new Dictionary<SType, FP>();
+        // parsed LoadDescriptor of price list document
+        public readonly DP csDP;
+        public readonly List<Comp> Components = new List<Comp>();
 
-#if DEBUG   //29-Mar-2017 for UT only
-        public CompSet(string _name, Rule.Rule rule, string LoadDescriptor, List <Comp> comps = null)
-        {
-            name = _name;
-            csFPs = rule.Parser(FP.type.CompSet, LoadDescriptor);
-            if (comps != null) Components = comps;
-        }
-#endif //DEBUG        
-        ////////////////public CompSet(string _name, List<Component.Component> _comps, Supl _supl, Docs _doc, List<FP> _csFPs)
-        ////////////////{
-        ////////////////    this.name       = _name;
-        ////////////////    this.Components = _comps;
-        ////////////////    this.Supplier   = _supl;
-        ////////////////    this.doc        = _doc;
-        ////////////////    this.csFPs      = _csFPs;
-        ////////////////}
-        public CompSet(string _name, Supl _supl, Rule.Rule _rule)
+        public CompSet(string _name, Supl _supl, string LoadDescription = "", List<Comp> comps = null)
         {
             name = _name;
             Supplier = _supl;
-            doc = getCSdoc(Supplier, _name);
-            csFPs = _rule.Parser(FP.type.CompSet, doc.LoadDescription);
-            for (int i=doc.i0; i < doc.il; i++)
+#if DEBUG //--------- 2017.04.02 for Unit Test
+            if(!string.IsNullOrEmpty(LoadDescription))
             {
-                Comp comp = new Comp(doc, i, csFPs);
-                Components.Add(comp);
+                csDP = new DP(LoadDescription);
+                Components = comps;
+            }
+            else
+#endif //--------- DEBUG for Unit Test
+            {
+                doc = getCSdoc(Supplier, _name);
+                csDP = new DP(doc.LoadDescription);
+                for (int i = doc.i0; i < doc.il; i++)
+                    Components.Add(new Comp(doc, i, csDP));
             }
         }
 

@@ -41,7 +41,7 @@ namespace TSmatch.Test
 //15/3            Parameter.Parameter.testParameter();
 //15/3            log.Info("Test Parameter\t\tOK");
 
-            FP.testFP();
+//31/3            FP.testFP();
             log.Info("Test FingerPrint\t\tOK");
 
 //13/3            Component.Component.testComponent();

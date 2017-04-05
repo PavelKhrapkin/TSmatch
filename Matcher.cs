@@ -51,9 +51,11 @@ using TSmatch.Rule;
 using Msg = TSmatch.Message.Message;
 using FP = TSmatch.FingerPrint.FingerPrint;
 using Sec = TSmatch.Section.Section;
+using Elm = TSmatch.ElmAttSet.ElmAttSet;
 using SType = TSmatch.Section.Section.SType;
 using TST = TSmatch.Test.assert;
 using TSmatch.FingerPrint;
+using TSmatch.DPar;
 
 namespace TSmatch.Matcher
 {
@@ -77,6 +79,9 @@ namespace TSmatch.Matcher
         /// <param name="_rule"></param>
         public Mtch(ElmAttSet.Group gr, Rule.Rule _rule)
         {
+            if (gr.prf.Contains("ш2") /* && _rule.text.Contains("д") */ ) rule = _rule;
+
+
             if (gr == null || gr.guids.Count < 1) return;
             ok = OK.NoMatch;
             group = gr;
@@ -91,12 +96,35 @@ namespace TSmatch.Matcher
                 gr.totalPrice = 0;
                 foreach (var id in gr.guids)
                 {
-                    double price = Lib.ToDouble(comp.fps[SType.Price].pars[0].par.ToString());
+                    Elm elm = gr.Elements[id];
+                    string priceStr = comp.Str(SType.Price);
+                    double price = getPrice(elm, rule.CompSet.csDP, priceStr);
                     gr.Elements[id].price = price;
                     gr.totalPrice += price;
                 }
                 break;
             }
+        }
+
+        private double getPrice(Elm elm, DPar.DPar csDP, string priceStr)
+        {
+            double price = Lib.ToDouble(priceStr);
+            foreach(var sec in csDP.dpar)
+            {
+                if (!sec.Key.ToString().Contains("UNIT_")) continue;
+                switch (sec.Key)
+                {
+                    case SType.UNIT_Weight: // kg -> tonn
+                        return elm.weight / 1000 * price;
+                    case SType.UNIT_Vol:    // mm3 -> m3
+                        return elm.volume /1000 / 1000 / 1000 * price;
+                    case SType.UNIT_Length:
+                        return elm.length * price;
+                    case SType.UNIT_Qty:
+                        return price;
+                }  
+            }
+            return 0;
         }
 
         public Mtch()   //for test only
@@ -231,7 +259,7 @@ namespace TSmatch.Matcher
             var match = new Mtch(gr, rule);
             TST.Eq(match.ok == OK.Match, true);
             var cmp = match.component;
-            TST.Eq(cmp.fps[SType.Material].pars[0].par.ToString(), "b12,5");
+//31/3            TST.Eq(cmp.fps[SType.Material].pars[0].par.ToString(), "b12,5");
             Log.exit();
         }
         void test_Mtch_3()
@@ -253,13 +281,13 @@ namespace TSmatch.Matcher
             TST.Eq(gr.mat, "c235");
             TST.Eq(gr.prf, "pl30");
             var doc = Docs.getDoc("Полоса СтальхолдингM");
-            var csFPs = new Dictionary<SType, FP>();
-            csFPs = rule.Parser(FP.type.CompSet, doc.LoadDescription);
-            Comp comp1 = new Comp(doc, 2, csFPs);
-            Comp comp2 = new Comp(doc, 12, csFPs);
-            List<Comp> comps = new List<Comp> { comp1, comp2 };
-            CS cs = new CS("test_CS", rule, doc.LoadDescription, comps);
-            TST.Eq(cs.csFPs.Count, 4);
+            var csDP = new Dictionary<SType, string>();
+//31/3            csFPs = rule.Parser(FP.type.CompSet, doc.LoadDescription);
+// 2/4            Comp comp1 = new Comp(doc, 2, csDP);
+// 2/4            Comp comp2 = new Comp(doc, 12, csDP);
+// 2/4            List<Comp> comps = new List<Comp> { comp1, comp2 };
+// 2/4            CS cs = new CS("test_CS", null, rule, doc.LoadDescription, comps);
+// 2/4            TST.Eq(cs.csDP.Count, 4);
 
             //////////////////////////TST.Eq(comp1.isMatch(gr, rule), false);
             //////////////////////////TST.Eq(comp2.isMatch(gr, rule), true);

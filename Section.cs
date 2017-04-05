@@ -2,7 +2,7 @@
  * Section -- class dealing with the fragment of string related to
  *            some section - f.e. Material, or Price
  *
- * 28.03.2017 Pavel Khrapkin
+ * 3.04.2017 Pavel Khrapkin
  *
  *--- History ---
  *  7.03.2017 made from other module fragments
@@ -38,11 +38,13 @@ namespace TSmatch.Section
         {
             NOT_DEFINED,
             Material, Profile, Price, Description,
-            LengthPerUnit, VolPerUnit, WeightPerUnit, Unit
+            LengthPerUnit, VolPerUnit, WeightPerUnit,
+            Unit, UNIT_Vol, UNIT_Weight, UNIT_Length, UNIT_Qty
         }
 
         public SType type;      // recognysed type of Section
         public string body;     // text after ':', but before first ';'
+        public SType refSection; // reference to the Section with data
 
         Dictionary<string, List<string>> SectionTab;
 
@@ -54,6 +56,7 @@ namespace TSmatch.Section
             {
                 type = SecType(sections[0]);
                 body = SecBody(sections[0]);
+                refSection = SecRef(sections[0]);
                 return;
             }
             foreach (string str in sections)
@@ -69,15 +72,36 @@ namespace TSmatch.Section
 
         SType SecType(string text)
         {
-            if (string.IsNullOrEmpty(text)) return SType.NOT_DEFINED;
-            if (text.Contains(':')) text = text.Substring(0, text.IndexOf(':'));
+            if (string.IsNullOrEmpty(text) || !text.Contains(':'))
+                return SType.NOT_DEFINED;
+            string hdr = text.Substring(0, text.IndexOf(':'));
             foreach(SType sec in Enum.GetValues(typeof(SType)))
             {
                 if (sec == SType.NOT_DEFINED) continue;
                 List<string> synonyms = SectionTab[sec.ToString()].ToList();
                 foreach (string syn in synonyms)
                 {
-                    if (Regex.IsMatch(text, syn + ".*?")) return sec;
+                    if (Regex.IsMatch(hdr, syn + ".*?"))
+                    {
+                        if (sec != SType.Unit) return sec;
+                        else return CompSecType(SecBody(text));
+                    }
+                }
+            }
+            return SType.NOT_DEFINED;
+        }
+
+        private SType CompSecType(string str)
+        {
+            foreach (SType sec in Enum.GetValues(typeof(SType)))
+            {
+                if (!sec.ToString().Contains("UNIT_")) continue;
+                List<string> synonyms = SectionTab[sec.ToString()].ToList();
+                foreach (string syn in synonyms)
+                {
+                    string t = syn.Replace("*", "(.*)");
+                    Regex tr = new Regex(t);
+                    if (tr.IsMatch(str)) return sec;
                 }
             }
             return SType.NOT_DEFINED;
@@ -87,8 +111,14 @@ namespace TSmatch.Section
         {
             Match m = Regex.Match(str, ".*:");
             int ind = m.Value.Length;
- //29/3           if (ind == 0) ind = str.Length;
             return str.Substring(ind);
+        }
+
+        SType SecRef(string str)
+        {
+            int indx = str.IndexOf(':');
+            if (indx == -1) return SType.NOT_DEFINED;
+            return SecType(str.Substring(indx + 1));
         }
 
         public bool isSectionMatch(string template)

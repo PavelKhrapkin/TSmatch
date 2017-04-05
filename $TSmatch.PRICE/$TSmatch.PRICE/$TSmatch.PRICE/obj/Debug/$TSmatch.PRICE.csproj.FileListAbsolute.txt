@@ -1,0 +1,6 @@
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\TSmatch\$TSmatch.PRICE\$TSmatch.PRICE\$TSmatch.PRICE\bin\Debug\$TSmatch.PRICE.exe.config
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\TSmatch\$TSmatch.PRICE\$TSmatch.PRICE\$TSmatch.PRICE\bin\Debug\$TSmatch.PRICE.exe
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\TSmatch\$TSmatch.PRICE\$TSmatch.PRICE\$TSmatch.PRICE\bin\Debug\$TSmatch.PRICE.pdb
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\TSmatch\$TSmatch.PRICE\$TSmatch.PRICE\$TSmatch.PRICE\obj\Debug\$TSmatch.PRICE.csprojResolveAssemblyReference.cache
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\TSmatch\$TSmatch.PRICE\$TSmatch.PRICE\$TSmatch.PRICE\obj\Debug\$TSmatch.PRICE.exe
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\TSmatch\$TSmatch.PRICE\$TSmatch.PRICE\$TSmatch.PRICE\obj\Debug\$TSmatch.PRICE.pdb
