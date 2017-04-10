@@ -62,13 +62,14 @@ using Ifc = TSmatch.IFC.IFC;
 using Log = match.Lib.Log;
 using Msg = TSmatch.Message.Message;
 using Elm = TSmatch.ElmAttSet.ElmAttSet;
-using ElmMGr  = TSmatch.ElmAttSet.Mgroup;
-using ElmGr   = TSmatch.ElmAttSet.Group;
+using ElmMGr = TSmatch.ElmAttSet.Mgroup;
+using ElmGr = TSmatch.ElmAttSet.Group;
 using Supplier = TSmatch.Suppliers.Supplier;
 using CmpSet = TSmatch.CompSet.CompSet;
 using SType = TSmatch.Section.Section.SType;
 
 using FileOp = match.FileOp.FileOp;
+using TSmatch.Document;
 
 namespace TSmatch.Model
 {
@@ -187,6 +188,10 @@ namespace TSmatch.Model
             strLst.Sort();
             Log.exit();
             return Models;
+        }
+        private void getModelInfo()
+        {
+            throw new NotImplementedException();
         }
         /// <summary>
         /// Read(nameModel) - получение модели (списка элементов с атрибутами) из Tekla или IFC
@@ -739,19 +744,42 @@ namespace TSmatch.Model
             wrModel(WR_MODEL_REPORT);       // отчет-сопоставление групп <материал, профиль> c прайс-листами поставщиков      
         }
 
-        internal void getSavedReport()
+        public bool getSavedReport(bool doRead = false)
         {
+//9/4            getModelInfo();
             Docs doc = Docs.getDoc(Decl.TSMATCHINFO_MODELINFO);
-            name = doc.Body.Strng(2,2);
+            if (isChangedStr(name, doc, 2, 2)) return false;
             date = Lib.getDateTime(doc.Body.Strng(5, 2));
-            docReport = Docs.getDoc(Decl.TSMATCHINFO_REPORT);
+            if(doRead)
+            {
+                Read();
+                Handler();
+                Report();
+            }
+            getSavedGroups();
+            return true;
         }
 
-        internal bool isModelCanged()
+        private bool isChangedStr(string str, Docs doc, int row, int col)
         {
-            // calculate elements.MD5
-            // compare this MD5 with one in TSmatchINFO.xlsx/ModelINFO
-            return false;
+            string strINFO = doc.Body.Strng(row, col);
+            return str == strINFO;
+        }
+        private void getSavedGroups()
+        {
+            docReport = Docs.getDoc(Decl.TSMATCHINFO_REPORT);
+            // 9/4/17 для отладки пока берем группы прямо из Tekla
+            Read();
+            getGroups();
+            //////////////elmGroups.Clear();
+            //////////////int grCount = docReport.Body.iEOL() - docReport.i0;
+            //9/4/17//////for (int i = docReport.i0; i < grCount; i++)
+            //////////////{
+            //////////////    elmGroups.Add()
+            //////////////    string mat = docReport.Body.Strng(i, 2);
+            //////////////    string prf = docReport.Body.Strng(i, 3);
+            //////////////    string totalPrice = docReport.Body.Strng(i, 11);
+            //////////////}
         }
     } // end class Model
 } // end namespace Model

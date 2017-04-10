@@ -29,8 +29,12 @@ namespace TSM_Select
         {
             boot = new Boot("init");
             model = boot.model;
-            model.Read();
-            model.getSavedReport();
+            if (model.getSavedReport())
+            {
+                // тут надо спросить пользователя "Будем читать из САПР?"
+                //..пока читаю всегда..
+                model.getSavedReport(true);
+            }
             WrForm(wrForm.modelINFO);
             WrForm(wrForm.modelReport);   
         }
@@ -61,23 +65,6 @@ namespace TSM_Select
                         modRep.Add(str);
                     }
                     listBox1.DataSource = modRep;
-  //                  rep.Location = new Point(10, 10);
-  //                  Controls.Add(rep);
-                    //////////                   rep.MultiColumn = true;
-                    ////////rep.BeginUpdate();
-                    ////////for (int i = 1; i < 10; i++)
-                    ////////{
-                    ////////    string str = "i=" + i + "\t" + i * 2 + "\t" + 3 * i;
-                    ////////    rep.Items.Add(str);
-                    ////////}
-                    ////rep.Items.Add("Name= " + model.name);
-                    ////rep.Items.Add("Total elements.Count= " + model.elementsCount);
-                    ////rep.Items.Add("Groups= " + model.elmGroups.Count);
-     //               rep.EndUpdate();
-                    ////////tableReport.BackColor = Color.White;
-                    ////////tableReport.RowCount = 5;
-                    ////////tableReport.ColumnCount = 6;
-                    ////////TableLayoutPanel modRep = new TableLayoutPanel();
                     break;
             }
 //            throw new NotImplementedException();

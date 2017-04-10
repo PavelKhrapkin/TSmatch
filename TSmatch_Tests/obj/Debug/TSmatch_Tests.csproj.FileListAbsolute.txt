@@ -1,0 +1,16 @@
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\TSmatch_Tests\bin\Debug\TSmatch_Tests.dll
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\TSmatch_Tests\bin\Debug\TSmatch_Tests.pdb
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\TSmatch_Tests\bin\Debug\TSmatch.exe
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\TSmatch_Tests\bin\Debug\log4net.dll
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\TSmatch_Tests\bin\Debug\Trimble.Connect.Client.dll
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\TSmatch_Tests\bin\Debug\IfcEngineCS.dll
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\TSmatch_Tests\bin\Debug\Microsoft.VisualStudio.TestPlatform.UnitTestFramework.dll
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\TSmatch_Tests\bin\Debug\TSmatch.pdb
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\TSmatch_Tests\bin\Debug\log4net.xml
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\TSmatch_Tests\bin\Debug\IfcEngineCS.pdb
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\TSmatch_Tests\obj\Debug\TSmatch_Tests.csprojResolveAssemblyReference.cache
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\TSmatch_Tests\obj\Debug\TSmatch_Tests.dll
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\TSmatch_Tests\obj\Debug\TSmatch_Tests.pdb
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\TSmatch_Tests\bin\Debug\Tekla.Structures.Model.dll
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\TSmatch_Tests\bin\Debug\Tekla.Structures.Dialog.dll
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\TSmatch_Tests\bin\Debug\Tekla.Structures.dll
