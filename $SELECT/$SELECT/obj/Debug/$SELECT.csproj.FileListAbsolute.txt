@@ -1,0 +1,17 @@
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\TSmatch\$SELECT\$SELECT\$SELECT\bin\Debug\$SELECT.exe.config
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\TSmatch\$SELECT\$SELECT\$SELECT\obj\Debug\$SELECT.csprojResolveAssemblyReference.cache
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\TSmatch\$SELECT\$SELECT\$SELECT\obj\Debug\TSmatch_SELECT.Form1.resources
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\TSmatch\$SELECT\$SELECT\$SELECT\obj\Debug\_SELECT.Properties.Resources.resources
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\TSmatch\$SELECT\$SELECT\$SELECT\obj\Debug\$SELECT.csproj.GenerateResource.Cache
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\TSmatch\$SELECT\$SELECT\$SELECT\bin\Debug\$SELECT.exe
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\TSmatch\$SELECT\$SELECT\$SELECT\bin\Debug\$SELECT.pdb
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\TSmatch\$SELECT\$SELECT\$SELECT\bin\Debug\IfcEngineCS.dll
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\TSmatch\$SELECT\$SELECT\$SELECT\bin\Debug\IfcManager.dll
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\TSmatch\$SELECT\$SELECT\$SELECT\bin\Debug\log4net.dll
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\TSmatch\$SELECT\$SELECT\$SELECT\bin\Debug\Tekla.Structures.Dialog.dll
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\TSmatch\$SELECT\$SELECT\$SELECT\bin\Debug\Tekla.Structures.dll
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\TSmatch\$SELECT\$SELECT\$SELECT\bin\Debug\Tekla.Structures.Model.dll
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\TSmatch\$SELECT\$SELECT\$SELECT\bin\Debug\IfcEngineCS.pdb
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\TSmatch\$SELECT\$SELECT\$SELECT\bin\Debug\log4net.xml
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\TSmatch\$SELECT\$SELECT\$SELECT\obj\Debug\$SELECT.exe
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\TSmatch\$SELECT\$SELECT\$SELECT\obj\Debug\$SELECT.pdb
