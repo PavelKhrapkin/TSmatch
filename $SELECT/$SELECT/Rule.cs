@@ -38,13 +38,11 @@ using Docs = TSmatch.Document.Document;
 using Comp = TSmatch.Component.Component;
 using CmpSet = TSmatch.CompSet.CompSet;
 using Supl = TSmatch.Suppliers.Supplier;
+//12/4 using FP = TSmatch.FingerPrint.FingerPrint;
 using DP = TSmatch.DPar.DPar;
 using Sec = TSmatch.Section.Section;
 using SType = TSmatch.Section.Section.SType;
-#if OLD
-using TSmatch.FingerPrint;
-using FP = TSmatch.FingerPrint.FingerPrint;
-#endif
+//12/4using TSmatch.FingerPrint;
 using TSmatch.Section;
 
 namespace TSmatch.Rule
@@ -59,8 +57,8 @@ namespace TSmatch.Rule
 		public readonly string text;        //текст правила
 
         //---- references to other classes - price-list conteiners
-        public readonly CmpSet CompSet;     //список компонентов, с которыми работает правило
-		public readonly Supl Supplier;      //Поставщик
+        public CmpSet CompSet;     //список компонентов, с которыми работает правило
+		public Supl Supplier;      //Поставщик
         public readonly DP ruleDP;          //identifiers of Materials, Profile, and others
         public Dictionary<SType, List<string>> synonyms = new Dictionary<SType, List<string>>();
  
@@ -82,12 +80,13 @@ namespace TSmatch.Rule
         public Rule(int n) : this(Docs.getDoc(Decl.RULES), n) {}
 #if DEBUG
         // 27/3/2017 пока - for unit test purpases only
-        public Rule(string str, CmpSet cs)
+        public Rule(string str, Supl supplier = null, CmpSet cs = null)
         {
             text = str;
             synonyms = RuleSynParse(str);
             ruleDP = new DP(str);
             CompSet = cs;
+            Supplier = supplier;
         }
 
         private Dictionary<SType,List<string>> RuleSynParse(string str)

@@ -27,14 +27,18 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 using IfcEngineCS;
+using IfcManager.Core;
 
 
 using FileOp = match.FileOp.FileOp;
 using Lib = match.Lib.MatchLib;
 using Msg = TSmatch.Message.Message;
 using ElmAttributes = TSmatch.ElmAttSet;
+using TSmatch.IFC.IfcManager.Core;
 
 namespace TSmatch.IFC
 {

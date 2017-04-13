@@ -30,9 +30,7 @@ using Lib = match.Lib.MatchLib;
 using Log = match.Lib.Log;
 using Msg = TSmatch.Message.Message;
 using Docs = TSmatch.Document.Document;
-#if OLD
-using FP = TSmatch.FingerPrint.FingerPrint;
-#endif
+//12/4 using FP = TSmatch.FingerPrint.FingerPrint;
 using DP = TSmatch.DPar.DPar;
 using Sec = TSmatch.Section.Section;
 using SType = TSmatch.Section.Section.SType;

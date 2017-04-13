@@ -49,14 +49,12 @@ using Rule = TSmatch.Rule.Rule;
 using TSmatch.ElmAttSet;
 using TSmatch.Rule;
 using Msg = TSmatch.Message.Message;
+//12/4 using FP = TSmatch.FingerPrint.FingerPrint;
 using Sec = TSmatch.Section.Section;
 using Elm = TSmatch.ElmAttSet.ElmAttSet;
 using SType = TSmatch.Section.Section.SType;
-#if OLD
-using TST = TSmatch.Test.assert;
-using TSmatch.FingerPrint;
-using FP = TSmatch.FingerPrint.FingerPrint;
-#endif
+//12/4 using TST = TSmatch.Test.assert;
+// 12/4 using TSmatch.FingerPrint;
 using TSmatch.DPar;
 
 namespace TSmatch.Matcher
@@ -71,7 +69,13 @@ namespace TSmatch.Matcher
         public ElmAttSet.Group group;           //reference to the Group<material, profile> being matched
         public Component.Component component;   //used Component in Match the Rule and Group
         public Rule.Rule rule;                  //the rule, which manage the matching
-        
+
+#if DEBUG
+        // for Unit Test only
+        public Mtch()
+        { }
+#endif // DEBUG
+
         /// <summary>
         /// Mtch(gr, _rule) - check if Group gr is in match with rule
         ///    if Mtch.ok.Match - return Mtch.Component chousen from CompSet.Component
@@ -127,10 +131,6 @@ namespace TSmatch.Matcher
                 }  
             }
             return 0;
-        }
-
-        public Mtch()   //for test only
-        {
         }
 
         /// <summary>
@@ -197,9 +197,8 @@ namespace TSmatch.Matcher
         //////////////    throw new NotImplementedException();
         //////////////    return result;
         //////////////}
-
-#region ------ test Matcher -----
-#if DEBUG
+#if OLD
+        //#region ------ test Matcher -----
         internal static void testMtch()
         {
             Log.set("testMtch");
@@ -227,7 +226,7 @@ namespace TSmatch.Matcher
 
         //////////////    Log.exit();
         //////////////}
-#if OLD
+
         private void test_Mtch_1()
         {
             Log.set(" test_Mtch_1: Rule 4 и Group<C255, L20x4>");
@@ -295,7 +294,6 @@ namespace TSmatch.Matcher
             //////////////////////////TST.Eq(comp2.isMatch(gr, rule), true);
             Log.exit();
         }
-#endif //OLD
 ////////////////////            return;     //13/3 - заглушен остаток теста
 
 ////////////////////            //-- test environment preparation: set ElmAttSet.Group and Rule
@@ -327,8 +325,8 @@ namespace TSmatch.Matcher
 //////////////////////            TST.Eq(match.price, 0.0);
 ////////////////////            Log.exit();
 ////////////////////        }
-#endif //#if DEBUG
-#endregion ------ test Matcher ------
+
+//#endregion ------ test Matcher ------
         /* 5.12.2016 ревизия
         public struct OK    // структура данных, описывающая найденное соответствие..
         {                   //..Правил, Прайс-листа комплектующих, и строки - Группы <mat,prf>
@@ -660,5 +658,6 @@ namespace TSmatch.Matcher
           return found;
         } // end SearchInComp
         2016.12.05 revision */
+#endif // OLD
     } // end class Matcher
 } // end namespace Matcher

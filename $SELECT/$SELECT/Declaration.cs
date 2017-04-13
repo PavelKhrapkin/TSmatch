@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-#if OLD
-using FP = TSmatch.FingerPrint.FingerPrint;
-#endif
+
+//12/4 using FP = TSmatch.FingerPrint.FingerPrint;
 
 namespace TSmatch.Declaration
 {
@@ -41,7 +40,7 @@ namespace TSmatch.Declaration
     /// </history>
     class Declaration
     {
-#region ----------- GENERAL PURPASE CONSTANTS -----------------
+        #region ----------- GENERAL PURPASE CONSTANTS -----------------
         public const char STR_DELIMITER = ';';  // знак - резделитель в списке в строках
 
         public const string TSMATCH = "TSmatch";                // general Application Name
@@ -65,17 +64,17 @@ namespace TSmatch.Declaration
         public const int MSG_ID = 1;
         public const int MSG_TXT_RU = 2;
         public const int MSG_TXT_EN = 3;
-#endregion
+        #endregion
 
-#region ----------- Sheets of TSmatch.xlsm --------------
+        #region ----------- Sheets of TSmatch.xlsm --------------
         public const string DOC_TOC = "TOC";    // Table Of Content - Лист - таблица-содержание всех Документов в TSmatch
         public const string SUPPLIERS = "Suppliers";    //Лист общей информации по Поставщикам
         public const string CONST = "Constants";
         public const string FORMS = "Forms";
         public const string LOG = "Log";
-#endregion
+        #endregion
 
-#region ----------- RESOURCE CONSTANTS ----------------
+        #region ----------- RESOURCE CONSTANTS ----------------
         // Resources - are various files, necessary for TSmatch operation in PC.
         // Constants hereunder descripe the Resource name, type and date to be checked as "Actual".
         // We should set here (EXPECT DATE) time earlier, than it is written in [1,1] of the Document
@@ -133,9 +132,9 @@ namespace TSmatch.Declaration
         public const string R_IFC2X3 = TEMPL_ENVIRONMENTS + @"\" + ENV_INP_DIR + @"\" + IFC_SCHEMA;           //IFC schema
         public static readonly string R_IFC2X3_TYPE = RESOURCE_TYPES.TeklaFile.ToString();
         public const string R_IFC2X3_DATE = "1.1.2015";
-#endregion
+        #endregion
 
-#region ----------- константы таблицы Документов -----------------
+        #region ----------- константы таблицы Документов -----------------
         public const int TOC_I0 = 4;    // строка TOC в таблице TOC
 
         public const int DOC_TIME = 1; // дата и время последнего изменения Документа
@@ -168,9 +167,9 @@ namespace TSmatch.Declaration
         public const int READONLY  = 3;   // Мода Документа - только чтение
         public const int APPEND    = 11;   // Мода Документа - дописывать
         public const int CREATEOROPEN = 21;   // Мода Документа - если не найден - создать
-#endregion
+        #endregion
 
-#region ----------- # шаблоны каталогов документов (поле doc.FileDirectory) --------------------
+        #region ----------- # шаблоны каталогов документов (поле doc.FileDirectory) --------------------
         public static readonly string[] TOC_DIR_TEMPLATES
             = { TEMPL_TOC, TEMPL_MODEL, TEMPL_COMP, TEMPL_TMP, TEMPL_DEBUG, TEMPL_MACROS, TEMPL_ENVIRONMENTS };
         public const string TEMPL_TOC = "#TOC";           //каталог TSmatch.xlsx 
@@ -180,17 +179,17 @@ namespace TSmatch.Declaration
         public const string TEMPL_DEBUG = "#DEBUG";         //каталог для собственной отладки
         public const string TEMPL_MACROS = "#Macros";       //каталог Tekla Macros - тут файлы для кнопки TSmatch
         public const string TEMPL_ENVIRONMENTS = "#Envir";  //каталог Tekla Environments
-#endregion
+        #endregion
 
-#region ----------- ТИПЫ ШТАМПОВ / ТИПЫ ДОКУМЕНТОВ ----------------------
+        #region ----------- ТИПЫ ШТАМПОВ / ТИПЫ ДОКУМЕНТОВ ----------------------
         ////public const string STAMP_TYPE_EQ = "=";  // точное соответствие
         ////public const string STAMP_TYPE_INC = "I"; // Includes
         public const string DOC_TYPE_N = "N";   // New Doc без Штампа или No Stamp
                                                 //public const string DOC_TYPE_N1 = "N1"; // New Doc, создавать новый Лист в самой левой позиции, если его нет; для Summary
                                                 //public const string STAMP_TYPE_N2 = "N2"; // New Doc, если нет, создавать в Листе2
-#endregion
+        #endregion
 
-#region ----------- константы журнала моделей -------------------
+        #region ----------- константы журнала моделей -------------------
         public const string MODELS = "Models";
 
         public const int MODEL_DATE = 1;    // Дата и время записи в Журнал моделей
@@ -201,9 +200,9 @@ namespace TSmatch.Declaration
         public const int MODEL_PHASE = 6;   // Текущая фаза проекта
         public const int MODEL_MD5  = 7;    // Контрольная сумма - MD5
         public const int MODEL_R_LIST = 8;  // колонка - список номеров строк Правил
-#endregion
+        #endregion
 
-#region ----------- константы правил Matching_Rules -------------------
+        #region ----------- константы правил Matching_Rules -------------------
         public const string RULES = "Rules";
 
         public const int RULE_DATE = 1;    // Дата и время записи Правила в TSmatch
@@ -216,9 +215,9 @@ namespace TSmatch.Declaration
         public const string ATT_DELIM = @"(${must}|,|=| |\t|\*|x|X|х|Х)";  //делимитры в Правилах
         public const string ATT_MUST  = @"(?<must>(&'.+')|(&"".+"")|(&«.+»)|(&“.+”)"; // &обязательно
         public const string ATT_PARAM = @"(?<param>(\$|p|р|п|P|Р|П)\w*\d)"; //параметры в Правилах
-#endregion
+        #endregion
 
-#region ----------- Документы файла TSmatchINFO.xlsx - записывается в каталог модели ----------
+        #region ----------- Документы файла TSmatchINFO.xlsx - записывается в каталог модели ----------
         public const string TSMATCHINFO_MODELINFO = "ModelINFO";    // общая информация о модели: имя, директория, MD5 и др
         public const string TSMATCHINFO_RAW       = "Raw";          // элементы с атрибутами, как они прочитаны из модели
         public const string TSMATCHINFO_MATERIALS = "Materials";    // сводка по материалам, их типам (бетон, сталь и др)
@@ -232,23 +231,23 @@ namespace TSmatch.Declaration
         public const string TMP_SUPPLIERS = "TMP_" + TSMATCHINFO_SUPPLIERS;
         public const string TMP_RULES     = "TMP_" + TSMATCHINFO_RULES;
         public const string TMP_REPORT    = "TMP_" + TSMATCHINFO_REPORT;
-#endregion
+        #endregion
 
-#region ----------- TSmatchINFO.xlsx/Report - Отчет по результатам подбора сортамента ----------
+        #region ----------- TSmatchINFO.xlsx/Report - Отчет по результатам подбора сортамента ----------
         public const int REPORT_N   = 1;     // Report' line Numer
         public const int REPORT_MAT = 2;     // Group Material
         public const int REPORT_PRF = 3;     // Group Profile
         public const int REPORT_LNG = 4;     // Group total Length [mm]
         public const int REPORT_WGT = 5;     // Group total Weight [kg]
         public const int REPORT_VOL = 6;     // Group total Volume [m3]
-        public const int REPORT_SUPL_LINE = 7;   // Supplied component description line
-        public const int REPORT_SUPL_TYPE = 8;   // Supplied component type
-        public const int REPORT_SUPL_LN_N = 9;   // Supplied component' line number in price-list
-        public const int REPORT_SUPL_WGT  = 10;  // Supplied component' total weight
-        public const int REPORT_SUPL_PRICE = 11; // Supplied component' total price
-#endregion
+        public const int REPORT_SUPL_DESCR = 7;   // Supplied component description
+        public const int REPORT_SUPPLIER   = 8;   // Supplier name
+        public const int REPORT_COMPSET    = 9;   // Supplier component set name
+        public const int REPORT_SUPL_WGT  = 10;   // Supplied component' total weight
+        public const int REPORT_SUPL_PRICE = 11;  // Supplied component' total price
+        #endregion
 
-#region ----------- TSmatchINFO.xlsx/Suppliers - Поставщики сортамента ----------
+        #region ----------- TSmatchINFO.xlsx/Suppliers - Поставщики сортамента ----------
         public const int SUPL_DATE = 1;     // Date when Supplier record  was updated in TSmatch.xlsx
         public const int SUPL_NAME = 2;     // Supplier' name
         public const int SUPL_URL  = 3;     // Supplier' hyperlink
@@ -258,9 +257,9 @@ namespace TSmatch.Declaration
         public const int SUPL_STREET = 7;   // Supplier' Street
         public const int SUPL_TEL = 8;      // Supplier' Telephone
         public const int SUPL_LISTCOUNT = 9;// Supplier' price-list/worksheets/Documents count in TSmatch.xlsx
-#endregion
+        #endregion
 
-#region ----------- константы Шаблонов - not in use -----------------
+        #region ----------- константы Шаблонов - not in use -----------------
 
         public const string PTRN_HDR = "A1";     // заголовки колонок   
         public const string PTRN_WIDTH = "A3";     // ширина колонок
@@ -280,6 +279,6 @@ namespace TSmatch.Declaration
         public const int STEP_PARAM = 5;    // Параметры Шага
         public const int STEP_INPDOCS = 6;    // Входные Документы Шага
         public const int STEP_OUTDOCS = 7;    // Выходные Документы Шага
-#endregion
+        #endregion
     }
 }

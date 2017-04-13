@@ -342,6 +342,10 @@ namespace TSmatch.Document
             }
             else wrDoc(form.name, obj);
         }
+        internal void wrDocListStr(int nStr, List<string>str)
+        {
+
+        }
         //internal void wrDoсForm(string dir, string v, DateTime date, string mD5, int count, string strListRules)
         //{
         //    throw new NotImplementedException();

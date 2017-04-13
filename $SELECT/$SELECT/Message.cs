@@ -1,18 +1,20 @@
 ﻿/*----------------------------------------------------------------------------
  * Message -- multilanguage message system
  * 
- * 20.8.2016  Pavel Khrapkin
+ * 12.4.2017  Pavel Khrapkin
  *
  *--- History ---
  * Feb-2016 Created
  * 20.3.2016 - Error message Code display even when Message system is not initialysed yet
  * 20.8.2016 - use log4net, bug fixes
+ * 12.4.2017 - Msg.Str(str) methoв add
  * ---------------------------------------------------------------------------------------
  *      Methods:
  * Start()    - Copy messages into the static list from TSmatch.xlsx/Messages Sheet
- * F(Code,..) - Fatal error message output
- * W(Code,..) - Warning message output
- * I(Code,..) - Information Message
+ * F(str,..) - Fatal error message output
+ * W(str,..) - Warning message output
+ * I(str,..) - Information Message
+ * Str(str,..) - return str coverted in multilanguage message support
  */
  using System;
 using System.Collections.Generic;
@@ -31,7 +33,7 @@ namespace TSmatch.Message
     public class Message
     {
         public static readonly ILog log = LogManager.GetLogger("Message");
-        public enum Severity { INFO = 0, WARNING, FATAL};
+        public enum Severity { INFO = 0, WARNING, FATAL, STR };
 
         public static bool Trace = false;  // For TRACE mode chage to "true";
 
@@ -89,7 +91,7 @@ namespace TSmatch.Message
                 || severity == (int)Severity.INFO) new Log(str);
             return;
         }
-        public static void txt(Severity type, string msgcode, object p0=null, object p1=null, object p2=null)
+        public static void Txt(Severity severity_type, string msgcode, object p0=null, object p1=null, object p2=null)
         {
             Message msg = Messages.Find(x => x.MessageID == msgcode);
             if (msg == null)
@@ -100,30 +102,21 @@ namespace TSmatch.Message
                 Log.FATAL("ERR_03 - Message Code Not Found");
             }
             string str = string.Format(msg.text, p0, p1, p2);
-            mes(str, (int)type);
-
-            //////bool ok = false;
-            //////foreach (var v in Messages)
-            //////{
-            //////    if (v.MessageID == msgcode)
-            //////    {
-            //////        string s = String.Format(v.text, p0, p1, p2);
-            //////        mes(s, (int)type);
-            //////        ok = true;
-            //////        break;
-            //////    }
-            ////////////////////}
-            ////////////////////if (!ok)
-            ////////////////////    if (Messages.Count > 0) F("ERR_03_NOMSG", msgcode);
-            ////////////////////    else Log.FATAL("Internal ERROR: Message system is not initiated");
+            mes(str, (int)severity_type);
         }
         public static void txt(string str, object p0= null, object p1 = null, object p2 = null)
-        { txt(Severity.FATAL, str, p0, p1, p2); }
+        { Txt(Severity.FATAL, str, p0, p1, p2); }
         public static void F(string str, object p0=null, object p1=null, object p2=null)
-        { txt(Severity.FATAL, str, p0, p1, p2); }
+        { Txt(Severity.FATAL, str, p0, p1, p2); }
         public static void W(string str, object p0 = null, object p1 = null, object p2 = null)
-        { txt(Severity.WARNING, str, p0, p1, p2); }
+        { Txt(Severity.WARNING, str, p0, p1, p2); }
         public static void I(string str, object p0 = null, object p1 = null, object p2 = null)
-        { txt(Severity.INFO, str, p0, p1, p2); }
+        { Txt(Severity.INFO, str, p0, p1, p2); }
+        public static string Str(string str, object p0 = null, object p1 = null, object p2 = null)
+        {
+            var msg = Messages.Find(x => x.MessageID == str);
+            if (msg == null) Txt(Severity.FATAL, "");
+            return msg.text;
+        }
     } // end class
 } // end namespace

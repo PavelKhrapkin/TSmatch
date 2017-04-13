@@ -199,11 +199,16 @@ namespace TSmatch.Model
                 iModJounal = getModJournal(name, dir);
                 date = DateTime.Parse(modJournal(iModJounal, Decl.MODEL_DATE));
                 getSavedGroups();
+//12/4                getSavedRules();
             }
             else //if no Tekla active get name and dir from IFC or from INFO file if exists
             {
-                if( !GetSavedReport() ) Msg.F("No Tekla no saved TSmatchINFO");
+                if (!GetSavedReport()) Msg.F("No Tekla no saved TSmatchINFO");
             }
+            // 12/4 //Docs doc = Docs.getDoc(Decl.TSMATCHINFO_MODELINFO);
+            //////////doc.Close();
+           var  doc = Docs.getDoc();
+            doc.Close();
         }
 
         private string modJournal(int iModJounal, int col)
@@ -222,7 +227,7 @@ namespace TSmatch.Model
         public int getModJournal(string name = "", string dir = "")
         {
             Docs doc = Docs.getDoc(Decl.MODELS);
-            if (name == "" ) throw new NotImplementedException();
+            if (name == "") throw new NotImplementedException();
             for (int i = doc.i0; i <= doc.il; i++)
             {
                 if (dir != "" && dir != doc.Body.Strng(i, Decl.MODEL_DIR)) continue;
@@ -514,6 +519,7 @@ namespace TSmatch.Model
             Log.set("Model.wrModel(" + doc_name + ")");
             DateTime t0 = DateTime.Now;
             Docs doc = Docs.getDoc(doc_name);
+            doc.Reset();
             switch (mode)
             {
                 case WrMod.ModelINFO:   // общая информация о модели: имя, директория, MD5 и др
@@ -557,13 +563,20 @@ namespace TSmatch.Model
                     int n = 1;
                     foreach (var gr in elmGroups)
                     {
-                        string foundDescr = "";
+                        string foundDescr = "", suplName = "", csName = "";
                         if (gr.match != null && gr.match.ok == Mtch.OK.Match)
+                        {
                             foundDescr = gr.match.component.Str(SType.Description);
+                            suplName = gr.match.rule.Supplier.name;
+                            csName = gr.match.rule.CompSet.name;
+                        }
                         doc.wrDocForm(n++, gr.mat, gr.prf
                             , gr.totalLength, gr.totalWeight, gr.totalVolume
-                            , foundDescr, 0, 0, 0, gr.totalPrice);
+                            , foundDescr, suplName, csName
+                            , gr.totalWeight, gr.totalPrice);
                     }
+                    doc.isChanged = true;
+                    doc.saveDoc();
                     //--- string - Summary
                     double sumWgh = 0, sumPrice = 0;
                     int iGr = doc.i0;
@@ -808,7 +821,7 @@ namespace TSmatch.Model
             iModJounal = getModJournal(name);
             date = DateTime.Parse(modJournal(iModJounal, Decl.MODEL_DATE));
             if (!isChangedInt(ref elementsCount, doc, 7, 2))
-            getSavedGroups();
+                getSavedGroups();
             return true;
         }
 
@@ -845,17 +858,27 @@ namespace TSmatch.Model
             if (elements.Count != elementsCount)
             {
                 Msg.F("TSmatchINFO.xlsx inconsystent", name, elementsCount, elements.Count);
-//11/4                GetSavedReport(doRead: true);
+                //11/4                GetSavedReport(doRead: true);
             }
             docReport = Docs.getDoc(Decl.TSMATCHINFO_REPORT);
             getGroups();
             int gr_n = docReport.i0;
-            foreach(var gr in elmGroups)
+            foreach (var gr in elmGroups)
             {
-                string grPrice = docReport.Body.Strng(gr_n++, Decl.REPORT_SUPL_PRICE);
+                string grPrice = docReport.Body.Strng(gr_n, Decl.REPORT_SUPL_PRICE);
                 gr.totalPrice = Lib.ToDouble(grPrice);
+                gr.SupplierName = docReport.Body.Strng(gr_n, Decl.REPORT_SUPPLIER);
+                gr.CompSetName = docReport.Body.Strng(gr_n, Decl.REPORT_COMPSET);
+                gr_n++;
             }
         }
+        public void getSavedRules()
+        {
+            strListRules = "17, 4, 5, 6, 7";
+            foreach (int n in Lib.GetPars(strListRules))
+                Rules.Add(new Rule.Rule(n));
+            ClosePriceLists();
+         }
         #endregion --- Get Saved Report from TSmatchINFO.xlsx file
     } // end class Model
 } // end namespace Model

@@ -171,5 +171,15 @@ namespace TSmatch.Suppliers
             doc.saveDoc();
             doc.Close();
         }
+        public string getSupplierStr()
+        {
+            string str = name + "\n";
+            if (!string.IsNullOrEmpty(index)) str += index + ", ";
+            str += City + ", ";
+            if (str.Length > 20) str += "\n";
+            str += street;
+            str += "\n Web: " + Url + "\n тел." + telephone;
+            return str;
+        }
     } // end class Supplier
 } // end namespace Suppliers

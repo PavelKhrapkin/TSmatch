@@ -45,9 +45,7 @@ using TSmatch.Rule;
 using Sec = TSmatch.Section.Section;
 using SType = TSmatch.Section.Section.SType;
 using Par = TSmatch.Parameter.Parameter;
-#if OLD
-using FP = TSmatch.FingerPrint.FingerPrint;
-#endif
+// 12/4 using FP = TSmatch.FingerPrint.FingerPrint;
 using DP = TSmatch.DPar.DPar;
 using TSmatch.Document;
 
