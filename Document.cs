@@ -1,7 +1,7 @@
 ﻿/*-------------------------------------------------------------------------------------------------------
  * Document -- works with all Documents in the system basing on TOC - Table Of Content
  * 
- * 13.01.2017  Pavel Khrapkin, Alex Pass, Alex Bobtsov
+ * 17.04.2017  Pavel Khrapkin, Alex Pass, Alex Bobtsov
  *
  *--------- History ----------------  
  * 2013-2015 заложена система управления документами на основе TOC и Штампов
@@ -25,6 +25,8 @@
  * 22.8.16 - wrDoc workout
  * 22.12.16 - #Template class in Bootstrap replaced with Dictionary<> in Documents
  * 13.01.17 - getDoc() = getDoc(Decl.DOC_TOC)
+ *  9.04.17 - getDoc optional bool arguments
+ * 17.04.17 - getDoc() il = doc.Body.iEOL();
  * -------------------------------------------
  *      METHODS:
  * Start()              - Load from directory TOCdir of TOC all known Document attributes, prepare everithing
@@ -96,8 +98,8 @@ namespace TSmatch.Document
         public List<Form> forms = new List<Form>(); // Document's Format descriptions
         public Dictionary<string, Dictionary<string, string>> docDic = new Dictionary<string, Dictionary<string, string>>();
 
-//        private const int TOC_DIRDBS_COL = 10;  //в первой строке в колонке TOC_DIRDBS_COL записан путь к dirDBs
-//        private const int TOC_LINE = 4;         //строка номер TOL_LINE таблицы ТОС отностися к самому этому документу.
+        //        private const int TOC_DIRDBS_COL = 10;  //в первой строке в колонке TOC_DIRDBS_COL записан путь к dirDBs
+        //        private const int TOC_LINE = 4;         //строка номер TOL_LINE таблицы ТОС отностися к самому этому документу.
         public Document(string name)    // конструктор создает пустой Документ с именем name
         { this.name = name; }
         public Document(Document d)     // конструктор - перегрузка для копирования Документа
@@ -129,7 +131,7 @@ namespace TSmatch.Document
         /// 30.3.2016 - Start(TOCdir) and getDoc with #template interaction with Bootstrap
         /// 17.4.2016 - tocStart extracted from Start for initial TOC open
         /// </history>
-        public static void Start(Dictionary<string,string>_Templates)
+        public static void Start(Dictionary<string, string> _Templates)
         {
             Log.set("Document.Start(#Templates)");
             Templates = _Templates;
@@ -167,6 +169,7 @@ namespace TSmatch.Document
             } // for по строкам TOC
             Log.exit();
         } // end Start
+
         /// <summary>
         /// tocStart(TOCdir) - open file TSmatch.xlsx in TOCdir directory
         /// </summary>
@@ -222,6 +225,15 @@ namespace TSmatch.Document
         }
         #endregion
 
+        public static bool IsDocExists(string name)
+        {
+            if (!Documents.ContainsKey(name)) return false;
+            Document doc = Documents[name];
+            if (doc.FileDirectory.Contains("#")) // #Template substitute with Path in Dictionary
+                doc.FileDirectory = Templates[doc.FileDirectory];
+            bool ok = FileOp.isFileExist(doc.FileDirectory, doc.FileName);
+            return ok;
+        }
         /// <summary>
         /// getDoc(name) - get Document name - when nor read yet - from the file. If necessary - Create new Sheet
         /// </summary>
@@ -240,12 +252,15 @@ namespace TSmatch.Document
         ///  5.4.16 - bug fix - SheetReset for "N" Document
         /// 19.4.16 - use Templ.getPath in getDoc()
         /// 27.4.16 - optional flag load - if false -> don't load contents from the file
+        ///  9.4.17 - optional create_if_not_exist argument
+        /// 17.4.17 - doc.il = doc.Body.iEOL();
         /// </history>
-        public static Document getDoc(string name = Decl.DOC_TOC, bool fatal = true, bool load = true)
+        public static Document getDoc(string name = Decl.DOC_TOC
+            , bool fatal = true, bool load = true, bool create_if_notexist = false, bool reset = false)
         {
             Log.set("getDoc(" + name + ")");
             Document doc = null;
-            string err = "Err getDoc: ", ex= "";
+            string err = "Err getDoc: ", ex = "";
             try { doc = Documents[name]; }
             catch (Exception e) { err += "doc not in TOC"; ex = e.Message; doc = null; }
             if (doc != null && !doc.isOpen)
@@ -255,20 +270,23 @@ namespace TSmatch.Document
                     if (doc.FileDirectory.Contains("#")) // #Template substitute with Path in Dictionary
                         doc.FileDirectory = Templates[doc.FileDirectory];
                     //-------- Load Document from the file or create it ------------
-                    bool create = !string.IsNullOrEmpty(doc.type) && doc.type[0] == 'N' ? true : false;
-                    doc.Wb = FileOp.fileOpen(doc.FileDirectory, doc.FileName, create);
+                    //9/4                    bool create = !string.IsNullOrEmpty(doc.type) && doc.type[0] == 'N' ? true : false;
+                    doc.Wb = FileOp.fileOpen(doc.FileDirectory, doc.FileName, create_if_notexist);
                     try
                     {
-                        if (doc.type == Decl.DOC_TYPE_N) FileOp.SheetReset(doc.Wb, doc.SheetN);
+                        //9/4                        if (doc.type == Decl.DOC_TYPE_N) FileOp.SheetReset(doc.Wb, doc.SheetN);
+                        if (reset) FileOp.SheetReset(doc.Wb, doc.SheetN);
                         doc.Sheet = doc.Wb.Worksheets[doc.SheetN];
                     }
                     catch (Exception e) { err += "no SheetN"; ex = doc.SheetN; doc = null; }
-                    if (create && doc != null) doc.Reset();
-                    else if (doc != null) doc.Body = FileOp.getSheetValue(doc.Sheet);
+                    //9/4                    if (create && doc != null) doc.Reset();
+                    //9/4                    else if (doc != null) doc.Body = FileOp.getSheetValue(doc.Sheet);
+                    doc.Body = FileOp.getSheetValue(doc.Sheet);
                 }
             } // end if(!doc.isOpen)
-            if(doc == null && fatal) Msg.F(err, ex, name);
-            if(doc != null && doc.Body != null) doc.isOpen = true;
+            if (doc == null && fatal) Msg.F(err, ex, name);
+            if (doc != null && doc.Body != null) doc.isOpen = true;
+            doc.il = doc.Body.iEOL();
             Log.exit();
             return doc;
         }
@@ -311,8 +329,8 @@ namespace TSmatch.Document
             form = Form.getFormByName(this, formName);
             form.AutoFit = AutoFit;
             Form.last_name = "";
-            Form.nStr = nStrBody == -1 ? Body.iEOL()+1: nStrBody; // defualt nStr = Body.iEOL()+1
-///            Form.getFormByName(this, formName).AutoFit = AutoFit;
+            Form.nStr = nStrBody == -1 ? Body.iEOL() + 1 : nStrBody; // defualt nStr = Body.iEOL()+1
+                                                                     ///            Form.getFormByName(this, formName).AutoFit = AutoFit;
             Log.exit();
         }
         internal void wrDocForm(params object[] obj)
@@ -326,6 +344,10 @@ namespace TSmatch.Document
                 //               wrDoc(form.name, ob);
             }
             else wrDoc(form.name, obj);
+        }
+        internal void wrDocListStr(int nStr, List<string>str)
+        {
+
         }
         //internal void wrDoсForm(string dir, string v, DateTime date, string mD5, int count, string strListRules)
         //{
@@ -347,17 +369,17 @@ namespace TSmatch.Document
         {
             Log.set("wrDoc(" + formName + ", obj[])");
 
-            if(obj is Array)
+            if (obj is Array)
             {
                 int objLng = obj.Length;
                 object[] _obj = obj;
                 //--------------- not implemented yet
-                if ( obj[0] is Array)
+                if (obj[0] is Array)
                 {
 
                 }
             }
- //           Type ob = typeof(obj);  //.IsAssignableFrom(type); 
+            //           Type ob = typeof(obj);  //.IsAssignableFrom(type); 
 
             Form frm = forms.Find(x => x.name == formName);
             if (frm == null) Msg.F("Document.wrDoc no form", formName, this.name);
@@ -407,7 +429,7 @@ namespace TSmatch.Document
         ////    wrDoc(str, t);
         ////    Body[1, 1] = t[0];
         ////}
-        public void wrDoc(List<int> rows, List<int>cols, List<int> rFr, List<int> cFr)
+        public void wrDoc(List<int> rows, List<int> cols, List<int> rFr, List<int> cFr)
         {
             Log.set("wrDoc(List rows, List cols, List rFr, List cFr)");
             Mtr tmpBody = FileOp.getSheetValue(this.Sheet);
@@ -417,7 +439,7 @@ namespace TSmatch.Document
         #endregion      //wrDoc area
 
         private void splitBodySummary()
-        {      
+        {
             int fullEOL = Body.iEOL();
             int _resLns = 0;
             switch (ResLines.Count)
@@ -495,13 +517,13 @@ namespace TSmatch.Document
         /// 20.1.16 - fix bug: not write EOLinTOC for TSmatch type Documents
         /// 1.04.16 - overlay saveDoc(..)
         /// </history>
-        public static void saveDoc(Document doc, bool BodySave = true, string MD5 = "",int EOL = 0)
+        public static void saveDoc(Document doc, bool BodySave = true, string MD5 = "", int EOL = 0)
         {
             Log.set("saveDoc(\"" + doc.name + "\")");
             try
             {
                 Document toc = Documents[Decl.DOC_TOC];
-                if (doc.type == Decl.DOC_TYPE_N) doc.isChanged = true; 
+                if (doc.type == Decl.DOC_TYPE_N) doc.isChanged = true;
                 if (doc.isChanged)
                 {
                     int EOLinTOC = EOL;
@@ -532,8 +554,9 @@ namespace TSmatch.Document
                         FileOp.saveRngValue(tmp, AutoFit: false);  //======= save TОC in TSmatch.xlsx
                         break;
                     }
-                }  
-            } catch (Exception e) { Log.FATAL("Ошибка \"" + e.Message + "\" сохранения файла \"" + doc.name + "\""); }
+                }
+            }
+            catch (Exception e) { Log.FATAL("Ошибка \"" + e.Message + "\" сохранения файла \"" + doc.name + "\""); }
             Log.exit();
         }
         public void saveDoc(bool BodySave = true, string MD5 = "", int EOL = 0)
@@ -549,56 +572,56 @@ namespace TSmatch.Document
             this.isOpen = false;
             FileOp.DisplayAlert(false);
             try { this.Wb.Close(); }
-            catch {  }
+            catch { }
             FileOp.DisplayAlert(true);
             Log.exit();
         }
         private static void colCpy(Mtr mtr, int rwMtr, Excel.Range rng, int rwRng)
         {
             int cols = mtr.iEOC();
-//!!! 2.1.16            for (int col = 1; col <= cols; col++) rng.Cells[rwRng, col] = mtr.get(rwMtr, col);
+            //!!! 2.1.16            for (int col = 1; col <= cols; col++) rng.Cells[rwRng, col] = mtr.get(rwMtr, col);
         }
-/*        /// <summary>
-        /// recognizeDoc(wb)        - распознавание Документа в Листе[1] wb
-        /// </summary>
-        /// <param name="wb"></param>
-        /// <returns>имя распознанного документа или null, если Документ не распознан</returns>
-        /// <history> 14.12.2013
-        /// 16.12.13 (ПХ) переписано распознавание с учетом if( is_wbSF(wb) )
-        /// 18.01.14 (ПХ) с использование Matrix
-        /// </history>
-        public static string recognizeDoc(Excel.Workbook wb)
-        {
-            Log.set("recognizeDoc(wb)");
-            Mtr wbMtr = FileOp.getSheetValue(wb.Worksheets[1]);
-            // вначале проверим где у wb Штамп - в теле или в пятке? Штамп в пятке бывает только у SF
-            // отделим от wbMtr область пятки SF -- переложим SFresLines строк wbMtr в wdSFsummary
-            int iEOL = wbMtr.iEOL();
-            int iEOC = wbMtr.iEOC();
-            object[,] tmp = new object [Decl.SFresLines + 1, iEOC + 1];
-            for (int rw = 1; rw <= Decl.SFresLines; rw++)
-                for (int col = 1; col <= iEOC; col++)
-                   tmp[rw, col] = wbMtr.get(iEOL - Decl.SFresLines + rw - 1, col);
-            Mtr wbSFsummary = new Mtr(tmp);
+        /*        /// <summary>
+                /// recognizeDoc(wb)        - распознавание Документа в Листе[1] wb
+                /// </summary>
+                /// <param name="wb"></param>
+                /// <returns>имя распознанного документа или null, если Документ не распознан</returns>
+                /// <history> 14.12.2013
+                /// 16.12.13 (ПХ) переписано распознавание с учетом if( is_wbSF(wb) )
+                /// 18.01.14 (ПХ) с использование Matrix
+                /// </history>
+                public static string recognizeDoc(Excel.Workbook wb)
+                {
+                    Log.set("recognizeDoc(wb)");
+                    Mtr wbMtr = FileOp.getSheetValue(wb.Worksheets[1]);
+                    // вначале проверим где у wb Штамп - в теле или в пятке? Штамп в пятке бывает только у SF
+                    // отделим от wbMtr область пятки SF -- переложим SFresLines строк wbMtr в wdSFsummary
+                    int iEOL = wbMtr.iEOL();
+                    int iEOC = wbMtr.iEOC();
+                    object[,] tmp = new object [Decl.SFresLines + 1, iEOC + 1];
+                    for (int rw = 1; rw <= Decl.SFresLines; rw++)
+                        for (int col = 1; col <= iEOC; col++)
+                           tmp[rw, col] = wbMtr.get(iEOL - Decl.SFresLines + rw - 1, col);
+                    Mtr wbSFsummary = new Mtr(tmp);
 
-                    Mtr rng = (Documents["SFDC"].stamp.Check(wbSFsummary))? wbSFsummary: wbMtr;
+                            Mtr rng = (Documents["SFDC"].stamp.Check(wbSFsummary))? wbSFsummary: wbMtr;
 
-            try 
-            {
-                foreach (var doc in Documents)  // ищем подходящий документ по Штампам
-                    if (doc.Value.stamp.Check(rng)) return doc.Value.name;
-                return null;                    // если ничего не нашли -> вовращаем null
-            }
-            finally { Log.exit(); }                  
-        }
-*/ //2.1.16
-        /// <summary>
-        /// инициирует Fetch-структуру Документа для Запроса fetch_rqst.
-        /// Если fetch_rqst не указан - для всех Запросов Документа.
-        /// </summary>
-        /// <param name="fetch_rqst"></param>
-        /// <history>11.1.2014 PKh
-        /// 15.1.2014 - дописан FetchInit() - просмотр всех Fetch Документа</history>
+                    try 
+                    {
+                        foreach (var doc in Documents)  // ищем подходящий документ по Штампам
+                            if (doc.Value.stamp.Check(rng)) return doc.Value.name;
+                        return null;                    // если ничего не нашли -> вовращаем null
+                    }
+                    finally { Log.exit(); }                  
+                }
+        */ //2.1.16
+           /// <summary>
+           /// инициирует Fetch-структуру Документа для Запроса fetch_rqst.
+           /// Если fetch_rqst не указан - для всех Запросов Документа.
+           /// </summary>
+           /// <param name="fetch_rqst"></param>
+           /// <history>11.1.2014 PKh
+           /// 15.1.2014 - дописан FetchInit() - просмотр всех Fetch Документа</history>
         public void FetchInit()
         {
             Log.set("FetchInit");
@@ -639,7 +662,7 @@ namespace TSmatch.Document
                 {
 
                     string s1 = doc.Body.Strng(i, key);
-                    if (s1 != "")try { keyDic.Add(s1, doc.Body.Strng(i, val)); }
+                    if (s1 != "") try { keyDic.Add(s1, doc.Body.Strng(i, val)); }
                         catch
                         {
                             Log.Warning("Запрос \"" + fetch_rqst + " Строка " + i
@@ -647,7 +670,7 @@ namespace TSmatch.Document
                         }
                 }
                 DateTime t1 = DateTime.Now;
-                new Log("-> "+(t1-t0));
+                new Log("-> " + (t1 - t0));
             }
             catch { Log.FATAL("ошибка запроса \"" + fetch_rqst + "\" для Документа \"" + name + "\""); }
             finally { Log.exit(); }
@@ -672,7 +695,7 @@ namespace TSmatch.Document
                 Dictionary<string, string> Dic = doc.docDic[ar_rqst[0] + "/" + ar_rqst[1]];
                 result = Dic[x];
             }
-            catch { Log.FATAL("ошибка Fetch( \"" + fetch_rqst + "\", \"" + x + "\")" ); }
+            catch { Log.FATAL("ошибка Fetch( \"" + fetch_rqst + "\", \"" + x + "\")"); }
             finally { Log.exit(); }
             return result;
         }
@@ -714,7 +737,7 @@ namespace TSmatch.Document
             /// 18.1.14 (ПХ) - переписано еще раз: проверяем mtr
             /// </history>
             public bool Check(Mtr mtr)
-            {             
+            {
                 if (mtr == null) return false;
                 foreach (OneStamp st in stamps) if (!st.Check(mtr)) return false;
                 return true;
@@ -766,8 +789,8 @@ namespace TSmatch.Document
             {
                 signature = doc.Body.Strng(rowNumber, Decl.DOC_STMPTXT);
                 typeStamp = doc.Body.Strng(rowNumber, Decl.DOC_STMPTYPE);
-  
-                List<int> rw  = intListFrCell(doc, rowNumber, Decl.DOC_STMPROW);
+
+                List<int> rw = intListFrCell(doc, rowNumber, Decl.DOC_STMPROW);
                 List<int> col = intListFrCell(doc, rowNumber, Decl.DOC_STMPCOL);
                 // декартово произведение множеств rw и col
                 rw.ForEach(r => col.ForEach(c => stampPosition.Add(new int[] { r, c })));
@@ -811,11 +834,15 @@ namespace TSmatch.Document
             public bool Check(Mtr mtr)
             {
                 string sigInStamp = signature.ToLower();
-                foreach (var pos in stampPosition) {
+                foreach (var pos in stampPosition)
+                {
                     string strToCheck = mtr.Strng(pos[0], pos[1]).ToLower();
-                    if (typeStamp == "=") {
+                    if (typeStamp == "=")
+                    {
                         if (strToCheck == sigInStamp) return true;
-                    } else {
+                    }
+                    else
+                    {
                         if (strToCheck.Contains(sigInStamp)) return true;
                     }
                 }
@@ -873,11 +900,11 @@ namespace TSmatch.Document
                                 for (int r = 1; r <= format.iEOL(); r++)
                                 {
                                     string f = format.Strng(r, c);
-                                    if ( f.Contains("{") & f.Contains("}")) { _r.Add(r); _c.Add(c); }
+                                    if (f.Contains("{") & f.Contains("}")) { _r.Add(r); _c.Add(c); }
                                 }
                         }
                         Forms.Add(new Form(s, _r, _c));
-                    }                 
+                    }
                 }
                 Log.exit();
                 return Forms;
