@@ -1,0 +1,17 @@
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\TSmatch 1.0\TSmatch\TSmatch\obj\Debug\TSmatch.csprojResolveAssemblyReference.cache
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\TSmatch 1.0\TSmatch\TSmatch\obj\Debug\TSmatch.Properties.Resources.resources
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\TSmatch 1.0\TSmatch\TSmatch\obj\Debug\TSmatch.csproj.GenerateResource.Cache
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\TSmatch 1.0\TSmatch\TSmatch\bin\Debug\TSmatch.exe.config
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\TSmatch 1.0\TSmatch\TSmatch\bin\Debug\TSmatch.exe
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\TSmatch 1.0\TSmatch\TSmatch\bin\Debug\TSmatch.pdb
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\TSmatch 1.0\TSmatch\TSmatch\bin\Debug\IfcEngineCS.dll
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\TSmatch 1.0\TSmatch\TSmatch\bin\Debug\IfcManager.dll
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\TSmatch 1.0\TSmatch\TSmatch\bin\Debug\log4net.dll
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\TSmatch 1.0\TSmatch\TSmatch\bin\Debug\Tekla.Structures.Dialog.dll
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\TSmatch 1.0\TSmatch\TSmatch\bin\Debug\Tekla.Structures.dll
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\TSmatch 1.0\TSmatch\TSmatch\bin\Debug\Tekla.Structures.Model.dll
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\TSmatch 1.0\TSmatch\TSmatch\bin\Debug\IfcEngineCS.pdb
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\TSmatch 1.0\TSmatch\TSmatch\bin\Debug\log4net.xml
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\TSmatch 1.0\TSmatch\TSmatch\obj\Debug\TSmatch.exe
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\TSmatch 1.0\TSmatch\TSmatch\obj\Debug\TSmatch.pdb
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\TSmatch 1.0\TSmatch\TSmatch\obj\Debug\SELECT.Form1.resources
