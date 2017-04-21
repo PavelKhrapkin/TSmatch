@@ -49,12 +49,12 @@ using Rule = TSmatch.Rule.Rule;
 using TSmatch.ElmAttSet;
 using TSmatch.Rule;
 using Msg = TSmatch.Message.Message;
-using FP = TSmatch.FingerPrint.FingerPrint;
+//12/4 using FP = TSmatch.FingerPrint.FingerPrint;
 using Sec = TSmatch.Section.Section;
 using Elm = TSmatch.ElmAttSet.ElmAttSet;
 using SType = TSmatch.Section.Section.SType;
-using TST = TSmatch.Test.assert;
-using TSmatch.FingerPrint;
+//12/4 using TST = TSmatch.Test.assert;
+// 12/4 using TSmatch.FingerPrint;
 using TSmatch.DPar;
 
 namespace TSmatch.Matcher
@@ -79,8 +79,7 @@ namespace TSmatch.Matcher
         /// <param name="_rule"></param>
         public Mtch(ElmAttSet.Group gr, Rule.Rule _rule)
         {
-            if (gr.prf.Contains("ш2") /* && _rule.text.Contains("д") */ ) rule = _rule;
-
+//21/4            if (gr.prf.Contains("ш2") /* && _rule.text.Contains("д") */ ) rule = _rule;
 
             if (gr == null || gr.guids.Count < 1) return;
             ok = OK.NoMatch;
@@ -195,9 +194,8 @@ namespace TSmatch.Matcher
         //////////////    throw new NotImplementedException();
         //////////////    return result;
         //////////////}
-
-        #region ------ test Matcher -----
-#if DEBUG
+#if OLD
+        //#region ------ test Matcher -----
         internal static void testMtch()
         {
             Log.set("testMtch");
@@ -324,8 +322,8 @@ namespace TSmatch.Matcher
 //////////////////////            TST.Eq(match.price, 0.0);
 ////////////////////            Log.exit();
 ////////////////////        }
-#endif //#if DEBUG
-        #endregion ------ test Matcher ------
+
+//#endregion ------ test Matcher ------
         /* 5.12.2016 ревизия
         public struct OK    // структура данных, описывающая найденное соответствие..
         {                   //..Правил, Прайс-листа комплектующих, и строки - Группы <mat,prf>
@@ -657,5 +655,6 @@ namespace TSmatch.Matcher
           return found;
         } // end SearchInComp
         2016.12.05 revision */
+#endif // OLD
     } // end class Matcher
 } // end namespace Matcher

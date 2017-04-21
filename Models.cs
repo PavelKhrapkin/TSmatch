@@ -101,10 +101,7 @@ namespace TSmatch.Model
                                         //7/6/17        public delegate List<Elm> readCAD(string path);
         public Docs docReport;
         TS ts = new TS();
-        SR savedReport; //17/4 = new SR();
         private Boot bootstrap;
-
-        public SR SavedReport { get => savedReport; set => savedReport = value; }
 
         public int CompareTo(Model mod) { return mod.date.CompareTo(date); }    //to Sort Models by time
 
@@ -525,8 +522,7 @@ namespace TSmatch.Model
             string doc_name = mode.ToString();
             Log.set("Model.wrModel(" + doc_name + ")");
             DateTime t0 = DateTime.Now;
-            Docs doc = Docs.getDoc(doc_name);
-            doc.Reset();
+            Docs doc = Docs.getDoc(doc_name, create_if_notexist: true, reset: true);
             switch (mode)
             {
                 case WrMod.ModelINFO:   // общая информация о модели: имя, директория, MD5 и др

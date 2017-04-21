@@ -28,6 +28,7 @@ using Decl = TSmatch.Declaration.Declaration;
 using Docs = TSmatch.Document.Document;
 using Elm = TSmatch.ElmAttSet.ElmAttSet;
 using Mod = TSmatch.Model.Model;
+using TS = TSmatch.Tekla.Tekla;
 
 namespace TSmatch.SaveReport
 {
@@ -45,27 +46,33 @@ namespace TSmatch.SaveReport
         public SavedReport()
         { }
 
-        public Model.Model getSavedReport()
+        public void getSavedReport()
         {
-            if (!Docs.IsDocExists(Decl.TSMATCHINFO_MODELINFO))
-            {
-                docModelINFO = Docs.getDoc(Decl.TSMATCHINFO_MODELINFO, create_if_notexist: true);
-                created_new = true;
-            }
-            else
-            {
-                docModelINFO = Docs.getDoc(Decl.TSMATCHINFO_MODELINFO);
-                if (!isReportConsistent()) Msg.F("SavedReport inconsistant");
-            }
-            return this;
-        }
-        #region --- ModelJournal -- позже перенести в отдельный класс - модуль
-        private string modJournal(int iModJounal, int col)
-        {
-            Docs docJournal = Docs.getDoc(Decl.MODELS);
-            return docJournal.Body.Strng(iModJounal, col);
+            string repNm = Decl.TSMATCHINFO_MODELINFO;
+            if (Docs.IsDocExists(repNm) && isReportConsistent()) return;
+            ReCreateSavedReport();
         }
 
+        private void ReCreateSavedReport()
+        {
+            TS ts = new TS();
+     //ToDo 21/4/17: когда буду делать САПР помимо Tekla, здесь переписать!
+            if(!TS.isTeklaActive()) Msg.F("SavedReport inconsistant and no Tekla");
+            //20/4            created_new = true;
+            name = TS.getModInfo();
+            dir = TS.ModInfo.ModelPath;
+            iModJounal = getModJournal(name, dir);
+            date = Lib.getDateTime(getModJrnValue(Decl.MODEL_DATE));
+            docModelINFO = Docs.getDoc(Decl.TSMATCHINFO_MODELINFO
+                , create_if_notexist: true, reset: true);
+            wrModel(WrMod.ModelINFO);
+            Read();
+            getSavedRules();
+            Handler();
+            wrModel(WrMod.Report);
+            if (!isReportConsistent()) Msg.F("internal errr");
+        }
+#region --- ModelJournal -- позже перенести в отдельный класс - модуль
         /// <summary>
         /// getModJournal(name, dir) - get model from Model Journal in TSmatch.xlsx
         /// </summary>
@@ -89,10 +96,16 @@ namespace TSmatch.SaveReport
             return -1;
         }
 
-        private string getModJrn(int col)
+        private string getModJrnValue(int col)
         {
             Docs doc = Docs.getDoc(Decl.MODELS);
             return doc.Body.Strng(iModJounal, col);
+        }
+
+        private string modJournal(int iModJounal, int col)
+        {
+            Docs docJournal = Docs.getDoc(Decl.MODELS);
+            return docJournal.Body.Strng(iModJounal, col);
         }
         #endregion --- ModelJournal -- позже перенести в отдельный класс - модуль
 
@@ -102,13 +115,14 @@ namespace TSmatch.SaveReport
             if (isChangedStr(ref name, docModelINFO, 2, 2)) return false;
             if (isChangedStr(ref dir, docModelINFO, 3, 2)) return false;
             iModJounal = getModJournal(name);
-            string dateJrn = getModJrn(Decl.MODEL_DATE);
+            string dateJrn = getModJrnValue(Decl.MODEL_DATE);
             if (isChangedStr(ref dateJrn, docModelINFO, 5, 2)) return false;
             date = DateTime.Parse(dateJrn);
             if (date > DateTime.Now) return false;
             if (!Docs.IsDocExists(Decl.TSMATCHINFO_RAW)) return false;
             docRaw = Docs.getDoc(Decl.TSMATCHINFO_RAW);
-            elmCntSav = docRaw.Body.iEOL() - docRaw.i0 +1;
+            elmCntSav = docRaw.Body.iEOL() - docRaw.i0 + 1;
+            if (elementsCount != elmCntSav) return false;
             if (elmCntSav != docModelINFO.Body.Int(7, 2)) return false;
             elements = getSavedRaw();
             getGroups();
@@ -172,7 +186,7 @@ namespace TSmatch.SaveReport
         }
         public void getSavedRules()
         {
-            strListRules = getModJrn(Decl.MODEL_R_LIST);
+            strListRules = getModJrnValue(Decl.MODEL_R_LIST);
             foreach (int n in Lib.GetPars(strListRules))
                 Rules.Add(new Rule.Rule(n));
             ClosePriceLists();

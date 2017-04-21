@@ -86,17 +86,17 @@ namespace TSmatch.Bootstrap
         Ifc ifc;
         public object classCAD;
         public Mod model;
+        private int elementsCount;
 
 
         public Bootstrap()
         {
             init(BootInitMode.Bootstrap);
-//            model = new Mod();
             var sr = new SaveReport.SavedReport();
-            var m = sr.getSavedReport();
+            model = sr;
+            model.elementsCount = elementsCount;
+            sr.getSavedReport();
             sr.CloseReport();
-            //17/4            model.dir = ModelDir;
-            //17/4            model.GetModelInfo();
         }
         /// <summary>
         /// init(name [,arg]) - initiate TSmatch module name
@@ -125,11 +125,11 @@ namespace TSmatch.Bootstrap
                     debug_path = desktop_path;
                     if (isTeklaActive)
                     {   // if Tekla is active - get Path of TSmatch
-                        classCAD = new TS();
+                        TS ts = new TS();
                         _TOCdir = TS.GetTeklaDir(TS.ModelDir.exceldesign);
                         ModelDir = TS.GetTeklaDir(TS.ModelDir.model);
+                        elementsCount = ts.elementsCount();
                         //6/4/17                        macroDir = TS.GetTeklaDir(TS.ModelDir.macro);
-                        classCAD = new TS();
                     }
                     else
                     {   // if not active - Windows Environment Variable value

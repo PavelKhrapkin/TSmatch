@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------
  * TS_OpenAPI -- Interaction with Tekla Structure over Open API
  * 
- * 22.8.2016  Pavel Khrapkin, Alex Bobtsov
+ * 10.4.2017  Pavel Khrapkin, Alex Bobtsov
  *
  *----- ToDo ---------------------------------------------
  * - реализовать интерфейс IAdapterCAD, при этом избавится от static
@@ -48,12 +48,15 @@ using log4net.Config;
 using Tekla.Structures;
 using TSD = Tekla.Structures.Dialog.ErrorDialog;
 using Tekla.Structures.Model;
+using Tekla.Structures.Geometry3d;
+using Tekla.Structures.Model.UI;
 
 using Log = match.Lib.Log;
 using Msg = TSmatch.Message.Message;
 using Lib = match.Lib.MatchLib;
 using TSM = Tekla.Structures.Model;
 using Elm = TSmatch.ElmAttSet.ElmAttSet;
+
 
 namespace TSmatch.Tekla
 {
@@ -62,6 +65,7 @@ namespace TSmatch.Tekla
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger("Tekla:TS_OpenAPI");
 
         const string MYNAME = "Tekla.Read v2.0";
+
         public enum ModelDir { exceldesign, model, macro, environment };
         /* 21.6.2016 -- заменяем на ElmAttSet
                 public struct AttSet : IComparable<AttSet>
@@ -103,12 +107,17 @@ namespace TSmatch.Tekla
 
         ////public List<Elm> Read(string modName) { return Read(); }
         ////public List<Elm> Read(this TSmatch.Model.Model _mod ) { return Read(_mod.name); }
-        public static List<Elm> Read(string dir = "", string name = "")
+        TSM.Model model = new TSM.Model();
+        List<Part> parts = new List<Part>();
+
+        public Tekla() { } // конструктор класса Tekla - пока пустой 6.4.17
+
+        public List<Elm> Read(string dir = "", string name = "")
         {
             Log.set("TS_OpenAPI.Read");
             List<Elm> elements = new List<Elm>();
-            TSM.Model model = new TSM.Model();
-            List<Part> parts = new List<Part>();
+            // 6.4.17 //TSM.Model model = new TSM.Model();
+            ////////////List<Part> parts = new List<Part>();
             ModInfo = model.GetInfo();
             if (dir != "" && ModInfo.ModelPath != dir
                 || name != "" && ModInfo.ModelName != String.Concat(name, ".db1")) Msg.F("Tekla.Read: Another model loaded, not", name);
@@ -134,12 +143,6 @@ namespace TSmatch.Tekla
                     string guid = "";
                     string mat_type = "";
                     double price = 0.0;
-                    //string profile = "";
-                    //double width = 0.0, height = 0.0;
-                    //myPart.GetReportProperty("PROFILE", ref profile);
-                    //myPart.GetReportProperty("WIDTH", ref width);
-                    //myPart.GetReportProperty("HEIGHT", ref height);
-                    //myPart.GetReportProperty("WEIGHT_NET", ref weight);
 
                     myPart.GetReportProperty("GUID", ref guid);
                     myPart.GetReportProperty("LENGTH", ref lng);
@@ -175,6 +178,7 @@ namespace TSmatch.Tekla
             Log.exit();
             return elements;
         } // Read
+
         static void Scale(List<Elm> elements)
         {
             foreach (var elm in elements)
@@ -182,6 +186,65 @@ namespace TSmatch.Tekla
                 // weight [kg]; volume [mm3]->[m3]
                 elm.volume = elm.volume / 1000 / 1000 / 1000;     // elm.volume [mm3] -> [m3] 
             }
+        }
+
+        public List<Elm> Read(string path)
+        {
+            string dir = Path.GetDirectoryName(path);
+            string name = Path.GetFileName(path);
+            return Read(dir, name);
+        }
+
+        public int elementsCount()
+        {
+            Log.set("TS_OpenAPI.elementsCount()");
+            //10/4/17            var i = model.GetPhases();
+            //10/4/17            int ii = TSM.Phase .PhaseNumber(); 
+            TSM.ModelObjectSelector selector = model.GetModelObjectSelector();
+            System.Type[] Types = new System.Type[1];
+            Types.SetValue(typeof(Part), 0);
+            TSM.ModelObjectEnumerator objectList = selector.GetAllObjectsWithType(Types);
+            Log.exit();
+            int totalCnt = objectList.GetSize();
+            return totalCnt;
+        }
+        /// <summary>
+        /// HeghlightElements(List<Elm>elements, color) - change color of elements in list 
+        /// </summary>
+        /// <param name="elements"></param>
+        /// <param name="color"></param>
+        public void HighlightElements(Dictionary<string, Elm> els, int color = 1)
+        {
+            Log.set("TS_OpenAPI.HighLightElements");
+            TSM.ModelObjectSelector selector = model.GetModelObjectSelector();
+            System.Type[] Types = new System.Type[1];
+            Types.SetValue(typeof(Part), 0);
+
+            TSM.ModelObjectEnumerator objectList = selector.GetAllObjectsWithType(Types);
+            int totalCnt = objectList.GetSize();
+
+            var colorObjects = new List<ModelObject>();
+
+            while (objectList.MoveNext())
+            {
+                TSM.Part myPart = objectList.Current as TSM.Part;
+                if (myPart != null)
+                {
+                    string guid = string.Empty;
+                    myPart.GetReportProperty("GUID", ref guid);
+                    if (els.ContainsKey(guid)) colorObjects.Add(myPart);
+                }
+            }
+            var _color = new Color(0.0, 0.0, 1.0);
+            ModelObjectVisualization.SetTransparencyForAll(TemporaryTransparency.SEMITRANSPARENT);
+            ModelObjectVisualization.SetTemporaryState(colorObjects, _color);
+            log.Info("\tTotal elements without price = " + colorObjects.Count);
+            Log.exit();
+        }
+
+        public void HighlightClear()
+        {
+            ModelObjectVisualization.SetTransparencyForAll(TemporaryTransparency.VISIBLE);
         }
         /*2016.6.21        /// <summary>
                 /// ModAtrMD5() - calculate MD5 of the model read from Tekla in ModAtr

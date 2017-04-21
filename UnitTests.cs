@@ -1,29 +1,27 @@
 ﻿/*----------------------------------------------------------------
  * Unit Test Module 
  *
- * 31.03.2017 Pavel Khrapkin
+ * 17.03.2017 Pavel Khrapkin
  *
  *--- History ---
  * 14.03.2017 Unit Test implemented
- * 21.03.2017 Section test
+ * 16.03.2017 Section test-tried to make Oleg' advise with Biitstrap.initSection(),
+ *            but return to static constructor in Section;
  * 17.03.2017 FingetPrtnt Test
  * ---- Tested Modules: ------------
- * Parameter    2017.03.29 OK
- * Section      2017.03.29 OK
- * FingerPrint  2017.03.31 OK
+ * Parameter    2017.03.14 OK
+ * Section      2017.03.16 OK
+ * FingerPrint  2017.03.17 частично - не все тесты перенесены из модуля TEST,
+ *                         не распознается tx справа от параметра {n} - может и не надо??
  */
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Collections.Generic;
 
 using Lib = match.Lib.MatchLib;
-using Par = TSmatch.Parameter.Parameter;
-using ParType = TSmatch.Parameter.Parameter.ParType;
-using Sec = TSmatch.Section.Section;
+using UT_Par = TSmatch.Parameter.utp;
+using UT_Sec = TSmatch.Section.Section;
 using SType = TSmatch.Section.Section.SType;
 using FP = TSmatch.FingerPrint.FingerPrint;
-using DP = TSmatch.DPar.DPar;
-
-using IMIT = TSmatch.Unit_Tests.Imitation._UT_Imitation;
+using FPtype = TSmatch.FingerPrint.FingerPrint.type;
 
 namespace TSmatch.Unit_Tests
 {
@@ -33,90 +31,53 @@ namespace TSmatch.Unit_Tests
         [TestMethod()]
         public void UT_Parameter_Test()
         {
-            var utp = new Par("{4}");
-            Assert.AreEqual(utp.ptype.ToString(), "String");
+            var utp = new UT_Par("{4}");
+            Assert.AreEqual(utp.type, "String");
             Assert.AreEqual(utp.tx, "");
             Assert.AreEqual(utp.par.ToString(), "4");
 
-            utp = new Par(string.Empty);
-            Assert.AreEqual(utp.ptype, ParType.ANY);
-            Assert.AreEqual((string)utp.par, "");
-            Assert.AreEqual(utp.tx, "");
-
-
-            utp = new Par("Ab{123}cD");
-            Assert.AreEqual(utp.ptype, ParType.String);
+            utp = new UT_Par("Ab{123}cD");
+            Assert.AreEqual(utp.type, "String");
             Assert.AreEqual((string)utp.par, "123");
             Assert.AreEqual(utp.tx, "ab");
 
-            utp = new Par("текст");
-            Assert.AreEqual(utp.ptype, ParType.String);
+            utp = new UT_Par("текст");
+            Assert.AreEqual(utp.type, "String");
             Assert.AreEqual(utp.tx, Lib.ToLat("текст"));
             Assert.AreEqual((string)utp.par, utp.tx);
 
-            utp = new Par("x{3");
+            utp = new UT_Par("x{3");
             Assert.AreEqual((string)utp.par, "x{3");
             Assert.AreEqual(utp.tx, (string)utp.par);
 
-            utp = new Par("def}fg");
+            utp = new UT_Par("def}fg");
             Assert.AreEqual((string)utp.par, "def}fg");
             Assert.AreEqual(utp.tx, (string)utp.par);
 
-            utp = new Par("Da{34{85}uy");
+            utp = new UT_Par("Da{34{85}uy");
             Assert.AreEqual(utp.tx, "da");
             Assert.AreEqual((string)utp.par, "3485");  // поскольку внутреняя { стирается
 
-            //---- str with ':'
-            utp = new Par("M: B{1}");
-            Assert.AreEqual(utp.tx, "b");
-            Assert.AreEqual((string)utp.par, "1");
-
-            utp = new Par("проф: текст*");
-            Assert.AreEqual(utp.tx, "тeкcт*");
-            Assert.AreEqual((string)utp.par, utp.tx);
-
-            //---- str with ';'
-            utp = new Par("M: B{1};");
-            Assert.AreEqual(utp.tx, "b");
-            Assert.AreEqual((string)utp.par, "1");
-
-            utp = new Par("M: B{1}; and other ;");
-            Assert.AreEqual(utp.tx, "b");
-            Assert.AreEqual((string)utp.par, "1");
-
-            //---- getParType test
-            utp = new Par("цена: {d~3}");
-            Assert.AreEqual(utp.ptype, ParType.Double);
+            ///---- ParType test
+            utp = new UT_Par("цена: {d~3}");
+            Assert.AreEqual(utp.type, "Double");
             Assert.AreEqual((string)utp.par, "3");
 
-            Assert.AreEqual(pType("{2}"), ParType.String);
-            Assert.AreEqual(pType("{s~2}"), ParType.String);
-            Assert.AreEqual(pType("{i~4}"), ParType.Integer);
-            Assert.AreEqual(pType("{d~3}"), ParType.Double);
-            Assert.AreEqual(pType("{digital~3}"), ParType.Double);
-            Assert.AreEqual(pType("текст{i~1}b{d~2,2}ff"), ParType.Integer);
-            Assert.AreEqual(pType("другой текст"), ParType.String);
-            Assert.AreEqual(pType(""), ParType.ANY);
+            Assert.AreEqual(parType("{2}"), "String");
+            Assert.AreEqual(parType("{s~2}"), "String");
+            Assert.AreEqual(parType("{i~4}"), "Integer");
+            Assert.AreEqual(parType("{d~3}"), "Double");
+            Assert.AreEqual(parType("{digital~3}"), "Double");
+            Assert.AreEqual(parType("текст{i~1}b{d~2,2}ff"), "Integer");
+            Assert.AreEqual(parType("другой текст"), "String");
+            Assert.AreEqual(parType(""), "String");
+
+            //            Assert.Fail();
         }
-
-        ParType pType(string str)
+        string parType(string str)
         {
-            var utp = new Par(str);
-            return utp.ptype;
-        }
-
-        [TestMethod()]
-        public void UT_Parameter_with_ParType()
-        {
-            var utp = new Par("M:b{1};", ParType.Integer);
-            Assert.AreEqual(utp.ptype, ParType.Integer);
-            Assert.AreEqual(utp.par, 1);
-            Assert.AreEqual(utp.tx, "b");
-
-            utp = new Par("M:b{d~1};", ParType.Integer); //d~ игнорируется
-            Assert.AreEqual(utp.ptype, ParType.Integer);
-            Assert.AreEqual(utp.par, 1);
-            Assert.AreEqual(utp.tx, "b");
+            var utp = new UT_Par(str);
+            return utp.type.ToString();
         }
     } // end class Parameter_Tests
 
@@ -126,171 +87,64 @@ namespace TSmatch.Unit_Tests
         [TestMethod()]
         public void UT_Section_Test()
         {
-            var SectionTab = new Bootstrap.Bootstrap.initSection().SectionTab;
-            Assert.AreEqual(SectionTab != null, true);
+            new Bootstrap.Bootstrap.initSection();
 
-            var s = new Sec("hh");
+            var s = new UT_Sec("hh");
             Assert.AreEqual(s.type, SType.NOT_DEFINED);
-            Assert.AreEqual(s.body, "hh");
 
-            s = new Sec(string.Empty);
+            s = new UT_Sec(string.Empty);
             Assert.AreEqual(s.type, SType.NOT_DEFINED);
             Assert.AreEqual(s.body, "");
 
-            s = new Sec("M: qq");
+            s = new UT_Sec("M: qq");
             Assert.AreEqual(s.type, SType.Material);
             Assert.AreEqual(s.body, "qq");
 
-            s = new Sec("мат: В20");
-            Assert.AreEqual(s.type, SType.Material);
-
-            s = new Sec("Prf: x; price: y;");
+            s = new UT_Sec("Prf: x; price: y;");
             Assert.AreEqual(s.type, SType.Profile);
             Assert.AreEqual(s.body, "x");
 
-            s = new Sec("Описание: xx");
+            s = new UT_Sec("Описание: xx");
             Assert.AreEqual(s.type, SType.Description);
             Assert.AreEqual(s.body, "xx");
 
-            s = new Sec("Des:{1}");
-            Assert.AreEqual(s.type, SType.Description);
-            Assert.AreEqual(s.body, "{1}");
-
-            s = new Sec("длина: 5");
+            s = new UT_Sec("длина: 5");
             Assert.AreEqual(s.type, SType.LengthPerUnit);
             Assert.AreEqual(s.body, "5");
 
-            s = new Sec("Объем: 7");    //Внимание!! Слово Объем содержит букву 'м'
-                                        //.. его нельзя употреблять в заголовках Секций
-            Assert.AreEqual(s.type, SType.Material);
+            s = new UT_Sec("Объем: 7");
+            Assert.AreEqual(s.type, SType.VolPerUnit);
             Assert.AreEqual(s.body, "7");
 
-            s = new Sec("кубометров: ");
-            Assert.AreEqual(s.type, SType.Material);    //.. тоже нельзя
-
-            s = new Sec("v: заливка в кубометрах");
-            Assert.AreEqual(s.type, SType.VolPerUnit);  //..но можно использовать 'м' в теле
-
-            s = new Sec("вес: 77");
+            s = new UT_Sec("вес: 77");
             Assert.AreEqual(s.type, SType.WeightPerUnit);
             Assert.AreEqual(s.body, "77");
 
-            s = new Sec("единица: ");
+            s = new UT_Sec("единица: ");
             Assert.AreEqual(s.type, SType.Unit);
             Assert.AreEqual(s.body, "");
 
-            //-- multi-header string
-            s = new Sec("M: hh: dd: ff : gh");
-            Assert.AreEqual(s.type, SType.Material);
-            Assert.AreEqual(s.body, "gh");
-
-            s = new Sec("Prf: Def: Уголок40х4");
-            Assert.AreEqual(s.type, SType.Profile);
-            Assert.AreEqual(s.body, "угoлoк40x4");
-
             //----- error input text handling -----
-            s = new Sec("Цена 2540");   // no ':'
-            Assert.AreEqual(s.type, SType.NOT_DEFINED);
-            Assert.AreEqual(s.body, "цeнa2540");
+            s = new UT_Sec("Цена 2540");   // no ':'
+            Assert.AreEqual(s.type, SType.Price);
+            Assert.AreEqual(s.body, "");
 
-            s = new Sec("Цена 2540;");
-            Assert.AreEqual(s.type, SType.NOT_DEFINED);
-            Assert.AreEqual(s.body, "цeнa2540");
+            s = new UT_Sec("Цена 2540;");
+            Assert.AreEqual(s.type, SType.Price);
+            Assert.AreEqual(s.body, "");
 
-            s = new Sec("; профиль: L");
+            s = new UT_Sec("; профиль: L");
             Assert.AreEqual(s.type, SType.NOT_DEFINED);
             Assert.AreEqual(s.body, "");
 
             //--- construtor Section("..;..;", SType) test
-            s = new Sec(";проф: Sec; Mat: n", SType.Profile);
+            s = new UT_Sec(";проф: Sec; Mat: n", SType.Profile);
             Assert.AreEqual(s.type, SType.Profile);
             Assert.AreEqual(s.body, "sec");
 
-            s = new Sec(";проф: Sec; Mat: n", SType.Unit);
+            s = new UT_Sec(";проф: Sec; Mat: n", SType.Unit);
             Assert.AreEqual(s.type, SType.NOT_DEFINED);
             Assert.AreEqual(s.body, "");
-        }
-
-        [TestMethod()]
-        public void UT_Section_Unit()
-        {
-            var s = new Sec("ед: руб/т");
-            Assert.AreEqual(s.type, SType.UNIT_Weight);
-
-            s = new Sec("ед: руб/тн");
-            Assert.AreEqual(s.type, SType.UNIT_Weight);
-
-            s = new Sec("ед: руб.за тонну");
-            Assert.AreEqual(s.type, SType.UNIT_Weight);
-
-            s = new Sec("un: руб.за пог.м");
-            Assert.AreEqual(s.type, SType.UNIT_Length);
-
-            s = new Sec("ед: за 1 штуку");
-            Assert.AreEqual(s.type, SType.UNIT_Qty);
-
-            //--- распознается неправильно
-            s = new Sec("un: руб. за метр");    //меТр - т=тонна дает UNIT_ Weight
-            Assert.AreEqual(s.type, SType.UNIT_Weight);
-        }
-
-        [TestMethod()]
-        public void UT_Section_SecRef()
-        {
-            var s = new Sec("Profile: Descr: Уголок *х*");
-            Assert.AreEqual(s.refSection, SType.Description);
-            Assert.AreEqual(s.type, SType.Profile);
-        }
-
-        [TestMethod()]
-        public void UT_isSectionMatch()
-        {
-            var sec = new Sec("Prf: L12x5");
-
-            bool b = sec.isSectionMatch("профиль:l*x*");
-            Assert.AreEqual(b, true);
-
-            Assert.AreEqual(sec.isSectionMatch("M: C245; профиль:l*x*"), true);
-
-            Assert.AreEqual(sec.isSectionMatch("M: C245"), false);
-
-            Assert.AreEqual(sec.isSectionMatch("профиль:Шв*x*"), false);
-        }
-
-        [TestMethod()]
-        public void UT_Section_secPars()
-        {
-            var sec = new Sec("проф:Уголок 40х4 ст3");
-            var ps = sec.secPars("Уголок * х *c*");
-            Assert.AreEqual(ps[0].parStr(), "40");
-            Assert.AreEqual(ps[1].parStr(), "4");
-            Assert.AreEqual(ps[2].parStr(), "т3");
-
-            // случай 1) const , напр. templ=материал С235
-            sec = new Sec("");  //то есть в прайс-листе этой колонки нет
-            ps = sec.secPars("M:C235");
-            Assert.AreEqual(ps.Count, 0);
-
-            // случай 2)  *    , напр. templ="Уголок *х*" comp= "Уголок 40x8"
-            sec = new Sec("Уголок 40х4");
-            ps = sec.secPars("проф: опис: Уголок * х * ");
-            Assert.AreEqual(ps.Count, 2);
-            Assert.AreEqual(ps[0].parStr(), "40");
-            Assert.AreEqual(ps[1].parStr(), "4");
-
-            // случай 3) {4}   , напр. templ="{4}"        comp= "Уголок 40x8" в кол 4
-            sec = new Sec("Уголок 40x8");
-            ps = sec.secPars("{4}");
-            Assert.AreEqual(ps.Count, 0);
-            Assert.AreEqual(sec.body, "угoлoк40x8");
-
-            // случай 4) ссылка, напр. templ="проф:опис: Уголок *х*с*" 
-            //                                          comp= "Уголок 40х8" ps 40 и 8
-            sec = new Sec("Уголок 40х8");
-            ps = sec.secPars("проф: опис: Уголок * х * ");
-            Assert.AreEqual(ps.Count, 2);
-            Assert.AreEqual(ps[0].parStr(), "40");
-            Assert.AreEqual(ps[1].parStr(), "8");
         }
     } // end class Section_Test
 
@@ -298,65 +152,57 @@ namespace TSmatch.Unit_Tests
     public class FingerPrint_Tests
     {
         [TestMethod()]
-        public void UT_FP()
+        public void UT_FP_constr1_Test()
         {
-            FP fp = new FP("hh");
-            Assert.AreEqual(fp.par, "hh");
+            // * тест: Уголок constructor1 FP(type.Rule, Проф: L * x *)
+            FP xr2 = new FP(FPtype.Rule, "Проф: L * x *");
+            Assert.AreEqual(xr2.section.type.ToString(), "Profile");
+            Assert.AreEqual(xr2.pars.Count, 1);
+            Assert.AreEqual(xr2.pars[0].ToString(), "l*x*");
+            Assert.AreEqual(xr2.txs.Count, 0);
 
-            FP fp1 = null;
-            FP fp2 = new FP("hh");
-            FP fp3 = new FP("hh2");
-            FP fp4 = new FP("");
-            Assert.AreEqual(fp.Equals(fp1), false);
-            Assert.AreEqual(fp.Equals(fp2), true);
-            Assert.AreEqual(fp.Equals(fp3), false);
-            Assert.AreEqual(fp4.Equals(fp1), false);
-        }
-    }
+            // * Уголок с материалом constructor1 FP(type.Rule, Проф: L * x * cт *)");
+            xr2 = new FP(FPtype.Rule, "Проф: L * x * cт *");
+            Assert.AreEqual(xr2.section.type.ToString(), "Profile");
+            Assert.AreEqual(xr2.pars.Count, 1);
+            Assert.AreEqual(xr2.pars[0].ToString(), "l*x*cт*");
+            Assert.AreEqual(xr2.txs.Count, 0);
 
-    [TestClass()]
-    public class UT_DPar_Tests
-    {
-        [TestMethod()]
-        public void UT_DPar()
-        {
-            string ld = "M:1; Prf:2; Des:3;Price:4;";
+            // * тест: Бетон -монолит constructor1 FP(type.Rule, М:В*)");
+            FP rule = new FP(FPtype.Rule, "M:B*;");
+            Assert.AreEqual(rule.pars.Count, 1);
+            Assert.AreEqual(rule.typeFP.ToString(), "Rule");
+            Assert.AreEqual(rule.section.type.ToString(), "Material");
+            Assert.AreEqual(rule.pars[0], "b*");
+            Assert.AreEqual(rule.txs.Count, 0);
 
-            DP dp = new DP(ld);
-            var d = new DP(ld).dpar;
-            Assert.AreEqual(d.Count, 4);
-            Assert.AreEqual(d[SType.Material],    "1");
-            Assert.AreEqual(d[SType.Profile],     "2");
-            Assert.AreEqual(d[SType.Description], "3");
-            Assert.AreEqual(d[SType.Price],       "4");
+            xr2 = new FP(FPtype.Rule, "Профиль:");
+            Assert.AreEqual(xr2.section.type.ToString(), "Profile");
 
-            Assert.AreEqual(dp.Col(SType.Material),    1);
-            Assert.AreEqual(dp.Col(SType.Profile),     2);
-            Assert.AreEqual(dp.Col(SType.Description), 3);
-            Assert.AreEqual(dp.Col(SType.Price),       4);
+            FP xr1 = new FP(FPtype.CompSet, "Описание: {3}");
+            Assert.AreEqual(xr1.pars.Count, 1);
+            Assert.AreEqual(xr1.typeFP.ToString(), "CompSet");
+            Assert.AreEqual(xr1.section.type.ToString(), "Description");
+            Assert.AreEqual(xr1.Col(), 3);
 
-            dp = new DP("M:23");
-            Assert.AreEqual(dp.Col(SType.Description), -1);
-            Assert.AreEqual(dp.Col(SType.Material), 23);
+            //-- CompSet tests
+            xr1 = new FP(FPtype.CompSet, "Цена: {4} если нет другого материала в описании");
+            Assert.AreEqual(xr1.pars.Count, 1);
+            Assert.AreEqual(xr1.typeFP.ToString(), "CompSet");
+            Assert.AreEqual(xr1.section.type.ToString(), "Price");
+            Assert.AreEqual(xr1.Col(), 4);
+            Assert.AreEqual(xr1.txs.Count, 2);
+            Assert.AreEqual(xr1.txs[0], "");
+//13/3            Assert.AreEqual(xr1.txs[1].Length > 10, true); - не распознается остаток строки справа!!
 
-            dp = new DP(string.Empty);
-            Assert.AreEqual(dp.Col(SType.Material), -1);
-
-            dp = new DP("qwerty");
-            Assert.AreEqual(dp.Col(SType.Profile), -1);
-
-            dp = new DP("профиль:Уголок *");
-            Assert.AreEqual(dp.dpStr.Count, 1);
-            Assert.AreEqual(dp.dpStr[SType.Profile], "Уголок *");
-            Assert.AreEqual(dp.dpar[SType.Profile], "угoлoк*");
-            Assert.AreEqual(dp.dpar.ContainsKey(SType.Profile), true);
-            Assert.AreEqual(dp.dpStr.ContainsKey(SType.Profile), true);
-
-            dp.Ad(SType.Unit, "Замес");
-            Assert.AreEqual(dp.dpStr.Count, 2);
-            Assert.AreEqual(dp.dpar.Count, 2);
-            Assert.AreEqual(dp.dpStr[SType.Profile], "Уголок *");
-            Assert.AreEqual(dp.dpar[SType.Unit], Lib.ToLat("Замес").ToLower());
+            xr1 = new FP(FPtype.CompSet, "Цена: {4} НДС {12}{14}%");
+            Assert.AreEqual(xr1.pars.Count, 3);
+            //13/3            Assert.AreEqual(xr1.txs[3], "%");      -- то же
+            Assert.AreEqual(xr1.Col(2), 14);
+            Assert.AreEqual(xr1.txs.Count, 4);
+            Assert.AreEqual(xr1.typeFP.ToString(), "CompSet");
+            Assert.AreEqual(xr1.section.type.ToString(), "Price");
+            Assert.AreEqual(xr1.Col(), 4);
         }
     }
 } // end namespace TSmatch.Unit_Tests
