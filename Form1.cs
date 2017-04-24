@@ -26,7 +26,11 @@ namespace SELECT
         private void Form1_Load(object sender, EventArgs e)
         {
             boot = new Boot();
-            model = boot.model;
+            var sr = new TSmatch.SaveReport.SavedReport();
+            model = sr;
+            model.SetModel();
+            sr.getSavedReport();
+            sr.CloseReport();
             WrForm(wrForm.modelINFO);
             WrForm(wrForm.modelReport);
             //16/4            model.HighLightElements(Mod.HighLightMODE.NoPrice);
@@ -34,6 +38,7 @@ namespace SELECT
             foreach (var gr in model.elmGroups)
                 if (gr.totalPrice == 0) grLst.Add(gr);
             model.Highlight(grLst);
+            rePrice.Text = "Пересчитать\nстоимость";
         }
 
         enum wrForm { modelINFO, modelReport };
@@ -56,7 +61,7 @@ namespace SELECT
                     List<string> modRep = new List<string>();
                     foreach (var gr in model.elmGroups)
                     {
-                        string str = string.Format("{0,12} {1,15} {2,20:N2}", gr.mat, gr.prf, gr.totalPrice);
+                        string str = string.Format("{0,12} {1,15} {2,20:N2}", gr.Mat, gr.Prf, gr.totalPrice);
                         modRep.Add(str);
                     }
                     listBox1.DataSource = modRep;
@@ -78,6 +83,7 @@ namespace SELECT
             model.HighLightClear();
             model.docReport.Close();
             boot.docTSmatch.Close();
+            match.FileOp.FileOp.AppQuit();
             Application.Exit();
         }
 
@@ -110,11 +116,12 @@ namespace SELECT
         private void button_Read_Click(object sender, EventArgs e)
         {
             label_modINFO.BackColor = Color.Yellow;
-            ts.Read();
+            //21/4ts.Read();
+            model.Read();
             WrForm(wrForm.modelINFO);
             model.wrModel(Mod.WrMod.ModelINFO);
             model.wrModel(Mod.WrMod.Raw);
-//17/4            model.getSavedRules();
+            //17/4            model.getSavedRules();
             model.Handler();
             model.wrModel(Mod.WrMod.Report);
             model.docReport.Close();
@@ -123,6 +130,21 @@ namespace SELECT
         private void label_totalPrice_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void rePrice_Click(object sender, EventArgs e)
+        {
+            rePrice.BackColor = Color.Yellow;
+
+            //////var gr = model.elmGroups[listBox1.SelectedIndex];
+            //////var grRule = gr.match.rule;
+            //////var grCS = gr.match.rule.CompSet;
+
+            model.ModReset();
+            model.Handler();
+            model.wrModel(Mod.WrMod.Report);
+            WrForm(wrForm.modelReport);
+            rePrice.BackColor = Color.GreenYellow;
         }
     }
 }

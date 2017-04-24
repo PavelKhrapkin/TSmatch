@@ -34,6 +34,8 @@ using Log = match.Lib.Log;
 using Lib = match.Lib.MatchLib;
 using Ifc = TSmatch.IFC.IfcManager.Core.IfcManager.IfcElement;
 using Mtch = TSmatch.Matcher.Mtch;
+using CmpSet = TSmatch.CompSet.CompSet;
+using Supl = TSmatch.Suppliers.Supplier;
 
 
 namespace TSmatch.ElmAttSet
@@ -244,6 +246,9 @@ namespace TSmatch.ElmAttSet
         public readonly double totalWeight;
         public readonly double totalVolume;
         public double totalPrice;
+        //---- references to other classes - price-list conteiners
+        public CmpSet CompSet;     //список компонентов, с которыми работает правило
+        public Supl Supplier;      //Поставщик
 
         public Mgroup(Dictionary<string, ElmAttSet> Els, string material, List<string> guids)
         {
@@ -299,6 +304,8 @@ namespace TSmatch.ElmAttSet
     {
         public string mat;
         public string prf;
+        public string Mat;
+        public string Prf;
         public List<string> guids;
         public double totalLength;
         public double totalWeight;
@@ -306,10 +313,15 @@ namespace TSmatch.ElmAttSet
         public double totalPrice;
         public Mtch match;          // Reference to the matched supply source (i.e.line in price list)   
         public Dictionary<string, ElmAttSet> Elements = new Dictionary<string, ElmAttSet>();
+        //---- references to other classes - price-list conteiners
+        public string CompSetName;  //список компонентов, с которыми работает правило
+        public string SupplierName; //Поставщик
 
         public Group(Dictionary<string, ElmAttSet>Els, string _mat, string _prf, List<string> _guids)
         {
             Elements = Els;
+            Mat = _mat;
+            Prf = _prf;
             mat = Lib.ToLat(_mat.ToLower());
             prf = Lib.ToLat(_prf.ToLower());
             guids = _guids;

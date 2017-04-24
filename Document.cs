@@ -1,7 +1,7 @@
 ﻿/*-------------------------------------------------------------------------------------------------------
  * Document -- works with all Documents in the system basing on TOC - Table Of Content
  * 
- * 20.04.2017  Pavel Khrapkin, Alex Pass, Alex Bobtsov
+ * 24.04.2017  Pavel Khrapkin, Alex Pass, Alex Bobtsov
  *
  *--------- History ----------------  
  * 2013-2015 заложена система управления документами на основе TOC и Штампов
@@ -27,15 +27,13 @@
  * 13.01.17 - getDoc() = getDoc(Decl.DOC_TOC)
  *  9.04.17 - getDoc optional bool arguments
  * 17.04.17 - getDoc() il = doc.Body.iEOL();
- * 20.04.17 - Get(name) - new instance implementation getDoc
  * -------------------------------------------
  *      METHODS:
  * Start()              - Load from directory TOCdir of TOC all known Document attributes, prepare everithing
  * tocStart(TOCdir)     - open TSmatch.xlsx from TOCdir directory; set Windown Registry Path if OK
  * setDocTemplate(dirTemplate, val) - set #dirTtemplate value as val in list of #templates  
- * getDoc([name][,fatal][,load]) - return Document doc named in TOC name or create it. Flag fatal is to try to open only
+ * getDoc(name[,fatal][,load]) - return Document doc named in TOC name or create it. Flag fatal is to try to open only
  *                                      load=false means do not document contents load from file
- *  Get([name]...)      - read document name from file. Instance imlementation of getDoc()  
  * Reset()              - "Reset" of the Document. All contents of hes Excel Sheet erased, write Header form
  * wrDoc(str, object[]) - write data from obj to the Excel file in format of Form and Form_F
 ?* loadDoc(name, wb)    - загружает Документ name или его обновления из файла wb, запускает Handler Документа
@@ -86,7 +84,7 @@ namespace TSmatch.Document
         public string MadeStep;
         private DateTime MadeTime;
         private string chkSum;          //контрольная сумма документа MD5 в виде стоки из 32 знаков
-//20/4        public string Supplier = "";    //имя организации - поставщика сортамента 
+        public string Supplier = "";    //имя организации - поставщика сортамента 
         private List<int> ResLines;     //число строк в пятке -- возможны альтернативные значения
         private Stamp stamp;            //каждый документ ссылается на цепочку сигнатур или Штамп
         private DateTime creationDate;  // дата создания Документа
@@ -159,7 +157,7 @@ namespace TSmatch.Document
                     doc.SheetN = mtr.Strng(i, Decl.DOC_SHEET);
                     if (doc.type == Decl.TSMATCH_TYPE) doc.Sheet = toc.Wb.Worksheets[doc.SheetN];
                     doc.creationDate = Lib.getDateTime(mtr[i, Decl.DOC_CREATED]);
-//20/4                    doc.Supplier = mtr.Strng(i, Decl.DOC_SUPPLIER);
+                    doc.Supplier = mtr.Strng(i, Decl.DOC_SUPPLIER);
                     doc.LoadDescription = mtr.Strng(i, Decl.DOC_STRUCTURE_DESCRIPTION);
                     doc.forms = Form.Init(i);
                     doc.Loader = mtr.Strng(i, Decl.DOC_LOADER);
@@ -233,7 +231,8 @@ namespace TSmatch.Document
             Document doc = Documents[name];
             if (doc.FileDirectory.Contains("#")) // #Template substitute with Path in Dictionary
                 doc.FileDirectory = Templates[doc.FileDirectory];
-            if (!FileOp.isFileExist(doc.FileDirectory, doc.FileName)) return false;
+            if( !FileOp.isFileExist(doc.FileDirectory, doc.FileName) ) return false;
+            if (!doc.isOpen) getDoc(name, fatal: false);
             if (!FileOp.isSheetExist(doc.Wb, doc.SheetN)) return false;
             return true;
         }
@@ -258,18 +257,6 @@ namespace TSmatch.Document
         ///  9.4.17 - optional create_if_not_exist argument
         /// 17.4.17 - doc.il = doc.Body.iEOL();
         /// </history>
-        /// <ToDo> 2017.04.19 - make instance method Document Get(string name) </ToDo>
-        /// <ISSUE> 2017.04.19 - при чтении пустого Excel вылетает</ISSUE>
-        public Document Get(string name = Decl.DOC_TOC, bool fatal = true, bool load = true
-            , bool create_if_notexists = false, bool reset = false)
-        {
-            if (!Documents.ContainsKey(name)) Msg.W("Document not exists", name);
-            Document doc = Documents[name];
-            ////try { doc = Documents[name]; }
-            ////catch { if( fatal) Msg.F("Document.Get doesn't exists", name);  }
-            throw new NotImplementedException();
-            return doc;
-        }
         public static Document getDoc(string name = Decl.DOC_TOC
             , bool fatal = true, bool load = true, bool create_if_notexist = false, bool reset = false)
         {
@@ -290,21 +277,15 @@ namespace TSmatch.Document
                     try
                     {
                         if (reset) doc.Reset();
-                        //9/4                        if (doc.type == Decl.DOC_TYPE_N) FileOp.SheetReset(doc.Wb, doc.SheetN);
-//20/4                        if (reset) FileOp.SheetReset(doc.Wb, doc.SheetN);
-//20/4                        else Msg.F("getDoc do Reset()", name);
                         doc.Sheet = doc.Wb.Worksheets[doc.SheetN];
-                        doc.Body = FileOp.getSheetValue(doc.Sheet);
                     }
                     catch (Exception e) { err += "no SheetN"; ex = doc.SheetN; doc = null; }
-//9/4                    if (create && doc != null) doc.Reset();
-//9/4                    else if (doc != null) doc.Body = FileOp.getSheetValue(doc.Sheet);
-                    
+                    doc.Body = FileOp.getSheetValue(doc.Sheet);
                 }
             } // end if(!doc.isOpen)
             if (doc == null && fatal) Msg.F(err, ex, name);
             if (doc != null && doc.Body != null) doc.isOpen = true;
-            doc.il = doc.Body.iEOL();
+            doc.il = (doc.Body == null) ? 0:  doc.Body.iEOL();
             Log.exit();
             return doc;
         }
@@ -363,7 +344,7 @@ namespace TSmatch.Document
             }
             else wrDoc(form.name, obj);
         }
-        internal void wrDocListStr(int nStr, List<string>str)
+        internal void wrDocListStr(int nStr, List<string> str)
         {
 
         }
@@ -549,7 +530,7 @@ namespace TSmatch.Document
                     {
                         FileOp.setRange(doc.Sheet);
                         FileOp.saveRngValue(doc.Body);
-                        doc.chkSum = doc.Body.ComputeMD5();
+//24/4/17                        doc.chkSum = doc.Body.ComputeMD5();
                         doc.EOLinTOC = doc.Body.iEOL();
                         FileOp.fileSave(doc.Wb);
                         doc.isChanged = false;
@@ -587,7 +568,11 @@ namespace TSmatch.Document
         {
             Log.set("Close(" + name + ")");
             if (save_flag) saveDoc(this, BodySave, MD5, EOL);
-            this.isOpen = false;
+            foreach (var d in Documents)
+            {
+                if (d.Value.Wb == Wb) d.Value.isOpen = false;
+            }
+            //22/4            isOpen = false;
             FileOp.DisplayAlert(false);
             try { this.Wb.Close(); }
             catch { }

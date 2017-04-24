@@ -1,9 +1,10 @@
 ﻿/*-----------------------------------------------------------------------------------
  * SavedReport -- class for handle saved reports in TSmatchINFO.xlsx
  * 
- *  17.04.2017 П.Л. Храпкин
+ *  24.04.2017 П.Л. Храпкин
  *  
  *--- Unit Tests ---
+ * 2017.04.24 UT_SaveReport_test
  *--- History  ---
  * 17.04.2017 выделен из модуля Model
  * -------------- TODO --------------
@@ -48,17 +49,10 @@ namespace TSmatch.SaveReport
 
         public void getSavedReport()
         {
-            string repNm = Decl.TSMATCHINFO_MODELINFO;
-            if (Docs.IsDocExists(repNm) && isReportConsistent()) return;
-            ReCreateSavedReport();
-        }
-
-        private void ReCreateSavedReport()
-        {
+            if (isReportConsistent()) return;
             TS ts = new TS();
-     //ToDo 21/4/17: когда буду делать САПР помимо Tekla, здесь переписать!
-            if(!TS.isTeklaActive()) Msg.F("SavedReport inconsistant and no Tekla");
-            //20/4            created_new = true;
+            //ToDo 21/4/17: когда буду делать САПР помимо Tekla, здесь переписать!
+            if (!TS.isTeklaActive()) Msg.F("SavedReport inconsistant and no Tekla");
             name = TS.getModInfo();
             dir = TS.ModInfo.ModelPath;
             iModJounal = getModJournal(name, dir);
@@ -72,7 +66,7 @@ namespace TSmatch.SaveReport
             wrModel(WrMod.Report);
             if (!isReportConsistent()) Msg.F("internal errr");
         }
-#region --- ModelJournal -- позже перенести в отдельный класс - модуль
+        #region --- ModelJournal -- позже перенести в отдельный класс - модуль
         /// <summary>
         /// getModJournal(name, dir) - get model from Model Journal in TSmatch.xlsx
         /// </summary>
@@ -111,6 +105,9 @@ namespace TSmatch.SaveReport
 
         private bool isReportConsistent()
         {
+            string repNm = Decl.TSMATCHINFO_MODELINFO;
+            if (!Docs.IsDocExists(repNm)) return false;
+            docModelINFO = Docs.getDoc(repNm);
             if (docModelINFO.il < 7) return false;
             if (isChangedStr(ref name, docModelINFO, 2, 2)) return false;
             if (isChangedStr(ref dir, docModelINFO, 3, 2)) return false;
@@ -122,6 +119,7 @@ namespace TSmatch.SaveReport
             if (!Docs.IsDocExists(Decl.TSMATCHINFO_RAW)) return false;
             docRaw = Docs.getDoc(Decl.TSMATCHINFO_RAW);
             elmCntSav = docRaw.Body.iEOL() - docRaw.i0 + 1;
+            if (elementsCount == 0) elementsCount = elmCntSav;
             if (elementsCount != elmCntSav) return false;
             if (elmCntSav != docModelINFO.Body.Int(7, 2)) return false;
             elements = getSavedRaw();
@@ -131,6 +129,8 @@ namespace TSmatch.SaveReport
             if (elmGroups.Count() != docReport.il - docReport.i0) return false;
             getSavedGroups();
             getSavedRules();
+            if (Rules.Count <= 0) return false;
+            if (docReport.Body.Double(docReport.il, Decl.REPORT_SUPL_PRICE) <= 0.0) return false;
             return true;
         }
 

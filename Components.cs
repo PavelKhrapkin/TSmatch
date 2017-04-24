@@ -1,7 +1,7 @@
 ﻿/*----------------------------------------------------------------------------
  * Components -- работа с документами - прайс-листами поставщиков компонентов
  * 
- * 28.02.2017  П.Храпкин
+ * 24.04.2017  П.Храпкин
  *
  *----- ToDo -----
  * 29.12.2016 написать загрузку из прайс-листа setComp(..) c разбором LoadDescriptor
@@ -9,6 +9,8 @@
  * 30.11.2016 made as separate module, CompSet is now in another file
  * 30.12.2016 fill matFP, prfFP in setComp()
  * 28.02.2017 fill component fields incliding List<FP> from price-list in constructor
+ * 22.04.2017 Component match isMatchGrRule=true with empty Section.body
+ * 24.04.2017 getMatch method updated
  * ---------------------------------------------------------------------------
  *      МЕТОДЫ:
  * getCompSet(name, Supplier) - getCompSet by  its name in Supplier' list
@@ -17,7 +19,8 @@
  * UddateFrInternet() - обновляет документ комплектующих из Интернет  
  * ----- class CompSet
  *      МЕТОДЫ:
- * getMat ()    - fill mat ftom CompSet.Components and Suplier.TOC
+ * getMatch(gr,rule)    - check if current Component is in match with Group anf Rule
+ *                        fill match from CompSet.Components and Suplier.TOC
  * 
  *    --- Вспомогательные методы - подпрограммы ---
  * UpgradeFrExcel(doc, strToDo) - обновление Документа по правилу strToDo
@@ -30,7 +33,6 @@ using Lib = match.Lib.MatchLib;
 using Log = match.Lib.Log;
 using Msg = TSmatch.Message.Message;
 using Docs = TSmatch.Document.Document;
-using FP = TSmatch.FingerPrint.FingerPrint;
 using DP = TSmatch.DPar.DPar;
 using Sec = TSmatch.Section.Section;
 using SType = TSmatch.Section.Section.SType;
@@ -56,20 +58,21 @@ namespace TSmatch.Component
             compDP = new DP("");
             foreach (SType sec in csDP.dpar.Keys)
             {
-var II = csDP.Col(SType.UNIT_Weight);
+                var II = csDP.Col(SType.UNIT_Weight);
                 int col = csDP.Col(sec);
-                if(col > 0 && col <= doc.Body.iEOC())
+                if (col > 0 && col <= doc.Body.iEOC())
                     compDP.Ad(sec, doc.Body.Strng(i, col));
             }
         }
 
 #if DEBUG   //-- 30-Mar-2017 -- вариант конструктора только для тестирования
-        public Component(DP comp, DP csDP = null)
+        public Component(DP comp = null, DP csDP = null)
         {
             compDP = comp;
         }
 #endif  // DEBUG -- вариант для тестирования
 
+        // for excetrnal use, including String representation in Viewer
         public string viewComp(SType stype)
         {
             string str = "";
@@ -77,13 +80,15 @@ var II = csDP.Col(SType.UNIT_Weight);
             catch { str = "##NOT_AVAILABLE##"; }
             return str;
         }
+        // for internal use, f.e. for comparision
         public string viewComp_(SType stype)
         {
             string str = "";
             try { str = compDP.dpar[stype]; }
             catch { str = "##NOT_AVAILABLE##"; }
-            return str;
+            return Lib.ToLat(str.ToLower());
         }
+#if OLD
         ///////////////////// <summary>
         ///////////////////// setComp(doc) - fill price list of Components from doc
         ///////////////////// setComp(doc_name) - overload
@@ -136,42 +141,96 @@ var II = csDP.Col(SType.UNIT_Weight);
         //////////////////    Log.exit();
         //////////////////    return Comps; 
         //////////////////}
-
-        public bool isMatch(ElmAttSet.Group gr, Rule.Rule rule = null) //25/3 Dictionary<SecTYPE,List<string>> ruleFPs = null)
+#endif
+        public bool isMatch(ElmAttSet.Group gr, Rule.Rule rule = null)
         {
             if (!isMatchGrRule(SType.Material, gr, rule)) return false;
-            if (!isMatchGrRule(SType.Profile,  gr, rule)) return false;
+            if (!isMatchGrRule(SType.Profile, gr, rule)) return false;
             return true;
         }
 
         bool isMatchGrRule(SType stype, ElmAttSet.Group gr, Rule.Rule rule)
         {
             if (rule == null || !compDP.dpar.ContainsKey(stype)) return true;
+            string sb = new Sec(rule.text, stype).body;
+            if (sb == "") return true;
             var ruleSyns = rule.synonyms;
             string comMatPrf = viewComp_(stype);
             string grMatPrf = stype == SType.Material ? gr.mat : gr.prf;
-
-            if (grMatPrf.Contains("ш2") && comMatPrf.Contains("ш2")) log.Info("--");  //5/4
-
             if (ruleSyns != null && ruleSyns.ContainsKey(stype))
             {
                 List<string> Syns = ruleSyns[stype].ToList();
                 if (!Lib.IContains(Syns, comMatPrf) || !Lib.IContains(Syns, grMatPrf)) return false;
                 string c = strExclude(comMatPrf, Syns);
                 string g = strExclude(grMatPrf, Syns);
-                if(c == g) return true;
-                return c.Contains(g);
-                ////////////////var p1 = Params(Syns, comMatPrf, );
-                //// 27/3 //////var p2 = Params(Syns, grMatPrf);
-                ////////////////bool b = p1 != p2  && stype == SType.Material;
-                //31/3//////////return Params(Syns, comMatPrf) == Params(Syns, grMatPrf);
+                if (c == g) return true;
+                string pattern = new Sec(rule.text, stype).body;
+                return isMatch(pattern, c, g);
             }
+
+            ////////////if(comMatPrf.Contains("50") && grMatPrf.Contains("50"))
+            ////////////{
+            ////////////    for(int i = 0; i < comMatPrf.Length; i++)
+            ////////////    {
+            ////////////        char cc = comMatPrf[i];
+            ////////////        char gg = grMatPrf[i];
+            ////////////        if (cc == gg) continue;
+            ////////////        int ii = 25;
+            ////////////    }
+            ////////////}
+
             return comMatPrf == grMatPrf;
+        }
+
+        //check if с - part of currect Component, and g - part of group
+        //.. is in match in terms of template pattern string with wildcards
+        public bool isMatch(string pattern, string c, string g)
+        {
+            var p_c = rp(pattern, c);
+            var p_g = rp(pattern, g);
+            int cnt = Math.Min(p_c.Count, p_g.Count);
+            for(int i = 0; i < cnt; i++)
+            {
+                if (p_c[i] != p_g[i]) return false;
+            }
+            return true;
+        }
+        public List<string> rp(string pattern, string str)
+        {
+            List<string> par = new List<string>();
+            string v = "";
+            bool p_mode = false;
+            for (int i = 0, j = 0; i < str.Length & j < pattern.Length; i++)
+            {
+                char r = pattern[j];
+                char p = str[i];
+                char? next = null;
+                if (j < pattern.Length) next = pattern[j + 1];
+                if (r == '*') p_mode = true;
+                else j++;
+                if (p_mode)
+                {
+                    if (p == next || next == null || i == str.Length)
+                    {
+                        p_mode = false;
+                        if (v != "") par.Add(v);
+                        v = "";
+                        continue;
+                    }
+                    v += p;
+                    continue;
+                }
+                if (r == p) continue;
+                par.Clear();
+                return par;
+            }
+            if (v != "") par.Add(v);
+            return par;
         }
 
         private string strExclude(string str, List<string> syns)
         {
-            foreach(string s in syns)
+            foreach (string s in syns)
             {
                 if (!str.Contains(s)) continue;
                 return str.Substring(s.Length);
@@ -179,7 +238,12 @@ var II = csDP.Col(SType.UNIT_Weight);
             Msg.F("Rule.strExclude error", str, syns);
             return null;
         }
-
+#if OLD
+        //24/4                return c.Contains(g);
+                ////////////////var p1 = Params(Syns, comMatPrf, );
+                //// 27/3 //////var p2 = Params(Syns, grMatPrf);
+                ////////////////bool b = p1 != p2  && stype == SType.Material;
+                //31/3//////////return Params(Syns, comMatPrf) == Params(Syns, grMatPrf);
         string Params(List<string> lst, string str)
         {
             foreach (string st in lst)
@@ -205,7 +269,7 @@ var II = csDP.Col(SType.UNIT_Weight);
         public void getComp()
         {
             Log.set("getComp");
-//            setComp(this.doc);
+            //            setComp(this.doc);
             try
             {
 
@@ -214,7 +278,6 @@ var II = csDP.Col(SType.UNIT_Weight);
             {
 
             }
-
 
             ////List<int> docCompPars = Mtch.GetPars(doc.LoadDescription);
             //////-- заполнение массива комплектующих Comps
@@ -249,7 +312,7 @@ var II = csDP.Col(SType.UNIT_Weight);
         {
             Log.set("UpgradeFrExcel(" + doc.name + ", " + strToDo + ")");
             if (strToDo != "DelEqPar1") Log.FATAL("не написано!");
-//!!            List<string> Comp = getComp(doc);
+            //!!            List<string> Comp = getComp(doc);
             //////int i = doc.i0;
             //////foreach (string s in Comp)
             //////{
@@ -272,55 +335,15 @@ var II = csDP.Col(SType.UNIT_Weight);
             Log.exit();
             return doc;
         }
-
+#endif //OLD
+        /// <summary>
+        /// Str(SType stype) - return Sec stype of Component for Viewer
+        /// </summary>
+        /// <param name="stype">SType Section of Component representation</param>
+        /// <returns>representation of Component as a string</returns>
         public string Str(SType stype)
         {
             return compDP.dpStr[stype];
         }
-
-        ////////////////////////        #region ------ test Component -----
-        ////////////////////////#if DEBUG
-        ////////////////////////        public static void testComponent()
-        ////////////////////////        {
-        ////////////////////////            Log.set("testComponent");
-        ////////////////////////            //-- test environment preparation: set csFPs and doc - price list "ГК Монолит"
-        ////////////////////////            Docs doc = Docs.getDoc("ГК Монолит");
-        ////////////////////////            List<FP> csFPs = new List<FP>();
-        ////////////////////////            Rule.Rule rule = new Rule.Rule(15);
-        //////////////////////////20/3            csFPs = rule.Parser(FP.type.CompSet, doc.LoadDescription);
-        ////////////////////////            TST.Eq(csFPs.Count, 3);
-
-        ////////////////////////            //-- simple Component line "B20" in col 1
-        ////////////////////////            Component comp = new Component(doc, 8 + 3, csFPs);
-        ////////////////////////            TST.Eq(comp.fps[0].txs[0], "b");
-        ////////////////////////            TST.Eq(comp.fps[0].txs.Count, 1);
-        ////////////////////////            TST.Eq(comp.fps[0].pars[0].ToString(), "20");
-        ////////////////////////            TST.Eq(comp.fps[0].pars.Count, 1);
-        ////////////////////////            //////////////////////var bb = SecTYPE.Material;
-        ////////////////////////            //////////////////////var aa = Section.Section.type.Material;
-        ////// 24/3 ////////////            //////////////////////bool comp.fps[0].section == SecTYPE.Material;
-        ////////////////////////            ////// 7/3/2017 //////SecTYPE comp.fps[0].section 
-        ////////////////////////            //////////////////////TST.Eq(comp.fps[0].section == FP.Section.Material, true);
-        ////////////////////////            //////////////////////TST.Eq(comp.fps[1].section == FP.Section.Description, true);
-        ////////////////////////            //////////////////////TST.Eq(comp.fps[1].pars.Count, 1);
-        ////////////////////////            //////////////////////TST.Eq(comp.fps[2].txs[0].ToString(), "");
-        ////////////////////////            //////////////////////TST.Eq(comp.fps[2].section == FP.Section.Price, true);
-        ////////////////////////            doc.Close();
-
-        ////////////////////////            //-- Уголок равнополочный Стальхолдинг -- разбор LoadDescription L{1}x{1}
-        ////////////////////////            doc = Docs.getDoc("Уголок Стальхолдинг");
-        ////////////////////////            rule = new Rule.Rule(4);
-        //////////////////////////20/3            csFPs = rule.Parser(FP.type.CompSet, doc.LoadDescription);
-        ////////////////////////            TST.Eq(csFPs.Count, 3);
-        ////////////////////////            TST.Eq(csFPs[0].pars[0], 1);
-
-        ////////////////////////            comp = new Component(doc, 42, csFPs);
-        ////////////////////////            TST.Eq(comp.fps[0].txs[0], "");
-        ////////////////////////// 6/3/17   TST.Eq(comp.fps[0].pars[0], "");
-
-        ////////////////////////            Log.exit();
-        ////////////////////////        }
-        ////////////////////////#endif //#if DEBUG
-        ////////////////////////        #endregion ------ test Component ------
     } // end class Component
 } // end namespace Component

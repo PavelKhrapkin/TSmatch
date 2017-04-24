@@ -1,7 +1,7 @@
 ﻿/*------------------------------------------------------------------------------------------
  * Model -- класс управления моделями, ведет Журнал Моделей и управляет их сохранением
  * 
- *  17.04.2017 П.Л. Храпкин
+ *  22.04.2017 П.Л. Храпкин
  *  
  *--- журнал ---
  * 18.1.2016 заложено П.Храпкин, А.Пасс, А.Бобцов
@@ -23,6 +23,7 @@
  * 25.01.2017 - add bool doInit argument to Model constructor to avoid Rule int at doInit=false
  * 11.04.2017 - GetSavedReport() check with Unit Test
  * 16.04.2017 - HighLight methods
+ * 22.04.2017 - ModReset method add
  * !!!!!!!!!!!!! -------------- TODO --------------
  * ! избавиться от static в RecentModel, RecentModelDir 
  * -----------------------------------------------------------------------------------------
@@ -46,6 +47,7 @@
  * getGroups()      - groupping of elements of Model by Material and Profile
  * IsModelCahanged - проверяет, изменилась ли Модель относительно сохраненного MD5
  ! lngGroup(atr)   - группирует элементы модели по парам <Материал, Профиль> возвращая массивы длинны 
+ * ModReset()      - clear and re-Read all Rules with theit Suppliers, CompSet, and price-lists 
  */
 using log4net;
 using System;
@@ -123,6 +125,24 @@ namespace TSmatch.Model
             : this(DateTime.Now, _name, _dir, _ifc, _made, _phase, _md5, new HashSet<Rule.Rule>(), "")
         { }
 
+        public void SetModel()
+        {
+            if (TS.isTeklaActive())
+            {   // if Tekla is active - get Path of TSmatch
+                name = Path.GetFileNameWithoutExtension(TS.ModInfo.ModelName);
+                dir = TS.GetTeklaDir(TS.ModelDir.model);
+                elementsCount = ts.elementsCount();
+                //6/4/17                        macroDir = TS.GetTeklaDir(TS.ModelDir.macro);
+            }
+            else
+            {   // if not active - Windows Environment Variable value
+                dir = Environment.GetEnvironmentVariable(Decl.WIN_TSMATCH_DIR,
+                    EnvironmentVariableTarget.User);
+//24/4                ModelDir = desktop_path;
+//24/4                classCAD = ifc;
+            }
+        }
+
         /// <summary>
         /// newModelOpenDialog(models) -- run when new Model must be open not exists in Model Journal models
         /// </summary>
@@ -192,24 +212,24 @@ namespace TSmatch.Model
         }
         public void GetModelInfo()
         {
-//17/4            savedReport = new SR();
+            //17/4            savedReport = new SR();
             if (TS.isTeklaActive())
             {
                 name = Path.GetFileNameWithoutExtension(TS.ModInfo.ModelName);
                 dir = TS.ModInfo.ModelPath;
                 elementsCount = ts.elementsCount();
                 // getModInfo from Journal by name and dir
-//17/4                iModJounal = getModJournal(name, dir);
-//17/4                date = DateTime.Parse(modJournal(iModJounal, Decl.MODEL_DATE));
-//17/4                savedReport.(date, dir);
-//17/4                if (!GetSavedReport()) savedReport.SaveReport();
-//17/4                getSavedGroups();
+                //17/4                iModJounal = getModJournal(name, dir);
+                //17/4                date = DateTime.Parse(modJournal(iModJounal, Decl.MODEL_DATE));
+                //17/4                savedReport.(date, dir);
+                //17/4                if (!GetSavedReport()) savedReport.SaveReport();
+                //17/4                getSavedGroups();
                 //12/4                getSavedRules();
                 //17/4 !! проверять, что elementsCount в Tekla и в памяти равны!!
             }
             else //if no Tekla active get name and dir from IFC or from INFO file if exists
             {
-//17/4                if (!GetSavedReport()) Msg.F("No Tekla no saved TSmatchINFO");
+                //17/4                if (!GetSavedReport()) Msg.F("No Tekla no saved TSmatchINFO");
             }
             // 12/4 //Docs doc = Docs.getDoc(Decl.TSMATCHINFO_MODELINFO);
             //////////doc.Close();
@@ -309,6 +329,14 @@ namespace TSmatch.Model
             Log.exit();
             return result;
         }
+
+        public void ModReset()
+        {
+            Rules.Clear();
+            foreach (int n in Lib.GetPars(strListRules))
+                Rules.Add(new Rule.Rule(n));
+            ClosePriceLists();
+        }
         /// <summary>
         /// saveModel(Model md)  - записываем измененную модель в файловую систему
         /// </summary>
@@ -361,7 +389,7 @@ namespace TSmatch.Model
             Log.exit();
             return mod;
         } // end update
-#endif //FOR_FUTURE 6/4/2017
+
         /// <summary>
         /// modelListUpdate(name, dir, Made, MD5) - update list of models in TSmatch.xlsx/Models
         /// </summary>
@@ -432,7 +460,7 @@ namespace TSmatch.Model
             //!! временно для отладки запишем в mod.Sopplers ВСЕХ поставщиков. Потом - только тех, кто в RuleList
             //!!           this.Suppliers = TSmatch.Suppliers.Supplier.    //TSmatch.Startup.Bootstrap.init(Decl.SUPPLIERS);
         }
-#if FOR_FUTURE  //6/5/17
+
         /// <summary>
         /// OpenModel(name) - open model name from Excel file, Tekla, or ifc file. Selection, when necessary
         /// </summary>
@@ -504,7 +532,7 @@ namespace TSmatch.Model
             Log.exit();
             return ok;
         }
-#endif //FOR_FUTURE
+#endif //FOR_FUTURE 6/4/2017
         /// <summary>
         /// wrModel(doc_name) - write formatted data from mod to Excel file
         /// </summary>
@@ -647,10 +675,10 @@ namespace TSmatch.Model
 
         #endregion -=-=- unclear region 2 to be audited
 
-        internal void Handler()
+        public void Handler()
         {
             wrToFile = ifWrToFile();
-            if (!wrToFile) return;  // if model not changed -> no handing is necessary
+            if (!wrToFile) return;  // if model not changed -> no handling is necessary
             foreach (var gr in elmGroups)
             {
                 bool b = false;
@@ -733,7 +761,8 @@ namespace TSmatch.Model
         public void getGroups()
         {
             Dictionary<string, ElmAttSet.ElmAttSet> Elements = new Dictionary<string, ElmAttSet.ElmAttSet>();
-            foreach (var elm in elements) { Elements.Add(elm.guid, elm); }
+            try { Elements = elements.ToDictionary(elm => elm.guid); }
+            catch { Msg.F("Model.getGroups inconsystent elements "); }
 
             //-- группы по Материалам elm.mat
             var matGroups = from elm in elements group elm by elm.mat;

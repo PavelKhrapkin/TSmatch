@@ -1,15 +1,16 @@
 /*--------------------------------------------
  * FileOp - File System primitives
  * 
- *  13.01.2017  Pavel Khrapkin, Alex Pass
+ *  22.04.2017  Pavel Khrapkin, Alex Pass
  *
  *--- History ---
- * 2013 - 2013 - created
+ * 2013 - 2016 - created
  * 12.3.2016 - isNamedRangeExist(name)
  * 20.3.2016 - CopyFile, Delete, Move
  * 27.3.2016 - use DisplayAlert in fileOpen for new created file -- now create or reopen silently
  * 17.4.2016 - isDirExist(path) created; fileRename(..); fileRenSAV(); fileDelete
  * 13.1.2016 - getRange(str)
+ * 22.4.2017 - AppQuit() method add
  * -------------------------------------------        
  * fileOpen(dir,name[,create])  - Open or Create file name in dir catalog
  * fileRename(dir, oldName, newName) - rename file in the same Directory
@@ -29,6 +30,7 @@
  * CopyFile(FrDir,FileName,ToDir[,overwrite]) - Copy File from FrDir to ToDir
  * Delete(dir, name)            - Detete file with Path dir
 ?* FormCol(char col[, dig])     - format column col in Excel file as a Number with dig decimal digits
+ * AppQuit()                    - quit Excel application 
  */
 using System;
 using System.IO;
@@ -220,7 +222,7 @@ namespace match.FileOp
             {
                 result = Wb.Names.Item(name) != null;
             }
-            catch ( Exception e)
+            catch (Exception e)
             {
                 if (Msg.Trace) Msg.I("TRACE_33.1_IsNameRangeExist", e, name);
                 result = false;
@@ -252,18 +254,19 @@ namespace match.FileOp
                     Wb.Worksheets.Add(Before: oldSh);
                     _sh = Wb.ActiveSheet;
                     Wb.Application.DisplayAlerts = false;
-                        oldSh.Delete();
+                    oldSh.Delete();
                     Wb.Application.DisplayAlerts = true;
                 }
                 else
                 {
-                    if(!QuietMode)
+                    if (!QuietMode)
                         Log.Warning("Лист(" + Wb.Name + "/" + name + ") не существовал. Создал новый.");
                     Wb.Worksheets.Add();
                     _sh = Wb.ActiveSheet;
                 }
                 _sh.Name = name;
-            } catch (Exception e) { Log.FATAL("ошибка \"" + e.Message + "\""); }
+            }
+            catch (Exception e) { Log.FATAL("ошибка \"" + e.Message + "\""); }
             Log.exit();
             return _sh;
         }
@@ -325,7 +328,7 @@ namespace match.FileOp
                 Excel.Range cell2 = _sh.Cells[r1, c1];
                 Excel.Range rng = _sh.Range[cell1, cell2];
                 rng.Value = obj;
-                if( AutoFit) for (int i = 1; i <= c1; i++) _sh.Columns[i].AutoFit();
+                if (AutoFit) for (int i = 1; i <= c1; i++) _sh.Columns[i].AutoFit();
             }
             catch (Exception e)
             {
@@ -379,6 +382,13 @@ namespace match.FileOp
         public static void FormCol(char col, int dig = 0)
         {
             throw new NotImplementedException();
+        }
+
+        public static void AppQuit()
+        {
+            DisplayAlert(false);
+            _app.Quit();
+            DisplayAlert(true);
         }
     }  // end class FileOp
 }  // end namespace FileOp
