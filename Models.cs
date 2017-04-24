@@ -136,8 +136,8 @@ namespace TSmatch.Model
             }
             else
             {   // if not active - Windows Environment Variable value
-                dir = Environment.GetEnvironmentVariable(Decl.WIN_TSMATCH_DIR,
-                    EnvironmentVariableTarget.User);
+//24/4                dir = Environment.GetEnvironmentVariable(Decl.WIN_TSMATCH_DIR,
+//24/4                    EnvironmentVariableTarget.User);
 //24/4                ModelDir = desktop_path;
 //24/4                classCAD = ifc;
             }

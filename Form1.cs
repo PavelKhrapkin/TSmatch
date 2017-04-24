@@ -28,9 +28,10 @@ namespace SELECT
             boot = new Boot();
             var sr = new TSmatch.SaveReport.SavedReport();
             model = sr;
+            sr.dir = boot.ModelDir;
             model.SetModel();
             sr.getSavedReport();
-            sr.CloseReport();
+//24/4            sr.CloseReport();
             WrForm(wrForm.modelINFO);
             WrForm(wrForm.modelReport);
             //16/4            model.HighLightElements(Mod.HighLightMODE.NoPrice);

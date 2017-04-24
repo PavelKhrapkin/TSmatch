@@ -74,7 +74,7 @@ namespace TSmatch.Bootstrap
         }
         public Docs docTSmatch;
         static string ComponentsDir;        // all price-lists directory
-        static string ModelDir = "";        // Model Report catalog
+        public string ModelDir = "";        // Model Report catalog
         static string TMPdir = "";          // temporary catalog
         static string macroDir = "";        // directory in Tekla\Environment to store button TSmatch
         static string IFCschema = "";       // IFC2X3.exd in Tekla Environment\common\inp as IFC schema 

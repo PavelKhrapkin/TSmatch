@@ -164,7 +164,8 @@ namespace TSmatch.Component
                 string c = strExclude(comMatPrf, Syns);
                 string g = strExclude(grMatPrf, Syns);
                 if (c == g) return true;
-                string pattern = new Sec(rule.text, stype).body;
+                string pattern = new Sec(rule.text, stype).body.Replace("=","");
+                foreach (var s in Syns) pattern = strExclude(pattern, Syns);
                 return isMatch(pattern, c, g);
             }
 

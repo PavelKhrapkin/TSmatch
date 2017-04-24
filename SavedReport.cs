@@ -110,7 +110,7 @@ namespace TSmatch.SaveReport
             docModelINFO = Docs.getDoc(repNm);
             if (docModelINFO.il < 7) return false;
             if (isChangedStr(ref name, docModelINFO, 2, 2)) return false;
-            if (isChangedStr(ref dir, docModelINFO, 3, 2)) return false;
+//24/4            if (isChangedStr(ref dir, docModelINFO, 3, 2)) return false;  //разрешить менять dir
             iModJounal = getModJournal(name);
             string dateJrn = getModJrnValue(Decl.MODEL_DATE);
             if (isChangedStr(ref dateJrn, docModelINFO, 5, 2)) return false;

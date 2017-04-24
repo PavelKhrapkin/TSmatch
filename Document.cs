@@ -263,7 +263,11 @@ namespace TSmatch.Document
             Log.set("getDoc(" + name + ")");
             Document doc = null;
             string err = "Err getDoc: ", ex = "";
-            try { doc = Documents[name]; }
+            try
+            {
+                doc = Documents[name];
+                if (reset) doc.Reset();
+            }
             catch (Exception e) { err += "doc not in TOC"; ex = e.Message; doc = null; }
             if (doc != null && !doc.isOpen)
             {
@@ -275,8 +279,7 @@ namespace TSmatch.Document
                     //9/4                    bool create = !string.IsNullOrEmpty(doc.type) && doc.type[0] == 'N' ? true : false;
                     doc.Wb = FileOp.fileOpen(doc.FileDirectory, doc.FileName, create_if_notexist);
                     try
-                    {
-                        if (reset) doc.Reset();
+                    { 
                         doc.Sheet = doc.Wb.Worksheets[doc.SheetN];
                     }
                     catch (Exception e) { err += "no SheetN"; ex = doc.SheetN; doc = null; }
