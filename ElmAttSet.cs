@@ -1,7 +1,7 @@
 ﻿/*--------------------------------------------------------------------------------------
  * ElmAttSet -- Definitions of Properties, and their Names of the Elements in the Model 
  * 
- *  30.9.2016  Pavel Khrapkin
+ *  25.04.2017  Pavel Khrapkin
  * 
  * ----- TODO 30.9.2016 ------
  * - закомментировать неиспользуемые методы группировки (Ctrl/F12 empty)
@@ -322,8 +322,8 @@ namespace TSmatch.ElmAttSet
             Elements = Els;
             Mat = _mat;
             Prf = _prf;
-            mat = Lib.ToLat(_mat.ToLower());
-            prf = Lib.ToLat(_prf.ToLower());
+            mat = Lib.ToLat(_mat.ToLower().Replace("*", "x"));
+            prf = Lib.ToLat(_prf.ToLower().Replace("*","x"));
             guids = _guids;
             totalLength = totalWeight = totalVolume = totalPrice = 0.0;
             foreach(var id in guids)
