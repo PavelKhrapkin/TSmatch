@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------------------
  * Bootstrap - provide initial start of TSmatch, when necessary - startup procedure
  * 
- * 24.04.2017  Pavel Khrapkin
+ * 17.04.2017  Pavel Khrapkin
  *
  *--- History ---
  * 25.3.2016 started 
@@ -92,6 +92,11 @@ namespace TSmatch.Bootstrap
         public Bootstrap()
         {
             init(BootInitMode.Bootstrap);
+            var sr = new SaveReport.SavedReport();
+            model = sr;
+            model.elementsCount = elementsCount;
+            sr.getSavedReport();
+            sr.CloseReport();
         }
         /// <summary>
         /// init(name [,arg]) - initiate TSmatch module name
@@ -118,11 +123,12 @@ namespace TSmatch.Bootstrap
                     Resources.Find(x => x.name == Decl.R_TEKLA).checkResource(Resource.R_name.Tekla);
                     desktop_path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
                     debug_path = desktop_path;
-                    if (TS.isTeklaActive())
+                    if (isTeklaActive)
                     {   // if Tekla is active - get Path of TSmatch
+                        TS ts = new TS();
                         _TOCdir = TS.GetTeklaDir(TS.ModelDir.exceldesign);
                         ModelDir = TS.GetTeklaDir(TS.ModelDir.model);
-//24/4                        elementsCount = ts.elementsCount();
+                        elementsCount = ts.elementsCount();
                         //6/4/17                        macroDir = TS.GetTeklaDir(TS.ModelDir.macro);
                     }
                     else
@@ -130,7 +136,7 @@ namespace TSmatch.Bootstrap
                         _TOCdir = Environment.GetEnvironmentVariable(Decl.WIN_TSMATCH_DIR,
                             EnvironmentVariableTarget.User);
                         ModelDir = desktop_path;
-//24/4                        classCAD = ifc;
+                        classCAD = ifc;
                     }
                     //22.12.16 позже, при реинжиниринге TSmatch, нужно будет специально заняться ресурсами - RESX .Net
                     //.. тогда и понадобится эта строчка    Console.WriteLine("IsTeklaActive=" + isTeklaActive + "\tTOCdir=" + TOCdir);

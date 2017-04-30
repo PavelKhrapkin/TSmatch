@@ -1,7 +1,7 @@
 ﻿/*----------------------------------------------------------------------------------------------
  * Matcher -- module fulfill matching Group of the Elements with CompSet in accrding with Rule
  *
- * 16.3.2017 Pavel Khrapkin
+ * 22.4.2017 Pavel Khrapkin
  *
  *--- History ---
  * 2016 previous editions P.Khrapkin, A.Pass, A.Bobtsov
@@ -49,12 +49,12 @@ using Rule = TSmatch.Rule.Rule;
 using TSmatch.ElmAttSet;
 using TSmatch.Rule;
 using Msg = TSmatch.Message.Message;
-//12/4 using FP = TSmatch.FingerPrint.FingerPrint;
+//using FP = TSmatch.FingerPrint.FingerPrint;
 using Sec = TSmatch.Section.Section;
 using Elm = TSmatch.ElmAttSet.ElmAttSet;
 using SType = TSmatch.Section.Section.SType;
-//12/4 using TST = TSmatch.Test.assert;
-// 12/4 using TSmatch.FingerPrint;
+//using TST = TSmatch.Test.assert;
+//using TSmatch.FingerPrint;
 using TSmatch.DPar;
 
 namespace TSmatch.Matcher
@@ -69,7 +69,7 @@ namespace TSmatch.Matcher
         public ElmAttSet.Group group;           //reference to the Group<material, profile> being matched
         public Component.Component component;   //used Component in Match the Rule and Group
         public Rule.Rule rule;                  //the rule, which manage the matching
-        
+
         /// <summary>
         /// Mtch(gr, _rule) - check if Group gr is in match with rule
         ///    if Mtch.ok.Match - return Mtch.Component chousen from CompSet.Component
@@ -79,8 +79,6 @@ namespace TSmatch.Matcher
         /// <param name="_rule"></param>
         public Mtch(ElmAttSet.Group gr, Rule.Rule _rule)
         {
-//21/4            if (gr.prf.Contains("ш2") /* && _rule.text.Contains("д") */ ) rule = _rule;
-
             if (gr == null || gr.guids.Count < 1) return;
             ok = OK.NoMatch;
             group = gr;
@@ -108,20 +106,21 @@ namespace TSmatch.Matcher
         private double getPrice(Elm elm, DPar.DPar csDP, string priceStr)
         {
             double price = Lib.ToDouble(priceStr);
-            foreach(var sec in csDP.dpar)
+            foreach (var sec in csDP.dpar)
             {
                 if (!sec.Key.ToString().Contains("UNIT_")) continue;
                 switch (sec.Key)
                 {
                     case SType.UNIT_Weight: // kg -> tonn
+                        if(elm.weight == 0) return elm.volume * 7850;
                         return elm.weight / 1000 * price;
                     case SType.UNIT_Vol:    // mm3 -> m3
-                        return elm.volume /1000 / 1000 / 1000 * price;
+                        return elm.volume / 1000 / 1000 / 1000 * price;
                     case SType.UNIT_Length:
                         return elm.length * price;
                     case SType.UNIT_Qty:
                         return price;
-                }  
+                }
             }
             return 0;
         }
@@ -194,14 +193,15 @@ namespace TSmatch.Matcher
         //////////////    throw new NotImplementedException();
         //////////////    return result;
         //////////////}
-#if OLD
-        //#region ------ test Matcher -----
+
+        #region ------ test Matcher -----
+#if DEBUG
         internal static void testMtch()
         {
             Log.set("testMtch");
             Mtch mtch = new Mtch();
-// 28/5            mtch.test_getSectionText();
-// 28/5            mtch.test_isSectionMatch();
+            // 28/5            mtch.test_getSectionText();
+            // 28/5            mtch.test_isSectionMatch();
             //////////////////mtch.test_Mtch_1();
             //// 28/3 ////////mtch.test_Mtch_2();
             //////////////////mtch.test_Mtch_3();
@@ -236,7 +236,7 @@ namespace TSmatch.Matcher
             List<string> guids = new List<string>(); guids.Add(el.guid);
             ElmAttSet.Group gr = new ElmAttSet.Group(els, "C245", "Уголок20X4", guids);
             Mtch match = new Mtch(gr, rule);
-            TST.Eq(match.ok == OK.Match, true);
+            //6/4/17            TST.Eq(match.ok == OK.Match, true);
             Log.exit();
         }
         void test_Mtch_2()
@@ -253,11 +253,11 @@ namespace TSmatch.Matcher
             model.setElements(els);
             model.getGroups();
             var gr = model.elmGroups[0];
-            TST.Eq(gr.guids.Count, 1);
+            //6/4/17            TST.Eq(gr.guids.Count, 1);
             var match = new Mtch(gr, rule);
-            TST.Eq(match.ok == OK.Match, true);
+            //6/4/17           TST.Eq(match.ok == OK.Match, true);
             var cmp = match.component;
-//31/3            TST.Eq(cmp.fps[SType.Material].pars[0].par.ToString(), "b12,5");
+            //31/3            TST.Eq(cmp.fps[SType.Material].pars[0].par.ToString(), "b12,5");
             Log.exit();
         }
         void test_Mtch_3()
@@ -267,7 +267,7 @@ namespace TSmatch.Matcher
             ElmAttSet.ElmAttSet elm = new ElmAttSet.ElmAttSet(
                 "ID56A7442F-0000-0D74-3134-353338303236",
                 "C235", "Steel", "Pl30", 0, 0, 0, 1001);
-            Dictionary<string, ElmAttSet.ElmAttSet> els 
+            Dictionary<string, ElmAttSet.ElmAttSet> els
                 = new Dictionary<string, ElmAttSet.ElmAttSet>();
             els.Add(elm.guid, elm);
             List<string> guids = new List<string>(); guids.Add(elm.guid);
@@ -275,55 +275,55 @@ namespace TSmatch.Matcher
             model.setElements(els);
             model.getGroups();
             var gr = model.elmGroups[0];
-            TST.Eq(gr.guids.Count, 1);
-            TST.Eq(gr.mat, "c235");
-            TST.Eq(gr.prf, "pl30");
+            //6/4/17           TST.Eq(gr.guids.Count, 1);
+            //6/4/17           TST.Eq(gr.mat, "c235");
+            //6/4/17TST.Eq(gr.prf, "pl30");
             var doc = Docs.getDoc("Полоса СтальхолдингM");
             var csDP = new Dictionary<SType, string>();
-//31/3            csFPs = rule.Parser(FP.type.CompSet, doc.LoadDescription);
-// 2/4            Comp comp1 = new Comp(doc, 2, csDP);
-// 2/4            Comp comp2 = new Comp(doc, 12, csDP);
-// 2/4            List<Comp> comps = new List<Comp> { comp1, comp2 };
-// 2/4            CS cs = new CS("test_CS", null, rule, doc.LoadDescription, comps);
-// 2/4            TST.Eq(cs.csDP.Count, 4);
+            //31/3            csFPs = rule.Parser(FP.type.CompSet, doc.LoadDescription);
+            // 2/4            Comp comp1 = new Comp(doc, 2, csDP);
+            // 2/4            Comp comp2 = new Comp(doc, 12, csDP);
+            // 2/4            List<Comp> comps = new List<Comp> { comp1, comp2 };
+            // 2/4            CS cs = new CS("test_CS", null, rule, doc.LoadDescription, comps);
+            // 2/4            TST.Eq(cs.csDP.Count, 4);
 
             //////////////////////////TST.Eq(comp1.isMatch(gr, rule), false);
             //////////////////////////TST.Eq(comp2.isMatch(gr, rule), true);
             Log.exit();
         }
-////////////////////            return;     //13/3 - заглушен остаток теста
+        ////////////////////            return;     //13/3 - заглушен остаток теста
 
-////////////////////            //-- test environment preparation: set ElmAttSet.Group and Rule
-////////////////////            el = new ElmAttSet.ElmAttSet("MyGuid", "B30", "Concrete", "", 0, 0, 0, 1000);
-////////////////////            els = new Dictionary<string, ElmAttSet.ElmAttSet>();
-////////////////////            els.Add(el.guid, el);
-////////////////////            gr = new ElmAttSet.Group(els, "B30", null, guids);
-////////////////////            rule = new Rule.Rule(15);
+        ////////////////////            //-- test environment preparation: set ElmAttSet.Group and Rule
+        ////////////////////            el = new ElmAttSet.ElmAttSet("MyGuid", "B30", "Concrete", "", 0, 0, 0, 1000);
+        ////////////////////            els = new Dictionary<string, ElmAttSet.ElmAttSet>();
+        ////////////////////            els.Add(el.guid, el);
+        ////////////////////            gr = new ElmAttSet.Group(els, "B30", null, guids);
+        ////////////////////            rule = new Rule.Rule(15);
 
-////////////////////            //-- empty gr: guids.Count = 0 || gr == null
-////////////////////            TST.Eq(guids.Count, 0);
-            
-////////////////////            TST.Eq(match.ok == OK.NoGroup, true);
-// 28/3 ////////////            gr = null;
-////////////////////            match = new Mtch(gr, rule);
-////////////////////            TST.Eq(match.ok == OK.NoGroup, true);
+        ////////////////////            //-- empty gr: guids.Count = 0 || gr == null
+        ////////////////////            TST.Eq(guids.Count, 0);
 
-////////////////////            //-- normal Mtch with 1 element with mat = "B30"
-////////////////////            guids.Add(el.guid);
-////////////////////            gr = new ElmAttSet.Group(els, "B30", null, guids);
-////////////////////            match = new Mtch(gr, rule);
-////////////////////            TST.Eq(match.ok == OK.Match, true);
+        ////////////////////            TST.Eq(match.ok == OK.NoGroup, true);
+        // 28/3 ////////////            gr = null;
+        ////////////////////            match = new Mtch(gr, rule);
+        ////////////////////            TST.Eq(match.ok == OK.NoGroup, true);
 
-////////////////////            //-- Mtch "C235" and "B30" -- should be OK.NoMatch
-//////////////////////            guids.Clear();
-////////////////////            gr = new ElmAttSet.Group(els, "C235", null, guids);
-////////////////////            match = new Mtch(gr, rule);
-////////////////////            TST.Eq(match.ok == OK.NoMatch, true);
-//////////////////////            TST.Eq(match.price, 0.0);
-////////////////////            Log.exit();
-////////////////////        }
+        ////////////////////            //-- normal Mtch with 1 element with mat = "B30"
+        ////////////////////            guids.Add(el.guid);
+        ////////////////////            gr = new ElmAttSet.Group(els, "B30", null, guids);
+        ////////////////////            match = new Mtch(gr, rule);
+        ////////////////////            TST.Eq(match.ok == OK.Match, true);
 
-//#endregion ------ test Matcher ------
+        ////////////////////            //-- Mtch "C235" and "B30" -- should be OK.NoMatch
+        //////////////////////            guids.Clear();
+        ////////////////////            gr = new ElmAttSet.Group(els, "C235", null, guids);
+        ////////////////////            match = new Mtch(gr, rule);
+        ////////////////////            TST.Eq(match.ok == OK.NoMatch, true);
+        //////////////////////            TST.Eq(match.price, 0.0);
+        ////////////////////            Log.exit();
+        ////////////////////        }
+#endif //#if DEBUG
+        #endregion ------ test Matcher ------
         /* 5.12.2016 ревизия
         public struct OK    // структура данных, описывающая найденное соответствие..
         {                   //..Правил, Прайс-листа комплектующих, и строки - Группы <mat,prf>
@@ -655,6 +655,5 @@ namespace TSmatch.Matcher
           return found;
         } // end SearchInComp
         2016.12.05 revision */
-#endif // OLD
     } // end class Matcher
 } // end namespace Matcher

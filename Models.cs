@@ -760,6 +760,8 @@ namespace TSmatch.Model
         /// <history> 2016.09.29 </history>
         public void getGroups()
         {
+            elmMgroups.Clear();
+            elmGroups.Clear();
             Dictionary<string, ElmAttSet.ElmAttSet> Elements = new Dictionary<string, ElmAttSet.ElmAttSet>();
             try { Elements = elements.ToDictionary(elm => elm.guid); }
             catch { Msg.F("Model.getGroups inconsystent elements "); }
@@ -782,7 +784,7 @@ namespace TSmatch.Model
                 log.Info("material= " + mtGr.mat + "\tCount= " + mtGr.guids.Count + "\tвес=" + mtGr.totalWeight + "\tобъем=" + mtGr.totalVolume);
 
             //-- группы по Материалу и Профилю elm.mat && elm.prf
-            this.elmGroups.Clear();
+//26/4            this.elmGroups.Clear();
             foreach (var Mgr in elmMgroups)
             {
                 string curMat = Mgr.mat;

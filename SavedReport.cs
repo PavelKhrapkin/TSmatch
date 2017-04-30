@@ -4,7 +4,6 @@
  *  24.04.2017 П.Л. Храпкин
  *  
  *--- Unit Tests ---
- * 2017.04.24 UT_SaveReport_test
  *--- History  ---
  * 17.04.2017 выделен из модуля Model
  * -------------- TODO --------------
@@ -33,6 +32,14 @@ using TS = TSmatch.Tekla.Tekla;
 
 namespace TSmatch.SaveReport
 {
+    delegate void BadSavRep();
+
+    class BadRepFound
+    {
+        public event BadSavRep UserEvent;
+        public void OnUserEvent() { UserEvent(); }
+    }
+
     public class SavedReport : Mod
     {
         public static readonly ILog log = LogManager.GetLogger("SavedReport");
@@ -46,6 +53,12 @@ namespace TSmatch.SaveReport
 
         public SavedReport()
         { }
+
+        public void SavRepHandler()
+        {
+            // write / reset TSmatchINFO.xlsx -- which Sheet?
+            throw new NotFiniteNumberException();
+        }
 
         public void getSavedReport()
         {
@@ -65,6 +78,11 @@ namespace TSmatch.SaveReport
             Handler();
             wrModel(WrMod.Report);
             if (!isReportConsistent()) Msg.F("internal errr");
+        }
+
+        private void BadReport_UserEvent()
+        {
+            throw new NotImplementedException();
         }
         #region --- ModelJournal -- позже перенести в отдельный класс - модуль
         /// <summary>
@@ -105,12 +123,16 @@ namespace TSmatch.SaveReport
 
         private bool isReportConsistent()
         {
+            BadRepFound badRep = new BadRepFound();
+            badRep.UserEvent += BadReport_UserEvent;
+            badRep.OnUserEvent();
+
             string repNm = Decl.TSMATCHINFO_MODELINFO;
             if (!Docs.IsDocExists(repNm)) return false;
             docModelINFO = Docs.getDoc(repNm);
             if (docModelINFO.il < 7) return false;
             if (isChangedStr(ref name, docModelINFO, 2, 2)) return false;
-//24/4            if (isChangedStr(ref dir, docModelINFO, 3, 2)) return false;  //разрешить менять dir
+            //24/4            if (isChangedStr(ref dir, docModelINFO, 3, 2)) return false;  //разрешить менять dir
             iModJounal = getModJournal(name);
             string dateJrn = getModJrnValue(Decl.MODEL_DATE);
             if (isChangedStr(ref dateJrn, docModelINFO, 5, 2)) return false;
@@ -154,7 +176,7 @@ namespace TSmatch.SaveReport
             return elms;
         }
 
-        public void SaveReport()
+        public void WriterSavRep()
         {
             throw new NotImplementedException();
         }
@@ -191,6 +213,14 @@ namespace TSmatch.SaveReport
                 Rules.Add(new Rule.Rule(n));
             ClosePriceLists();
         }
+
+        ////////////////public event WriterSavRep BadSavRep;
+
+        ////////////////protected virtual void OnBadSavRep(EventArgs e)
+        // 28/04 ///////{
+        ////////////////    EventHandler handler = BadSavRep;
+        ////////////////    if (handler != null) handler(this, e);
+        ////////////////}
 
         public void CloseReport()
         {

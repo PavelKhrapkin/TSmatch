@@ -40,18 +40,18 @@ using Supl = TSmatch.Suppliers.Supplier;
 
 namespace TSmatch.ElmAttSet
 {
-    public class ElmAttSet : IComparable<ElmAttSet> , IEquatable<ElmAttSet>
+    public class ElmAttSet : IComparable<ElmAttSet>, IEquatable<ElmAttSet>
     {
         public static readonly ILog log = LogManager.GetLogger("ElmAttSet");
 
         public string guid = "";
-        public string mat  = "";       
-        public string mat_type = "";   
-        public string prf  = "";       
-        public double length = 0.0;      
-        public double weight = 0.0;    
-        public double volume = 0.0;    
-        public double price  = 0.0;
+        public string mat = "";
+        public string mat_type = "";
+        public string prf = "";
+        public double length = 0.0;
+        public double weight = 0.0;
+        public double volume = 0.0;
+        public double price = 0.0;
 
         public static Dictionary<string, ElmAttSet> Elements = new Dictionary<string, ElmAttSet>();
 
@@ -62,13 +62,13 @@ namespace TSmatch.ElmAttSet
             , double _lng = 0.0, double _weight = 0.0, double _volume = 0.0, double _price = 0.0)
         {
             guid = _guid;
-            mat  = _mat;
+            mat = _mat;
             mat_type = _mat_type;
-            prf  = _prf;
+            prf = _prf;
             length = _lng;
             weight = _weight;
             volume = _volume;
-            price  = _price;
+            price = _price;
         }
         public ElmAttSet(Ifc ifc_elm)
         {
@@ -84,7 +84,7 @@ namespace TSmatch.ElmAttSet
         public bool Equals(ElmAttSet other)
         {
             return mat.Equals(other.mat) && prf.Equals(other.prf) && volume.Equals(other.volume);
-        }       
+        }
         public int CompareTo(ElmAttSet other)
         {
             int result = mat.CompareTo(other.mat);
@@ -122,45 +122,45 @@ namespace TSmatch.ElmAttSet
             }
         } // end ElmAttSetCompararer
     } // end class ElmAttSet
-/*
-    #region Groups
-    public class Groups
-    {
-        public class materialType //: IComparable<materialType>
-        {
-            public readonly string matTypeGr;
-            public readonly List<string> guids;
-            public readonly double totalWeight;
-            public readonly double totalVolume;
-            public readonly double totalPrice;
+      /*
+          #region Groups
+          public class Groups
+          {
+              public class materialType //: IComparable<materialType>
+              {
+                  public readonly string matTypeGr;
+                  public readonly List<string> guids;
+                  public readonly double totalWeight;
+                  public readonly double totalVolume;
+                  public readonly double totalPrice;
 
-            public materialType(string materialType)
-            {
-                this.matTypeGr = materialType;
-                List<string> guids = new List<string>();
- ///               List<ElmAttSet> mtgrElms = from elm in this by elm.
-            }
-//            var mgroups = from elm in elements group elm by elm.mat;
-        } // end class Groups.materialType
+                  public materialType(string materialType)
+                  {
+                      this.matTypeGr = materialType;
+                      List<string> guids = new List<string>();
+       ///               List<ElmAttSet> mtgrElms = from elm in this by elm.
+                  }
+      //            var mgroups = from elm in elements group elm by elm.mat;
+              } // end class Groups.materialType
 
-        public class Material : IComparable<Material>
-        {
+              public class Material : IComparable<Material>
+              {
 
-        } // end class Groups.Material
+              } // end class Groups.Material
 
-        public class MatPrf : IComparable<MatPrf>
-        {
+              public class MatPrf : IComparable<MatPrf>
+              {
 
-        } // end class Groups.MatPrf
+              } // end class Groups.MatPrf
 
-        public class Supplier : IComparable<Supplier>
-        {
+              public class Supplier : IComparable<Supplier>
+              {
 
-        } // end class Groups.Supplier
+              } // end class Groups.Supplier
 
-    } // end class Groups
-    #endregion Groups
-*/
+          } // end class Groups
+          #endregion Groups
+      */
     #region MaterialTypeGroup, MGroup, Group
 
     ///// <summary>
@@ -317,22 +317,21 @@ namespace TSmatch.ElmAttSet
         public string CompSetName;  //список компонентов, с которыми работает правило
         public string SupplierName; //Поставщик
 
-        public Group(Dictionary<string, ElmAttSet>Els, string _mat, string _prf, List<string> _guids)
+        public Group(Dictionary<string, ElmAttSet> Els, string _mat, string _prf, List<string> _guids)
         {
             Elements = Els;
             Mat = _mat;
             Prf = _prf;
             mat = Lib.ToLat(_mat.ToLower().Replace("*", "x"));
-            prf = Lib.ToLat(_prf.ToLower().Replace("*","x"));
+            prf = Lib.ToLat(_prf.ToLower().Replace("*", "x"));
             guids = _guids;
             totalLength = totalWeight = totalVolume = totalPrice = 0.0;
-            foreach(var id in guids)
+            foreach (var id in guids)
             {
-                if (Els[id].mat != mat) continue;
                 totalLength += Els[id].length;
                 totalVolume += Els[id].volume;
                 totalWeight += Els[id].weight;
-                totalPrice  += Els[id].price;
+                totalPrice += Els[id].price;
             }
         }
         public int CompareTo(Group gr)     //to Sort Groups by Materials

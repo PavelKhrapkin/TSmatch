@@ -256,6 +256,7 @@ namespace TSmatch.Document
         /// 27.4.16 - optional flag load - if false -> don't load contents from the file
         ///  9.4.17 - optional create_if_not_exist argument
         /// 17.4.17 - doc.il = doc.Body.iEOL();
+        /// 27.4.17 - move Reset() later in code, error logic changed
         /// </history>
         public static Document getDoc(string name = Decl.DOC_TOC
             , bool fatal = true, bool load = true, bool create_if_notexist = false, bool reset = false)
@@ -263,11 +264,7 @@ namespace TSmatch.Document
             Log.set("getDoc(" + name + ")");
             Document doc = null;
             string err = "Err getDoc: ", ex = "";
-            try
-            {
-                doc = Documents[name];
-                if (reset) doc.Reset();
-            }
+            try { doc = Documents[name]; }
             catch (Exception e) { err += "doc not in TOC"; ex = e.Message; doc = null; }
             if (doc != null && !doc.isOpen)
             {
@@ -276,24 +273,24 @@ namespace TSmatch.Document
                     if (doc.FileDirectory.Contains("#")) // #Template substitute with Path in Dictionary
                         doc.FileDirectory = Templates[doc.FileDirectory];
                     //-------- Load Document from the file or create it ------------
-                    //9/4                    bool create = !string.IsNullOrEmpty(doc.type) && doc.type[0] == 'N' ? true : false;
                     doc.Wb = FileOp.fileOpen(doc.FileDirectory, doc.FileName, create_if_notexist);
-                    try
-                    { 
-                        doc.Sheet = doc.Wb.Worksheets[doc.SheetN];
-                    }
+                    if (reset) doc.Reset();
+                    try { doc.Sheet = doc.Wb.Worksheets[doc.SheetN]; }
                     catch (Exception e) { err += "no SheetN"; ex = doc.SheetN; doc = null; }
-                    doc.Body = FileOp.getSheetValue(doc.Sheet);
+                    if(doc != null) doc.Body = FileOp.getSheetValue(doc.Sheet);
                 }
             } // end if(!doc.isOpen)
-            if (doc == null && fatal) Msg.F(err, ex, name);
-            if (doc != null && doc.Body != null) doc.isOpen = true;
-            doc.il = (doc.Body == null) ? 0:  doc.Body.iEOL();
+            if (doc != null)
+            {
+                doc.isOpen = true;
+                doc.il = (doc.Body == null) ? 0 : doc.Body.iEOL();
+            }
+            else if(fatal) Msg.F(err, ex, name);
             Log.exit();
             return doc;
         }
         /// <summary>
-        /// Reset() - "Reset" of the Document. All contents of hes Excel Sheet erased, write Header form
+        /// Reset() - "Reset" of the Document. All contents of the Excel Sheet erased, write Header form
         /// Reset("Now") - write DataTime.Now string in Cell [1,1]
         /// </summary>
         /// <history>9.1.2014
@@ -306,16 +303,16 @@ namespace TSmatch.Document
         {
             Log.set("Reset(" + this.name + ")");
             Document toc = getDoc();
-            this.Sheet = FileOp.SheetReset(this.Wb, this.SheetN);
-            Excel.Range rng = FileOp.setRange(this.Sheet);
+            Sheet = FileOp.SheetReset(Wb, SheetN);
+            Excel.Range rng = FileOp.setRange(Sheet);
             if (this.forms.Count == 0) Msg.F("Document.Reset no HDR form", this.name);
-            string myHDR_name = this.forms[0].name;
+            string myHDR_name = forms[0].name;
             FileOp.CopyRng(toc.Wb, myHDR_name, rng);
-            this.Body = FileOp.getSheetValue(this.Sheet);
+            Body = FileOp.getSheetValue(Sheet);
             if (str == "Now")
             {
                 Body[1, 1] = Lib.timeStr();
-                FileOp.setRange(this.Sheet);
+                FileOp.setRange(Sheet);
                 FileOp.saveRngValue(Body);
             }
             Log.exit();
