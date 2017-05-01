@@ -4,8 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using FP = TSmatch.FingerPrint.FingerPrint;
-
 namespace TSmatch.Declaration
 {
     /// <summary>
@@ -37,8 +35,9 @@ namespace TSmatch.Declaration
     /// 3.12.16     - Resource Recover NoTOCdirEnvVar
     ///  1.1.17     - ruleSection/elmAttSection/priceSections declaration area add
     /// 15.1.17     - remove Section constants to FingerPrint
+    /// 30.4.17     - TSmatchINFO/Report column constants changed 
     /// </history>
-    class Declaration
+    public class Declaration
     {
         #region ----------- GENERAL PURPASE CONSTANTS -----------------
         public const char STR_DELIMITER = ';';  // знак - резделитель в списке в строках
@@ -240,10 +239,10 @@ namespace TSmatch.Declaration
         public const int REPORT_LNG = 4;     // Group total Length [mm]
         public const int REPORT_WGT = 5;     // Group total Weight [kg]
         public const int REPORT_VOL = 6;     // Group total Volume [m3]
-        public const int REPORT_SUPL_LINE = 7;   // Supplied component description line
-        public const int REPORT_SUPL_TYPE = 8;   // Supplied component type
-        public const int REPORT_SUPL_LN_N = 9;   // Supplied component' line number in price-list
-        public const int REPORT_SUPL_WGT  = 10;  // Supplied component' total weight
+        public const int REPORT_SUPL_DESCR = 7;  // Supplied component description
+        public const int REPORT_SUPPLIER   = 8;  // Supplied of component name
+        public const int REPORT_COMPSET    = 9;  // Supplied component' CompSet
+        public const int REPORT_SUPL_WGT   = 10; // Supplied component' total weight
         public const int REPORT_SUPL_PRICE = 11; // Supplied component' total price
         #endregion
 

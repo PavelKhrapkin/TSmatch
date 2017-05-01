@@ -1,11 +1,12 @@
 ﻿/*-----------------------------------------------------------------------------------
  * SavedReport -- class for handle saved reports in TSmatchINFO.xlsx
  * 
- *  24.04.2017 П.Л. Храпкин
+ *  1.05.2017 П.Л. Храпкин
  *  
  *--- Unit Tests ---
  *--- History  ---
  * 17.04.2017 выделен из модуля Model
+ *  1.05.2017 with Document Reset and ReSave
  * -------------- TODO --------------
  * 17.04.2017 - !ПОЗЖЕ! вынести методы ModelJourlal в отдельный класс
  * ---------------------------------------------------------------------------------
@@ -32,17 +33,19 @@ using TS = TSmatch.Tekla.Tekla;
 
 namespace TSmatch.SaveReport
 {
-    delegate void BadSavRep();
+    //////////////////delegate void BadSavRep();
 
-    class BadRepFound
-    {
-        public event BadSavRep UserEvent;
-        public void OnUserEvent() { UserEvent(); }
-    }
+    // 1/5/17 ////////class BadRepFound
+    //////////////////{
+    //////////////////    public event BadSavRep UserEvent;
+    //////////////////    public void OnUserEvent() { UserEvent(); }
+    //////////////////}
 
     public class SavedReport : Mod
     {
         public static readonly ILog log = LogManager.GetLogger("SavedReport");
+
+        public event EventHandler BadRepFaced;
 
         Docs docModelINFO;
         Docs docRaw;
@@ -54,11 +57,22 @@ namespace TSmatch.SaveReport
         public SavedReport()
         { }
 
-        public void SavRepHandler()
-        {
-            // write / reset TSmatchINFO.xlsx -- which Sheet?
-            throw new NotFiniteNumberException();
-        }
+        //////////////////public void SavRepHandler()
+        //////////////////{
+        // 1/5/17 ////////    // write / reset TSmatchINFO.xlsx -- which Sheet?
+        //////////////////    throw new NotFiniteNumberException();
+        //////////////////}
+
+        //////////////////public void test_BadRepEvent()
+        //////////////////{
+
+        //////////////////}
+
+        //////////////////protected virtual void OnBadRepFaced(Docs doc)
+        //////////////////{
+        //////////////////    Console.WriteLine("** BadRepFaced doc.name = \"{0}\"", doc.name);
+        //////////////////    Console.ReadKey();
+        //////////////////}
 
         public void getSavedReport()
         {
@@ -80,10 +94,10 @@ namespace TSmatch.SaveReport
             if (!isReportConsistent()) Msg.F("internal errr");
         }
 
-        private void BadReport_UserEvent()
-        {
-            throw new NotImplementedException();
-        }
+        //////////////private void BadReport_UserEvent()
+        // 1/5/17 ////{
+        //////////////    throw new NotImplementedException();
+        //////////////}
         #region --- ModelJournal -- позже перенести в отдельный класс - модуль
         /// <summary>
         /// getModJournal(name, dir) - get model from Model Journal in TSmatch.xlsx
@@ -123,15 +137,13 @@ namespace TSmatch.SaveReport
 
         private bool isReportConsistent()
         {
-            BadRepFound badRep = new BadRepFound();
-            badRep.UserEvent += BadReport_UserEvent;
-            badRep.OnUserEvent();
-
             string repNm = Decl.TSMATCHINFO_MODELINFO;
-            if (!Docs.IsDocExists(repNm)) return false;
+            if (!Docs.IsDocExists(repNm)) Msg.F("SavedReport doc not exists", repNm);
             docModelINFO = Docs.getDoc(repNm);
-            if (docModelINFO.il < 7) return false;
-            if (isChangedStr(ref name, docModelINFO, 2, 2)) return false;
+            if (docModelINFO == null || docModelINFO.il < 7)
+                Recover(repNm, RecoverToDo.ResetRep);
+            if (isChangedStr(ref name, docModelINFO, 2, 2))
+                Recover(repNm, RecoverToDo.ChangedMod);
             //24/4            if (isChangedStr(ref dir, docModelINFO, 3, 2)) return false;  //разрешить менять dir
             iModJounal = getModJournal(name);
             string dateJrn = getModJrnValue(Decl.MODEL_DATE);
@@ -154,6 +166,32 @@ namespace TSmatch.SaveReport
             if (Rules.Count <= 0) return false;
             if (docReport.Body.Double(docReport.il, Decl.REPORT_SUPL_PRICE) <= 0.0) return false;
             return true;
+        }
+
+        public enum RecoverToDo { ResetRep, ChangedMod, NewMod }
+        public void Recover(string repNm, RecoverToDo to_do)
+        {
+            switch (to_do)
+            {
+                case RecoverToDo.ResetRep:
+                    switch (repNm)
+                    {
+                        case Decl.TSMATCHINFO_MODELINFO:
+                            Docs doc = Docs.getDoc();
+                            break;
+                    }
+                    break;
+            }
+            if (to_do == RecoverToDo.ChangedMod)
+            {
+
+
+                iModJounal = getModJournal(name, dir);
+            }
+            if (!Docs.IsDocExists(repNm))
+                docModelINFO = Docs.getDoc(Decl.TSMATCHINFO_MODELINFO
+    , create_if_notexist: true, reset: true);
+            throw new NotImplementedException();
         }
 
         private List<Elm> getSavedRaw()
@@ -227,4 +265,4 @@ namespace TSmatch.SaveReport
             docModelINFO.Close();
         }
     } // end class SavedReport
-} // end namespace 
+} // end namespace

@@ -1,0 +1,69 @@
+﻿<Window x:Class="WPF.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WPF"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="350" Width="600" Icon="TSmatch.ico">
+    <Grid Margin="0,0,0,0" Background="Ivory">
+
+        <!-- ModelINFO Text Block -->
+        <TextBlock x:Name="ModelINFO"
+            HorizontalAlignment="Right" Width="250" Margin="0,26,10,0" 
+            TextWrapping="Wrap" Padding="5"
+            VerticalAlignment="Top" Height="84" Background="AliceBlue" >
+        </TextBlock>
+        <StackPanel>
+            <TextBlock x:Name="ModelINFO_header" Background="Yellow" 
+                       Text="Общая информация по модели"
+                       HorizontalAlignment="Right" Width="250"
+                       Margin="0,10,10,0"
+                       TextAlignment="Center"/>
+        </StackPanel>
+        <Border BorderBrush="Black" BorderThickness="1"
+                HorizontalAlignment="Right" Height="100"
+                Margin="0,10,10,0" VerticalAlignment="Top" Width="250" />
+        <Border BorderBrush="Black" BorderThickness="1"
+                HorizontalAlignment="Right" Height="16"
+                Margin="0,10,10,0" VerticalAlignment="Top" Width="250" />
+
+        <!-- Supplier and CompSet Text Block -->
+        <TextBlock x:Name="Supl_CS"
+            HorizontalAlignment="Right" Width="250"
+            VerticalAlignment="Top" Height="100"
+            Margin="0, 120,10,0" Background="White" />
+        <TextBlock x:Name="TotalSupl_price"
+            HorizontalAlignment="Right" Width="250"
+            VerticalAlignment="Top" Height="16"
+            Margin="0, 200,10,0" Background="LightCyan" />       
+
+        <!-- Total model price Text Block -->
+        <TextBlock x:Name ="ModPriceSummary"
+            HorizontalAlignment="Right" Height="16"
+            VerticalAlignment="Bottom"
+            Margin="0,0,10,60"  Width="250"
+            TextWrapping="Wrap" 
+            Background="DarkOrange"
+            TextAlignment="Center"
+            Text="Общая цена проекта 123 456 789,00 руб"/>
+        <Border BorderBrush="Black" BorderThickness="1" 
+                HorizontalAlignment="Right" Height="16"
+                VerticalAlignment="Bottom"
+                Margin="0,0, 10,60"  Width="250" />
+
+        <!-- Groups <Material,Profile,Price> Panel -->
+        <ListView Name="elmGroups" Margin="10 10 10 10" HorizontalAlignment="Left" Width="300" SelectionChanged="elmGroups_SelectionChanged" >
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Header="Материал" Width="Auto" DisplayMemberBinding="{Binding mat}" />
+                    <GridViewColumn Header="Профиль" Width="Auto" DisplayMemberBinding="{Binding prf}" />
+                    <GridViewColumn Header="Цена" Width="Auto" DisplayMemberBinding="{Binding price}" />
+                </GridView>
+            </ListView.View>
+        </ListView>
+
+        <!-- OK button -->
+        <Button Content="OK" HorizontalAlignment="Left" Margin="454,270,0,0" VerticalAlignment="Top" Width="46" Click="OK_button_Click" Height="29" RenderTransformOrigin="0.538,0.691"/>
+    </Grid>
+</Window>
