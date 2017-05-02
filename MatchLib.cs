@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------
  * MatchLib -- библиотека общих подпрограмм проекта match 3.0
  * 
- *  17.10.16 П.Храпкин, А.Пасс
+ *  2.5.2017 П.Храпкин, А.Пасс
  *  
  * - 20.11.13 переписано с VBA на С#
  * - 1.12.13 добавлен метод ToIntList
@@ -19,6 +19,7 @@
  * - 21.2.16 убрал static class Matchlib; метод ToLat()
  * -  2.8.16 добавлен метод ToDouble
  * - 17.10.16 перенес GetPars из Matcher
+ * -  2.05.17 Windows.Form and TextBox references removed, MessageBox add
  * -------------------------------------------
  *      ---- методы Mtch.Lib ----
  * fileOpen(dir, name[,OpenMode]) - открываем файл Excel по имени name в директории Dir, возвращает Workbook
@@ -39,9 +40,8 @@ using System;
 using System.Data;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using System.IO;
-using System.Windows.Forms;
 using System.Diagnostics;
+using System.Windows;
 
 using System.Linq;
 using System.Text;
@@ -373,8 +373,13 @@ namespace match.Lib
         {
             log.Info(DateTime.Now.ToShortDateString() + " ---------< " + msg + " >---------");
         }
-        private static void _tx(string tx) { Console.WriteLine(tx); }
+        private static void _tx(string tx)
+        {
+            Console.WriteLine(tx);
+//2/5/2017//            MessageBox.Show(tx);
+        }
     }
+#if WindowsForm_in_Use //2.5.2017
     /// <summary>
     /// TextBoxWriter - система отладки с Log в WindowsForm 
     /// из http://devnuances.com/c_sharp/kak-perenapravit-vyivod-konsoli-v-textbox-v-c-sharp/
@@ -405,4 +410,5 @@ namespace match.Lib
             get { return System.Text.Encoding.UTF8; }
         }
     } // end class
+#endif //WindowsForm_in_Use
 }  //end namespace

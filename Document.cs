@@ -1,7 +1,7 @@
 ﻿/*-------------------------------------------------------------------------------------------------------
  * Document -- works with all Documents in the system basing on TOC - Table Of Content
  * 
- * 24.04.2017  Pavel Khrapkin, Alex Pass, Alex Bobtsov
+ * 2.05.2017  Pavel Khrapkin, Alex Pass, Alex Bobtsov
  *
  *--------- History ----------------  
  * 2013-2015 заложена система управления документами на основе TOC и Штампов
@@ -27,11 +27,13 @@
  * 13.01.17 - getDoc() = getDoc(Decl.DOC_TOC)
  *  9.04.17 - getDoc optional bool arguments
  * 17.04.17 - getDoc() il = doc.Body.iEOL();
+ *  2.05.17 - isDocExist() defuail = TOC
  * -------------------------------------------
  *      METHODS:
  * Start()              - Load from directory TOCdir of TOC all known Document attributes, prepare everithing
  * tocStart(TOCdir)     - open TSmatch.xlsx from TOCdir directory; set Windown Registry Path if OK
- * setDocTemplate(dirTemplate, val) - set #dirTtemplate value as val in list of #templates  
+ * setDocTemplate(dirTemplate, val) - set #dirTtemplate value as val in list of #templates
+ * IsDocExist([name])   - check if document with doc.name exists
  * getDoc(name[,fatal][,load]) - return Document doc named in TOC name or create it. Flag fatal is to try to open only
  *                                      load=false means do not document contents load from file
  * Reset()              - "Reset" of the Document. All contents of hes Excel Sheet erased, write Header form
@@ -79,7 +81,7 @@ namespace TSmatch.Document
         public Excel.Workbook Wb;
         public Excel.Worksheet Sheet;
         private string FileName;
-        private string FileDirectory;
+        public string FileDirectory;
         private string SheetN;
         public string MadeStep;
         private DateTime MadeTime;
@@ -225,7 +227,7 @@ namespace TSmatch.Document
         }
         #endregion
 
-        public static bool IsDocExists(string name)
+        public static bool IsDocExists(string name = Decl.DOC_TOC)
         {
             if (!Documents.ContainsKey(name)) return false;
             Document doc = Documents[name];

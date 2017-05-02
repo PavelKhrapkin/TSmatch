@@ -45,7 +45,7 @@ namespace TSmatch.SaveReport
     {
         public static readonly ILog log = LogManager.GetLogger("SavedReport");
 
-        public event EventHandler BadRepFaced;
+     // 2/5/17 ////////public event EventHandler BadRepFaced;
 
         Docs docModelINFO;
         Docs docRaw;
@@ -138,7 +138,7 @@ namespace TSmatch.SaveReport
         private bool isReportConsistent()
         {
             string repNm = Decl.TSMATCHINFO_MODELINFO;
-            if (!Docs.IsDocExists(repNm)) Msg.F("SavedReport doc not exists", repNm);
+            if (!Docs.IsDocExists(repNm)) Msg.F("SavedReport doc not exists and no Tekla", repNm);
             docModelINFO = Docs.getDoc(repNm);
             if (docModelINFO == null || docModelINFO.il < 7)
                 Recover(repNm, RecoverToDo.ResetRep);

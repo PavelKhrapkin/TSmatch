@@ -36,13 +36,12 @@ namespace WPF
         private void MainWindowLoad()
         {
             Title = "TSmatch - согласование поставщиков в проекте";
-//1/5            var boot = new TSmatch.Bootstrap.Bootstrap();
-            ////////////boot = new Boot();
-            // 29/4 ////var sr = new TSmatch.SaveReport.SavedReport();
+            var boot = new TSmatch.Bootstrap.Bootstrap();
+            var sr = new TSmatch.SaveReport.SavedReport();
             ////////////model = sr;
             ////////////sr.dir = boot.ModelDir;
             ////////////model.SetModel();
-            ////////////sr.getSavedReport();
+            sr.getSavedReport();
             //////////////24/4            sr.CloseReport();
             WrForm(wrForm.modelINFO);
             WrForm(wrForm.modelReport);

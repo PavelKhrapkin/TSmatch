@@ -1,7 +1,7 @@
 ﻿/*----------------------------------------------------------------------------
  * CompSet -- Set of Components got from the Supplier' price-list
  * 
- * 2.4.2017  P.Khrapkin
+ * 2.5.2017  P.Khrapkin
  *
  * -- ToDo
  * 31.12.16 использовать Rule.FPs и LoadDescription при конструировании CompSet
@@ -10,6 +10,7 @@
  * 31.12.2016 Rule.FPs accounted
  * 21.03.2017 Section and FP use
  *  2.04.2017 simplified with PRICE - DPar instead of FPs, don't use Rule.Parser
+ *  2.05.2017 FingerPrint reference removed, audit
  * ---------------------------------------------------------------------------
  *      Methods:
  * getCompSet(name, Supplier) - getCompSet by  its name in Supplier' list
@@ -45,7 +46,6 @@ using TSmatch.Rule;
 using Sec = TSmatch.Section.Section;
 using SType = TSmatch.Section.Section.SType;
 using Par = TSmatch.Parameter.Parameter;
-using FP = TSmatch.FingerPrint.FingerPrint;
 using DP = TSmatch.DPar.DPar;
 using TSmatch.Document;
 

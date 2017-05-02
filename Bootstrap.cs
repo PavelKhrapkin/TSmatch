@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------------------
  * Bootstrap - provide initial start of TSmatch, when necessary - startup procedure
  * 
- * 17.04.2017  Pavel Khrapkin
+ *  2.05.2017  Pavel Khrapkin
  *
  *--- History ---
  * 25.3.2016 started 
@@ -14,7 +14,8 @@
  * 17.03.2017 - Section.init() with Oleg Turetsky recommendation
  *  6.04.2017 - version for TSM_Select
  *  9.04.2017 - tested and tuned with UnitTest
- * 17.04.2017 - SavedModel class implementd
+ *  17.04.2017 - SavedModel class implementd
+ *  2.05.2017 - audit
  * ---------------------------------------------------------------------------
  *      Bootstrap Methods:
  * Bootstrap()      - check all resources and start all other modules
@@ -33,13 +34,7 @@
  */
 
 using System;
-using System.IO;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.IO.Compression;
 
 using Decl = TSmatch.Declaration.Declaration;
 using Lib = match.Lib.MatchLib;
@@ -49,13 +44,9 @@ using TS = TSmatch.Tekla.Tekla;
 using Ifc = TSmatch.IFC.IFC;
 using Msg = TSmatch.Message.Message;
 using Docs = TSmatch.Document.Document;
-using Sect = TSmatch.Section.Section;
 using SType = TSmatch.Section.Section.SType;
 using Mod = TSmatch.Model.Model;
 
-#if TSM_Select
-using Trimble.Connect.Client;
-#endif  // TSM_Select
 namespace TSmatch.Bootstrap
 {
     public class Bootstrap
@@ -86,17 +77,10 @@ namespace TSmatch.Bootstrap
         Ifc ifc;
         public object classCAD;
         public Mod model;
-        private int elementsCount;
-
 
         public Bootstrap()
         {
             init(BootInitMode.Bootstrap);
-            var sr = new SaveReport.SavedReport();
-            model = sr;
-            model.elementsCount = elementsCount;
-            sr.getSavedReport();
-            sr.CloseReport();
         }
         /// <summary>
         /// init(name [,arg]) - initiate TSmatch module name
@@ -125,11 +109,11 @@ namespace TSmatch.Bootstrap
                     debug_path = desktop_path;
                     if (isTeklaActive)
                     {   // if Tekla is active - get Path of TSmatch
-                        TS ts = new TS();
+                        classCAD = new TS();
                         _TOCdir = TS.GetTeklaDir(TS.ModelDir.exceldesign);
                         ModelDir = TS.GetTeklaDir(TS.ModelDir.model);
-                        elementsCount = ts.elementsCount();
                         //6/4/17                        macroDir = TS.GetTeklaDir(TS.ModelDir.macro);
+                        classCAD = new TS();
                     }
                     else
                     {   // if not active - Windows Environment Variable value
