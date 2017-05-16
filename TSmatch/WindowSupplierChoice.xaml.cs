@@ -28,36 +28,36 @@ namespace TSmatch
         {
             InitializeComponent();
             Title = "TSmatch: выбор поставщика";
-            List<supl> items = new List<supl>();
+            List<Supl> items = new List<Supl>();
             Docs doc = Docs.getDoc(Decl.SUPPLIERS);
             for (int i = doc.i0; i <= doc.il; i++)
             {
-                string sName = doc.Body.Strng(i, Decl.SUPL_NAME);
-                string sCity = doc.Body.Strng(i, Decl.SUPL_CITY);
-                string sIndx = doc.Body.Strng(i, Decl.SUPL_STREET);
-                string sStrt = doc.Body.Strng(i, Decl.SUPL_STREET);
-                string sUrl = doc.Body.Strng(i, Decl.SUPL_URL);
-                var s = new supl(sName, sCity, sIndx, sStrt, sUrl);
+                string Name = doc.Body.Strng(i, Decl.SUPL_NAME);
+                string city = doc.Body.Strng(i, Decl.SUPL_CITY);
+                int Indx = doc.Body.Int(i, Decl.SUPL_INDEX);
+                string Strt = doc.Body.Strng(i, Decl.SUPL_STREET);
+                string Url = doc.Body.Strng(i, Decl.SUPL_URL);
+                if (string.IsNullOrEmpty(Name) || string.IsNullOrEmpty(city)) continue;
+                Supl s = new Supl(Name, Indx, city, Strt, Url);
                 items.Add(s);
-                Suppliers.ItemsSource = items;
             }
+            Suppliers.ItemsSource = items;
         }
-
-        public class supl
+        public class Supl
         {
-            public string SuplName;
-            public string City;
-            public string Index;
-            public string StreetAdr;
-            public string Url;
+            public string Name { get; set; }
+            public int Index { get; set; }
+            public string City { get; set; }
+            public string Street { get; set; }
+            public string Url { get; set; }
 
-            public supl(string _SupName, string _City, string _Index, string _Street, string _Url)
+            public Supl(string name, int index, string city, string street, string url)
             {
-                SuplName = _SupName;
-                City = _City;
-                Index = _Index;
-                StreetAdr = _Street;
-                Url = _Url;
+                Name = name;
+                Index = index;
+                City = city;
+                Street = street;
+                Url = url;
             }
         }
 
@@ -66,7 +66,7 @@ namespace TSmatch
             Msg.AskFOK("ыыыыs");
         }
 
-            private void OK_button_Click(object sender, RoutedEventArgs e)
+        private void OK_button_Click(object sender, RoutedEventArgs e)
         {
             Close();
         }

@@ -38,6 +38,7 @@ namespace TSmatch
         private void Supl_CS_Panel()
         {
             ElmGr group = MainWindow.currentGroup;
+            if (group == null) return;
             string suplName = group.SupplierName;
             Supplier.Content = suplName;
             string csName = group.CompSetName;

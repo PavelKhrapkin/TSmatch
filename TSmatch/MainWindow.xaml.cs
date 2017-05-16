@@ -1,4 +1,14 @@
-﻿using System;
+﻿/*-------------------------------------------
+ * WPF Main Windows 15.5.2017 Pavel.Khrapkin
+ * ------------------------------------------
+ * --- History ---
+ * 2017.05.15 - restored as Tsmatch 1.0.1 after Source Control excident
+ * --- Known Issue ---
+ * - It is good re-design XAML idea to have two column on MainWindow with the Width = "*".
+ * Than with Window size changed, Group<Mat,Prf,Price> part would become wider.
+ * - ToDo some kind of progress bar moving on the MainWindow, when Tekla re-draw HighLight.
+ */
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
