@@ -33,6 +33,7 @@ namespace TSmatch.Model.Handler
     {
         public void Handler(Mod mod)
         {
+            Log.set("MH.Handler(\"" + mod.name + "\")");
             getGroups(mod.elements);
             foreach (var gr in mod.elmGroups)
             {
@@ -56,10 +57,13 @@ namespace TSmatch.Model.Handler
             }
             elements = elms.Values.ToList();
 
-//8/5       elements     getSuppliers();
-//14/5            elements = getPricingFrGroups();
-//9/5            ClosePriceLists();
-//8/5            getPricingMD5();
+            //8/5       elements     getSuppliers();
+            //14/5            elements = getPricingFrGroups();
+            //9/5            ClosePriceLists();
+            //8/5            getPricingMD5();
+            Log.Trace("<MH>Rules.Count=", mod.Rules.Count);
+            Log.Trace("<MH>Price match for ", mod.matches.Count, " / ", mod.elmGroups.Count);
+            Log.exit();
         }
 
         private void getPricingMD5()

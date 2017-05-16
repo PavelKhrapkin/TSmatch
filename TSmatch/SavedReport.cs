@@ -22,6 +22,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+using Log = match.Lib.Log;
 using Lib = match.Lib.MatchLib;
 using Msg = TSmatch.Message.Message;
 using Decl = TSmatch.Declaration.Declaration;
@@ -50,6 +51,8 @@ namespace TSmatch.SaveReport
 
         public void GetSavedReport(Mod mod)
         {
+            Log.TraceOn();
+            Log.set("SR.GetSavedReport(\"" + mod.name + "\")");
             SetSavedMod(mod);
             bool check = true;
             while (check)
@@ -68,25 +71,31 @@ namespace TSmatch.SaveReport
                 mh.getGroups(elements);
                 elmGroups = mh.elmGroups;
                 elmMgroups = mh.elmMgroups;
-//12/5                mj = new ModelJournal.ModJournal(boot.models);
-//14/5                Mod m = mj.getModJournal(name);
 
+                Log.Trace("*SR.elements=", elements.Count, " gr=", elmGroups.Count);
+                //12/5                mj = new ModelJournal.ModJournal(boot.models);
+                //14/5                Mod m = mj.getModJournal(name);
+                //16/5---------------- перенести это в Pricing() ---------------
+                // пока почему-то нужно вызывать Handling -- делается Reset(Report)
                 getSavedRules();
-
                 mh.Handler(this);
                 // если здесь isChanged=true -- mj.SaveModJournal
                 //13/5              strListRules = m.strListRules;
-                elements = mh.elements;
                 elmGroups = mh.elmGroups;
+                Log.Trace("*SR.elements=", elements.Count, " gr=", elmGroups.Count);
+                //16/5-----------------------------------------------------------
                 getSavedGroups();
 
                 check = false;
             }
-//14/5            mj.SynchModJournal(ModelInCad);
+            //14/5            mj.SynchModJournal(ModelInCad);
+            Log.exit();
+            Log.TraceOff();
         }
 
         private void SetSavedMod(Mod mod)
         {
+            Log.set("SetSavedReport");
             ModelInCad = mod;
 
             dINFO = Docs.getDoc(Decl.TSMATCHINFO_MODELINFO, fatal: false);
@@ -104,6 +113,18 @@ namespace TSmatch.SaveReport
 
             mj = mod.mj;
             mh = mod.mh;
+
+            if (TS.isTeklaActive()) Log.Trace("Tekla active");
+            else Log.Trace("No Tekla");
+            Log.Trace("name =", name);
+            Log.Trace("dir  =", dir);
+            Log.Trace("phase=", phase);
+            Log.Trace("made =", made);
+            Log.Trace("date =", date);
+            Log.Trace("prcDT=", pricingDate);
+            Log.Trace("elCnt=", elementsCount);
+            Log.Trace("strRl=", strListRules);
+            Log.exit();
         }
 #if OLD
             if (isReportConsistent()) return;
@@ -248,6 +269,7 @@ namespace TSmatch.SaveReport
         /// <returns>updated list of elements in file and in memory</returns>
         public List<Elm> getSavedRaw()
         {
+            Log.set("SR.getSavedRaw()");
             Docs docRaw = Docs.getDoc(sRaw, create_if_notexist: false);
             if (docRaw == null) Reset(sRaw);
             if (TS.isTeklaActive())
@@ -276,6 +298,8 @@ namespace TSmatch.SaveReport
             Docs docModelINFO = Docs.getDoc(Decl.TSMATCHINFO_MODELINFO);
             if (MD5 != docModelINFO.Body.Strng(6, 2)
                 || elementsCount != docModelINFO.Body.Int(7, 2)) Reset(sINFO);
+            Log.Trace("{ elmCount, MD5} ==", elms.Count, MD5);
+            Log.exit();
             return elms;
         }
 
@@ -318,11 +342,14 @@ namespace TSmatch.SaveReport
         }
         public void getSavedRules()
         {
+            Log.set("SR.getSavedRules(\"" + strListRules + "\")");
             strListRules = "17, 4, 5, 6, 7";    // 13/5 заглушка
+            Log.set("SR.getSavedRules(\"" + strListRules + "\")");
             //7/5            strListRules = getModJrnValue(Decl.MODEL_R_LIST);
             foreach (int n in Lib.GetPars(strListRules))
                 Rules.Add(new Rule.Rule(n));
             //8/5            ClosePriceLists();
+            Log.exit();
         }
 
         public void CloseReport()
