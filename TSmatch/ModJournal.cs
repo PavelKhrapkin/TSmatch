@@ -87,7 +87,7 @@ namespace TSmatch.Model.Journal
 
         internal void SynchModJournal(Mod modelInCad)
         {
-            throw new NotImplementedException();
+//16/5            throw new NotImplementedException();
         }
 
         public void ChangeModJournal(Mod mod)
