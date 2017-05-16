@@ -63,7 +63,13 @@ namespace TSmatch
 
         private void OnSupplier_changed(object sender, SelectionChangedEventArgs e)
         {
-            Msg.AskFOK("ыыыыs");
+            string curSN = MainWindow.SuplName;
+            Supl selectedSupl = (Supl) Suppliers.SelectedItem;
+            string selSN = selectedSupl.Name;
+            if (!Msg.AskYN("Вы действительно хотите заменить \"{0}\" на \"{1}\"?", curSN, selSN)) return;
+            MainWindow.SuplName = selSN;
+            MainWindow.RePricing();
+            Close();
         }
 
         private void OK_button_Click(object sender, RoutedEventArgs e)

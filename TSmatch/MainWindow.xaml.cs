@@ -42,6 +42,7 @@ namespace TSmatch
 
         public static Mod model;
         public static ElmGr currentGroup;
+        public static string SuplName;
 
         public MainWindow()
         {
@@ -131,6 +132,7 @@ namespace TSmatch
 
         private void OnSuplClick(object sender, RoutedEventArgs e)
         {
+            SuplName = (currentGroup == null) ? string.Empty : currentGroup.SupplierName;
             var SuplChoiceWindow = new WindowSuplCSChoice();
             SuplChoiceWindow.Show();
         }
@@ -146,9 +148,16 @@ namespace TSmatch
 //15/5            var SuplChoiceWindow = new WindowSuplCSChoice();
 //15/5            SuplChoiceWindow.Show();
             MessageBox.Show("Пересчет стоимости материалов", "TSmatch");
+            RePricing();
 //15/5            model.mh.Pricing(model);
 //15/5            WrForm(wrForm.modelReport);
         }
+
+        internal static void RePricing()
+        {
+//16/5      throw new NotImplementedException();
+        }
+
         private void OK_button_Click(object sender, RoutedEventArgs e)
         {
             model.HighLightClear();
