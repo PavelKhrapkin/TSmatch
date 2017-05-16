@@ -1,14 +1,14 @@
 ﻿/*-----------------------------------------------------------------------------------
  * SavedReport -- class for handle saved reports in TSmatchINFO.xlsx
  * 
- *  12.05.2017 П.Л. Храпкин
+ *  16.05.2017 П.Л. Храпкин
  *  
  *--- Unit Tests ---
  *--- History  ---
  * 17.04.2017 выделен из модуля Model
  *  1.05.2017 with Document Reset and ReSave
  *  7.05.2017 написал SetFrSavedModelINFO(), переписал isReportConsystant()
- * 12.05.2017 audit
+ * 16.05.2017 audit
  *--- Methods: -------------------      
  * SaveReport() - NotImplemented yet - Saved current Model in TSmatchINFO.xlsx
  * bool GetSavedReport()    - read TSmatchINFO.xlsx, set it as a current Model
@@ -20,7 +20,6 @@
 using log4net;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 using Log = match.Lib.Log;
 using Lib = match.Lib.MatchLib;
@@ -29,9 +28,7 @@ using Decl = TSmatch.Declaration.Declaration;
 using Docs = TSmatch.Document.Document;
 using Elm = TSmatch.ElmAttSet.ElmAttSet;
 using Mod = TSmatch.Model.Model;
-using Boot = TSmatch.Bootstrap.Bootstrap;
 using TS = TSmatch.Tekla.Tekla;
-using TSmatch.Model;
 
 namespace TSmatch.SaveReport
 {
@@ -51,7 +48,6 @@ namespace TSmatch.SaveReport
 
         public void GetSavedReport(Mod mod)
         {
-            Log.TraceOn();
             Log.set("SR.GetSavedReport(\"" + mod.name + "\")");
             SetSavedMod(mod);
             bool check = true;
@@ -71,26 +67,12 @@ namespace TSmatch.SaveReport
                 mh.getGroups(elements);
                 elmGroups = mh.elmGroups;
                 elmMgroups = mh.elmMgroups;
-
                 Log.Trace("*SR.elements=", elements.Count, " gr=", elmGroups.Count);
-                //12/5                mj = new ModelJournal.ModJournal(boot.models);
-                //14/5                Mod m = mj.getModJournal(name);
-                //16/5---------------- перенести это в Pricing() ---------------
-                // пока почему-то нужно вызывать Handling -- делается Reset(Report)
-                getSavedRules();
-                mh.Handler(this);
-                // если здесь isChanged=true -- mj.SaveModJournal
-                //13/5              strListRules = m.strListRules;
-                elmGroups = mh.elmGroups;
-                Log.Trace("*SR.elements=", elements.Count, " gr=", elmGroups.Count);
-                //16/5-----------------------------------------------------------
                 getSavedGroups();
-
                 check = false;
             }
-            //14/5            mj.SynchModJournal(ModelInCad);
+            mj.SynchModJournal(ModelInCad);
             Log.exit();
-            Log.TraceOff();
         }
 
         private void SetSavedMod(Mod mod)
@@ -170,8 +152,19 @@ namespace TSmatch.SaveReport
             //12/5 getSavedGroups();
             //6/5           getSavedRules();
             //6/5           if (R
-           //12/5 ules.Count <= 0) return false;
+            //12/5 ules.Count <= 0) return false;
             //7/5            if (docReport.Body.Double(docReport.il, Decl.REPORT_SUPL_PRICE) <= 0.0) return false;
+            //12/5                mj = new ModelJournal.ModJournal(boot.models);
+            //14/5                Mod m = mj.getModJournal(name);
+            //16/5---------------- перенести это в Pricing() ---------------
+            // пока почему-то нужно вызывать Handling -- делается Reset(Report)
+            //16/5                getSavedRules();
+            //16/5                mh.Handler(this);
+            // если здесь isChanged=true -- mj.SaveModJournal
+            //13/5              strListRules = m.strListRules;
+            //16/5                elmGroups = mh.elmGroups;
+            //16/5                Log.Trace("*SR.elements=", elements.Count, " gr=", elmGroups.Count);
+            //16/5-----------------------------------------------------------
         }
 
         private void ChangedPricing()
@@ -191,6 +184,7 @@ namespace TSmatch.SaveReport
         {
             if (string.IsNullOrEmpty(name)) Msg.F("SavedReport doc not exists and no CAD");
             if (!Docs.IsDocExists(doc_name)) Recover(doc_name, RecoverToDo.CreateRep);
+            Msg.AskFOK("Вы действительно намерены переписать TSmatchINFO.xlsx/Report?");
             Recover(doc_name, RecoverToDo.ResetRep);
         }
 
@@ -326,7 +320,7 @@ namespace TSmatch.SaveReport
             if (elmGroups.Count == 0) Msg.F("SavedReport.getSavedGroup: elmGroups.Count = 0");
             string sRep = Decl.TSMATCHINFO_REPORT;
             Docs dRep = Docs.getDoc(sRep);
-            if (dRep == null || dRep.il != (elmGroups.Count + dRep.i0 + 1)) Reset(sRep);
+            if (dRep == null || dRep.il != (elmGroups.Count + dRep.i0)) Reset(sRep);
             double totalPrice = dRep.Body.Double(dRep.il, Decl.REPORT_SUPL_PRICE);
             if (totalPrice == 0) Pricing();
             int gr_n = dRep.i0;
