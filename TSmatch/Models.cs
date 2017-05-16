@@ -1,7 +1,7 @@
 ﻿/*------------------------------------------------------------------------------------------
  * Model -- класс управления моделями, ведет Журнал Моделей и управляет их сохранением
  * 
- * 11.05.2017 П.Л. Храпкин
+ * 16.05.2017 П.Л. Храпкин
  *  
  *--- журнал ---
  * 18.1.2016 заложено П.Храпкин, А.Пасс, А.Бобцов
@@ -229,6 +229,7 @@ namespace TSmatch.Model
 
         public void SetModel(Boot boot)      // 7/5  List<Model> models)
         {
+            Log.set("SetModel");
             //create child class references mj, mh, sr
             mj = new Journal.ModJournal(boot.models);
             mh = new Handler.ModHandler();
@@ -263,6 +264,7 @@ namespace TSmatch.Model
             elements = sr.elements;
             elmGroups = sr.elmGroups;
             pricingDate = sr.pricingDate;
+            Log.exit();
         }
 
         /// <summary>

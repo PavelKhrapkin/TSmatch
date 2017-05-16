@@ -19,7 +19,7 @@
  * - 21.2.16 убрал static class Matchlib; метод ToLat()
  * -  2.8.16 добавлен метод ToDouble
  * - 17.10.16 перенес GetPars из Matcher
- *  -16.05.17 log4net use with WPF
+ * - 16.05.17 log4net use with WPF, TraceOn()/TraceOff()
  * -------------------------------------------
  *      ---- методы Mtch.Lib ----
  * fileOpen(dir, name[,OpenMode]) - открываем файл Excel по имени name в директории Dir, возвращает Workbook
@@ -41,7 +41,6 @@ using System.Data;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.IO;
-//5/5/17 using System.Windows.Forms;
 using System.Diagnostics;
 using log4net;
 using log4net.Config;
@@ -346,7 +345,7 @@ namespace match.Lib
     /// <history> 30.12.2013 P.Khrapkin
     /// 1.1.2016 в FATAL выводим стек имен
     /// 9.9.2016 use lof4net log&trace library
-    /// 16.5.2017 log4net with WPF
+    /// 16.5.2017 log4net with WPF, TraceOn()/TraceOff()
     /// </history>
     public class Log
     {
@@ -355,6 +354,7 @@ namespace match.Lib
 
         private static string _context;
         static Stack<string> _nameStack = new Stack<string>();
+        private static int _trace_level = 0;
 
         public Log(string msg)
         {
@@ -364,7 +364,7 @@ namespace match.Lib
         }
         public static void set(string sub)
         {
-            //            log.Info(sub);
+            if(_trace_level > 0) log.Info("---" + sub);
             _nameStack.Push(sub);
         }
         public static void exit() { _nameStack.Pop(); }
@@ -377,6 +377,14 @@ namespace match.Lib
             Debugger.Break();
         }
         public static void Warning(string msg) { new Log("\n[warning] " + msg); }
+        public static void TraceOn() { _trace_level++; }
+        public static void TraceOff() { _trace_level--; }
+        public static void Trace(string msg, params object[] arg)
+        {
+            if (_trace_level <= 0) return;
+            foreach (var a in arg) if (a != null) msg += a.ToString() + " ";
+            log.Info(msg);
+        }
         [STAThread]
         public static void START(string msg)
         {
