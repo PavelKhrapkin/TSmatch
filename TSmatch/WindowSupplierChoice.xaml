@@ -15,7 +15,7 @@
                     <GridViewColumn Header="Индекс" Width="60" DisplayMemberBinding="{Binding Index}" />
                     <GridViewColumn Header="Город" Width="100" DisplayMemberBinding="{Binding City}" />
                     <GridViewColumn Header="Улица" Width="240" DisplayMemberBinding="{Binding Street}" />
-                    <GridViewColumn Header="Web сайт" Width="150" DisplayMemberBinding="{Binding Url}" />
+                    <GridViewColumn Header="Web сайт" Width="220" DisplayMemberBinding="{Binding Url}" />
                 </GridView>
             </ListView.View>
         </ListView>

@@ -1,7 +1,7 @@
 ﻿/*----------------------------------------------------------------------------
  * Message -- multilanguage message system
  * 
- * 11.05.2017  Pavel Khrapkin
+ * 16.05.2017  Pavel Khrapkin
  *
  *--- History ---
  * Feb-2016 Created
@@ -9,6 +9,7 @@
  * 20.8.2016 - use log4net, bug fixes
  *  9.5.2017 - MessageBox.Show use
  * 11.5.2017 - Fatal error handling with Application.Current.Sutdown, AskFOK, and SPLAS messages
+ * 16.5.2017 - AskYN
  * ---------------------------------------------------------------------------------------
  *      Methods:
  * Start()    - Copy messages into the static list from TSmatch.xlsx/Messages Sheet
@@ -94,6 +95,21 @@ namespace TSmatch.Message
                 || severity == (int)Severity.INFO) new Log(str);
             return;
         }
+
+        public static void txt(Severity type, string msgcode, params object[] p)
+        {
+            Message msg = Messages.Find(x => x.MessageID == msgcode);
+            if (msg == null)
+            {
+                MessageBox.Show(msgcode, "(*) TSmatch " + type);
+            }
+            else
+            {
+                string str = string.Format(msg.text, p);
+                MessageBox.Show(str, "TSmatch " + type);
+            }
+        }
+#if OLD
         public static void txt(Severity type, string msgcode, object p0 = null, object p1 = null, object p2 = null)
         {
             Message msg = Messages.Find(x => x.MessageID == msgcode);
@@ -107,14 +123,11 @@ namespace TSmatch.Message
                 MessageBox.Show(str, "TSmatch " + type);
             }
         }
-        public static void txt(string str, object p0 = null, object p1 = null, object p2 = null)
-        { txt(Severity.FATAL, str, p0, p1, p2); }
-        public static void F(string str, object p0 = null, object p1 = null, object p2 = null)
-        { txt(Severity.FATAL, str, p0, p1, p2);  Stop(); }
-        public static void W(string str, object p0 = null, object p1 = null, object p2 = null)
-        { txt(Severity.WARNING, str, p0, p1, p2); }
-        public static void I(string str, object p0 = null, object p1 = null, object p2 = null)
-        { txt(Severity.INFO, str, p0, p1, p2); }
+#endif 
+        public static void txt(string str, params object[] p) { txt(Severity.FATAL, str, p); }
+        public static void F(string str, params object[] p) { txt(Severity.FATAL, str, p);  Stop(); }
+        public static void W(string str, params object[] p) { txt(Severity.WARNING, str, p); }
+        public static void I(string str, params object[] p) { txt(Severity.INFO, str, p); }
 #if NotWorkingYet
         public static void S(string str, object p0 = null, object p1 = null, object p2 = null)
         {
@@ -123,13 +136,39 @@ namespace TSmatch.Message
             splashScreen.Show(true);
         }
 #endif // Splash еще не умею...
-        public static void AskFOK(string msgcode, object p0 = null, object p1 = null, object p2 = null)
+        public static bool AskYN(string msgcode, params object[] p)   //16/5 0 = null, object p1 = null, object p2 = null)
         {
+            var X = MessageBoxResult.Yes;
             string str = msgcode;
             Message msg = Messages.Find(x => x.MessageID == msgcode);
-            if (msg != null) str = string.Format(msg.text, p0, p1, p2);
-            var ok = MessageBox.Show(str, "(*) TSmatch",
-                MessageBoxButton.OKCancel, MessageBoxImage.Question);
+            if (msg == null)
+            {
+                str = string.Format(msgcode, p);
+                X = MessageBox.Show(str, "(*) TSmatch", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            }
+            else
+            {
+                str = string.Format(msg.text, p);
+                X = MessageBox.Show(str, "TSmatch", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            }
+            return X == MessageBoxResult.Yes;
+        }
+
+        public static void AskFOK(string msgcode, params object[] p)
+        {
+            var ok = MessageBoxResult.OK;
+            string str = msgcode;
+            Message msg = Messages.Find(x => x.MessageID == msgcode);
+            if(msg == null)
+            {
+                str = string.Format(msgcode, p);
+                ok = MessageBox.Show(str, "(*) TSmatch", MessageBoxButton.OKCancel, MessageBoxImage.Question);
+            }
+            else
+            {
+                str = string.Format(msg.text, p);
+                ok = MessageBox.Show(str, "TSmatch", MessageBoxButton.OKCancel, MessageBoxImage.Question);
+            }
             if (ok == MessageBoxResult.OK) return;
             Stop();
         }
