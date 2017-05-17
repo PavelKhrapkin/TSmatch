@@ -1,7 +1,7 @@
 ﻿/*--------------------------------------------------------------------------------------------
  * ModHandler : Model -- Handle Model for Report preparation
  * 
- *  12.05.2017 Pavel Khrapkin
+ *  17.05.2017 Pavel Khrapkin
  *  
  *--- History ---
  *  8.05.2017 get from Model code
@@ -17,6 +17,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using log4net;
 using Decl = TSmatch.Declaration.Declaration;
 using Lib = match.Lib.MatchLib;
 using Log = match.Lib.Log;
@@ -31,10 +32,13 @@ namespace TSmatch.Model.Handler
 {
     public class ModHandler : Mod
     {
+        public static readonly ILog log = LogManager.GetLogger("Model.Handler");
+
         public void Handler(Mod mod)
         {
             Log.set("MH.Handler(\"" + mod.name + "\")");
             getGroups(mod.elements);
+            log.Info("- total elements = " + mod.elements.Count + " in " + mod.elmGroups.Count + "groups");
             foreach (var gr in mod.elmGroups)
             {
                 bool b = false;
@@ -45,6 +49,7 @@ namespace TSmatch.Model.Handler
                 }
                 if (!b) log.Info("No Match Group. mat= " + gr.mat + "\tprf=" + gr.prf);
             }
+            int cnt = 0;
             var elms = new Dictionary<string, Elm>();
             elms = mod.elements.ToDictionary(elm => elm.guid);
             foreach(var match in mod.matches)
@@ -52,31 +57,20 @@ namespace TSmatch.Model.Handler
                 double price_per_t = match.group.totalPrice / match.group.totalVolume;
                 foreach (var guid in match.group.guids)
                 {
-                    elms[guid].price = price_per_t * elms[guid].volume;   
+                    elms[guid].price = price_per_t * elms[guid].volume;
+                    cnt++;
                 }
             }
+
+            log.Info("- found " + mod.matches.Count + " price matches for " + cnt + " elements");
             elements = elms.Values.ToList();
 
-            //8/5       elements     getSuppliers();
-            //14/5            elements = getPricingFrGroups();
-            //9/5            ClosePriceLists();
-            //8/5            getPricingMD5();
             Log.Trace("<MH>Rules.Count=", mod.Rules.Count);
             Log.Trace("<MH>Price match for ", mod.matches.Count, " / ", mod.elmGroups.Count);
             Log.exit();
         }
 
-        private void getPricingMD5()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void ClosePriceLists()
-        {
-            foreach (var rule in Rules) rule.CompSet.doc.Close();
-        }
-
-        public void Pricing(Mod m)
+        public void Pricing(ref Mod m)
         {
             getRules(m);
             Handler(m);
@@ -105,8 +99,8 @@ namespace TSmatch.Model.Handler
         internal void getRules(Mod mod)
         {
             foreach (int n in Lib.GetPars(mod.strListRules))
-                Rules.Add(new Rule.Rule(n));
-            ClosePriceLists();
+                mod.Rules.Add(new Rule.Rule(n));
+            foreach(var rule in mod.Rules) rule.CompSet.doc.Close();
         }
         /// <summary>
         /// getGroups() - groupping of elements of Model by Material and Profile
@@ -170,5 +164,5 @@ namespace TSmatch.Model.Handler
             }
             log.Info("-------------- CheckSum: total elements count in all groups = " + chkSum);
         }
-    }
-}
+    } // end class ModHandler : Model
+} // end namespace Model.Handler
