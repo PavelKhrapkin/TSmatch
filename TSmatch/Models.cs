@@ -1,7 +1,7 @@
 ﻿/*------------------------------------------------------------------------------------------
  * Model -- класс управления моделями, ведет Журнал Моделей и управляет их сохранением
  * 
- * 16.05.2017 П.Л. Храпкин
+ * 17.05.2017 П.Л. Храпкин
  *  
  *--- журнал ---
  * 18.1.2016 заложено П.Храпкин, А.Пасс, А.Бобцов
@@ -52,11 +52,11 @@
  ! lngGroup(atr)   - группирует элементы модели по парам <Материал, Профиль> возвращая массивы длинны 
  * ModReset()      - clear and re-Read all Rules with theit Suppliers, CompSet, and price-lists 
  */
-using log4net;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
+
+using log4net;
 using Boot = TSmatch.Bootstrap.Bootstrap;
 using CmpSet = TSmatch.CompSet.CompSet;
 using Decl = TSmatch.Declaration.Declaration;
@@ -80,7 +80,7 @@ namespace TSmatch.Model
     public class Model : IComparable<Model>
     {
         #region --- Definitions and Constructors
-        public static readonly ILog log = LogManager.GetLogger("Module");
+        public static readonly ILog log = LogManager.GetLogger("Model");
 
         public DateTime date;       // дата и время последнего обновления модели
         public string name;         // название модели

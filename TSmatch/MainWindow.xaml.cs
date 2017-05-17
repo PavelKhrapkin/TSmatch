@@ -1,12 +1,13 @@
 ﻿/*-------------------------------------------
- * WPF Main Windows 15.5.2017 Pavel.Khrapkin
+ * WPF Main Windows 17.5.2017 Pavel.Khrapkin
  * ------------------------------------------
  * --- History ---
  * 2017.05.15 - restored as Tsmatch 1.0.1 after Source Control excident
- * --- Known Issue ---
+ * --- Known Issue & ToDos ---
  * - It is good re-design XAML idea to have two column on MainWindow with the Width = "*".
  * Than with Window size changed, Group<Mat,Prf,Price> part would become wider.
  * - ToDo some kind of progress bar moving on the MainWindow, when Tekla re-draw HighLight.
+ * - Implement [RePricing] button
  */
 using System;
 using System.Collections.Generic;
@@ -40,9 +41,12 @@ namespace TSmatch
     {
         public static readonly ILog log = LogManager.GetLogger("MainWindow");
 
+        public delegate void NextPrimeDelegate();
+
         public static Mod model;
         public static ElmGr currentGroup;
         public static string SuplName;
+        private bool ModelIsChanged = false;
 
         public MainWindow()
         {
@@ -58,9 +62,37 @@ namespace TSmatch
             var sr = new SaveReport.SavedReport();
             model = sr;
             model.SetModel(boot);
-            WrForm(wrForm.modelINFO);
-            WrForm(wrForm.modelReport);
+            WrModelInfoPanel();
+            WrReportPanel();
             model.HighLightElements(Mod.HighLightMODE.NoPrice);
+        }
+
+        private void WrModelInfoPanel()
+        {
+            ModelINFO.Text = "Модель:\t\"" + model.name + "\""
+                    + "\nДата сохранения " + model.date.ToLongDateString()
+                        + " " + model.date.ToShortTimeString()
+                    + "\nДата расценки     " + model.pricingDate.ToLongDateString()
+                        + " " + model.pricingDate.ToShortTimeString()
+                + "\nВсего " + model.elementsCount + " элементов"
+                        + ", " + model.elmGroups.Count + " групп";
+        }
+
+        private void WrReportPanel()
+        {
+            List<gr> items = new List<gr>();
+            foreach (var gr in model.elmGroups)
+            {
+                string sPrice = String.Format("{0, 20:N2}", gr.totalPrice);
+                var g = new gr() { mat = gr.Mat, prf = gr.Prf, price = sPrice };
+                items.Add(g);
+            }
+            elmGroups.ItemsSource = items;
+
+            double totalPrice = 0.0;
+            foreach (var gr in model.elmGroups) totalPrice += gr.totalPrice;
+            string st = string.Format("Общая цена проекта {0:N0} руб", totalPrice);
+            ModPriceSummary.Text = st;
         }
 
         public class gr
@@ -70,41 +102,6 @@ namespace TSmatch
             //3/5           public double price { get; set; }
             public string price { get; set; }
         }
-
-        enum wrForm { modelINFO, modelReport };
-        private void WrForm(wrForm wrf, int indx = -1)
-        {
-            switch (wrf)
-            {
-                case wrForm.modelINFO:
-                    ModelINFO.Text = "Модель:\t\"" + model.name + "\""
-                        + "\nДата сохранения " + model.date.ToLongDateString()
-                            + " " + model.date.ToShortTimeString()
-                        + "\nДата расценки     " + model.pricingDate.ToLongDateString()
-                            + " " + model.pricingDate.ToShortTimeString()
-                    + "\nВсего " + model.elementsCount + " элементов"
-                            + ", " + model.elmGroups.Count + " групп";
-                    break;
-
-                case wrForm.modelReport:
-                    List<gr> items = new List<gr>();
-                    foreach (var gr in model.elmGroups)
-                    {
-                        string sPrice = String.Format("{0, 20:N2}", gr.totalPrice);
-                        var g = new gr() { mat = gr.Mat, prf = gr.Prf, price = sPrice };
-                        items.Add(g);
-                    }
-                    elmGroups.ItemsSource = items;
-
-                    double totalPrice = 0.0;
-                    foreach (var gr in model.elmGroups) totalPrice += gr.totalPrice;
-                    string st = string.Format("Общая цена проекта {0:N0} руб", totalPrice);
-                    //14/5                   string prDate = "\nДата расценки " + model.pricingDate.ToString("d.MM.yyyy H:mm");
-                    ModPriceSummary.Text = st; //14/5 + prDate;
-                    break;
-            }
-        }
-
         private void elmGroups_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             gr v = (gr)elmGroups.SelectedValue;
@@ -147,15 +144,18 @@ namespace TSmatch
         {
 //15/5            var SuplChoiceWindow = new WindowSuplCSChoice();
 //15/5            SuplChoiceWindow.Show();
-            MessageBox.Show("Пересчет стоимости материалов", "TSmatch");
+            Msg.AskFOK("Пересчет стоимости материалов");
             RePricing();
+            RePrice.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new NextPrimeDelegate(WrReportPanel));
 //15/5            model.mh.Pricing(model);
 //15/5            WrForm(wrForm.modelReport);
         }
 
         internal static void RePricing()
         {
-//16/5      throw new NotImplementedException();
+            model.mh.Pricing(ref model);
+
+//17/5            WrForm(wrForm.modelReport);
         }
 
         private void OK_button_Click(object sender, RoutedEventArgs e)
