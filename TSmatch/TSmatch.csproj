@@ -86,6 +86,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="WindowMaterialChoice.xaml.cs">
+      <DependentUpon>WindowMaterialChoice.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Rule.cs" />
     <Compile Include="SavedReport.cs" />
     <Compile Include="Section.cs" />
@@ -94,6 +97,9 @@
     <Compile Include="TS_OpenAPI.cs" />
     <Compile Include="WindowChoice_SuplCS.xaml.cs" />
     <Compile Include="WindowCompSetCoice.xaml.cs" />
+    <Compile Include="WindowProfileChoice.xaml.cs">
+      <DependentUpon>WindowProfileChoice.xaml</DependentUpon>
+    </Compile>
     <Compile Include="WindowSupplierChoice.xaml.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -117,6 +123,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="WindowMaterialChoice.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="WindowChoice_SuplCS.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -124,6 +134,10 @@
     <Page Include="WindowCompSetCoice.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="WindowProfileChoice.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="WindowSupplierChoice.xaml">
       <Generator>MSBuild:Compile</Generator>
