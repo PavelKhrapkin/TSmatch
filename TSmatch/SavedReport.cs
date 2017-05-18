@@ -1,14 +1,14 @@
 ﻿/*-----------------------------------------------------------------------------------
  * SavedReport -- class for handle saved reports in TSmatchINFO.xlsx
  * 
- *  16.05.2017 П.Л. Храпкин
+ *  18.05.2017 П.Л. Храпкин
  *  
  *--- Unit Tests ---
  *--- History  ---
  * 17.04.2017 выделен из модуля Model
  *  1.05.2017 with Document Reset and ReSave
  *  7.05.2017 написал SetFrSavedModelINFO(), переписал isReportConsystant()
- * 16.05.2017 audit
+ * 18.05.2017 Save(model)
  *--- Methods: -------------------      
  * SaveReport() - NotImplemented yet - Saved current Model in TSmatchINFO.xlsx
  * bool GetSavedReport()    - read TSmatchINFO.xlsx, set it as a current Model
@@ -16,6 +16,7 @@
  *                            suit to the current model
  * IsModelCahanged - проверяет, изменилась ли Модель относительно сохраненного MD5
  ! lngGroup(atr)   - группирует элементы модели по парам <Материал, Профиль> возвращая массивы длинны 
+ * Save(Model mod) - Save model mod in file TSmatchINFO.xlsx
  */
 using log4net;
 using System;
@@ -297,11 +298,6 @@ namespace TSmatch.SaveReport
             return elms;
         }
 
-        public void WriterSavRep()
-        {
-            throw new NotImplementedException();
-        }
-
         private bool isChangedStr(ref string str, Docs doc, int row, int col)
         {
             string strINFO = doc.Body.Strng(row, col);
@@ -322,7 +318,7 @@ namespace TSmatch.SaveReport
             Docs dRep = Docs.getDoc(sRep);
             if (dRep == null || dRep.il != (elmGroups.Count + dRep.i0)) Reset(sRep);
             double totalPrice = dRep.Body.Double(dRep.il, Decl.REPORT_SUPL_PRICE);
-            if (totalPrice == 0) Pricing();
+//17/5            if (totalPrice == 0) Pricing();
             int gr_n = dRep.i0;
             foreach (var gr in elmGroups)
             {
@@ -344,6 +340,34 @@ namespace TSmatch.SaveReport
                 Rules.Add(new Rule.Rule(n));
             //8/5            ClosePriceLists();
             Log.exit();
+        }
+
+        internal void Save(Mod model, bool isRawChanged)
+        {
+            // переложим все необходимый атрибуты для ModelINFO из model в this
+            name = model.name;
+            dir = model.dir;
+            phase = model.phase;
+            date = model.date;
+            made = model.made;
+            MD5 = model.MD5;
+            elementsCount = model.elementsCount;
+            pricingDate = model.pricingDate;
+            pricingMD5 = model.pricingMD5;
+
+            elements = model.elements;
+
+            elmGroups = model.elmGroups;
+
+            // теперь запишем в файл
+            wrModel(WrMod.ModelINFO);
+            if(isRawChanged) wrModel(WrMod.Raw);
+            wrModel(WrMod.Report);
+//18/5            strListRules = model.strListRules;
+//18/5            Rules = model.Rules;
+
+            
+            //17/5            throw new NotImplementedException();
         }
 
         public void CloseReport()
