@@ -1,7 +1,7 @@
 ﻿/*------------------------------------------------------------------------------------------
  * Model -- класс управления моделями, ведет Журнал Моделей и управляет их сохранением
  * 
- * 17.05.2017 П.Л. Храпкин
+ * 18.05.2017 П.Л. Храпкин
  *  
  *--- журнал ---
  * 18.1.2016 заложено П.Храпкин, А.Пасс, А.Бобцов
@@ -28,6 +28,7 @@
  *  6.05.2017 - fast MD5 calculation call in Read
  *  8.05.2017 - part of this code moved to child ModHandler module
  * 11.05.2017 - getSavedReport() inside SetModel
+ * 17.05.2017 - model.Save()
  * !!!!!!!!!!!!! -------------- TODO --------------
  * ! избавиться от static в RecentModel, RecentModelDir и вообще их переписать
  * -----------------------------------------------------------------------------------------
@@ -96,7 +97,7 @@ namespace TSmatch.Model
         public DateTime pricingDate;
         public List<ElmMGr> elmMgroups = new List<ElmMGr>();
         public List<ElmGr> elmGroups = new List<ElmGr>();   // will be used in Matcher
-        public readonly HashSet<Rule.Rule> Rules = new HashSet<Rule.Rule>();
+        public HashSet<Rule.Rule> Rules = new HashSet<Rule.Rule>();
         public string strListRules;                        // список Правил в виде текста вида "5,6,8"   
         public readonly HashSet<Supplier> Suppliers = new HashSet<Supplier>();
         public List<CmpSet> CompSets = new List<CmpSet>();
@@ -112,6 +113,7 @@ namespace TSmatch.Model
 
         public Model() { }
 
+     
         ////////////////////////public Model(DateTime t, string n, string d, string ifc, string m, string p, string md5, HashSet<Rule.Rule> r, string s)
         ////////////////////////{
         ////////////////////////    this.date = t;

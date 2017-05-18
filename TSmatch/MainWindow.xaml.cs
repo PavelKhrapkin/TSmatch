@@ -46,7 +46,7 @@ namespace TSmatch
         public static Mod model;
         public static ElmGr currentGroup;
         public static string SuplName;
-        private bool ModelIsChanged = false;
+        private static bool ModelIsChanged = false, isRawChanged = false;
 
         public MainWindow()
         {
@@ -114,9 +114,6 @@ namespace TSmatch
             Supl supl = new Supl(currentGroup.SupplierName);
             Supplier.Content = suplName + "\t" + cs_name; ;
             Supl_CS.Text = supl.getSupplierStr();
-
-            model.HighLightElements(Mod.HighLightMODE.Guids, currentGroup.guids);
-
             double p = 0;
             foreach (var gr in model.elmGroups)
             {
@@ -125,6 +122,14 @@ namespace TSmatch
             }
             string sP = string.Format("{0:N2}", p);
             TotalSupl_price.Text = "Всего по этому поставщику " + sP + " руб";
+
+            elmGroups.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal
+                , new NextPrimeDelegate(HighLighting));
+        }
+
+        private void HighLighting()
+        {
+            model.HighLightElements(Mod.HighLightMODE.Guids, currentGroup.guids);
         }
 
         private void OnSuplClick(object sender, RoutedEventArgs e)
@@ -137,29 +142,32 @@ namespace TSmatch
         private void OnTeklaRead_button_click(object sender, RoutedEventArgs e)
         {
             MessageBox.Show("Читать?", "TSmatch", MessageBoxButton.OK);
-            //8/5            model.Read();
+            model.Read();
+            isRawChanged = true;
         }
 
         private void RePrice_button_Click(object sender, RoutedEventArgs e)
         {
-//15/5            var SuplChoiceWindow = new WindowSuplCSChoice();
-//15/5            SuplChoiceWindow.Show();
             Msg.AskFOK("Пересчет стоимости материалов");
             RePricing();
-            RePrice.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new NextPrimeDelegate(WrReportPanel));
+            RePrice.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal
+                , new NextPrimeDelegate(WrReportPanel));
 //15/5            model.mh.Pricing(model);
-//15/5            WrForm(wrForm.modelReport);
         }
 
         internal static void RePricing()
         {
             model.mh.Pricing(ref model);
-
-//17/5            WrForm(wrForm.modelReport);
+            ModelIsChanged = true;
         }
 
         private void OK_button_Click(object sender, RoutedEventArgs e)
         {
+            if (ModelIsChanged && Msg.AskYN("Модель или цены изменились. Запишем изменения в файл?"))
+            {
+                var sr = new SaveReport.SavedReport();
+                sr.Save(model, isRawChanged);
+            }
             model.HighLightClear();
             FileOp.AppQuit();
             Application.Current.Shutdown();
