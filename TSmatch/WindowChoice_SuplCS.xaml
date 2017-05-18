@@ -62,7 +62,7 @@
         </Grid>
 
         <!-- Group Attributs: Volume, Weight, Lenght, Price -->
-        <Grid Margin="10 180 80 20" Background="LightGray" Height="Auto">
+        <Grid Margin="10 180 180 20" Background="LightGray" Height="Auto">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="50"/>
                 <ColumnDefinition Width="*"/>
