@@ -36,10 +36,13 @@ namespace TSmatch.Declaration
     ///  1.1.17     - ruleSection/elmAttSection/priceSections declaration area add
     /// 15.1.17     - remove Section constants to FingerPrint
     /// 30.4.17     - TSmatchINFO/Report column constants changed 
+    /// 19.05.17    - readonly DateTime(2010.1.1);
     /// </history>
     public class Declaration
     {
         #region ----------- GENERAL PURPASE CONSTANTS -----------------
+        public static readonly DateTime OLD = new DateTime(2010, 1, 1);
+
         public const char STR_DELIMITER = ';';  // знак - резделитель в списке в строках
 
         public const string TSMATCH = "TSmatch";                // general Application Name
@@ -221,7 +224,7 @@ namespace TSmatch.Declaration
         public const string TSMATCHINFO_RAW       = "Raw";          // элементы с атрибутами, как они прочитаны из модели
         public const string TSMATCHINFO_MATERIALS = "Materials";    // сводка по материалам, их типам (бетон, сталь и др)
         public const string TSMATCHINFO_SUPPLIERS = "ModSuppliers"; // сводка по поставщикам проекта (контакты, URL прайс-листа, закупки)
-        public const string TSMATCHINFO_RULES     = "ModRules";     // перечень Правил, используемых для обработки модели
+        public const string TSMATCHINFO_RULES     = "Rules";        // перечень Правил, используемых для обработки модели
         public const string TSMATCHINFO_REPORT    = "Report";       // отчет по сопоставлению групп <материал, профиль> 
                                                                     //.. c прайс-листами поставщиков
         public const string TMP_MODELINFO = "TMP_" + TSMATCHINFO_MODELINFO;

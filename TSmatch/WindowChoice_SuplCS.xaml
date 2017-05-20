@@ -37,19 +37,24 @@
                 <ColumnDefinition Width="2" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <Button Grid.Column="0" x:Name="GrMat"
-                    Content="Материал" Background="LavenderBlush">
+            <Button Grid.Column="0" x:Name="GrMat" Content="Материал" 
+                    Background="LavenderBlush"
+                    Click="Material_click">
+<!--                 
                 <Button.ContextMenu>
-                    <ContextMenu>
+                   <ContextMenu>
                         <MenuItem Header="Menu item 1" />
                         <MenuItem Header="Menu item 2" />
                         <Separator />
                         <MenuItem Header="Menu item 3" />
-                    </ContextMenu>
+                    </ContextMenu>                    
                 </Button.ContextMenu>
+-->
             </Button>
-            <Button Grid.Column="3" x:Name="GrPrf"
-                    Content="Профиль" Background="LavenderBlush">
+            <Button Grid.Column="3" x:Name="GrPrf" Content="Профиль"
+                    Background="LavenderBlush"
+                    Click="Profile_click">
+<!--                
                 <Button.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="Menu item 1" />
@@ -58,6 +63,7 @@
                         <MenuItem Header="Menu item 3" />
                     </ContextMenu>
                 </Button.ContextMenu>
+-->                
             </Button>
         </Grid>
 

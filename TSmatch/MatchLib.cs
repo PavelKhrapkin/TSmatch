@@ -374,7 +374,7 @@ namespace match.Lib
             log.Fatal("\n\n[FATAL] " + msg);
             _tx("\n\tв стеке имен:");
             foreach (var s in _nameStack) _tx("\t-> " + s);
-            Debugger.Break();
+//19/5            Debugger.Break();
         }
         public static void Warning(string msg) { new Log("\n[warning] " + msg); }
         public static void TraceOn() { _trace_level++; }
@@ -390,7 +390,7 @@ namespace match.Lib
         {
             log.Info(DateTime.Now.ToShortDateString() + " ---------< " + msg + " >---------");
         }
-        private static void _tx(string tx) { Console.WriteLine(tx); }
+        private static void _tx(string tx) { log.Info(tx); Console.WriteLine(tx); }
     }
 #if OLD
     /// <summary>

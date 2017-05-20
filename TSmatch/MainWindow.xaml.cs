@@ -46,7 +46,7 @@ namespace TSmatch
         public static Mod model;
         public static ElmGr currentGroup;
         public static string SuplName;
-        private static bool ModelIsChanged = false, isRawChanged = false;
+        private static bool ModelIsChanged = false, isRawChanged = false, isRuleChanged = false;
 
         public MainWindow()
         {
@@ -149,6 +149,7 @@ namespace TSmatch
         private void RePrice_button_Click(object sender, RoutedEventArgs e)
         {
             Msg.AskFOK("Пересчет стоимости материалов");
+            if (!Msg.AskYN("Правила годятся?")) { var W_Rules = new W_Rules(); W_Rules.Show(); }
             RePricing();
             RePrice.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal
                 , new NextPrimeDelegate(WrReportPanel));
@@ -163,10 +164,11 @@ namespace TSmatch
 
         private void OK_button_Click(object sender, RoutedEventArgs e)
         {
-            if (ModelIsChanged && Msg.AskYN("Модель или цены изменились. Запишем изменения в файл?"))
+            isRuleChanged = true;
+//19/5            if (ModelIsChanged && Msg.AskYN("Модель или цены изменились. Запишем изменения в файл?"))
             {
                 var sr = new SaveReport.SavedReport();
-                sr.Save(model, isRawChanged);
+                sr.Save(model, isRawChanged, isRuleChanged);
             }
             model.HighLightClear();
             FileOp.AppQuit();

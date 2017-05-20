@@ -79,6 +79,18 @@ namespace TSmatch
             CompSetChoiceWindow.Show();
         }
 
+        private void Material_click(object sender, RoutedEventArgs e)
+        {
+            var WindowMaterialChoice = new WindowMaterialChoice();
+//18/5            WindowMaterialChoice.Show();
+        }
+
+        private void Profile_click(object sender, RoutedEventArgs e)
+        {
+            var SupplierChoiceWindow = new WindowProfileChoice();
+//18/5            SupplierChoiceWindow.Show();
+        }
+
         private void OK_button_Click(object sender, RoutedEventArgs e)
         {
              Close();

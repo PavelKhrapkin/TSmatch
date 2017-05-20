@@ -101,6 +101,9 @@
       <DependentUpon>WindowProfileChoice.xaml</DependentUpon>
     </Compile>
     <Compile Include="WindowSupplierChoice.xaml.cs" />
+    <Compile Include="W_Rules.xaml.cs">
+      <DependentUpon>W_Rules.xaml</DependentUpon>
+    </Compile>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -142,6 +145,10 @@
     <Page Include="WindowSupplierChoice.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="W_Rules.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   <ItemGroup>
