@@ -102,11 +102,13 @@ namespace TSmatch.Message
             if (msg == null)
             {
                 MessageBox.Show(msgcode, "(*) TSmatch " + type);
+                Log.FATAL(msgcode);
             }
             else
             {
                 string str = string.Format(msg.text, p);
                 MessageBox.Show(str, "TSmatch " + type);
+                Log.FATAL(str);
             }
         }
 #if OLD

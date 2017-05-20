@@ -332,6 +332,7 @@ namespace TSmatch.SaveReport
         }
         public void getSavedRules()
         {
+#if DBG
             Log.set("SR.getSavedRules(\"" + strListRules + "\")");
             strListRules = "17, 4, 5, 6, 7";    // 13/5 заглушка
             Log.set("SR.getSavedRules(\"" + strListRules + "\")");
@@ -340,9 +341,29 @@ namespace TSmatch.SaveReport
                 Rules.Add(new Rule.Rule(n));
             //8/5            ClosePriceLists();
             Log.exit();
+#endif // DBG
+            Log.set("SR.getSavedRules()");
+            Rules.Clear();
+            Docs doc = Docs.getDoc("Rules");
+            for(int i = doc.i0; i <= doc.il; i++)
+            {
+//19/5                string sDate = doc.Body.Strng(i, 1);
+                date = Lib.getDateTime(doc.Body.Strng(i, 1));
+                if (date > DateTime.Now || date < Decl.OLD) continue;
+                string sSupl = doc.Body.Strng(i, 2);
+                string sCS = doc.Body.Strng(i, 3);
+                string sR = doc.Body.Strng(i, 4);
+                if (string.IsNullOrEmpty(sSupl)
+                    || string.IsNullOrEmpty(sCS)
+                    || string.IsNullOrEmpty(sR)) continue;
+                var rule = new Rule.Rule(date, sSupl, sCS, sR);
+                Rules.Add(rule);      
+            }
+            log.Info("- getSavedRules() Rules.Count = " + Rules.Count);
+            Log.exit();
         }
 
-        internal void Save(Mod model, bool isRawChanged)
+        internal void Save(Mod model, bool isRawChanged, bool isRuleChanged)
         {
             // переложим все необходимый атрибуты для ModelINFO из model в this
             name = model.name;
@@ -359,12 +380,16 @@ namespace TSmatch.SaveReport
 
             elmGroups = model.elmGroups;
 
+            getSavedRules();
+ //19/5           Rules = model.Rules;
+
             // теперь запишем в файл
             wrModel(WrMod.ModelINFO);
             if(isRawChanged) wrModel(WrMod.Raw);
             wrModel(WrMod.Report);
-//18/5            strListRules = model.strListRules;
-//18/5            Rules = model.Rules;
+            //18/5            strListRules = model.strListRules;
+            //18/5            Rules = model.Rules;
+            if (isRuleChanged) wrModel(WrMod.Rules);
 
             
             //17/5            throw new NotImplementedException();

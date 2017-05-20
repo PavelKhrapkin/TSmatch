@@ -1,11 +1,12 @@
 ﻿/*----------------------------------------------------------------------------------------------
  * Rule.cs -- Rule, which describes how to find Components used in Model in Supplier's price-list
  *
- * 2.5.2017 П.Храпкин
+ * 19.5.2017 П.Храпкин
  *
  *--- History ---
  * 17.10.2016 code file created from module Matcher
  *  2.05.2017 FingerPrint references removed
+ * 19.05.2017 public DateTime Rule.Date
  * -----------------------------------------------------------------------------------------
  *      КОНСТРУКТОРЫ Правил - загружают Правила из листа Правил в TSmatch или из журнала моделей
  * Rule(дата, тип, текст Правила, документ-база сортаментов)    - простая инициализация из TSmatch
@@ -50,6 +51,7 @@ namespace TSmatch.Rule
     {
         public static readonly ILog log = LogManager.GetLogger("Rule");
 
+        public DateTime date;               //дата и время записи Правила
         private int _id { get; set; }
 		public readonly string name;        //название правила
 		public readonly string type;        //тип правила
@@ -62,6 +64,9 @@ namespace TSmatch.Rule
         public Dictionary<SType, List<string>> synonyms = new Dictionary<SType, List<string>>();
  
         public double RuleRedundencyPerCent = 0.0;  //коэффициент избыточности, требуемый запас по данному материалу/профилю/Правилу
+        private string sSupl;
+        private string sCS;
+        private string sR;
 
         public Rule(Docs doc, int i)
         {
@@ -85,6 +90,16 @@ namespace TSmatch.Rule
             synonyms = RuleSynParse(str);
             ruleDP = new DP(str);
             CompSet = cs;
+        }
+
+        public Rule(DateTime _date, string sSupl, string sCS, string sR)
+        {
+            date = _date;
+            text = sR;
+            synonyms = RuleSynParse(text);
+            ruleDP = new DP(text);
+            Supplier = new Suppliers.Supplier(sSupl);
+            CompSet = new CmpSet(sCS, Supplier);
         }
 
         private Dictionary<SType,List<string>> RuleSynParse(string str)

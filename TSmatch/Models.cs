@@ -1,7 +1,7 @@
 ﻿/*------------------------------------------------------------------------------------------
  * Model -- класс управления моделями, ведет Журнал Моделей и управляет их сохранением
  * 
- * 18.05.2017 П.Л. Храпкин
+ * 19.05.2017 П.Л. Храпкин
  *  
  *--- журнал ---
  * 18.1.2016 заложено П.Храпкин, А.Пасс, А.Бобцов
@@ -29,6 +29,7 @@
  *  8.05.2017 - part of this code moved to child ModHandler module
  * 11.05.2017 - getSavedReport() inside SetModel
  * 17.05.2017 - model.Save()
+ * 19.05.2017 - ModelwrModel(Rules)
  * !!!!!!!!!!!!! -------------- TODO --------------
  * ! избавиться от static в RecentModel, RecentModelDir и вообще их переписать
  * -----------------------------------------------------------------------------------------
@@ -680,12 +681,14 @@ namespace TSmatch.Model
                     }
                     break;
                 case WrMod.Rules:       // перечень Правил, используемых для обработки модели
-                    doc.wrDocSetForm("HDR_ModRules", 1, AutoFit: true);
-                    doc.wrDocForm(strListRules);
-                    doc.wrDocSetForm("FORM_ModRuleLine");
+//19/5                    doc.wrDocSetForm("HDR_ModRules", 1, AutoFit: true);
+                    //19/5doc.wrDocSetForm("HDR_Rules", 1, AutoFit: true);
+                    //19/5                    doc.wrDocForm(strListRules);
+                    //19/5                    doc.wrDocSetForm("FORM_ModRuleLine");
+                    doc.wrDocSetForm("FORM_RuleLine");
                     foreach (var rule in Rules)
                     {
-                        doc.wrDocForm(rule.Supplier.name, rule.CompSet.name, rule.text);
+                        doc.wrDocForm(rule.date, rule.Supplier.name, rule.CompSet.name, rule.text);
                     }
                     break;
                 case WrMod.Report:      // отчет по сопоставлению групп <материал, профиль> c прайс-листами поставщиков
