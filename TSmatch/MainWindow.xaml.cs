@@ -112,9 +112,6 @@ namespace TSmatch
             gr v = (gr)elm_groups.SelectedValue;
             if (v == null) return;
             currentGroup = model.elmGroups.Find(x => x.Mat == v.mat && x.Prf == v.prf);
-            ////////////////////string cs_name = string.Empty;
-            ////////////////////try { cs_name = currentGroup.match.rule.CompSet.name; }
-            ////////////////////catch { }
             SuplName = currentGroup.SupplierName;
             Supl supl = new Supl(currentGroup.SupplierName);
             Supl_CS_Mat_Prf.Text = SuplName + "\t" + currentGroup.CompSetName;

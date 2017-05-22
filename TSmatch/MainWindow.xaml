@@ -62,6 +62,7 @@
                 HorizontalAlignment="Right" Height="20"
                 VerticalAlignment="Top"
                 Margin="0,115, 10,80"  Width="250"
+                TextAlignment="Center"   
                 Background="Lightgreen" />
         <TextBlock x:Name="Supl_CS"
             HorizontalAlignment="Right" Width="250"
