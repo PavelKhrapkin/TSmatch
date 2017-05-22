@@ -1,7 +1,7 @@
 ﻿/*----------------------------------------------------------------------------
  * CompSet -- Set of Components got from the Supplier' price-list
  * 
- * 2.5.2017  P.Khrapkin
+ * 22.5.2017  P.Khrapkin
  *
  * -- ToDo
  * 31.12.16 использовать Rule.FPs и LoadDescription при конструировании CompSet
@@ -11,6 +11,7 @@
  * 21.03.2017 Section and FP use
  *  2.04.2017 simplified with PRICE - DPar instead of FPs, don't use Rule.Parser
  *  2.05.2017 FingerPrint reference removed, audit
+ * 22.05.2017 Not existing CompSet event handle;
  * ---------------------------------------------------------------------------
  *      Methods:
  * getCompSet(name, Supplier) - getCompSet by  its name in Supplier' list
@@ -66,14 +67,12 @@ namespace TSmatch.CompSet
         {
             name = _name;
             Supplier = _supl;
-#if DEBUG //--------- 2017.04.02 for Unit Test
             if(!string.IsNullOrEmpty(LoadDescription))
             {
                 csDP = new DP(LoadDescription);
                 Components = comps;
             }
             else
-#endif //--------- DEBUG for Unit Test
             {
                 doc = getCSdoc(Supplier, _name);
                 csDP = new DP(doc.LoadDescription);
@@ -95,7 +94,7 @@ namespace TSmatch.CompSet
                 docName = toc.Body.Strng(i, Decl.DOC_NAME);
                 break;
             }
-            if (string.IsNullOrEmpty(docName)) Msg.F("CompSet not found price list");
+            if (string.IsNullOrEmpty(docName)) throw new Exception("CompSet not found price list"); //              Msg.F("CompSet not found price list");
             return Docs.getDoc(docName);
         }
 

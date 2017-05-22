@@ -172,9 +172,16 @@ namespace TSmatch.Suppliers
         internal CmpSet getNEWcs(Supplier supl, Gr group)
         {
             string grCSname = group.CompSetName;
-            var cs = CompSets.Find(x => x.name == grCSname);
-            if (cs != null) return cs; // нашел CS с тем же именем!
-            // в дальнейшем тут вставить подбор CompSet по-компонентнов с учетом Rule.synonyms
+            CmpSet cs;
+            try { cs = new CmpSet(grCSname, this); }
+            catch { return null; }
+            //////////if (CompSets.Count == 0)
+            //////////{
+                
+            //////////}
+            //////////var cs = CompSets.Find(x => x.name == grCSname);
+            //////////if (cs != null) return cs; // нашел CS с тем же именем!
+            // в дальнейшем тут вставить подбор CompSet по-компонентно с учетом Rule.synonyms
             // это означает, что, хотя у CS другое название, его разрешено использовать Правилами.
             var mod = MainWindow.model;
             if (mod.Rules.Count == 0) return null; // тут надо загрузить Правила из TSmatchINFO.xlsx/Rules
@@ -184,7 +191,7 @@ namespace TSmatch.Suppliers
             if (cs != null) return cs;    // true - found CompSet.name from this Suppler
             //.. по крайней мере, имя отличается -- проверим по-компонентно все прайс-листы с Match
             //.. еще не написано
-            return null;
+            return cs;
         }
 
         /// <summary>
