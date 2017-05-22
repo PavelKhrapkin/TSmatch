@@ -25,6 +25,7 @@ using Lib = match.Lib.MatchLib;
 using Docs = TSmatch.Document.Document;
 using CmpSet = TSmatch.CompSet.CompSet;
 using TSmatch.ElmAttSet;
+using Gr = TSmatch.ElmAttSet.Group;
 
 namespace TSmatch.Suppliers
 {
@@ -153,7 +154,7 @@ namespace TSmatch.Suppliers
         }
         public string getSupplierStr()
         {
-            string str = name + "\n";
+            string str = "Адрес: ";
             if (!string.IsNullOrEmpty(index)) str += index + ", ";
             str += City + ", ";
             if (str.Length > 20) str += "\n";
@@ -163,15 +164,43 @@ namespace TSmatch.Suppliers
         }
 
         /// <summary>
+        /// getNEWcs(Supplier, Group) - return CompSet could be supplied by supl, or null if not available
+        /// </summary>
+        /// <param name="selSupl"></param>
+        /// <param name="grOLD"></param>
+        /// <returns></returns>
+        internal CmpSet getNEWcs(Supplier supl, Gr group)
+        {
+            string grCSname = group.CompSetName;
+            var cs = CompSets.Find(x => x.name == grCSname);
+            if (cs != null) return cs; // нашел CS с тем же именем!
+            // в дальнейшем тут вставить подбор CompSet по-компонентнов с учетом Rule.synonyms
+            // это означает, что, хотя у CS другое название, его разрешено использовать Правилами.
+            var mod = MainWindow.model;
+            if (mod.Rules.Count == 0) return null; // тут надо загрузить Правила из TSmatchINFO.xlsx/Rules
+            Rule.Rule rule = null;
+            if (group.match != null) rule = group.match.rule;
+            cs = CompSets.Find(x => x.name == rule.CompSet.name);
+            if (cs != null) return cs;    // true - found CompSet.name from this Suppler
+            //.. по крайней мере, имя отличается -- проверим по-компонентно все прайс-листы с Match
+            //.. еще не написано
+            return null;
+        }
+
+        /// <summary>
         /// CheckCS(group) return true, when this Supplier
         /// containes same material and profule, or rule allow replacement
         /// </summary>
         /// <param name="group"></param>
         /// <param name="rule"></param>
         /// <returns></returns>
-        internal bool CheckCS(Group group, Rule rule = null)
+        internal bool CheckCS(Group group)
         {
-            throw new NotImplementedException();
+            string grCSname = group.CompSetName;
+            var cs = CompSets.Find(x => x.name == grCSname);
+            if (cs != null)  return true; // нашел CS с тем же именем!
+            
+            return false;
         }
     } // end class Supplier
 } // end namespace Suppliers
