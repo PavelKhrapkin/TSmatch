@@ -1,5 +1,5 @@
 ﻿/*-------------------------------------------
- * WPF Main Windows 17.5.2017 Pavel.Khrapkin
+ * WPF Main Windows 22.5.2017 Pavel.Khrapkin
  * ------------------------------------------
  * --- History ---
  * 2017.05.15 - restored as Tsmatch 1.0.1 after Source Control excident
@@ -27,6 +27,7 @@ using System.Windows.Shapes;
 using log4net;
 using Log = match.Lib.Log;
 using FileOp = match.FileOp.FileOp;
+using Boot = TSmatch.Bootstrap.Bootstrap;
 using Msg = TSmatch.Message.Message;
 using Mod = TSmatch.Model.Model;
 using Supl = TSmatch.Suppliers.Supplier;
@@ -41,6 +42,9 @@ namespace TSmatch
     {
         public static readonly ILog log = LogManager.GetLogger("MainWindow");
 
+        const string ABOUT = "TSmatch v1.0.2 16.5.2017";
+        public static Boot boot;
+        public static string MyCity = "Санкт-Петербург";
         public delegate void NextPrimeDelegate();
 
         public static Mod model;
@@ -50,7 +54,7 @@ namespace TSmatch
 
         public MainWindow()
         {
-            Log.START("TSmatch v1.0.2 16.5.2017");
+            Log.START(ABOUT);
             InitializeComponent();
             MainWindowLoad();
         }
@@ -58,7 +62,8 @@ namespace TSmatch
         private void MainWindowLoad()
         {
             Title = "TSmatch - согласование поставщиков в проекте";
-            var boot = new TSmatch.Bootstrap.Bootstrap();
+//20/5            message.Text = "..Load MainWindow..";
+            boot = new Boot();
             var sr = new SaveReport.SavedReport();
             model = sr;
             model.SetModel(boot);
@@ -87,7 +92,7 @@ namespace TSmatch
                 var g = new gr() { mat = gr.Mat, prf = gr.Prf, price = sPrice };
                 items.Add(g);
             }
-            elmGroups.ItemsSource = items;
+            elm_groups.ItemsSource = items;
 
             double totalPrice = 0.0;
             foreach (var gr in model.elmGroups) totalPrice += gr.totalPrice;
@@ -104,15 +109,15 @@ namespace TSmatch
         }
         private void elmGroups_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            gr v = (gr)elmGroups.SelectedValue;
+            gr v = (gr)elm_groups.SelectedValue;
             if (v == null) return;
             currentGroup = model.elmGroups.Find(x => x.Mat == v.mat && x.Prf == v.prf);
             string cs_name = string.Empty;
             try { cs_name = currentGroup.match.rule.CompSet.name; }
             catch { }
-            string suplName = currentGroup.SupplierName;
+            SuplName = currentGroup.SupplierName;
             Supl supl = new Supl(currentGroup.SupplierName);
-            Supplier.Content = suplName + "\t" + cs_name; ;
+            Supplier.Content = SuplName + "\t" + cs_name; ;
             Supl_CS.Text = supl.getSupplierStr();
             double p = 0;
             foreach (var gr in model.elmGroups)
@@ -123,7 +128,7 @@ namespace TSmatch
             string sP = string.Format("{0:N2}", p);
             TotalSupl_price.Text = "Всего по этому поставщику " + sP + " руб";
 
-            elmGroups.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal
+            elm_groups.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal
                 , new NextPrimeDelegate(HighLighting));
         }
 
@@ -135,8 +140,47 @@ namespace TSmatch
         private void OnSuplClick(object sender, RoutedEventArgs e)
         {
             SuplName = (currentGroup == null) ? string.Empty : currentGroup.SupplierName;
-            var SuplChoiceWindow = new WindowSuplCSChoice();
-            SuplChoiceWindow.Show();
+//20/5            var SuplChoiceWindow = new WindowSuplCSChoice();  // разобраться с именами окон!!
+//20/5            SuplChoiceWindow.Show();
+        }
+
+        private void OnSaveAs(object sender, RoutedEventArgs e)
+        {
+            Msg.AskFOK("Not ready yet");
+        }
+
+        private void OnFontSize(object sender, RoutedEventArgs e)
+        {
+            Msg.AskFOK("Not ready yet");
+        }
+
+        private void OnSupllier(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrEmpty(SuplName)) return;
+            var wSupplier = new W_Supplier();
+            wSupplier.Show();
+            // AskYN() если изменился - новый выбор Supplier, else return
+            // RePricing();
+         }
+
+        private void OnCompSet(object sender, RoutedEventArgs e)
+        {
+//22/5            var wChoice = new WindowSupplierChain();
+//22/5            wChoice.Show();
+        }
+
+        private void OnMaterial(object sender, RoutedEventArgs e)
+        {
+            Msg.AskFOK("Not ready yeat");
+//22/5            var wChoice = new WindowSupplierChain();
+//22/5            wChoice.Show();
+        }
+
+        private void OnProfile(object sender, RoutedEventArgs e)
+        {
+            Msg.AskFOK("Not ready yeat");
+//22/5            var wChoice = new WindowSupplierChain();
+//22/5            wChoice.Show();
         }
 
         private void OnTeklaRead_button_click(object sender, RoutedEventArgs e)
@@ -149,11 +193,11 @@ namespace TSmatch
         private void RePrice_button_Click(object sender, RoutedEventArgs e)
         {
             Msg.AskFOK("Пересчет стоимости материалов");
-            if (!Msg.AskYN("Правила годятся?")) { var W_Rules = new W_Rules(); W_Rules.Show(); }
+//20/5            if (!Msg.AskYN("Правила годятся?")) { var W_Rules = new W_Rules(); W_Rules.Show(); }
             RePricing();
             RePrice.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal
                 , new NextPrimeDelegate(WrReportPanel));
-//15/5            model.mh.Pricing(model);
+            //15/5            model.mh.Pricing(model);
         }
 
         internal static void RePricing()
@@ -162,10 +206,20 @@ namespace TSmatch
             ModelIsChanged = true;
         }
 
+        private void OnHelp(object sender, RoutedEventArgs e)
+        {
+            string helpPath = boot.TOCdir + @"\TSmatchHelp.mht";
+            System.Diagnostics.Process.Start(helpPath);
+        }
+        private void OnAbout(object sender, RoutedEventArgs e)
+        {
+            Msg.AskFOK(ABOUT);
+        }
+
         private void OK_button_Click(object sender, RoutedEventArgs e)
         {
-            isRuleChanged = true;
-//19/5            if (ModelIsChanged && Msg.AskYN("Модель или цены изменились. Запишем изменения в файл?"))
+//21/5            isRuleChanged = true;
+            if (ModelIsChanged && Msg.AskYN("Модель или цены изменились. Запишем изменения в файл?"))
             {
                 var sr = new SaveReport.SavedReport();
                 sr.Save(model, isRawChanged, isRuleChanged);

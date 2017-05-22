@@ -53,16 +53,16 @@ namespace TSmatch.Rule
 
         public DateTime date;               //дата и время записи Правила
         private int _id { get; set; }
-		public readonly string name;        //название правила
-		public readonly string type;        //тип правила
-		public readonly string text;        //текст правила
+        public readonly string name;        //название правила
+        public readonly string type;        //тип правила
+        public readonly string text;        //текст правила
 
         //---- references to other classes - price-list conteiners
         public readonly CmpSet CompSet;     //список компонентов, с которыми работает правило
-		public readonly Supl Supplier;      //Поставщик
+        public readonly Supl Supplier;      //Поставщик
         public readonly DP ruleDP;          //identifiers of Materials, Profile, and others
         public Dictionary<SType, List<string>> synonyms = new Dictionary<SType, List<string>>();
- 
+
         public double RuleRedundencyPerCent = 0.0;  //коэффициент избыточности, требуемый запас по данному материалу/профилю/Правилу
         private string sSupl;
         private string sCS;
@@ -78,10 +78,10 @@ namespace TSmatch.Rule
             string csName = (string)doc.Body[i, Decl.RULE_COMPSETNAME];
             string suplName = (string)doc.Body[i, Decl.RULE_SUPPLIERNAME];
             Supplier = new Suppliers.Supplier(suplName);
-            CompSet = new CmpSet(csName, Supplier); 
+            CompSet = new CmpSet(csName, Supplier);
         }
         // параметр doc не указан, по умолчанию извлекаем Правила из TSmatch.xlsx/Rules
-        public Rule(int n) : this(Docs.getDoc(Decl.RULES), n) {}
+        public Rule(int n) : this(Docs.getDoc(Decl.RULES), n) { }
 #if DEBUG
         // 27/3/2017 пока - for unit test purpases only
         public Rule(string str, CmpSet cs)
@@ -102,16 +102,16 @@ namespace TSmatch.Rule
             CompSet = new CmpSet(sCS, Supplier);
         }
 
-        private Dictionary<SType,List<string>> RuleSynParse(string str)
+        private Dictionary<SType, List<string>> RuleSynParse(string str)
         {
             var Syns = new Dictionary<SType, List<string>>();
             string[] sections = str.Split(';');
-            foreach(var s in sections)
+            foreach (var s in sections)
             {
                 List<string> synLst = new List<string>();
                 Section.Section sect = new Section.Section(s);
                 string[] strs = sect.body.Split('=');
-                foreach(string tx in strs)
+                foreach (string tx in strs)
                 {
                     int indxPar = tx.IndexOf('*');
                     string stx;
@@ -119,7 +119,7 @@ namespace TSmatch.Rule
                     else stx = tx.Substring(0, indxPar);
                     synLst.Add(stx);
                 }
-                if(synLst.Count > 1) Syns.Add(sect.type, synLst);
+                if (synLst.Count > 1) Syns.Add(sect.type, synLst);
             }
             return Syns;
         }

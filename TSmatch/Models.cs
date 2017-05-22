@@ -106,7 +106,7 @@ namespace TSmatch.Model
         public bool wrToFile = true;   // when true- we should write into the file TSmatchINFO.xlsx, else- no changes
         public Docs docReport;
         TS ts = new TS();
-        public Journal.ModJournal mj; 
+        public Journal.ModJournal mj;
         public Handler.ModHandler mh;
         public SR sr;
 
@@ -114,7 +114,7 @@ namespace TSmatch.Model
 
         public Model() { }
 
-     
+
         ////////////////////////public Model(DateTime t, string n, string d, string ifc, string m, string p, string md5, HashSet<Rule.Rule> r, string s)
         ////////////////////////{
         ////////////////////////    this.date = t;
@@ -256,11 +256,11 @@ namespace TSmatch.Model
                 Model m = sr.SetFrSavedModelINFO(dir);
                 name = m.name;
                 elementsCount = m.elementsCount;
-                if(elementsCount == 0)
+                if (elementsCount == 0)
                     Msg.F("SavedReport doc not exists and no CAD");
                 date = m.date;
                 pricingDate = m.pricingDate;
-                strListRules = m.strListRules;
+//20/5                strListRules = m.strListRules;
                 //24/4                classCAD = ifc;
             }
             sr.GetSavedReport(this);
@@ -282,7 +282,7 @@ namespace TSmatch.Model
             elementsCount = elements.Count;
             Docs dRaw = Docs.getDoc(Decl.TSMATCHINFO_RAW, fatal: false);
             string newMD5 = getMD5(elements);
-            if (newMD5 != MD5 || dRaw == null || elementsCount != dRaw.il-dRaw.i0)
+            if (newMD5 != MD5 || dRaw == null || elementsCount != dRaw.il - dRaw.i0)
             {
                 isChanged = true;
                 MD5 = newMD5;
@@ -302,7 +302,7 @@ namespace TSmatch.Model
         public string get_pricingMD5(List<ElmGr> elmGr)
         {
             var s_g = new List<Serialized_Group>();
-            foreach(var gr in elmGr) { s_g.Add(new Serialized_Group(gr)); }
+            foreach (var gr in elmGr) { s_g.Add(new Serialized_Group(gr)); }
             return MD5gen.MD5HashGenerator.GenerateKey(s_g);
         }
 
@@ -681,10 +681,10 @@ namespace TSmatch.Model
                     }
                     break;
                 case WrMod.Rules:       // перечень Правил, используемых для обработки модели
-//19/5                    doc.wrDocSetForm("HDR_ModRules", 1, AutoFit: true);
-                    //19/5doc.wrDocSetForm("HDR_Rules", 1, AutoFit: true);
-                    //19/5                    doc.wrDocForm(strListRules);
-                    //19/5                    doc.wrDocSetForm("FORM_ModRuleLine");
+                                        //19/5                    doc.wrDocSetForm("HDR_ModRules", 1, AutoFit: true);
+                                        //19/5doc.wrDocSetForm("HDR_Rules", 1, AutoFit: true);
+                                        //19/5                    doc.wrDocForm(strListRules);
+                                        //19/5                    doc.wrDocSetForm("FORM_ModRuleLine");
                     doc.wrDocSetForm("FORM_RuleLine");
                     foreach (var rule in Rules)
                     {

@@ -49,8 +49,8 @@ namespace TSmatch.Declaration
         public const string WIN_TSMATCH_DIR = TSMATCH + "_Dir"; // Windows Path Paramentr
         public const string F_MATCH = TSMATCH + ".xlsx";        // central dispatch file
         public const string TSMATCH_EXE = TSMATCH + ".exe";     // Application exe file       
-        public const string BUTTON_CS   = "TSmatch.cs";
-        public const string BUTTON_BMP  = "TSmatch.BMP";
+        public const string BUTTON_CS = "TSmatch.cs";
+        public const string BUTTON_BMP = "TSmatch.BMP";
         public const string ENV_INP_DIR = @"common\inp";        // IFC schema stored in sub-dir Tekla Environment
         public const string IFC_SCHEMA = "IFC2X3.exp";
         public const string TSMATCH_ZIP = "Tsmatch.zip";
@@ -92,7 +92,7 @@ namespace TSmatch.Declaration
         public const string R_TSMATCH_DATE = "12.4.2016";
 
         public const string R_TOC = DOC_TOC;                //TSmatch.xlsx/TOC - Table of Content
-        public const string R_TOC_TYPE = TEMPL_TOC;     
+        public const string R_TOC_TYPE = TEMPL_TOC;
         public const string R_TOC_DATE = "3.7.2016 10:10";
 
         public const string R_SUPPLIERS = SUPPLIERS;        //TSmatch.xlsx/Suppliers - Поставщики         
@@ -141,23 +141,23 @@ namespace TSmatch.Declaration
 
         public const int DOC_TIME = 1; // дата и время последнего изменения Документа
         public const int DOC_NAME = 2; // имя Документа
-        public const int DOC_EOL  = 3; // EOL Документа
-        public const int DOC_I0   = 4; // номер строки - начала таблицы
-        public const int DOC_IL   = 5; // номер последней строки таблицы 
+        public const int DOC_EOL = 3; // EOL Документа
+        public const int DOC_I0 = 4; // номер строки - начала таблицы
+        public const int DOC_IL = 5; // номер последней строки таблицы 
         public const int DOC_TYPE = 6; // Тип Документа
         public const int DOC_MADESTEP = 7; // последний выполненный Шаг
-        public const int DOC_DIR =  8; // каталог, где лежит Документ
+        public const int DOC_DIR = 8; // каталог, где лежит Документ
         public const int DOC_FILE = 9; // файл match, содержащий Документ
         public const int DOC_SHEET = 10; // лист Документа
-        public const int DOC_STMPTXT  = 11; // текст Штампа
+        public const int DOC_STMPTXT = 11; // текст Штампа
         public const int DOC_STMPTYPE = 12; // тип Штампа
-        public const int DOC_STMPROW  = 13; // строка Штампа
-        public const int DOC_STMPCOL  = 14; // колонка Штампа
-        public const int DOC_CREATED  = 15; // дата создания Документа
-        public const int DOC_FORMS    = 17; // основной шаблон Документа. Помимо заголовков Шапки, он может иметь 
-                                            //..имя другой формы - для данных, или имена двух форм с подформами _F 
+        public const int DOC_STMPROW = 13; // строка Штампа
+        public const int DOC_STMPCOL = 14; // колонка Штампа
+        public const int DOC_CREATED = 15; // дата создания Документа
+        public const int DOC_FORMS = 17; // основной шаблон Документа. Помимо заголовков Шапки, он может иметь 
+                                         //..имя другой формы - для данных, или имена двух форм с подформами _F 
         public const int DOC_HYPERLINK = 18; //гиперссылка на источник в Интернете
-        public const int DOC_SUPPLIER  = 19; // Организация- поставщика сортамента
+        public const int DOC_SUPPLIER = 19; // Организация- поставщика сортамента
         public const int DOC_ADR = 20;    // адрес поставщика
         public const int DOC_LOADER = 21; // Loader Документа
         public const int DOC_STRUCTURE_DESCRIPTION = 22;    // строка - описание структуры документа
@@ -166,8 +166,8 @@ namespace TSmatch.Declaration
         // -----------константы моды работы с Документом -----------------
         public enum DOC_RW_TYPE { RW, RO, CREATEOROPEN, N1, N2, N };
         public const int READWRITE = 0;   // Мода Документа - открыть на чтение и запись -- по умолчанию
-        public const int READONLY  = 3;   // Мода Документа - только чтение
-        public const int APPEND    = 11;   // Мода Документа - дописывать
+        public const int READONLY = 3;   // Мода Документа - только чтение
+        public const int APPEND = 11;   // Мода Документа - дописывать
         public const int CREATEOROPEN = 21;   // Мода Документа - если не найден - создать
         #endregion
 
@@ -196,11 +196,11 @@ namespace TSmatch.Declaration
 
         public const int MODEL_DATE = 1;    // Дата и время записи в Журнал моделей
         public const int MODEL_NAME = 2;    // Имя модели
-        public const int MODEL_DIR  = 3;    // Каталог модели
+        public const int MODEL_DIR = 3;    // Каталог модели
         public const int MODEL_IFCPATH = 4; // Файл IFC, соответствующий модели
         public const int MODEL_MADE = 5;    // Model exported as (Made)
         public const int MODEL_PHASE = 6;   // Текущая фаза проекта
-        public const int MODEL_MD5  = 7;    // Контрольная сумма - MD5
+        public const int MODEL_MD5 = 7;    // Контрольная сумма - MD5
         public const int MODEL_R_LIST = 8;  // колонка - список номеров строк Правил
         #endregion
 
@@ -211,48 +211,48 @@ namespace TSmatch.Declaration
         public const int RULE_NAME = 2;    // Имя Правила
         public const int RULE_TYPE = 3;    // Тип Правила
         public const int RULE_RULE = 4;    // Текст Правила
-        public const int RULE_COMPSETNAME  = 5; // Price-List - set of Component data from ..
+        public const int RULE_COMPSETNAME = 5; // Price-List - set of Component data from ..
         public const int RULE_SUPPLIERNAME = 6; //..Supplier' name
 
         public const string ATT_DELIM = @"(${must}|,|=| |\t|\*|x|X|х|Х)";  //делимитры в Правилах
-        public const string ATT_MUST  = @"(?<must>(&'.+')|(&"".+"")|(&«.+»)|(&“.+”)"; // &обязательно
+        public const string ATT_MUST = @"(?<must>(&'.+')|(&"".+"")|(&«.+»)|(&“.+”)"; // &обязательно
         public const string ATT_PARAM = @"(?<param>(\$|p|р|п|P|Р|П)\w*\d)"; //параметры в Правилах
         #endregion
 
         #region ----------- Документы файла TSmatchINFO.xlsx - записывается в каталог модели ----------
         public const string TSMATCHINFO_MODELINFO = "ModelINFO";    // общая информация о модели: имя, директория, MD5 и др
-        public const string TSMATCHINFO_RAW       = "Raw";          // элементы с атрибутами, как они прочитаны из модели
+        public const string TSMATCHINFO_RAW = "Raw";          // элементы с атрибутами, как они прочитаны из модели
         public const string TSMATCHINFO_MATERIALS = "Materials";    // сводка по материалам, их типам (бетон, сталь и др)
         public const string TSMATCHINFO_SUPPLIERS = "ModSuppliers"; // сводка по поставщикам проекта (контакты, URL прайс-листа, закупки)
-        public const string TSMATCHINFO_RULES     = "Rules";        // перечень Правил, используемых для обработки модели
-        public const string TSMATCHINFO_REPORT    = "Report";       // отчет по сопоставлению групп <материал, профиль> 
-                                                                    //.. c прайс-листами поставщиков
+        public const string TSMATCHINFO_RULES = "Rules";        // перечень Правил, используемых для обработки модели
+        public const string TSMATCHINFO_REPORT = "Report";       // отчет по сопоставлению групп <материал, профиль> 
+                                                                 //.. c прайс-листами поставщиков
         public const string TMP_MODELINFO = "TMP_" + TSMATCHINFO_MODELINFO;
-        public const string TMP_RAW       = "TMP_" + TSMATCHINFO_RAW;
+        public const string TMP_RAW = "TMP_" + TSMATCHINFO_RAW;
         public const string TMP_MATERIALS = "TMP_" + TSMATCHINFO_MATERIALS;
         public const string TMP_SUPPLIERS = "TMP_" + TSMATCHINFO_SUPPLIERS;
-        public const string TMP_RULES     = "TMP_" + TSMATCHINFO_RULES;
-        public const string TMP_REPORT    = "TMP_" + TSMATCHINFO_REPORT;
+        public const string TMP_RULES = "TMP_" + TSMATCHINFO_RULES;
+        public const string TMP_REPORT = "TMP_" + TSMATCHINFO_REPORT;
         #endregion
 
         #region ----------- TSmatchINFO.xlsx/Report - Отчет по результатам подбора сортамента ----------
-        public const int REPORT_N   = 1;     // Report' line Numer
+        public const int REPORT_N = 1;     // Report' line Numer
         public const int REPORT_MAT = 2;     // Group Material
         public const int REPORT_PRF = 3;     // Group Profile
         public const int REPORT_LNG = 4;     // Group total Length [mm]
         public const int REPORT_WGT = 5;     // Group total Weight [kg]
         public const int REPORT_VOL = 6;     // Group total Volume [m3]
         public const int REPORT_SUPL_DESCR = 7;  // Supplied component description
-        public const int REPORT_SUPPLIER   = 8;  // Supplied of component name
-        public const int REPORT_COMPSET    = 9;  // Supplied component' CompSet
-        public const int REPORT_SUPL_WGT   = 10; // Supplied component' total weight
+        public const int REPORT_SUPPLIER = 8;  // Supplied of component name
+        public const int REPORT_COMPSET = 9;  // Supplied component' CompSet
+        public const int REPORT_SUPL_WGT = 10; // Supplied component' total weight
         public const int REPORT_SUPL_PRICE = 11; // Supplied component' total price
         #endregion
 
         #region ----------- TSmatchINFO.xlsx/Suppliers - Поставщики сортамента ----------
         public const int SUPL_DATE = 1;     // Date when Supplier record  was updated in TSmatch.xlsx
         public const int SUPL_NAME = 2;     // Supplier' name
-        public const int SUPL_URL  = 3;     // Supplier' hyperlink
+        public const int SUPL_URL = 3;     // Supplier' hyperlink
         public const int SUPL_COUNTRY = 4;  // Supplier' Country
         public const int SUPL_INDEX = 5;    // Supplier' Post Index
         public const int SUPL_CITY = 6;     // Supplier' City

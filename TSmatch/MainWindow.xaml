@@ -6,28 +6,56 @@
         xmlns:local="clr-namespace:TSmatch"
         mc:Ignorable="d"
         Title="MainWindow" Height="350" Width="600">
+
     <Grid Background="Ivory">
-        <Border BorderBrush="Black" BorderThickness="2" Margin="0,0,0,0" />
+        <Border BorderBrush="Black" BorderThickness="2"
+                Margin="0,0,0,0" />
+        
+        <!-- Menu -->
+        <DockPanel>
+            <Menu IsMainMenu="True" VerticalAlignment="Top"
+                 Height="16" Margin="2,2,0,0">
+                <MenuItem Header="Файл">
+                    <MenuItem Header="_Сохранить как" Click="OnSaveAs"/>
+                </MenuItem>
+                <MenuItem Header="Настройки">
+                    <MenuItem Header="Параметры" Click="OnFontSize"/>
+                    <MenuItem Header="Размер шрифта" Click="OnFontSize"/>
+                </MenuItem>
+                <MenuItem Header="Выбор">
+                    <MenuItem Header="По_ставщик" Click="OnSupllier"/>
+                    <MenuItem Header="_Сортамент" Click="OnCompSet"/>
+                    <MenuItem Header="_Материал" Click="OnMaterial"/>
+                    <MenuItem Header="_Профиль" Click="OnProfile"/>
+                    <Separator />
+                    <MenuItem Header="П_равила" Click="OnSupllier"/>
+                </MenuItem>    
+                <MenuItem Header="_?">
+                    <MenuItem Header="Справка" Click="OnHelp"/>
+                    <MenuItem Header="О программе" Click="OnAbout"/>
+                </MenuItem>
+            </Menu>
+        </DockPanel>
+ 
         <!-- ModelINFO Text Block -->
         <TextBlock x:Name="ModelINFO"
-            HorizontalAlignment="Right" Width="250" Margin="0,26,10,0" 
+            HorizontalAlignment="Right" Width="250" Margin="0,30,10,0" 
             TextWrapping="Wrap" Padding="5"
-            VerticalAlignment="Top" Height="84" Background="AliceBlue" >
+            VerticalAlignment="Top" Height="90" Background="AliceBlue" >
         </TextBlock>
         <StackPanel>
             <TextBlock x:Name="ModelINFO_header" Background="Yellow" 
                        Text="Общая информация по модели"
                        HorizontalAlignment="Right" Width="250"
-                       Margin="0,10,10,0"
+                       Margin="0,20,10,0"
                        TextAlignment="Center"/>
         </StackPanel>
         <Border BorderBrush="Black" BorderThickness="1"
-                HorizontalAlignment="Right" Height="100"
-                Margin="0,10,10,0" VerticalAlignment="Top" Width="250" />
+                HorizontalAlignment="Right" Height="112"
+                Margin="0,20,10,0" VerticalAlignment="Top" Width="250" />
         <Border BorderBrush="Black" BorderThickness="1"
                 HorizontalAlignment="Right" Height="16"
-                Margin="0,10,10,0" VerticalAlignment="Top" Width="250" />
-
+                Margin="0,20,10,0" VerticalAlignment="Top" Width="250" />
 
         <!-- Supplier and CompSet Text Block -->
         <Button x:Name="Supplier" Click="OnSuplClick"
@@ -57,10 +85,10 @@
                 HorizontalAlignment="Right" Height="16"
                 VerticalAlignment="Bottom"
                 Margin="0,0, 10,60"  Width="250" />
-        
+
         <!-- Groups <Material,Profile,Price> Panel -->
-        <ListView Name="elmGroups"
-                  Margin="10 10 10 10" HorizontalAlignment="Left" Width="300"
+        <ListView Name="elm_groups"
+                  Margin="10 20 10 10" HorizontalAlignment="Left" Width="300"
                   SelectionChanged="elmGroups_SelectionChanged" FontSize="11" >
 
             <ListView.ItemContainerStyle>
@@ -68,6 +96,7 @@
                     <Setter Property="HorizontalContentAlignment" Value="Stretch" />
                 </Style>
             </ListView.ItemContainerStyle>
+
 
             <ListView.View>
                 <GridView>
