@@ -38,21 +38,18 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="IfcEngineCS">
-      <HintPath>..\..\..\..\TSmatch\Tsmatch LIBRARY\IfcEngineCS.dll</HintPath>
+      <HintPath>..\..\..\..\..\Desktop\TSmatch\C#\TSmatchSelect\TSM_Select\TSM_Select\bin\Debug\IfcEngineCS.dll</HintPath>
     </Reference>
     <Reference Include="IfcManager">
-      <HintPath>..\..\..\..\TSmatch\Tsmatch LIBRARY\IfcManager.dll</HintPath>
+      <HintPath>..\..\..\..\..\Desktop\TSmatch\C#\TSmatchSelect\TSM_Select\TSM_Select\bin\Debug\IfcManager.dll</HintPath>
     </Reference>
     <Reference Include="log4net">
-      <HintPath>..\..\..\..\TSmatch\Tsmatch LIBRARY\log4net.dll</HintPath>
+      <HintPath>..\..\..\..\..\Desktop\TSmatch\C#\TSmatchSelect\TSM_Select\TSM_Select\bin\Debug\log4net.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Office.Interop.Excel, Version=15.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <EmbedInteropTypes>True</EmbedInteropTypes>
       <HintPath>..\..\..\..\..\..\..\..\..\Program Files (x86)\Microsoft Office\root\Office16\DCF\Microsoft.Office.Interop.Excel.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.VisualStudio.TestPlatform.UnitTestFramework">
-      <HintPath>..\..\..\..\TSmatch\Tsmatch LIBRARY\Microsoft.VisualStudio.TestPlatform.UnitTestFramework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -86,32 +83,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="WindowMaterialChoice.xaml.cs">
-      <DependentUpon>WindowMaterialChoice.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Rule.cs" />
-    <Compile Include="SavedReport.cs" />
-    <Compile Include="Section.cs" />
-    <Compile Include="Serialized_object.cs" />
-    <Compile Include="Suppliers.cs" />
-    <Compile Include="TS_OpenAPI.cs" />
-    <Compile Include="WindowChoice_SuplCS.xaml.cs" />
-    <Compile Include="WindowCompSetCoice.xaml.cs" />
-    <Compile Include="WindowProfileChoice.xaml.cs">
-      <DependentUpon>WindowProfileChoice.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="WindowSupplierChoice.xaml.cs" />
-    <Compile Include="W_Rules.xaml.cs">
-      <DependentUpon>W_Rules.xaml</DependentUpon>
-    </Compile>
-    <Page Include="MainWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Compile Include="App.xaml.cs">
-      <DependentUpon>App.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="Bootstrap.cs" />
     <Compile Include="Components.cs" />
     <Compile Include="CompSet.cs" />
@@ -122,36 +93,6 @@
     <Compile Include="FileOp.cs" />
     <Compile Include="IFC.cs" />
     <Compile Include="Interface.cs" />
-    <Compile Include="MainWindow.xaml.cs">
-      <DependentUpon>MainWindow.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Page Include="WindowMaterialChoice.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="WindowChoice_SuplCS.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="WindowCompSetCoice.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="WindowProfileChoice.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="WindowSupplierChoice.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="W_Rules.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="Matcher.cs" />
     <Compile Include="MatchLib.cs" />
     <Compile Include="Matrix.cs" />
@@ -161,6 +102,38 @@
     <Compile Include="ModHandler.cs" />
     <Compile Include="ModJournal.cs" />
     <Compile Include="Parameter.cs" />
+    <Compile Include="Rule.cs" />
+    <Compile Include="SavedReport.cs" />
+    <Compile Include="Section.cs" />
+    <Compile Include="Serialized_object.cs" />
+    <Compile Include="Suppliers.cs" />
+    <Compile Include="TS_OpenAPI.cs" />
+    <Compile Include="W_Rules.xaml.cs" />
+    <Compile Include="W_Supplier.xaml.cs">
+      <DependentUpon>W_Supplier.xaml</DependentUpon>
+    </Compile>
+    <Page Include="MainWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Compile Include="App.xaml.cs">
+      <DependentUpon>App.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MainWindow.xaml.cs">
+      <DependentUpon>MainWindow.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Page Include="W_Rules.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="W_Supplier.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -178,6 +151,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="Model_ClassDiagram.cd" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -187,9 +161,13 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="logo.png" />
-    <Resource Include="OK.jpg" />
     <Resource Include="TSmatch.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="logo.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="OK.jpg" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

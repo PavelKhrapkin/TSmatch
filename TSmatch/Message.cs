@@ -127,7 +127,7 @@ namespace TSmatch.Message
         }
 #endif 
         public static void txt(string str, params object[] p) { txt(Severity.FATAL, str, p); }
-        public static void F(string str, params object[] p) { txt(Severity.FATAL, str, p);  Stop(); }
+        public static void F(string str, params object[] p) { txt(Severity.FATAL, str, p); Stop(); }
         public static void W(string str, params object[] p) { txt(Severity.WARNING, str, p); }
         public static void I(string str, params object[] p) { txt(Severity.INFO, str, p); }
 #if NotWorkingYet
@@ -161,7 +161,7 @@ namespace TSmatch.Message
             var ok = MessageBoxResult.OK;
             string str = msgcode;
             Message msg = Messages.Find(x => x.MessageID == msgcode);
-            if(msg == null)
+            if (msg == null)
             {
                 str = string.Format(msgcode, p);
                 ok = MessageBox.Show(str, "(*) TSmatch", MessageBoxButton.OKCancel, MessageBoxImage.Question);

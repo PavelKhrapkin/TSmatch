@@ -364,7 +364,7 @@ namespace match.Lib
         }
         public static void set(string sub)
         {
-            if(_trace_level > 0) log.Info("---" + sub);
+            if (_trace_level > 0) log.Info("---" + sub);
             _nameStack.Push(sub);
         }
         public static void exit() { _nameStack.Pop(); }
@@ -374,7 +374,7 @@ namespace match.Lib
             log.Fatal("\n\n[FATAL] " + msg);
             _tx("\n\tв стеке имен:");
             foreach (var s in _nameStack) _tx("\t-> " + s);
-//19/5            Debugger.Break();
+            //19/5            Debugger.Break();
         }
         public static void Warning(string msg) { new Log("\n[warning] " + msg); }
         public static void TraceOn() { _trace_level++; }

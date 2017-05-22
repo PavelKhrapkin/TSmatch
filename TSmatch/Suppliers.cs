@@ -1,7 +1,7 @@
 ﻿/*----------------------------------------------------------------------------
  * Suppliers - componets supplier organisations
  * 
- *  14.5.2017  Pavel Khrapkin
+ *  22.5.2017  Pavel Khrapkin
  *
  *--- History ---
  * 27.4.2016 - Remove List<string> doc_names from the Supplier class
@@ -24,6 +24,7 @@ using Msg = TSmatch.Message.Message;
 using Lib = match.Lib.MatchLib;
 using Docs = TSmatch.Document.Document;
 using CmpSet = TSmatch.CompSet.CompSet;
+using TSmatch.ElmAttSet;
 
 namespace TSmatch.Suppliers
 {
@@ -152,13 +153,25 @@ namespace TSmatch.Suppliers
         }
         public string getSupplierStr()
         {
-            string str = "Адрес: ";
+            string str = name + "\n";
             if (!string.IsNullOrEmpty(index)) str += index + ", ";
             str += City + ", ";
             if (str.Length > 20) str += "\n";
             str += street;
             str += "\n Web: " + Url + "\n тел." + telephone;
             return str;
+        }
+
+        /// <summary>
+        /// CheckCS(group) return true, when this Supplier
+        /// containes same material and profule, or rule allow replacement
+        /// </summary>
+        /// <param name="group"></param>
+        /// <param name="rule"></param>
+        /// <returns></returns>
+        internal bool CheckCS(Group group, Rule rule = null)
+        {
+            throw new NotImplementedException();
         }
     } // end class Supplier
 } // end namespace Suppliers

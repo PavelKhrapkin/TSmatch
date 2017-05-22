@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------------------
  * SavedReport -- class for handle saved reports in TSmatchINFO.xlsx
  * 
- *  18.05.2017 П.Л. Храпкин
+ *  20.05.2017 П.Л. Храпкин
  *  
  *--- Unit Tests ---
  *--- History  ---
@@ -33,10 +33,6 @@ using TS = TSmatch.Tekla.Tekla;
 
 namespace TSmatch.SaveReport
 {
-    /// <summary>
-    /// SavedReport Model content in what is stored in TSmatchINFO.xlsx.
-    /// It is not the same, stored in Model.Journal, but in process of synch.
-    /// </summary>
     public class SavedReport : Mod
     {
         public static readonly ILog log = LogManager.GetLogger("SavedReport");
@@ -72,7 +68,7 @@ namespace TSmatch.SaveReport
                 getSavedGroups();
                 check = false;
             }
-            mj.SynchModJournal(ModelInCad);
+//20/5            mj.SynchModJournal(ModelInCad);
             Log.exit();
         }
 
@@ -85,14 +81,14 @@ namespace TSmatch.SaveReport
             dRaw = Docs.getDoc(Decl.TSMATCHINFO_RAW, fatal: false);
             dRep = Docs.getDoc(Decl.TSMATCHINFO_REPORT, fatal: false);
 
-            name  = mod.name;
-            dir   = mod.dir;
+            name = mod.name;
+            dir = mod.dir;
             phase = mod.phase;
-            date  = mod.date;
-            made  = mod.made; MD5 = mod.MD5;
+            date = mod.date;
+            made = mod.made; MD5 = mod.MD5;
             elementsCount = mod.elementsCount;
             pricingDate = mod.pricingDate;
-            pricingMD5  = mod.pricingMD5;
+            pricingMD5 = mod.pricingMD5;
 
             mj = mod.mj;
             mh = mod.mh;
@@ -139,11 +135,11 @@ namespace TSmatch.SaveReport
             if (elements.Count == 0) Msg.F("elements.Count == 0");
             Docs dRep = Docs.getDoc(Decl.TSMATCHINFO_REPORT);
             dRep.Reset();
-//12/5            mj = new ModelJournal.ModJournal(boot.models);
+            //12/5            mj = new ModelJournal.ModJournal(boot.models);
             Mod m = mj.getModJournal(name);
             strListRules = m.strListRules;
             getSavedRules();
-//12/5            mh = new ModelHandler.ModHandler();
+            //12/5            mh = new ModelHandler.ModHandler();
             mh.Handler(this);
             getSavedRules();
 
@@ -209,7 +205,7 @@ namespace TSmatch.SaveReport
                     {
                         case Decl.TSMATCHINFO_MODELINFO:
                             wrModel(WrMod.ModelINFO);
-                            mj.ChangeModJournal(ModelInCad);
+//20/5                            mj.ChangeModJournal(ModelInCad);
                             break;
                         case Decl.TSMATCHINFO_RAW:
                             Read(); //wrModel(WrMod.Raw) is inside Read()
@@ -240,8 +236,8 @@ namespace TSmatch.SaveReport
                 elementsCount = dINFO.Body.Int(7, 2);
             pricingDate = DateTime.Parse(dINFO.Body.Strng(8, 2));
             pricingMD5 = dINFO.Body.Strng(9, 2);
-            Mod m = mj.SetFromModJournal(name, dir);
-            strListRules = m.strListRules;
+//20/5            Mod m = mj.SetFromModJournal(name, dir);
+//20/5            strListRules = m.strListRules;
             return this;
 #if ToReview    //8/5
             //7/5            iModJounal = getModJournal(name);
@@ -318,7 +314,7 @@ namespace TSmatch.SaveReport
             Docs dRep = Docs.getDoc(sRep);
             if (dRep == null || dRep.il != (elmGroups.Count + dRep.i0)) Reset(sRep);
             double totalPrice = dRep.Body.Double(dRep.il, Decl.REPORT_SUPL_PRICE);
-//17/5            if (totalPrice == 0) Pricing();
+            //17/5            if (totalPrice == 0) Pricing();
             int gr_n = dRep.i0;
             foreach (var gr in elmGroups)
             {
@@ -345,9 +341,9 @@ namespace TSmatch.SaveReport
             Log.set("SR.getSavedRules()");
             Rules.Clear();
             Docs doc = Docs.getDoc("Rules");
-            for(int i = doc.i0; i <= doc.il; i++)
+            for (int i = doc.i0; i <= doc.il; i++)
             {
-//19/5                string sDate = doc.Body.Strng(i, 1);
+                //19/5                string sDate = doc.Body.Strng(i, 1);
                 date = Lib.getDateTime(doc.Body.Strng(i, 1));
                 if (date > DateTime.Now || date < Decl.OLD) continue;
                 string sSupl = doc.Body.Strng(i, 2);
@@ -357,7 +353,7 @@ namespace TSmatch.SaveReport
                     || string.IsNullOrEmpty(sCS)
                     || string.IsNullOrEmpty(sR)) continue;
                 var rule = new Rule.Rule(date, sSupl, sCS, sR);
-                Rules.Add(rule);      
+                Rules.Add(rule);
             }
             log.Info("- getSavedRules() Rules.Count = " + Rules.Count);
             Log.exit();
@@ -381,17 +377,17 @@ namespace TSmatch.SaveReport
             elmGroups = model.elmGroups;
 
             getSavedRules();
- //19/5           Rules = model.Rules;
+            //19/5           Rules = model.Rules;
 
             // теперь запишем в файл
             wrModel(WrMod.ModelINFO);
-            if(isRawChanged) wrModel(WrMod.Raw);
+            if (isRawChanged) wrModel(WrMod.Raw);
             wrModel(WrMod.Report);
             //18/5            strListRules = model.strListRules;
             //18/5            Rules = model.Rules;
             if (isRuleChanged) wrModel(WrMod.Rules);
 
-            
+
             //17/5            throw new NotImplementedException();
         }
 

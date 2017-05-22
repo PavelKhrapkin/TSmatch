@@ -52,7 +52,7 @@ namespace TSmatch.Model.Handler
             int cnt = 0;
             var elms = new Dictionary<string, Elm>();
             elms = mod.elements.ToDictionary(elm => elm.guid);
-            foreach(var match in mod.matches)
+            foreach (var match in mod.matches)
             {
                 double price_per_t = match.group.totalPrice / match.group.totalVolume;
                 foreach (var guid in match.group.guids)
@@ -100,7 +100,7 @@ namespace TSmatch.Model.Handler
         {
             foreach (int n in Lib.GetPars(mod.strListRules))
                 mod.Rules.Add(new Rule.Rule(n));
-            foreach(var rule in mod.Rules) rule.CompSet.doc.Close();
+            foreach (var rule in mod.Rules) rule.CompSet.doc.Close();
         }
         /// <summary>
         /// getGroups() - groupping of elements of Model by Material and Profile
