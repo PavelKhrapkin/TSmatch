@@ -1,7 +1,7 @@
 ﻿/*----------------------------------------------------------------------------
  * Message -- multilanguage message system
  * 
- * 16.05.2017  Pavel Khrapkin
+ * 22.05.2017  Pavel Khrapkin
  *
  *--- History ---
  * Feb-2016 Created
@@ -9,7 +9,7 @@
  * 20.8.2016 - use log4net, bug fixes
  *  9.5.2017 - MessageBox.Show use
  * 11.5.2017 - Fatal error handling with Application.Current.Sutdown, AskFOK, and SPLAS messages
- * 16.5.2017 - AskYN
+ * 22.5.2017 - AskYN, Msg.OK()
  * ---------------------------------------------------------------------------------------
  *      Methods:
  * Start()    - Copy messages into the static list from TSmatch.xlsx/Messages Sheet
@@ -156,24 +156,32 @@ namespace TSmatch.Message
             return X == MessageBoxResult.Yes;
         }
 
-        public static void AskFOK(string msgcode, params object[] p)
+        private static MessageBoxResult reply;
+
+        public static void AskOK(string msgcode, params object[] p)
         {
-            var ok = MessageBoxResult.OK;
+            reply = MessageBoxResult.OK;
             string str = msgcode;
             Message msg = Messages.Find(x => x.MessageID == msgcode);
             if (msg == null)
             {
                 str = string.Format(msgcode, p);
-                ok = MessageBox.Show(str, "(*) TSmatch", MessageBoxButton.OKCancel, MessageBoxImage.Question);
+                reply = MessageBox.Show(str, "(*) TSmatch", MessageBoxButton.OKCancel, MessageBoxImage.Question);
             }
             else
             {
                 str = string.Format(msg.text, p);
-                ok = MessageBox.Show(str, "TSmatch", MessageBoxButton.OKCancel, MessageBoxImage.Question);
+                reply = MessageBox.Show(str, "TSmatch", MessageBoxButton.OKCancel, MessageBoxImage.Question);
             }
-            if (ok == MessageBoxResult.OK) return;
+        }
+
+        public static void AskFOK(string msgcode, params object[] p)
+        {
+            AskOK(msgcode, p);
+            if (reply == MessageBoxResult.OK) return;
             Stop();
         }
+
         public static void Stop()
         {
             FileOp.AppQuit();

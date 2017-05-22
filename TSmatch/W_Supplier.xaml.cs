@@ -98,17 +98,20 @@ namespace TSmatch
             log.Info("new Supplier selected = \"" + selectedSupl.SuplName + "\"");
 
             var selSupl = suppliers.Find(x => x.name == selectedSupl.SuplName);
-            if (selSupl == null) Msg.F("Inconsystant W_Supplier");
-            if (selSupl.CheckCS(MainWindow.currentGroup))
+            if (selSupl == null) Msg.F("Inconsystent W_Supplier");
+            var grOLD = MainWindow.currentGroup;
+            var grNEW = selSupl.getNEWcs(selSupl, grOLD);
+            if(grNEW == null)
             {
-                // пересчитывать вес, объем, стоимость группы; диалог по "тому же" сортаменту
+                 Msg.AskOK("\"{0}\" не поставляет [{1}, {2}], но Вы можете изменить Правила" +
+                    " и согласовать изменения с проектировщиком."
+                    , selSupl.name, grOLD.Mat, grOLD.Prf);
             }
             else
             {
-                // пересчитывать вес, объем, стоимость группы; диалог по измененному сортаменту
-                Msg.W("Необходимо согласование с проектировщиком!");
+                //////                // пересчитывать вес, объем, стоимость группы; диалог по "тому же" сортаменту
+                ////////22/5                selSupl = selSupl.getTotals();
             }
-
 #if notReady
             Supl supl = 
             bool csOK = false;
@@ -133,7 +136,7 @@ namespace TSmatch
 
         private void CheckIfChanges()
         {
-            throw new NotImplementedException();
+//22/5            throw new NotImplementedException();
         }
     }
 } // end namespace W_Supplier

@@ -42,7 +42,7 @@ namespace TSmatch
     {
         public static readonly ILog log = LogManager.GetLogger("MainWindow");
 
-        const string ABOUT = "TSmatch v1.0.2 16.5.2017";
+        const string ABOUT = "TSmatch v1.0.2 22.5.2017";
         public static Boot boot;
         public static string MyCity = "Санкт-Петербург";
         public delegate void NextPrimeDelegate();
@@ -112,12 +112,12 @@ namespace TSmatch
             gr v = (gr)elm_groups.SelectedValue;
             if (v == null) return;
             currentGroup = model.elmGroups.Find(x => x.Mat == v.mat && x.Prf == v.prf);
-            string cs_name = string.Empty;
-            try { cs_name = currentGroup.match.rule.CompSet.name; }
-            catch { }
+            ////////////////////string cs_name = string.Empty;
+            ////////////////////try { cs_name = currentGroup.match.rule.CompSet.name; }
+            ////////////////////catch { }
             SuplName = currentGroup.SupplierName;
             Supl supl = new Supl(currentGroup.SupplierName);
-            Supplier.Content = SuplName + "\t" + cs_name; ;
+            Supl_CS_Mat_Prf.Text = SuplName + "\t" + currentGroup.CompSetName;
             Supl_CS.Text = supl.getSupplierStr();
             double p = 0;
             foreach (var gr in model.elmGroups)
@@ -165,8 +165,8 @@ namespace TSmatch
 
         private void OnCompSet(object sender, RoutedEventArgs e)
         {
-//22/5            var wChoice = new WindowSupplierChain();
-//22/5            wChoice.Show();
+            //22/5            var wChoice = new WindowSupplierChain();
+            //22/5            wChoice.Show();
         }
 
         private void OnMaterial(object sender, RoutedEventArgs e)
