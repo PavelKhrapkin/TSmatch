@@ -175,6 +175,7 @@ namespace TSmatch.Suppliers
             CmpSet cs;
             try { cs = new CmpSet(grCSname, this); }
             catch { return null; }
+
             //////////if (CompSets.Count == 0)
             //////////{
                 
