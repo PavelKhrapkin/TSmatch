@@ -150,7 +150,7 @@ namespace TSmatch
 
         private void OnPriceCheck(object sender, RoutedEventArgs e)
         {
-         
+            
         }
 
         private void OnSupllier(object sender, RoutedEventArgs e)
