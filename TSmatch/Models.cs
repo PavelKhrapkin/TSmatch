@@ -57,6 +57,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 
 using log4net;
 using Boot = TSmatch.Bootstrap.Bootstrap;
@@ -357,7 +358,13 @@ namespace TSmatch.Model
         }
         public void HighLightElements(Dictionary<string, Elm> elms)
         {
-            if (TS.isTeklaActive()) ts.HighlightElements(elms);
+            //23/5            if (TS.isTeklaActive()) ts.HighlightElements(elms);
+            if (TS.isTeklaActive())
+            {
+                Type type = typeof(InvHLclass);
+                MethodInfo info = type.GetMethod("InvHL");
+                info.Invoke(null, new object[] { elms });
+            }
             else { } // in future here put the code for highlight in another Viewer
         }
         public void HighLightElements(ElmGr group, List<Elm> elements)
@@ -399,6 +406,14 @@ namespace TSmatch.Model
         public void HighLightClear()
         {
             if (TS.isTeklaActive()) ts.HighlightClear();
+        }
+        static class InvHLclass
+        {
+            public static void InvHL(Dictionary<string, Elm> elms)
+            {
+                TS ts = new TS();
+                ts.HighlightElements(elms);
+            }
         }
         #endregion --- HighLight methods
 
