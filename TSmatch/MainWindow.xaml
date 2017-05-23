@@ -21,6 +21,8 @@
                 <MenuItem Header="Настройки">
                     <MenuItem Header="Параметры" Click="OnFontSize"/>
                     <MenuItem Header="Размер шрифта" Click="OnFontSize"/>
+                    <Separator/>
+                    <MenuItem Header="Проверка прайс-листов" Click="OnPriceCheck"/>
                 </MenuItem>
                 <MenuItem Header="Выбор">
                     <MenuItem Header="По_ставщик" Click="OnSupllier"/>
@@ -29,7 +31,7 @@
                     <MenuItem Header="_Профиль" Click="OnProfile"/>
                     <Separator />
                     <MenuItem Header="П_равила" Click="OnSupllier"/>
-                </MenuItem>    
+                </MenuItem>
                 <MenuItem Header="_?">
                     <MenuItem Header="Справка" Click="OnHelp"/>
                     <MenuItem Header="О программе" Click="OnAbout"/>

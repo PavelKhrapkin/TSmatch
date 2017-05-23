@@ -1,8 +1,9 @@
 ﻿/*-------------------------------------------
- * WPF Main Windows 22.5.2017 Pavel.Khrapkin
+ * WPF Main Windows 23.5.2017 Pavel.Khrapkin
  * ------------------------------------------
  * --- History ---
- * 2017.05.15 - restored as Tsmatch 1.0.1 after Source Control excident
+ * 2017.05.15 - restored as TSmatch 1.0.1 after Source Control excident
+ * 2017.05.23 - Menu OnPriceCheck
  * --- Known Issue & ToDos ---
  * - It is good re-design XAML idea to have two column on MainWindow with the Width = "*".
  * Than with Window size changed, Group<Mat,Prf,Price> part would become wider.
@@ -59,6 +60,7 @@ namespace TSmatch
             MainWindowLoad();
         }
 
+        #region --- MainWindow Panels ---
         private void MainWindowLoad()
         {
             Title = "TSmatch - согласование поставщиков в проекте";
@@ -133,14 +135,9 @@ namespace TSmatch
         {
             model.HighLightElements(Mod.HighLightMODE.Guids, currentGroup.guids);
         }
+        #endregion --- MainWindow Panels ---
 
-        private void OnSuplClick(object sender, RoutedEventArgs e)
-        {
-            SuplName = (currentGroup == null) ? string.Empty : currentGroup.SupplierName;
-//20/5            var SuplChoiceWindow = new WindowSuplCSChoice();  // разобраться с именами окон!!
-//20/5            SuplChoiceWindow.Show();
-        }
-
+        #region --- Menu Items ---
         private void OnSaveAs(object sender, RoutedEventArgs e)
         {
             Msg.AskFOK("Not ready yet");
@@ -149,6 +146,11 @@ namespace TSmatch
         private void OnFontSize(object sender, RoutedEventArgs e)
         {
             Msg.AskFOK("Not ready yet");
+        }
+
+        private void OnPriceCheck(object sender, RoutedEventArgs e)
+        {
+         
         }
 
         private void OnSupllier(object sender, RoutedEventArgs e)
@@ -179,7 +181,9 @@ namespace TSmatch
 //22/5            var wChoice = new WindowSupplierChain();
 //22/5            wChoice.Show();
         }
+        #endregion --- [Read], [RePrice], and [OK] buttons ---
 
+        #region --- [Read], [RePrice], and [OK] buttons ---
         private void OnTeklaRead_button_click(object sender, RoutedEventArgs e)
         {
             MessageBox.Show("Читать?", "TSmatch", MessageBoxButton.OK);
@@ -225,5 +229,6 @@ namespace TSmatch
             FileOp.AppQuit();
             Application.Current.Shutdown();
         }
+        #endregion --- [Read], [RePrice], and [OK] buttons ---
     }
-}
+} //end namespace
