@@ -10,7 +10,7 @@
     <Grid Background="Ivory">
         <Border BorderBrush="Black" BorderThickness="2"
                 Margin="0,0,0,0" />
-        
+
         <!-- Menu -->
         <DockPanel>
             <Menu IsMainMenu="True" VerticalAlignment="Top"
@@ -37,8 +37,10 @@
                     <MenuItem Header="О программе" Click="OnAbout"/>
                 </MenuItem>
             </Menu>
+            <TextBlock x:Name="msg" Background="#FFEAEAF8" 
+                       VerticalAlignment="Top" Margin="2,2,2,0"/>
         </DockPanel>
- 
+
         <!-- ModelINFO Text Block -->
         <TextBlock x:Name="ModelINFO"
             HorizontalAlignment="Right" Width="250" Margin="0,30,10,0" 
