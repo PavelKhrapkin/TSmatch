@@ -1,4 +1,18 @@
-﻿using System;
+﻿/*---------------------------------------------------------------
+ * Declaration - common constatnt and readonly declaranion module
+ *
+ * 24.05.2017 Pavel Khrapkin
+ *
+ *--- History ---
+ * 2013-2016 - initial history: use DataTable, adapt from match to TSmach,
+ *             Docs.Stamp definitions, Regex const, #teplates in TOC, Boot resources
+ *  1.1.17  - ruleSection/elmAttSection/priceSections declaration area add
+ * 15.1.17  - remove Section constants for FingerPrint
+ * 30.4.17  - TSmatchINFO/Report column constants changed 
+ * 19.5.17  - readonly DateTime(2010.1.1);
+ * 24.5.17  - TSmatch.Models and Rules removes to TSmatchINFO.xlsx
+ */
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,38 +20,6 @@ using System.Threading.Tasks;
 
 namespace TSmatch.Declaration
 {
-    /// <summary>
-    /// Declaration -- определения глобальных констант
-    /// </summary>
-    /// <history> 20.12.2013
-    /// 7.1.2014    - добавлена секция констант Шаблонов
-    /// 23.1.14     - переход к DataTable
-    /// 12.12.15    - адаптация к TSmatch
-    /// 22.12.15    - секция типов Штампа Документа
-    /// 2.1.2016    - моды работы с Документом
-    /// 9.1.2016    - разделитель списков в строке ";"
-    /// 24.1.16     - константы Matching_Rules, регулярнае выражения
-    /// 17.2.16     - в Documents добавлены - строки границы таблицы I0 и IL и их обработка
-    /// 19.2.16     - шаблоны каталогов в doc.FileDirectory
-    ///  6.3.16     - измененил STAMP_TYPE_N, заменил на DOC_TYPE_N
-    ///  7.3.16     - заложена система сообщений с языком из Windows Culture.Info
-    ///  8.3.16     - #шаблоны
-    /// 12.3.16     - multilanguage support
-    /// 20.3.16     - bootstrap support - copy from current Path to Tekla directories
-    /// 25.3.16     - Sullier List attributes
-    /// 30.3.16     - Resource constants created
-    ///  9.4.16     - TSmatchINFO/Report section
-    /// 19.4.16     - Resources chage
-    ///  2.6.16     - Resource IFC2X3.exp add
-    ///  2.7.16     - FORM Resourse add for TSmatch.xlsx
-    ///  6.8.16     - Moule C# Code Names -- use them to avoid static in Module Classes by defining xxAdd in BootStrat.Init and every Module
-    /// 21.8.16     - re-defined Documents of TSmatchINFO.xlsx
-    /// 3.12.16     - Resource Recover NoTOCdirEnvVar
-    ///  1.1.17     - ruleSection/elmAttSection/priceSections declaration area add
-    /// 15.1.17     - remove Section constants to FingerPrint
-    /// 30.4.17     - TSmatchINFO/Report column constants changed 
-    /// 19.05.17    - readonly DateTime(2010.1.1);
-    /// </history>
     public class Declaration
     {
         #region ----------- GENERAL PURPASE CONSTANTS -----------------
@@ -107,13 +89,13 @@ namespace TSmatch.Declaration
         public const string R_FORM_TYPE = TEMPL_TOC;
         public const string R_FORM_DATE = "2.7.2016 7:40";
 
-        public const string R_RULES = RULES;               //TSmatch.xlsx/Rules - Правила       
-        public const string R_RULES_TYPE = TEMPL_TOC;
-        public const string R_RULES_DATE = "2.4.2016 4:20";
+//24/5        public const string R_RULES = RULES;               //TSmatch.xlsx/Rules - Правила       
+//24/5        public const string R_RULES_TYPE = TEMPL_TOC;
+//24/5        public const string R_RULES_DATE = "2.4.2016 4:20";
 
-        public const string R_MODELS = MODELS;              //TSmatch.xlsx/Models - Модели
-        public const string R_MODELS_TYPE = TEMPL_TOC;
-        public const string R_MODELS_DATE = "5.11.2016 13:00";
+//24/5        public const string R_MODELS = MODELS;              //TSmatch.xlsx/Models - Модели
+//24/5        public const string R_MODELS_TYPE = TEMPL_TOC;
+//24/5        public const string R_MODELS_DATE = "5.11.2016 13:00";
 
         public const string R_CONST = CONST;               //TSmatch.xlsx/Constants - Таблицы и константы TSmatch
         public const string R_CONST_TYPE = TEMPL_TOC;
@@ -191,6 +173,7 @@ namespace TSmatch.Declaration
                                                 //public const string STAMP_TYPE_N2 = "N2"; // New Doc, если нет, создавать в Листе2
         #endregion
 
+#if AUDIT //24.5.2017
         #region ----------- константы журнала моделей -------------------
         public const string MODELS = "Models";
 
@@ -203,21 +186,7 @@ namespace TSmatch.Declaration
         public const int MODEL_MD5 = 7;    // Контрольная сумма - MD5
         public const int MODEL_R_LIST = 8;  // колонка - список номеров строк Правил
         #endregion
-
-        #region ----------- константы правил Matching_Rules -------------------
-        public const string RULES = "Rules";
-
-        public const int RULE_DATE = 1;    // Дата и время записи Правила в TSmatch
-        public const int RULE_NAME = 2;    // Имя Правила
-        public const int RULE_TYPE = 3;    // Тип Правила
-        public const int RULE_RULE = 4;    // Текст Правила
-        public const int RULE_COMPSETNAME = 5; // Price-List - set of Component data from ..
-        public const int RULE_SUPPLIERNAME = 6; //..Supplier' name
-
-        public const string ATT_DELIM = @"(${must}|,|=| |\t|\*|x|X|х|Х)";  //делимитры в Правилах
-        public const string ATT_MUST = @"(?<must>(&'.+')|(&"".+"")|(&«.+»)|(&“.+”)"; // &обязательно
-        public const string ATT_PARAM = @"(?<param>(\$|p|р|п|P|Р|П)\w*\d)"; //параметры в Правилах
-        #endregion
+#endif //AUDIT //24.5.2017
 
         #region ----------- Документы файла TSmatchINFO.xlsx - записывается в каталог модели ----------
         public const string TSMATCHINFO_MODELINFO = "ModelINFO";    // общая информация о модели: имя, директория, MD5 и др
@@ -235,6 +204,18 @@ namespace TSmatch.Declaration
         public const string TMP_REPORT = "TMP_" + TSMATCHINFO_REPORT;
         #endregion
 
+        #region ----------- константы TSmatchINFO.xlsx/Rules -------------------
+//24/5        public const string RULES = "Rules";
+
+        public const int RULE_DATE = 1;         // Date and time of Rule set/update
+        public const int RULE_SUPPLIERNAME = 2; // Supplier' name
+        public const int RULE_COMPSETNAME = 3;  // Component Set for the Supplie
+        public const int RULE_RULETEXT = 4;     // Текст Правила
+
+//24/5        public const string ATT_DELIM = @"(${must}|,|=| |\t|\*|x|X|х|Х)";  //делимитры в Правилах
+//24/5        public const string ATT_MUST = @"(?<must>(&'.+')|(&"".+"")|(&«.+»)|(&“.+”)"; // &обязательно
+//24/5        public const string ATT_PARAM = @"(?<param>(\$|p|р|п|P|Р|П)\w*\d)"; //параметры в Правилах
+        #endregion
         #region ----------- TSmatchINFO.xlsx/Report - Отчет по результатам подбора сортамента ----------
         public const int REPORT_N = 1;     // Report' line Numer
         public const int REPORT_MAT = 2;     // Group Material
@@ -247,9 +228,9 @@ namespace TSmatch.Declaration
         public const int REPORT_COMPSET = 9;  // Supplied component' CompSet
         public const int REPORT_SUPL_WGT = 10; // Supplied component' total weight
         public const int REPORT_SUPL_PRICE = 11; // Supplied component' total price
-        #endregion
+#endregion
 
-        #region ----------- TSmatchINFO.xlsx/Suppliers - Поставщики сортамента ----------
+#region ----------- TSmatchINFO.xlsx/Suppliers - Поставщики сортамента ----------
         public const int SUPL_DATE = 1;     // Date when Supplier record  was updated in TSmatch.xlsx
         public const int SUPL_NAME = 2;     // Supplier' name
         public const int SUPL_URL = 3;     // Supplier' hyperlink
@@ -261,13 +242,15 @@ namespace TSmatch.Declaration
         public const int SUPL_LISTCOUNT = 9;// Supplier' price-list/worksheets/Documents count in TSmatch.xlsx
         #endregion
 
-        #region ----------- константы Шаблонов - not in use -----------------
+#if OLD
+#region ----------- константы Шаблонов - not in use -----------------
 
         public const string PTRN_HDR = "A1";     // заголовки колонок   
         public const string PTRN_WIDTH = "A3";     // ширина колонок
         public const int PTRN_FETCH = 6;    // Fetch запрос
 
         public const string PTRN_COPYHDR = "CopyHdr"; // указание копировать заголовок из Шаблона
+
 
         // -----------константы таблицы Процессов -----------------
         public const string PROCESS = "Process";
@@ -281,6 +264,7 @@ namespace TSmatch.Declaration
         public const int STEP_PARAM = 5;    // Параметры Шага
         public const int STEP_INPDOCS = 6;    // Входные Документы Шага
         public const int STEP_OUTDOCS = 7;    // Выходные Документы Шага
-        #endregion
+#endregion
+#endif // OLD
     }
 }

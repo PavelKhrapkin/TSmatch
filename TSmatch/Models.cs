@@ -1,7 +1,7 @@
 ﻿/*------------------------------------------------------------------------------------------
  * Model -- класс управления моделями, ведет Журнал Моделей и управляет их сохранением
  * 
- * 23.05.2017 П.Л. Храпкин
+ * 24.05.2017 П.Л. Храпкин
  *  
  *--- журнал ---
  * 18.1.2016 заложено П.Храпкин, А.Пасс, А.Бобцов
@@ -31,6 +31,7 @@
  * 17.05.2017 - model.Save()
  * 19.05.2017 - ModelwrModel(Rules)
  * 23.05.2017 - HighLight Invoke
+ * 24.05.2017 - exclude ModJournal from Project
  * !!!!!!!!!!!!! -------------- TODO --------------
  * ! избавиться от static в RecentModel, RecentModelDir и вообще их переписать
  * -----------------------------------------------------------------------------------------
@@ -108,7 +109,6 @@ namespace TSmatch.Model
         public bool wrToFile = true;   // when true- we should write into the file TSmatchINFO.xlsx, else- no changes
         public Docs docReport;
         TS ts = new TS();
-        public Journal.ModJournal mj;
         public Handler.ModHandler mh;
         public SR sr;
 
@@ -156,7 +156,7 @@ namespace TSmatch.Model
             }
             return result;
         }
-
+#if OLD
         //////////////////////public Model(string _name, string _dir, string _ifc, string _made, string _phase, string _md5
         // 12/5/17 ///////////    , HashSet<Rule.Rule> _rules, string _strRuleList)
         //////////////////////   : this(DateTime.Now, _name, _dir, _ifc, _made, _phase, _md5, _rules, _strRuleList)
@@ -179,9 +179,10 @@ namespace TSmatch.Model
             }
         }
         public Model(int i, bool doInit = true) : this(Docs.getDoc(Decl.MODELS), i, doInit) { }
-        #endregion
+#endif // OLD 24/5/17
+#endregion
 
-        #region -=-=- unclear region to be clean-up
+#region -=-=- unclear region to be clean-up
 #if OLD
         /// <summary>
         /// Model.Start() - начинает работу со списком моделей, инициализирует структуры данных
@@ -228,15 +229,15 @@ namespace TSmatch.Model
             var doc = Docs.getDoc();
             doc.Close();
         }
-        #endregion -=-=- unclear region to be clean-up
+#endregion -=-=- unclear region to be clean-up
 
-        #region --- Setup and Read CAD methods
+#region --- Setup and Read CAD methods
 
         public void SetModel(Boot boot)      // 7/5  List<Model> models)
         {
             Log.set("SetModel");
             //create child class references mj, mh, sr
-            mj = new Journal.ModJournal(boot.models);
+//24/5            mj = new Journal.ModJournal(boot.models);
             mh = new Handler.ModHandler();
             sr = new SR();
             if (TS.isTeklaActive())
@@ -246,9 +247,9 @@ namespace TSmatch.Model
                 phase = TS.ModInfo.CurrentPhase.ToString();
                 made = TS.MyName;
                 elementsCount = ts.elementsCount();
-                Model m = mj.getModJournal(name, dir);
-                date = m.date;
-                strListRules = m.strListRules;
+//24/5                Model m = mj.getModJournal(name, dir);
+//24/5                date = m.date;
+//24/5                strListRules = m.strListRules;
                 //6/4/17                        macroDir = TS.GetTeklaDir(TS.ModelDir.macro);
                 HighLightClear();
             }
@@ -334,9 +335,9 @@ namespace TSmatch.Model
             elements = Ifc.Read(ifcPath);
         }
 #endif //OLD
-        #endregion --- Read CAD methods
+#endregion --- Read CAD methods
 
-        #region --- HighLight methods
+#region --- HighLight methods
         public enum HighLightMODE { NoPrice, Guids }
         public void HighLightElements(HighLightMODE mode, List<string> guids = null)
         {
@@ -416,9 +417,9 @@ namespace TSmatch.Model
                 ts.HighlightElements(elms);
             }
         }
-        #endregion --- HighLight methods
+#endregion --- HighLight methods
 
-        #region -=-=- unclear region 2 to be audited
+#region -=-=- unclear region 2 to be audited
 #if OLD
         /// <summary>
         /// getModel(name) - get Model by name in TSmatch.xlsx/Model Journal  
@@ -792,7 +793,7 @@ namespace TSmatch.Model
         }
         public static string RecentModelDir() { return RecentModel().dir; }
 #endif //OLD
-        #endregion -=-=- unclear region 2 to be audited
+#endregion -=-=- unclear region 2 to be audited
 
         public void setElements(List<ElmAttSet.ElmAttSet> els)
         {

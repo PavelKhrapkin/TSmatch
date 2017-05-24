@@ -150,7 +150,8 @@ namespace TSmatch
 
         private void OnPriceCheck(object sender, RoutedEventArgs e)
         {
-            
+            var p = new PriceList.PriceList();
+            p.CheckAll();
         }
 
         private void OnSupllier(object sender, RoutedEventArgs e)

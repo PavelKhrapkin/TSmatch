@@ -90,7 +90,7 @@ namespace TSmatch.SaveReport
             pricingDate = mod.pricingDate;
             pricingMD5 = mod.pricingMD5;
 
-            mj = mod.mj;
+//24/5            mj = mod.mj;
             mh = mod.mh;
 
             if (TS.isTeklaActive()) Log.Trace("Tekla active");
@@ -136,8 +136,8 @@ namespace TSmatch.SaveReport
             Docs dRep = Docs.getDoc(Decl.TSMATCHINFO_REPORT);
             dRep.Reset();
             //12/5            mj = new ModelJournal.ModJournal(boot.models);
-            Mod m = mj.getModJournal(name);
-            strListRules = m.strListRules;
+//24/5            Mod m = mj.getModJournal(name);
+//24/5            strListRules = m.strListRules;
             getSavedRules();
             //12/5            mh = new ModelHandler.ModHandler();
             mh.Handler(this);

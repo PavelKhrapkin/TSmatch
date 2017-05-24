@@ -46,6 +46,7 @@ namespace TSmatch.Model.Journal
             strListRules = m.strListRules;
             return m;
         }
+#if OLD
         /// <summary>
         /// getModJournal(name, dir) - get model from Model Journal in TSmatch.xlsx
         /// 
@@ -57,6 +58,7 @@ namespace TSmatch.Model.Journal
         /// <ToDo>10.4.17 реализовать default name и dir </ToDo>
         public Mod getModJournal(string name = "", string dir = "")
         {
+
             Docs doc = Docs.getDoc(Decl.MODELS);
             if (name == "") throw new NotImplementedException();
             Mod m = models.Find(x => x.name == name && x.dir == dir);
@@ -84,7 +86,7 @@ namespace TSmatch.Model.Journal
             Docs docJournal = Docs.getDoc(Decl.MODELS);
             return docJournal.Body.Strng(iModJournal, col);
         }
-
+#endif //OLD 24/5/17
         internal void SynchModJournal(Mod modelInCad)
         {
 //16/5            throw new NotImplementedException();

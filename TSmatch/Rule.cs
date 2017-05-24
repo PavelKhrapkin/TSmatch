@@ -1,12 +1,13 @@
 ﻿/*----------------------------------------------------------------------------------------------
  * Rule.cs -- Rule, which describes how to find Components used in Model in Supplier's price-list
  *
- * 19.5.2017 П.Храпкин
+ * 24.5.2017 П.Храпкин
  *
  *--- History ---
  * 17.10.2016 code file created from module Matcher
  *  2.05.2017 FingerPrint references removed
  * 19.05.2017 public DateTime Rule.Date
+ * 24.05.2017 get
  * -----------------------------------------------------------------------------------------
  *      КОНСТРУКТОРЫ Правил - загружают Правила из листа Правил в TSmatch или из журнала моделей
  * Rule(дата, тип, текст Правила, документ-база сортаментов)    - простая инициализация из TSmatch
@@ -70,9 +71,9 @@ namespace TSmatch.Rule
 
         public Rule(Docs doc, int i)
         {
-            name = (string)doc.Body[i, Decl.RULE_NAME];
-            type = (string)doc.Body[i, Decl.RULE_TYPE];
-            text = Lib.ToLat((string)doc.Body[i, Decl.RULE_RULE]);
+//24/5            name = (string)doc.Body[i, Decl.RULE_NAME];
+//24/5            type = (string)doc.Body[i, Decl.RULE_TYPE];
+            text = Lib.ToLat((string)doc.Body[i, Decl.RULE_RULETEXT]);
             synonyms = RuleSynParse(text);
             ruleDP = new DP(text);  // template for identification
             string csName = (string)doc.Body[i, Decl.RULE_COMPSETNAME];
@@ -81,7 +82,7 @@ namespace TSmatch.Rule
             CompSet = new CmpSet(csName, Supplier);
         }
         // параметр doc не указан, по умолчанию извлекаем Правила из TSmatch.xlsx/Rules
-        public Rule(int n) : this(Docs.getDoc(Decl.RULES), n) { }
+        public Rule(int n) : this(Docs.getDoc(Decl.TSMATCHINFO_RULES), n) { }
 #if DEBUG
         // 27/3/2017 пока - for unit test purpases only
         public Rule(string str, CmpSet cs)
@@ -129,6 +130,19 @@ namespace TSmatch.Rule
         {
             if (other == null) return false;
             return (this._id == other._id);
+        }
+
+        internal static List<string> getList(string name)
+        {
+            List<string> result = new List<string>(); 
+            Docs doc = Docs.getDoc(Decl.TSMATCHINFO_RULES);
+            for(int i = doc.i0; i <= doc.il; i++)
+            {
+                string suplName = doc.Body.Strng(i, Decl.RULE_SUPPLIERNAME);
+                if (suplName != name) continue;
+                result.Add(suplName);
+            }
+            return result;
         }
 #if OLD
         /// <summary>
