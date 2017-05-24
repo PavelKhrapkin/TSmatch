@@ -68,7 +68,6 @@ namespace TSmatch.SaveReport
                 getSavedGroups();
                 check = false;
             }
-//20/5            mj.SynchModJournal(ModelInCad);
             Log.exit();
         }
 
@@ -84,15 +83,14 @@ namespace TSmatch.SaveReport
             name = mod.name;
             dir = mod.dir;
             phase = mod.phase;
-            date = mod.date;
+            date = Lib.getDateTime(dINFO.Body.Strng(Decl.MODINFO_DATE_R, 2));
             made = mod.made; MD5 = mod.MD5;
             elementsCount = mod.elementsCount;
             pricingDate = mod.pricingDate;
             pricingMD5 = mod.pricingMD5;
-
-//24/5            mj = mod.mj;
             mh = mod.mh;
 
+            Log.TraceOn();
             if (TS.isTeklaActive()) Log.Trace("Tekla active");
             else Log.Trace("No Tekla");
             Log.Trace("name =", name);
@@ -103,6 +101,7 @@ namespace TSmatch.SaveReport
             Log.Trace("prcDT=", pricingDate);
             Log.Trace("elCnt=", elementsCount);
             Log.Trace("strRl=", strListRules);
+            Log.TraceOff();
             Log.exit();
         }
 #if OLD

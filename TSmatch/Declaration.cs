@@ -13,10 +13,6 @@
  * 24.5.17  - TSmatch.Models and Rules removes to TSmatchINFO.xlsx
  */
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace TSmatch.Declaration
 {
@@ -88,14 +84,6 @@ namespace TSmatch.Declaration
         public const string R_FORM = FORMS;                //TSmatch.xlsx/Forms - Формы
         public const string R_FORM_TYPE = TEMPL_TOC;
         public const string R_FORM_DATE = "2.7.2016 7:40";
-
-//24/5        public const string R_RULES = RULES;               //TSmatch.xlsx/Rules - Правила       
-//24/5        public const string R_RULES_TYPE = TEMPL_TOC;
-//24/5        public const string R_RULES_DATE = "2.4.2016 4:20";
-
-//24/5        public const string R_MODELS = MODELS;              //TSmatch.xlsx/Models - Модели
-//24/5        public const string R_MODELS_TYPE = TEMPL_TOC;
-//24/5        public const string R_MODELS_DATE = "5.11.2016 13:00";
 
         public const string R_CONST = CONST;               //TSmatch.xlsx/Constants - Таблицы и константы TSmatch
         public const string R_CONST_TYPE = TEMPL_TOC;
@@ -173,22 +161,7 @@ namespace TSmatch.Declaration
                                                 //public const string STAMP_TYPE_N2 = "N2"; // New Doc, если нет, создавать в Листе2
         #endregion
 
-#if AUDIT //24.5.2017
-        #region ----------- константы журнала моделей -------------------
-        public const string MODELS = "Models";
-
-        public const int MODEL_DATE = 1;    // Дата и время записи в Журнал моделей
-        public const int MODEL_NAME = 2;    // Имя модели
-        public const int MODEL_DIR = 3;    // Каталог модели
-        public const int MODEL_IFCPATH = 4; // Файл IFC, соответствующий модели
-        public const int MODEL_MADE = 5;    // Model exported as (Made)
-        public const int MODEL_PHASE = 6;   // Текущая фаза проекта
-        public const int MODEL_MD5 = 7;    // Контрольная сумма - MD5
-        public const int MODEL_R_LIST = 8;  // колонка - список номеров строк Правил
-        #endregion
-#endif //AUDIT //24.5.2017
-
-        #region ----------- Документы файла TSmatchINFO.xlsx - записывается в каталог модели ----------
+        #region ----------- Documents/Tabs in TSmatchINFO.xlsx ----------
         public const string TSMATCHINFO_MODELINFO = "ModelINFO";    // общая информация о модели: имя, директория, MD5 и др
         public const string TSMATCHINFO_RAW = "Raw";          // элементы с атрибутами, как они прочитаны из модели
         public const string TSMATCHINFO_MATERIALS = "Materials";    // сводка по материалам, их типам (бетон, сталь и др)
@@ -205,17 +178,24 @@ namespace TSmatch.Declaration
         #endregion
 
         #region ----------- константы TSmatchINFO.xlsx/Rules -------------------
-//24/5        public const string RULES = "Rules";
-
         public const int RULE_DATE = 1;         // Date and time of Rule set/update
         public const int RULE_SUPPLIERNAME = 2; // Supplier' name
         public const int RULE_COMPSETNAME = 3;  // Component Set for the Supplie
         public const int RULE_RULETEXT = 4;     // Текст Правила
-
-//24/5        public const string ATT_DELIM = @"(${must}|,|=| |\t|\*|x|X|х|Х)";  //делимитры в Правилах
-//24/5        public const string ATT_MUST = @"(?<must>(&'.+')|(&"".+"")|(&«.+»)|(&“.+”)"; // &обязательно
-//24/5        public const string ATT_PARAM = @"(?<param>(\$|p|р|п|P|Р|П)\w*\d)"; //параметры в Правилах
         #endregion
+
+        #region ----------- константы TSmatchINFO.xlsx/ModelINFO -------------------
+        public const int MODINFO_NAME_R = 2;       
+        public const int MODINFO_DIR_R  = 3;   
+        public const int MODINFO_PHASE_R= 4;      
+        public const int MODINFO_DATE_R = 5;
+        public const int MODINFO_MADE_R = 6;
+        public const int MODINFO_MD5_R  = 6;
+        public const int MODINFO_ELMCNT_R = 7;
+        public const int MODINFO_PRCDAT_R = 8;
+        public const int MODINFO_PRCMD5_R = 9;
+        #endregion
+
         #region ----------- TSmatchINFO.xlsx/Report - Отчет по результатам подбора сортамента ----------
         public const int REPORT_N = 1;     // Report' line Numer
         public const int REPORT_MAT = 2;     // Group Material
@@ -241,30 +221,5 @@ namespace TSmatch.Declaration
         public const int SUPL_TEL = 8;      // Supplier' Telephone
         public const int SUPL_LISTCOUNT = 9;// Supplier' price-list/worksheets/Documents count in TSmatch.xlsx
         #endregion
-
-#if OLD
-#region ----------- константы Шаблонов - not in use -----------------
-
-        public const string PTRN_HDR = "A1";     // заголовки колонок   
-        public const string PTRN_WIDTH = "A3";     // ширина колонок
-        public const int PTRN_FETCH = 6;    // Fetch запрос
-
-        public const string PTRN_COPYHDR = "CopyHdr"; // указание копировать заголовок из Шаблона
-
-
-        // -----------константы таблицы Процессов -----------------
-        public const string PROCESS = "Process";
-
-        public const int STEP_TIME = 0;    // Дата и время выполнения Шага. Если тут пусто или "/" - это строка-комментарий
-        public const int PROC_NAME = 1;    // Имя Процесса. В сроках Шага тут пусто
-        public const int STEP_PREVSTEP = 2;    // Предшествующий Шаг. Шаг этой строки выполняем только
-                                               //..если предыдущий Шаг выполнен или тут пусто
-        public const int STEP_NAME = 3;    // Имя Шага
-        public const int STEP_DONE = 4;    // Шаг выполнен "1", иначе - выполняем
-        public const int STEP_PARAM = 5;    // Параметры Шага
-        public const int STEP_INPDOCS = 6;    // Входные Документы Шага
-        public const int STEP_OUTDOCS = 7;    // Выходные Документы Шага
-#endregion
-#endif // OLD
     }
 }
