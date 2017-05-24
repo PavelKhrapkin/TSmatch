@@ -494,7 +494,7 @@ namespace TSmatch.Document
             }
             ////           doc.Sheet = doc.Wb.Worksheets[name];
             doc.splitBodySummary();
-            doc.FetchInit();
+//24/5/17            doc.FetchInit();
 
             ////// если есть --> запускаем Handler
             ////if (doc.Loader != null) Proc.Reset(doc.Loader);
@@ -620,13 +620,14 @@ namespace TSmatch.Document
                     finally { Log.exit(); }                  
                 }
         */ //2.1.16
-           /// <summary>
-           /// инициирует Fetch-структуру Документа для Запроса fetch_rqst.
-           /// Если fetch_rqst не указан - для всех Запросов Документа.
-           /// </summary>
-           /// <param name="fetch_rqst"></param>
-           /// <history>11.1.2014 PKh
-           /// 15.1.2014 - дописан FetchInit() - просмотр всех Fetch Документа</history>
+#if FETCH
+        /// <summary>
+        /// инициирует Fetch-структуру Документа для Запроса fetch_rqst.
+        /// Если fetch_rqst не указан - для всех Запросов Документа.
+        /// </summary>
+        /// <param name="fetch_rqst"></param>
+        /// <history>11.1.2014 PKh
+        /// 15.1.2014 - дописан FetchInit() - просмотр всех Fetch Документа</history>
         public void FetchInit()
         {
             Log.set("FetchInit");
@@ -704,6 +705,7 @@ namespace TSmatch.Document
             finally { Log.exit(); }
             return result;
         }
+#endif // FETCH
         /// <summary>
         /// Класс Stamp, описывающий все штампы документа
         /// </summary>

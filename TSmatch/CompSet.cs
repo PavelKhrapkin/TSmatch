@@ -94,7 +94,7 @@ namespace TSmatch.CompSet
                 docName = toc.Body.Strng(i, Decl.DOC_NAME);
                 break;
             }
-            if (string.IsNullOrEmpty(docName)) throw new Exception("CompSet not found price list"); //              Msg.F("CompSet not found price list");
+            if (string.IsNullOrEmpty(docName)) throw new Exception("CompSet not found price list"); // 22.5.17            Msg.F("CompSet not found price list");
             return Docs.getDoc(docName);
         }
 

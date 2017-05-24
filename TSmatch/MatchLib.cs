@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------
  * MatchLib -- библиотека общих подпрограмм проекта match 3.0
  * 
- *  16.05.17 П.Храпкин, А.Пасс
+ *  24.05.17 П.Храпкин, А.Пасс
  *  
  * - 20.11.13 переписано с VBA на С#
  * - 1.12.13 добавлен метод ToIntList
@@ -20,6 +20,7 @@
  * -  2.8.16 добавлен метод ToDouble
  * - 17.10.16 перенес GetPars из Matcher
  * - 16.05.17 log4net use with WPF, TraceOn()/TraceOff()
+ * - 24.05.17 Regex const for GetPar are local - not in Declaration anymore
  * -------------------------------------------
  *      ---- методы Mtch.Lib ----
  * fileOpen(dir, name[,OpenMode]) - открываем файл Excel по имени name в директории Dir, возвращает Workbook
@@ -326,10 +327,11 @@ namespace match.Lib
         /// <returns>List<int>возвращаемый список найденых параметров</int></returns>
         public static List<int> GetPars(string str)
         {
+            const string ATT_DELIM = @"(${must}|,|=| |\t|\*|x|X|х|Х)";
             const string VAL = @"\d+";
             List<int> pars = new List<int>();
             if (string.IsNullOrEmpty(str)) return pars;
-            string[] pvals = Regex.Split(str, Decl.ATT_DELIM);
+            string[] pvals = Regex.Split(str, ATT_DELIM);
             foreach (var v in pvals)
             {
                 if (string.IsNullOrEmpty(v)) continue;

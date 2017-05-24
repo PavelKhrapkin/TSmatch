@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.26403.7
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TSmatch", "TSmatch\TSmatch.csproj", "{FBAE5BDB-3A4F-4FA5-BDCE-AC3FB437CAA4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UT_TSmatch", "UT_TSmatch\UT_TSmatch.csproj", "{E0A10B7E-1671-4E0F-AE3F-3CA68BE74615}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{FBAE5BDB-3A4F-4FA5-BDCE-AC3FB437CAA4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FBAE5BDB-3A4F-4FA5-BDCE-AC3FB437CAA4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FBAE5BDB-3A4F-4FA5-BDCE-AC3FB437CAA4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E0A10B7E-1671-4E0F-AE3F-3CA68BE74615}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E0A10B7E-1671-4E0F-AE3F-3CA68BE74615}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E0A10B7E-1671-4E0F-AE3F-3CA68BE74615}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E0A10B7E-1671-4E0F-AE3F-3CA68BE74615}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

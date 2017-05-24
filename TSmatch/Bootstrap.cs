@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------------------
  * Bootstrap - provide initial start of TSmatch, when necessary - startup procedure
  * 
- *  3.05.2017  Pavel Khrapkin
+ *  24.05.2017  Pavel Khrapkin
  *
  *--- History ---
  * 25.3.2016 started 
@@ -16,6 +16,7 @@
  *  9.04.2017 - tested and tuned with UnitTest
  * 17.04.2017 - SavedModel class implementd
  *  3.05.2017 - Model Journal initialization
+ * 24.05/2017 - Rules and Model journal are not global resources anymore
  * ---------------------------------------------------------------------------
  *      Bootstrap Methods:
  * Bootstrap()      - check all resources and start all other modules
@@ -140,7 +141,7 @@ namespace TSmatch.Bootstrap
                     Docs.Start(Templates);
                     docTSmatch = Docs.getDoc();
                     Msg.Start();
-                    initModJournal();
+//24/5                    initModJournal();
                     break;
 #if OLD
                     //17/3/2017                    new initSection();
@@ -222,8 +223,6 @@ namespace TSmatch.Bootstrap
                 result.Add(new Resource(Decl.R_MSG, Decl.R_MSG_TYPE, Decl.R_MSG_DATE));
                 result.Add(new Resource(Decl.R_FORM, Decl.R_FORM_TYPE, Decl.R_FORM_DATE));
                 result.Add(new Resource(Decl.R_SUPPLIERS, Decl.R_SUPPLIERS_TYPE, Decl.R_SUPPLIERS_DATE));
-                result.Add(new Resource(Decl.R_MODELS, Decl.R_MODELS_TYPE, Decl.R_MODELS_DATE));
-                result.Add(new Resource(Decl.R_RULES, Decl.R_RULES_TYPE, Decl.R_RULES_DATE));
                 result.Add(new Resource(Decl.R_CONST, Decl.R_CONST_TYPE, Decl.R_CONST_DATE));
                 result.Add(new Resource(Decl.R_TSMATCH_EXE, Decl.R_TSMATCH_EXE_TYPE, Decl.R_TSMATCH_EXE_DATE));
                 result.Add(new Resource(Decl.R_BUTTON_CS, Decl.R_BUTTON_CS_TYPE, Decl.R_BUTTON_CS_DATE));
@@ -320,15 +319,16 @@ namespace TSmatch.Bootstrap
                 SectionTab.Add(t.ToString(), lst);
             }
         } // end class initSection
-
+#if OLD
         void initModJournal()
         {
             models = new List<Mod>();
-            Docs doc = Docs.getDoc(Decl.MODELS);
+//24/5            Docs doc = Docs.getDoc(Decl.MODELS);
             for (int i = doc.i0; i <= doc.il; i++)
             {
                 models.Add(new Mod(i, doInit: false));
             }
         }
+#endif // OLD
     } // end class Bootsrap
 } // end namespace
