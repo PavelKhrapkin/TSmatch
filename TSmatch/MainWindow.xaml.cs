@@ -52,6 +52,7 @@ namespace TSmatch
         public static ElmGr currentGroup;
         public static string SuplName;
         private static bool ModelIsChanged = false, isRawChanged = false, isRuleChanged = false;
+        public static string message;
 
         public MainWindow()
         {
@@ -72,6 +73,8 @@ namespace TSmatch
             WrModelInfoPanel();
             WrReportPanel();
             model.HighLightElements(Mod.HighLightMODE.NoPrice);
+            message = "вначале группы без цен...";
+            msg.Text = message;
         }
 
         private void WrModelInfoPanel()
@@ -127,6 +130,7 @@ namespace TSmatch
             string sP = string.Format("{0:N2}", p);
             TotalSupl_price.Text = "Всего по этому поставщику " + sP + " руб";
 
+            message = "выделяю группу..";
             elm_groups.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal
                 , new NextPrimeDelegate(HighLighting));
         }
