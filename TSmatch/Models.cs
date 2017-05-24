@@ -236,8 +236,7 @@ namespace TSmatch.Model
         public void SetModel(Boot boot)      // 7/5  List<Model> models)
         {
             Log.set("SetModel");
-            //create child class references mj, mh, sr
-//24/5            mj = new Journal.ModJournal(boot.models);
+            //create child class references mh, sr
             mh = new Handler.ModHandler();
             sr = new SR();
             if (TS.isTeklaActive())
@@ -247,9 +246,6 @@ namespace TSmatch.Model
                 phase = TS.ModInfo.CurrentPhase.ToString();
                 made = TS.MyName;
                 elementsCount = ts.elementsCount();
-//24/5                Model m = mj.getModJournal(name, dir);
-//24/5                date = m.date;
-//24/5                strListRules = m.strListRules;
                 //6/4/17                        macroDir = TS.GetTeklaDir(TS.ModelDir.macro);
                 HighLightClear();
             }
@@ -263,10 +259,10 @@ namespace TSmatch.Model
                     Msg.F("SavedReport doc not exists and no CAD");
                 date = m.date;
                 pricingDate = m.pricingDate;
-//20/5                strListRules = m.strListRules;
                 //24/4                classCAD = ifc;
             }
             sr.GetSavedReport(this);
+            date = sr.date;
             elements = sr.elements;
             elmGroups = sr.elmGroups;
             pricingDate = sr.pricingDate;

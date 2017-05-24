@@ -6,6 +6,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using Boot = TSmatch.Bootstrap.Bootstrap;
+
 namespace TSmatch.PriceList.Tests
 {
     [TestClass()]
@@ -14,6 +16,9 @@ namespace TSmatch.PriceList.Tests
         [TestMethod()]
         public void UT_CheckAll()
         {
+            var boot = new Boot();
+
+
             Assert.Fail();
         }
     }
