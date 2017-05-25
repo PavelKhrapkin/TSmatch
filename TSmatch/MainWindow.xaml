@@ -30,7 +30,7 @@
                     <MenuItem Header="_Материал" Click="OnMaterial"/>
                     <MenuItem Header="_Профиль" Click="OnProfile"/>
                     <Separator />
-                    <MenuItem Header="П_равила" Click="OnSupllier"/>
+                    <MenuItem Header="П_равила" Click="OnRules"/>
                 </MenuItem>
                 <MenuItem Header="_?">
                     <MenuItem Header="Справка" Click="OnHelp"/>
