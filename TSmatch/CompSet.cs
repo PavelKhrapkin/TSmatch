@@ -1,7 +1,7 @@
 ﻿/*----------------------------------------------------------------------------
  * CompSet -- Set of Components got from the Supplier' price-list
  * 
- * 22.5.2017  P.Khrapkin
+ * 25.5.2017  P.Khrapkin
  *
  * -- ToDo
  * 31.12.16 использовать Rule.FPs и LoadDescription при конструировании CompSet
@@ -63,7 +63,7 @@ namespace TSmatch.CompSet
         public readonly DP csDP;
         public readonly List<Comp> Components = new List<Comp>();
 
-        public CompSet(string _name, Supl _supl, string LoadDescription = "", List<Comp> comps = null)
+        public CompSet(string _name, Supl _supl, string LoadDescription = "", List<Comp> comps = null, bool init = true)
         {
             name = _name;
             Supplier = _supl;

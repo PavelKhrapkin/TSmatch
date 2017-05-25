@@ -1,12 +1,12 @@
 ﻿/*-----------------------------------------------
- * WPF Window W_Supplier 21.5.2017 Pavel Khrapkin
+ * W_Supplier WPF Window 21.5.2017 Pavel Khrapkin
  * ----------------------------------------------
  * --- History ---
  * 2017.05.21 - written
  * --- Known Issue & ToDos ---
  * - еще нет диалога по допустимости CompSet для выбранного поставщика
  */
- using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;

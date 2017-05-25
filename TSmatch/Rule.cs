@@ -1,7 +1,7 @@
 ﻿/*----------------------------------------------------------------------------------------------
  * Rule.cs -- Rule, which describes how to find Components used in Model in Supplier's price-list
  *
- * 24.5.2017 П.Храпкин
+ * 25.5.2017 П.Храпкин
  *
  *--- History ---
  * 17.10.2016 code file created from module Matcher
@@ -69,20 +69,19 @@ namespace TSmatch.Rule
         private string sCS;
         private string sR;
 
-        public Rule(Docs doc, int i)
+        public Rule(Docs doc, int i, bool init = true)
         {
-//24/5            name = (string)doc.Body[i, Decl.RULE_NAME];
-//24/5            type = (string)doc.Body[i, Decl.RULE_TYPE];
+            date = Lib.getDateTime(doc.Body.Strng(i, Decl.RULE_DATE));
             text = Lib.ToLat((string)doc.Body[i, Decl.RULE_RULETEXT]);
             synonyms = RuleSynParse(text);
             ruleDP = new DP(text);  // template for identification
             string csName = (string)doc.Body[i, Decl.RULE_COMPSETNAME];
             string suplName = (string)doc.Body[i, Decl.RULE_SUPPLIERNAME];
             Supplier = new Suppliers.Supplier(suplName);
-            CompSet = new CmpSet(csName, Supplier);
+            if(init) CompSet = new CmpSet(csName, Supplier, init: init);
         }
         // параметр doc не указан, по умолчанию извлекаем Правила из TSmatch.xlsx/Rules
-        public Rule(int n) : this(Docs.getDoc(Decl.TSMATCHINFO_RULES), n) { }
+        public Rule(int n, bool init=true) : this(Docs.getDoc(Decl.TSMATCHINFO_RULES), n, init) { }
 #if DEBUG
         // 27/3/2017 пока - for unit test purpases only
         public Rule(string str, CmpSet cs)

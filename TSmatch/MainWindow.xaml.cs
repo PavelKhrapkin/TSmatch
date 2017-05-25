@@ -1,5 +1,5 @@
 ﻿/*-------------------------------------------
- * WPF Main Windows 23.5.2017 Pavel.Khrapkin
+ * WPF Main Windows 25.5.2017 Pavel.Khrapkin
  * ------------------------------------------
  * --- History ---
  * 2017.05.15 - restored as TSmatch 1.0.1 after Source Control excident
@@ -43,7 +43,7 @@ namespace TSmatch
     {
         public static readonly ILog log = LogManager.GetLogger("MainWindow");
 
-        const string ABOUT = "TSmatch v1.0.2 22.5.2017";
+        const string ABOUT = "TSmatch v1.0.2 25.5.2017";
         public static Boot boot;
         public static string MyCity = "Санкт-Петербург";
         public delegate void NextPrimeDelegate();
@@ -185,6 +185,12 @@ namespace TSmatch
             Msg.AskFOK("Not ready yeat");
 //22/5            var wChoice = new WindowSupplierChain();
 //22/5            wChoice.Show();
+        }
+
+        private void OnRules(object sender, RoutedEventArgs e)
+        {
+            var wRules = new W_Rules();
+            wRules.Show();
         }
         #endregion --- [Read], [RePrice], and [OK] buttons ---
 
