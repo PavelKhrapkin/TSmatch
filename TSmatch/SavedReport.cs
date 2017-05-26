@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------------------
  * SavedReport -- class for handle saved reports in TSmatchINFO.xlsx
  * 
- *  20.05.2017 П.Л. Храпкин
+ *  25.05.2017 П.Л. Храпкин
  *  
  *--- Unit Tests ---
  *--- History  ---
@@ -40,16 +40,17 @@ namespace TSmatch.SaveReport
         string sINFO = Decl.TSMATCHINFO_MODELINFO;
         string sRaw = Decl.TSMATCHINFO_RAW;
         string sRep = Decl.TSMATCHINFO_REPORT;
-        Docs dINFO, dRaw, dRep;
+        string sRul = Decl.TSMATCHINFO_RULES;
+        Docs dINFO, dRaw, dRep, dRul;
         private Mod ModelInCad;
 
         public void GetSavedReport(Mod mod)
         {
             Log.set("SR.GetSavedReport(\"" + mod.name + "\")");
-            SetSavedMod(mod);
             bool check = true;
             while (check)
             {
+                SetSavedMod(mod);
                 if (dINFO == null && !TS.isTeklaActive()) Msg.F("SavedReport doc not exists and no CAD");
                 if (dINFO == null || dINFO.il < 9) { Reset(Decl.TSMATCHINFO_MODELINFO); continue; }
                 if (isChangedStr(ref mod.name, dINFO, 2, 2)) { ChangedModel(); continue; }
@@ -65,7 +66,9 @@ namespace TSmatch.SaveReport
                 elmGroups = mh.elmGroups;
                 elmMgroups = mh.elmMgroups;
                 Log.Trace("*SR.elements=", elements.Count, " gr=", elmGroups.Count);
+                if(!Docs.IsDocExists(sRep)) { Reset(sRep); continue; }
                 getSavedGroups();
+                if(!Docs.IsDocExists(sRul)) { Reset(sRul); continue; }
                 check = false;
             }
             Log.exit();
@@ -204,7 +207,6 @@ namespace TSmatch.SaveReport
                     {
                         case Decl.TSMATCHINFO_MODELINFO:
                             wrModel(WrMod.ModelINFO);
-//20/5                            mj.ChangeModJournal(ModelInCad);
                             break;
                         case Decl.TSMATCHINFO_RAW:
                             Read(); //wrModel(WrMod.Raw) is inside Read()
@@ -310,7 +312,7 @@ namespace TSmatch.SaveReport
         {
             if (elmGroups.Count == 0) Msg.F("SavedReport.getSavedGroup: elmGroups.Count = 0");
             string sRep = Decl.TSMATCHINFO_REPORT;
-            Docs dRep = Docs.getDoc(sRep);
+            Docs dRep = Docs.getDoc(sRep, fatal: false);
             if (dRep == null || dRep.il != (elmGroups.Count + dRep.i0)) Reset(sRep);
             double totalPrice = dRep.Body.Double(dRep.il, Decl.REPORT_SUPL_PRICE);
             //17/5            if (totalPrice == 0) Pricing();
