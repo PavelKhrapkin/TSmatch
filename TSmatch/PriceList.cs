@@ -1,7 +1,7 @@
 ﻿/*----------------------------------------------------------------------------
  * PriceList - class for Price List checking in data base
  * 
- *  24.5.2017  Pavel Khrapkin
+ *  29.5.2017  Pavel Khrapkin
  *
  *--- History ---
  * ---------------------------------------------------------------------------
@@ -34,7 +34,7 @@ namespace TSmatch.PriceList
 
             //-- Check TSmach.xlsx/Suppliers consystancy
             Docs SupList = Docs.getDoc(Decl.SUPPLIERS);
-            for(int i = SupList.i0; i <= SupList.il; i++ )
+            for (int i = SupList.i0; i <= SupList.il; i++)
             {
                 Supl s = new Supl(i);
                 int nCompSets = SupList.Body.Int(i, Decl.SUPL_LISTCOUNT);
@@ -42,7 +42,7 @@ namespace TSmatch.PriceList
                 {
                     string csName = SupList.Body.Strng(i, Decl.SUPL_LISTCOUNT + n + 1);
                     CS cs = null;
-                    try { cs = new CS(csName, s); cs.doc.Close(); }
+                    try { cs = new CS(csName, s); }
                     catch { }
                     var ruleLst = Rule.Rule.getList(s.name);
                     string msg = string.Format("PriceList \"{0}\" "
@@ -50,15 +50,21 @@ namespace TSmatch.PriceList
                     if (ruleLst.Count == 0) msg += ", and no Rule for him";
                     else msg += string.Format(", however, available {0} for him", ruleLst.Count);
                     log.Info(msg);
-                }   
+                    if (cs == null) continue;
+                    cs.doc.Close();
+                }
             }
-
-            //-- check toc
-            for(int i = toc.i0; i <= toc.il; i++)
+            return;
+            //-- check toc and close open price-lists
+            for (int i = toc.i0; i <= toc.il; i++)
             {
-
+                string type = toc.Body.Strng(i, Decl.DOC_TYPE);
+                if (!type.Contains("Comp")) continue;
+                string doc_name = toc.Body.Strng(i, Decl.DOC_NAME);
+                Docs doc = Docs.getDoc(doc_name, fatal: false);
+                if (doc == null) continue;
+                doc.Close();
             }
-
         }
     }
 } // end namespace PriceList
