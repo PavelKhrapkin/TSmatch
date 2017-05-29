@@ -1,7 +1,7 @@
 ﻿/*---------------------------------------------------------------
  * Declaration - common constatnt and readonly declaranion module
  *
- * 24.05.2017 Pavel Khrapkin
+ * 29.05.2017 Pavel Khrapkin
  *
  *--- History ---
  * 2013-2016 - initial history: use DataTable, adapt from match to TSmach,
@@ -11,6 +11,7 @@
  * 30.4.17  - TSmatchINFO/Report column constants changed 
  * 19.5.17  - readonly DateTime(2010.1.1);
  * 24.5.17  - TSmatch.Models and Rules removes to TSmatchINFO.xlsx
+ * 27.5.17  - write to Raw.xml instead of TSmatchINFO.xlsx/Raw
  */
 using System;
 
@@ -163,14 +164,14 @@ namespace TSmatch.Declaration
 
         #region ----------- Documents/Tabs in TSmatchINFO.xlsx ----------
         public const string TSMATCHINFO_MODELINFO = "ModelINFO";    // общая информация о модели: имя, директория, MD5 и др
-        public const string TSMATCHINFO_RAW = "Raw";          // элементы с атрибутами, как они прочитаны из модели
         public const string TSMATCHINFO_MATERIALS = "Materials";    // сводка по материалам, их типам (бетон, сталь и др)
         public const string TSMATCHINFO_SUPPLIERS = "ModSuppliers"; // сводка по поставщикам проекта (контакты, URL прайс-листа, закупки)
         public const string TSMATCHINFO_RULES = "Rules";        // перечень Правил, используемых для обработки модели
         public const string TSMATCHINFO_REPORT = "Report";       // отчет по сопоставлению групп <материал, профиль> 
                                                                  //.. c прайс-листами поставщиков
+        public const string RAWXML = "Raw.xml";             // model.elements saved in file Raw.xml
+
         public const string TMP_MODELINFO = "TMP_" + TSMATCHINFO_MODELINFO;
-        public const string TMP_RAW = "TMP_" + TSMATCHINFO_RAW;
         public const string TMP_MATERIALS = "TMP_" + TSMATCHINFO_MATERIALS;
         public const string TMP_SUPPLIERS = "TMP_" + TSMATCHINFO_SUPPLIERS;
         public const string TMP_RULES = "TMP_" + TSMATCHINFO_RULES;
@@ -185,12 +186,12 @@ namespace TSmatch.Declaration
         #endregion
 
         #region ----------- константы TSmatchINFO.xlsx/ModelINFO -------------------
-        public const int MODINFO_NAME_R = 2;       
-        public const int MODINFO_DIR_R  = 3;   
-        public const int MODINFO_PHASE_R= 4;      
+        public const int MODINFO_NAME_R = 2;
+        public const int MODINFO_DIR_R = 3;
+        public const int MODINFO_PHASE_R = 4;
         public const int MODINFO_DATE_R = 5;
         public const int MODINFO_MADE_R = 6;
-        public const int MODINFO_MD5_R  = 6;
+        public const int MODINFO_MD5_R = 6;
         public const int MODINFO_ELMCNT_R = 7;
         public const int MODINFO_PRCDAT_R = 8;
         public const int MODINFO_PRCMD5_R = 9;
@@ -208,9 +209,9 @@ namespace TSmatch.Declaration
         public const int REPORT_COMPSET = 9;  // Supplied component' CompSet
         public const int REPORT_SUPL_WGT = 10; // Supplied component' total weight
         public const int REPORT_SUPL_PRICE = 11; // Supplied component' total price
-#endregion
+        #endregion
 
-#region ----------- TSmatchINFO.xlsx/Suppliers - Поставщики сортамента ----------
+        #region ----------- TSmatchINFO.xlsx/Suppliers - Поставщики сортамента ----------
         public const int SUPL_DATE = 1;     // Date when Supplier record  was updated in TSmatch.xlsx
         public const int SUPL_NAME = 2;     // Supplier' name
         public const int SUPL_URL = 3;     // Supplier' hyperlink
