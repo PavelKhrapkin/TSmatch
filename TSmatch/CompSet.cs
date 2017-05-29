@@ -1,7 +1,7 @@
 ﻿/*----------------------------------------------------------------------------
  * CompSet -- Set of Components got from the Supplier' price-list
  * 
- * 25.5.2017  P.Khrapkin
+ * 29.5.2017  P.Khrapkin
  *
  * -- ToDo
  * 31.12.16 использовать Rule.FPs и LoadDescription при конструировании CompSet
@@ -52,7 +52,7 @@ using TSmatch.Document;
 
 namespace TSmatch.CompSet
 {
-    public class CompSet   
+    public class CompSet
     {
         public static readonly ILog log = LogManager.GetLogger("CompSet");
 
@@ -67,7 +67,7 @@ namespace TSmatch.CompSet
         {
             name = _name;
             Supplier = _supl;
-            if(!string.IsNullOrEmpty(LoadDescription))
+            if (!string.IsNullOrEmpty(LoadDescription))
             {
                 csDP = new DP(LoadDescription);
                 Components = comps;
