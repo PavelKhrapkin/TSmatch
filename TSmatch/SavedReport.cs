@@ -50,9 +50,10 @@ namespace TSmatch.SaveReport
             bool check = true;
             while (check)
             {
-                SetSavedMod(mod);
                 if (dINFO == null && !TS.isTeklaActive()) Msg.F("SavedReport doc not exists and no CAD");
+                dINFO = Docs.getDoc(sINFO);
                 if (dINFO == null || dINFO.il < 9) { Reset(Decl.TSMATCHINFO_MODELINFO); continue; }
+                SetSavedMod(mod);
                 if (isChangedStr(ref mod.name, dINFO, 2, 2)) { ChangedModel(); continue; }
                 if (isChangedStr(ref mod.dir, dINFO, 3, 2)) { Reset(sINFO); continue; }
                 if (isChangedStr(ref mod.MD5, dINFO, 6, 2)) { ChangedModel(); continue; }
@@ -181,7 +182,7 @@ namespace TSmatch.SaveReport
 
         private void Reset(string doc_name)
         {
-            if (string.IsNullOrEmpty(name)) Msg.F("SavedReport doc not exists and no CAD");
+//26/5            if (string.IsNullOrEmpty(name)) Msg.F("SavedReport doc not exists and no CAD");
             if (!Docs.IsDocExists(doc_name)) Recover(doc_name, RecoverToDo.CreateRep);
             Msg.AskFOK("Вы действительно намерены переписать TSmatchINFO.xlsx/Report?");
             Recover(doc_name, RecoverToDo.ResetRep);
