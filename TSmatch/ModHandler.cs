@@ -1,10 +1,11 @@
 ﻿/*--------------------------------------------------------------------------------------------
  * ModHandler : Model -- Handle Model for Report preparation
  * 
- *  17.05.2017 Pavel Khrapkin
+ *  29.05.2017 Pavel Khrapkin
  *  
  *--- History ---
- *  8.05.2017 get from Model code
+ *  8.05.2017 taken from Model code
+ * 27.05.2017 getRules
  *--- Unit Tests --- 
  * -------------------------------------------------------------------------------------------
  *      Methods:
@@ -54,6 +55,7 @@ namespace TSmatch.Model.Handler
             elms = mod.elements.ToDictionary(elm => elm.guid);
             foreach (var match in mod.matches)
             {
+                match.group.SupplierName = match.rule.Supplier.name;
                 double price_per_t = match.group.totalPrice / match.group.totalVolume;
                 foreach (var guid in match.group.guids)
                 {
@@ -98,8 +100,10 @@ namespace TSmatch.Model.Handler
 
         internal void getRules(Mod mod)
         {
-            foreach (int n in Lib.GetPars(mod.strListRules))
-                mod.Rules.Add(new Rule.Rule(n));
+            if (mod.Rules.Count != 0) return;
+            Docs dRules = Docs.getDoc(Decl.TSMATCHINFO_RULES);
+            for (int i = dRules.i0; i <= dRules.il; i++)
+                mod.Rules.Add(new Rule.Rule(i));
             foreach (var rule in mod.Rules) rule.CompSet.doc.Close();
         }
         /// <summary>
