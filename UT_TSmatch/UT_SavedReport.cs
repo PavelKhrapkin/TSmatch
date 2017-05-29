@@ -1,5 +1,5 @@
 ﻿/*=================================
- * Saved Report Unit Test 9.5.2017
+ * Saved Report Unit Test 29.5.2017
  *=================================
  */
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -98,10 +98,11 @@ namespace TSmatch.SaveReport.Tests
             Assert.IsTrue(date > old);
             Assert.IsTrue(date < DateTime.Now);
 
-            // проверяем создание TSmatchINFO.xlsx/Raw
-            string raw = Decl.TSMATCHINFO_RAW;
-            // 4/5 долго: 2 мин            sr.Recover(raw, SR.RecoverToDo.ResetRep);
-            Assert.IsTrue(Docs.IsDocExists(raw));
+            //-- Raw теперь - отдельный xml файл, его не надо проверять 27.05.2017
+            //// проверяем создание TSmatchINFO.xlsx/Raw
+            //string raw = Decl.TSMATCHINFO_RAW;
+            //// 4/5 долго: 2 мин            sr.Recover(raw, SR.RecoverToDo.ResetRep);
+            //Assert.IsTrue(Docs.IsDocExists(raw));
 
             // проверяем создание TSmatchINFO.xlsx/Report
             string report = Decl.TSMATCHINFO_REPORT;
@@ -126,7 +127,7 @@ namespace TSmatch.SaveReport.Tests
         }
 
         [TestMethod()]
-        public void UT_SavedReport_getSavedRaw()
+        public void UT_SavedReport_Raw()
         {
             var sr = init();
             model.dir = boot.ModelDir;
@@ -134,7 +135,7 @@ namespace TSmatch.SaveReport.Tests
             // else -- sr.SetFrSavedModelINFO(model.dir); -- вызывается init-Model.SetModel
             Assert.IsTrue(Test_ModelINFO());
 
-            model.elements = sr.getSavedRaw();
+            model.elements = sr.Raw(model);
 
             Assert.IsTrue(model.elements.Count > 0);
             Assert.AreEqual(model.elementsCount, model.elements.Count);
@@ -153,7 +154,7 @@ namespace TSmatch.SaveReport.Tests
         {
             var sr = init();
             model.dir = boot.ModelDir;
-            sr.elements = sr.getSavedRaw();
+            sr.elements = sr.Raw(model);
             //12/5            model.mh = new ModelHandler.ModHandler();
             model.mh.getGroups(sr.elements);
             model.elmGroups = model.mh.elmGroups;
