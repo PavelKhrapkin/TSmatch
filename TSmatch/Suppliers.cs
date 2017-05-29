@@ -1,7 +1,7 @@
 ﻿/*----------------------------------------------------------------------------
  * Suppliers - componets supplier organisations
  * 
- *  22.5.2017  Pavel Khrapkin
+ *  29.5.2017  Pavel Khrapkin
  *
  *--- History ---
  * 27.4.2016 - Remove List<string> doc_names from the Supplier class
@@ -178,7 +178,7 @@ namespace TSmatch.Suppliers
 
             //////////if (CompSets.Count == 0)
             //////////{
-                
+
             //////////}
             //////////var cs = CompSets.Find(x => x.name == grCSname);
             //////////if (cs != null) return cs; // нашел CS с тем же именем!
@@ -206,8 +206,8 @@ namespace TSmatch.Suppliers
         {
             string grCSname = group.CompSetName;
             var cs = CompSets.Find(x => x.name == grCSname);
-            if (cs != null)  return true; // нашел CS с тем же именем!
-            
+            if (cs != null) return true; // нашел CS с тем же именем!
+
             return false;
         }
     } // end class Supplier
