@@ -115,6 +115,7 @@
     <Compile Include="W_Supplier.xaml.cs">
       <DependentUpon>W_Supplier.xaml</DependentUpon>
     </Compile>
+    <Compile Include="XML.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
