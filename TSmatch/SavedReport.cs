@@ -208,9 +208,6 @@ namespace TSmatch.SaveReport
                         case Decl.TSMATCHINFO_MODELINFO:
                             wrModel(WrMod.ModelINFO);
                             break;
-                        ////////////////case Decl.TSMATCHINFO_RAW:
-                        // 27/5 ////////    Read(); //wrModel(WrMod.Raw) is inside Read()
-                        ////////////////    break;
                         case Decl.TSMATCHINFO_REPORT:
                             wrModel(WrMod.Report);
                             break;
@@ -272,6 +269,8 @@ namespace TSmatch.SaveReport
             }
             else
             {                               // get from CAD and Write or re-Write Raw.xml 
+                Msg.AskFOK("Файл Raw.xml не доступен."
+                    + " Вы действительно хотите получить его из САПР заново?");
                 mod.Read();
                 rwXML.XML.WriteToXmlFile(file, mod.elements);
                 elms = mod.elements;
