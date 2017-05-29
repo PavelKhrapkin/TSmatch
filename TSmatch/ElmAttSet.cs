@@ -1,7 +1,7 @@
 ﻿/*--------------------------------------------------------------------------------------
  * ElmAttSet -- Definitions of Properties, and their Names of the Elements in the Model 
  * 
- *  25.04.2017  Pavel Khrapkin
+ *  29.05.2017  Pavel Khrapkin
  * 
  * ----- TODO 30.9.2016 ------
  * - закомментировать неиспользуемые методы группировки (Ctrl/F12 empty)
@@ -15,6 +15,7 @@
  * 16.08.2016 - LINQ Groupping methods - not implemented (!) почистить ElmAttSet
  * 22.08.2016 - методы Scale и SetScale
  * 30.09.2016 - clean up, Group class audited
+ * 27.05.2017 - preparation to XML serialized save - parameterless constructors
  * -------------------------------------------
  * public class ElmAttSet - set of model component attribuyes, extracted from Tekla or IFC by method Read
  * public class Group     - Group elements by Materials and Profile
@@ -55,6 +56,8 @@ namespace TSmatch.ElmAttSet
 
         public static Dictionary<string, ElmAttSet> Elements = new Dictionary<string, ElmAttSet>();
 
+        public ElmAttSet() { }
+
         //public string[] TAG = { "GUID", "MATERIAL", "MATERIAL_TYPE", "PROFILE", "LENGTH", "WEIGHT", "VOLUME", "PRICE" };
         //public enum sumFields { length, weight, volume, price }
 
@@ -92,22 +95,7 @@ namespace TSmatch.ElmAttSet
             if (result == 0) return -length.CompareTo(other.length);
             return result;
         }
-        /// <summary>
-        /// ElementsMD5 -- calculate hash code MD5 for the list of elements of the model
-        /// </summary>
-        /// <returns></returns>
-        /// <remarks>It could take few minutes or more for the large model</remarks>
-        /// <history>21/6/2016 moved here from TS_OpenAPI
-        /// </history>
-        public static string ElementsMD5()
-        {
-            //            DateTime t0 = DateTime.Now;  
-            string str = "";
-            foreach (var elm in Elements.Values) str += elm.mat + elm.prf + elm.length.ToString();
-            string ModelMD5 = Lib.ComputeMD5(str);
-            return ModelMD5;
-            //            new Log("MD5 time = " + (DateTime.Now - t0).ToString());
-        }
+
         public class ElmAttSetCompararer : IEqualityComparer<ElmAttSet>
         {
             public bool Equals(ElmAttSet p1, ElmAttSet p2)
@@ -123,7 +111,7 @@ namespace TSmatch.ElmAttSet
         } // end ElmAttSetCompararer
     } // end class ElmAttSet
       /*
-          #region Groups
+#region Groups
           public class Groups
           {
               public class materialType //: IComparable<materialType>
@@ -159,7 +147,7 @@ namespace TSmatch.ElmAttSet
               } // end class Groups.Supplier
 
           } // end class Groups
-          #endregion Groups
+#endregion Groups
       */
     #region MaterialTypeGroup, MGroup, Group
 
@@ -278,26 +266,7 @@ namespace TSmatch.ElmAttSet
         public int CompareTo(Mgroup mgr)     //to Sort Groups by Materials
         {
             return mat.CompareTo(mgr.mat);
-        }
-
-        ////////public double setMgrPrice(List<ElmAttSet> Els, List<string> guids)
-        ////////{
-        ////////    totalPrice = 0;
-        ////////    foreach (string id in guids)
-        ////////    {
-        ////////        totalPrice += Els[id].;
-        ////////    }
-        ////////    return totalPrice;
-        ////////}
-        ////internal class Build : Mgroup
-        ////{
-        ////    private List<ElmAttSet> elements;
-
-        ////    public Build(List<ElmAttSet> elements)
-        ////    {
-        ////        this.elements = elements;
-        ////    }
-        ////}
+        }  
     } // end class Mgroup
 
     public class Group : IComparable<Group>
@@ -316,6 +285,8 @@ namespace TSmatch.ElmAttSet
         //---- references to other classes - price-list conteiners
         public string CompSetName;  //список компонентов, с которыми работает правило
         public string SupplierName; //Поставщик
+
+        public Group() { }
 
         public Group(Dictionary<string, ElmAttSet> Els, string _mat, string _prf, List<string> _guids)
         {
