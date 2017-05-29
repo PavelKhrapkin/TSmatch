@@ -1,9 +1,9 @@
 ﻿/*------------------------------------------------------------------------------------------
  * Model -- класс управления моделями, ведет Журнал Моделей и управляет их сохранением
  * 
- * 24.05.2017 П.Л. Храпкин
+ * 29.05.2017 П.Л. Храпкин
  *  
- *--- журнал ---
+ *--- History ---
  * 18.1.2016 заложено П.Храпкин, А.Пасс, А.Бобцов
  * 29.2.2016 bug fix in getGroup
  *  6.3.2016 список Правил в стрке Модели, setModel(name); openModel,readModel
@@ -32,10 +32,8 @@
  * 19.05.2017 - ModelwrModel(Rules)
  * 23.05.2017 - HighLight Invoke
  * 24.05.2017 - exclude ModJournal from Project
- * !!!!!!!!!!!!! -------------- TODO --------------
- * ! избавиться от static в RecentModel, RecentModelDir и вообще их переписать
- * -----------------------------------------------------------------------------------------
- *      КОНСТРУКТОРЫ: загружают Журнал Моделей из листа Models в TSmatch или из параметров
+ * 27.05.2017 - XML read and write model.elements as Raw.xml in wrMod, modelWr bug fix 
+ * ---- КОНСТРУКТОРЫ: загружают Журнал Моделей из листа Models в TSmatch или из параметров
  * Model(DateTime, string, string, string, string md5, List<Mtch.Rule> r)   - простая инициализация
  * Model( .. )      - указаны все данные модели, кроме даты - записываем в список моделей TSmatch Now
  * Model(doc, n)    - инициализируем экземпляр модели из строки n Документа doc
@@ -116,23 +114,6 @@ namespace TSmatch.Model
 
         public Model() { }
 
-
-        ////////////////////////public Model(DateTime t, string n, string d, string ifc, string m, string p, string md5, HashSet<Rule.Rule> r, string s)
-        ////////////////////////{
-        ////////////////////////    this.date = t;
-        ////////////////////////    this.name = n;
-        ////////////////////////    this.dir = d;
-        ////////////////////////    this.ifcPath = ifc;
-        ////////////////////////    this.Made = m;
-        ////////////////////////    this.Phase = p;
-        ////////////////////////    this.MD5 = md5;
-        ////////////////////////    this.Rules = r;
-        ////////////////////////    this.strListRules = s;
-        ////////////////////////}
-        ////////////////////////public Model(string _name, string _dir, string _ifc, string _made, string _phase, string _md5)
-        // 12/5/17 /////////////    : this(DateTime.Now, _name, _dir, _ifc, _made, _phase, _md5, new HashSet<Rule.Rule>(), "")
-        ////////////////////////{ }
-
         /// <summary>
         /// newModelOpenDialog(models) -- run when new Model must be open not exists in Model Journal models
         /// </summary>
@@ -156,53 +137,7 @@ namespace TSmatch.Model
             }
             return result;
         }
-#if OLD
-        //////////////////////public Model(string _name, string _dir, string _ifc, string _made, string _phase, string _md5
-        // 12/5/17 ///////////    , HashSet<Rule.Rule> _rules, string _strRuleList)
-        //////////////////////   : this(DateTime.Now, _name, _dir, _ifc, _made, _phase, _md5, _rules, _strRuleList)
-        //////////////////////{ }
-        public Model(Docs doc, int i, bool doInit = true)
-        {
-            this.date = Lib.getDateTime(doc.Body[i, Decl.MODEL_DATE]);
-            this.name = doc.Body.Strng(i, Decl.MODEL_NAME);
-            this.dir = doc.Body.Strng(i, Decl.MODEL_DIR);
-            this.ifcPath = doc.Body.Strng(i, Decl.MODEL_IFCPATH);
-            this.made = doc.Body.Strng(i, Decl.MODEL_MADE);
-            this.phase = doc.Body.Strng(i, Decl.MODEL_PHASE);
-            this.MD5 = doc.Body.Strng(i, Decl.MODEL_MD5);
-            // преобразуем список Правил из вида "5,6,8" в List<Rule>
-            strListRules = doc.Body.Strng(i, Decl.MODEL_R_LIST);
-            if (doInit)
-            {
-                foreach (int n in Lib.GetPars(strListRules))
-                    Rules.Add(new Rule.Rule(n));
-            }
-        }
-        public Model(int i, bool doInit = true) : this(Docs.getDoc(Decl.MODELS), i, doInit) { }
-#endif // OLD 24/5/17
-#endregion
 
-#region -=-=- unclear region to be clean-up
-#if OLD
-        /// <summary>
-        /// Model.Start() - начинает работу со списком моделей, инициализирует структуры данных
-        /// </summary>
-        /// <returns></returns>
-        /// <history>12.2.2016<\history>
-        public static List<Model> Start()
-        {
-            Log.set("Model.Start");
-            Models.Clear();
-            Docs doc = Docs.getDoc(Decl.MODELS);
-            for (int i = doc.i0; i <= doc.il; i++)
-                if (doc.Body[i, Decl.MODEL_NAME] != null) Models.Add(new Model(doc, i));
-            List<string> strLst = new List<string>();
-            foreach (var m in Models) strLst.Add(m.name);
-            strLst.Sort();
-            Log.exit();
-            return Models;
-        }
-#endif //OLD
         public void GetModelInfo()
         {
             //17/4            savedReport = new SR();
@@ -229,9 +164,9 @@ namespace TSmatch.Model
             var doc = Docs.getDoc();
             doc.Close();
         }
-#endregion -=-=- unclear region to be clean-up
+        #endregion -=-=- unclear region to be clean-up
 
-#region --- Setup and Read CAD methods
+        #region --- Setup and Read CAD methods
 
         public void SetModel(Boot boot)      // 7/5  List<Model> models)
         {
@@ -279,15 +214,13 @@ namespace TSmatch.Model
             if (TS.isTeklaActive()) elements = ts.Read();
             else elements = Ifc.Read(ifcPath);
             elementsCount = elements.Count;
-            Docs dRaw = Docs.getDoc(Decl.TSMATCHINFO_RAW, fatal: false);
             string newMD5 = getMD5(elements);
-            if (newMD5 != MD5 || dRaw == null || elementsCount != dRaw.il - dRaw.i0)
+            if (newMD5 != MD5)
             {
                 isChanged = true;
                 MD5 = newMD5;
                 date = DateTime.Now;
                 wrModel(WrMod.ModelINFO);
-                wrModel(WrMod.Raw);
             }
             return this;
         }
@@ -331,9 +264,9 @@ namespace TSmatch.Model
             elements = Ifc.Read(ifcPath);
         }
 #endif //OLD
-#endregion --- Read CAD methods
+        #endregion --- Read CAD methods
 
-#region --- HighLight methods
+        #region --- HighLight methods
         public enum HighLightMODE { NoPrice, Guids }
         public void HighLightElements(HighLightMODE mode, List<string> guids = null)
         {
@@ -413,9 +346,9 @@ namespace TSmatch.Model
                 ts.HighlightElements(elms);
             }
         }
-#endregion --- HighLight methods
+        #endregion --- HighLight methods
 
-#region -=-=- unclear region 2 to be audited
+        #region -=-=- unclear region 2 to be audited
 #if OLD
         /// <summary>
         /// getModel(name) - get Model by name in TSmatch.xlsx/Model Journal  
@@ -716,7 +649,7 @@ namespace TSmatch.Model
                             suplName = gr.match.rule.Supplier.name;
                             csName = gr.match.rule.CompSet.name;
                         }
-                        doc.wrDocForm(n++, gr.mat, gr.prf
+                        doc.wrDocForm(n++, gr.Mat, gr.Prf
                             , gr.totalLength, gr.totalWeight, gr.totalVolume
                             , foundDescr, suplName, csName
                             , gr.totalWeight, gr.totalPrice);
@@ -789,7 +722,7 @@ namespace TSmatch.Model
         }
         public static string RecentModelDir() { return RecentModel().dir; }
 #endif //OLD
-#endregion -=-=- unclear region 2 to be audited
+        #endregion -=-=- unclear region 2 to be audited
 
         public void setElements(List<ElmAttSet.ElmAttSet> els)
         {
