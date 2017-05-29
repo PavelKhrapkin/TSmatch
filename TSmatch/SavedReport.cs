@@ -1,16 +1,16 @@
 ﻿/*-----------------------------------------------------------------------------------
  * SavedReport -- class for handle saved reports in TSmatchINFO.xlsx
  * 
- *  25.05.2017 П.Л. Храпкин
+ *  27.05.2017 П.Л. Храпкин
  *  
  *--- Unit Tests ---
+ * UT_SavedReport_Raw 2017.05.27 11 sec
  *--- History  ---
  * 17.04.2017 выделен из модуля Model
  *  1.05.2017 with Document Reset and ReSave
  *  7.05.2017 написал SetFrSavedModelINFO(), переписал isReportConsystant()
- * 18.05.2017 Save(model)
+ * 27.05.2017 - XML read and write model.elements as Raw.xml in Raw() 
  *--- Methods: -------------------      
- * SaveReport() - NotImplemented yet - Saved current Model in TSmatchINFO.xlsx
  * bool GetSavedReport()    - read TSmatchINFO.xlsx, set it as a current Model
  *                            return true if name, dir, quantity of elements is
  *                            suit to the current model
@@ -20,10 +20,12 @@
  */
 using log4net;
 using System;
+using System.IO;
 using System.Collections.Generic;
 
 using Log = match.Lib.Log;
 using Lib = match.Lib.MatchLib;
+using FileOp = match.FileOp.FileOp;
 using Msg = TSmatch.Message.Message;
 using Decl = TSmatch.Declaration.Declaration;
 using Docs = TSmatch.Document.Document;
@@ -38,7 +40,6 @@ namespace TSmatch.SaveReport
         public static readonly ILog log = LogManager.GetLogger("SavedReport");
 
         string sINFO = Decl.TSMATCHINFO_MODELINFO;
-        string sRaw = Decl.TSMATCHINFO_RAW;
         string sRep = Decl.TSMATCHINFO_REPORT;
         string sRul = Decl.TSMATCHINFO_RULES;
         Docs dINFO, dRaw, dRep, dRul;
@@ -60,16 +61,16 @@ namespace TSmatch.SaveReport
                 if (isChangedStr(ref mod.pricingMD5, dINFO, 9, 2)) { ChangedPricing(); continue; }
                 pricingDate = Lib.getDateTime(dINFO.Body.Strng(8, 2));
 
-                elements = getSavedRaw();
+                elements = Raw(mod);
                 if (elements == null && !TS.isTeklaActive()) Msg.F("No Saved elements in TSmatchINFO.xlsx");
 
                 mh.getGroups(elements);
                 elmGroups = mh.elmGroups;
                 elmMgroups = mh.elmMgroups;
                 Log.Trace("*SR.elements=", elements.Count, " gr=", elmGroups.Count);
-                if(!Docs.IsDocExists(sRep)) { Reset(sRep); continue; }
+                if (!Docs.IsDocExists(sRep)) { Reset(sRep); continue; }
                 getSavedGroups();
-                if(!Docs.IsDocExists(sRul)) { Reset(sRul); continue; }
+                if (!Docs.IsDocExists(sRul)) { Reset(sRul); continue; }
                 check = false;
             }
             Log.exit();
@@ -81,7 +82,6 @@ namespace TSmatch.SaveReport
             ModelInCad = mod;
 
             dINFO = Docs.getDoc(Decl.TSMATCHINFO_MODELINFO, fatal: false);
-            dRaw = Docs.getDoc(Decl.TSMATCHINFO_RAW, fatal: false);
             dRep = Docs.getDoc(Decl.TSMATCHINFO_REPORT, fatal: false);
 
             name = mod.name;
@@ -139,8 +139,8 @@ namespace TSmatch.SaveReport
             Docs dRep = Docs.getDoc(Decl.TSMATCHINFO_REPORT);
             dRep.Reset();
             //12/5            mj = new ModelJournal.ModJournal(boot.models);
-//24/5            Mod m = mj.getModJournal(name);
-//24/5            strListRules = m.strListRules;
+            //24/5            Mod m = mj.getModJournal(name);
+            //24/5            strListRules = m.strListRules;
             getSavedRules();
             //12/5            mh = new ModelHandler.ModHandler();
             mh.Handler(this);
@@ -176,13 +176,12 @@ namespace TSmatch.SaveReport
         {
             Msg.AskFOK("Нет сохраненной корректной модели. Читаем модель заново?");
             Reset(sINFO);
-            Reset(sRaw);
+            elements = Raw(this, write: true);
             Reset(sRep);
         }
 
         private void Reset(string doc_name)
         {
-//26/5            if (string.IsNullOrEmpty(name)) Msg.F("SavedReport doc not exists and no CAD");
             if (!Docs.IsDocExists(doc_name)) Recover(doc_name, RecoverToDo.CreateRep);
             Msg.AskFOK("Вы действительно намерены переписать TSmatchINFO.xlsx/Report?");
             Recover(doc_name, RecoverToDo.ResetRep);
@@ -209,9 +208,9 @@ namespace TSmatch.SaveReport
                         case Decl.TSMATCHINFO_MODELINFO:
                             wrModel(WrMod.ModelINFO);
                             break;
-                        case Decl.TSMATCHINFO_RAW:
-                            Read(); //wrModel(WrMod.Raw) is inside Read()
-                            break;
+                        ////////////////case Decl.TSMATCHINFO_RAW:
+                        // 27/5 ////////    Read(); //wrModel(WrMod.Raw) is inside Read()
+                        ////////////////    break;
                         case Decl.TSMATCHINFO_REPORT:
                             wrModel(WrMod.Report);
                             break;
@@ -238,8 +237,8 @@ namespace TSmatch.SaveReport
                 elementsCount = dINFO.Body.Int(7, 2);
             pricingDate = DateTime.Parse(dINFO.Body.Strng(8, 2));
             pricingMD5 = dINFO.Body.Strng(9, 2);
-//20/5            Mod m = mj.SetFromModJournal(name, dir);
-//20/5            strListRules = m.strListRules;
+            //20/5            Mod m = mj.SetFromModJournal(name, dir);
+            //20/5            strListRules = m.strListRules;
             return this;
 #if ToReview    //8/5
             //7/5            iModJounal = getModJournal(name);
@@ -256,42 +255,32 @@ namespace TSmatch.SaveReport
         }
 
         /// <summary>
-        /// getSavedRaw() - read elements from TSmatchINFO/Raw; 
-        ///     When Lines Count in this file != elementsCount = re-write it.
+        /// Raw() - read elements from Raw.xml or re-write it, if necessary 
+        ///<para>
+        ///re-write reasons: Raw.xml not exists, MD5 or elementsCount != ones in ModelINFO
+        ///</para>
         /// </summary>
         /// <returns>updated list of elements in file and in memory</returns>
-        public List<Elm> getSavedRaw()
+        public List<Elm> Raw(Mod mod, bool write = false)
         {
-            Log.set("SR.getSavedRaw()");
-            Docs docRaw = Docs.getDoc(sRaw, create_if_notexist: false);
-            if (docRaw == null) Reset(sRaw);
-            if (TS.isTeklaActive())
-            {
-                var ts = new TS();
-                elementsCount = ts.elementsCount();
-            }
-            int cnt = docRaw.il - docRaw.i0 + 1;
-            if (cnt != elementsCount) Reset(sRaw);
-
+            Log.set("SR.Raw(" + mod.name + ")");
             List<Elm> elms = new List<Elm>();
-
-            for (int i = docRaw.i0; i <= docRaw.il; i++)
-            {
-                string guid = docRaw.Body.Strng(i, 1);
-                string mat = docRaw.Body.Strng(i, 2);
-                string mat_type = docRaw.Body.Strng(i, 3);
-                string prf = docRaw.Body.Strng(i, 4);
-                double lng = docRaw.Body.Double(i, 5);
-                double weight = docRaw.Body.Double(i, 6);
-                double vol = docRaw.Body.Double(i, 7);
-                Elm elm = new Elm(guid, mat, mat_type, prf, lng, weight, vol);
-                elms.Add(elm);
+            string file = Path.Combine(mod.dir, Decl.RAWXML);
+            if (!write && FileOp.isFileExist(file))
+            {                               // Read Raw.xml
+                elms = rwXML.XML.ReadFromXmlFile<List<Elm>>(file);
             }
-            MD5 = getMD5(elms);
+            else
+            {                               // get from CAD and Write or re-Write Raw.xml 
+                mod.Read();
+                rwXML.XML.WriteToXmlFile(file, mod.elements);
+                elms = mod.elements;
+            }
+            if (mod.elementsCount != elms.Count) elms = Raw(mod, write: true);
             Docs docModelINFO = Docs.getDoc(Decl.TSMATCHINFO_MODELINFO);
-            if (MD5 != docModelINFO.Body.Strng(6, 2)
+            if (mod.MD5 != docModelINFO.Body.Strng(6, 2)
                 || elementsCount != docModelINFO.Body.Int(7, 2)) Reset(sINFO);
-            Log.Trace("{ elmCount, MD5} ==", elms.Count, MD5);
+            Log.Trace("{ elmCount, MD5} ==", elms.Count, mod.MD5);
             Log.exit();
             return elms;
         }
@@ -379,11 +368,9 @@ namespace TSmatch.SaveReport
             elmGroups = model.elmGroups;
 
             getSavedRules();
-            //19/5           Rules = model.Rules;
 
             // теперь запишем в файл
             wrModel(WrMod.ModelINFO);
-            if (isRawChanged) wrModel(WrMod.Raw);
             wrModel(WrMod.Report);
             //18/5            strListRules = model.strListRules;
             //18/5            Rules = model.Rules;
