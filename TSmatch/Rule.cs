@@ -1,7 +1,7 @@
 ﻿/*----------------------------------------------------------------------------------------------
  * Rule.cs -- Rule, which describes how to find Components used in Model in Supplier's price-list
  *
- * 25.5.2017 П.Храпкин
+ * 29.5.2017 П.Храпкин
  *
  *--- History ---
  * 17.10.2016 code file created from module Matcher
@@ -54,20 +54,22 @@ namespace TSmatch.Rule
 
         public DateTime date;               //дата и время записи Правила
         private int _id { get; set; }
-        public readonly string name;        //название правила
-        public readonly string type;        //тип правила
-        public readonly string text;        //текст правила
+        public string name;        //название правила
+        public string type;        //тип правила
+        public string text;        //текст правила
 
         //---- references to other classes - price-list conteiners
         public readonly CmpSet CompSet;     //список компонентов, с которыми работает правило
         public readonly Supl Supplier;      //Поставщик
-        public readonly DP ruleDP;          //identifiers of Materials, Profile, and others
+        public DP ruleDP;                   //identifiers of Materials, Profile, and others
         public Dictionary<SType, List<string>> synonyms = new Dictionary<SType, List<string>>();
 
         public double RuleRedundencyPerCent = 0.0;  //коэффициент избыточности, требуемый запас по данному материалу/профилю/Правилу
         private string sSupl;
         private string sCS;
         private string sR;
+
+        public Rule() { }
 
         public Rule(Docs doc, int i, bool init = true)
         {
@@ -78,10 +80,10 @@ namespace TSmatch.Rule
             string csName = (string)doc.Body[i, Decl.RULE_COMPSETNAME];
             string suplName = (string)doc.Body[i, Decl.RULE_SUPPLIERNAME];
             Supplier = new Suppliers.Supplier(suplName);
-            if(init) CompSet = new CmpSet(csName, Supplier, init: init);
+            if (init) CompSet = new CmpSet(csName, Supplier, init: init);
         }
         // параметр doc не указан, по умолчанию извлекаем Правила из TSmatch.xlsx/Rules
-        public Rule(int n, bool init=true) : this(Docs.getDoc(Decl.TSMATCHINFO_RULES), n, init) { }
+        public Rule(int n, bool init = true) : this(Docs.getDoc(Decl.TSMATCHINFO_RULES), n, init) { }
 #if DEBUG
         // 27/3/2017 пока - for unit test purpases only
         public Rule(string str, CmpSet cs)
@@ -102,7 +104,7 @@ namespace TSmatch.Rule
             CompSet = new CmpSet(sCS, Supplier);
         }
 
-        private Dictionary<SType, List<string>> RuleSynParse(string str)
+        public Dictionary<SType, List<string>> RuleSynParse(string str)
         {
             var Syns = new Dictionary<SType, List<string>>();
             string[] sections = str.Split(';');
@@ -133,9 +135,9 @@ namespace TSmatch.Rule
 
         internal static List<string> getList(string name)
         {
-            List<string> result = new List<string>(); 
+            List<string> result = new List<string>();
             Docs doc = Docs.getDoc(Decl.TSMATCHINFO_RULES);
-            for(int i = doc.i0; i <= doc.il; i++)
+            for (int i = doc.i0; i <= doc.il; i++)
             {
                 string suplName = doc.Body.Strng(i, Decl.RULE_SUPPLIERNAME);
                 if (suplName != name) continue;
