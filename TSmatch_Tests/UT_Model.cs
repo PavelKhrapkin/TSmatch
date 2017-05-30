@@ -1,25 +1,47 @@
-﻿using System;
+﻿/*=================================
+ * Model Unit Test 24.5.2017
+ *=================================
+ */
+ using System;
 using System.Linq;
 using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-using IMIT = TSmatch.Unit_Tests.Imitation._UT_Imitation;
-
+using FileOp = match.FileOp.FileOp;
+using Boot = TSmatch.Bootstrap.Bootstrap;
 using Elm = TSmatch.ElmAttSet.ElmAttSet;
 using Mod = TSmatch.Model.Model;
+using Decl = TSmatch.Declaration.Declaration;
 
 namespace TSmatch.Unit_Tests.UT_Model
 {
     [TestClass]
     public class UT_Model
     {
-        [TestMethod]
-        public void UT_Model_getModJournal()
-        {
-            Mod mod = new Mod();
-            int i = mod.getModJournal("ЗС2", @"C:\TeklaStructuresModels\2016\ЗС2");
-        }
+        Boot boot;
+        Mod model;
 
+        [TestMethod]
+        public void UT_SetModel()
+        {
+            boot = new Bootstrap.Bootstrap();
+            model = new Mod();
+            model.SetModel(boot);
+
+            Assert.IsTrue(model.name.Length > 0);
+            Assert.IsTrue(model.dir.Length > 0);
+            Assert.IsTrue(model.dir.Length > 0);
+            Assert.IsTrue(model.dir.Contains(@"\"));
+            Assert.IsTrue(model.dir.Contains(":"));
+            Assert.IsTrue(model.date > Decl.OLD);
+            Assert.IsTrue(model.date < DateTime.Now);
+            Assert.IsTrue(model.elements.Count > 0);
+            Assert.AreEqual(model.elements.Count, model.elementsCount);
+            Assert.IsTrue(model.elmGroups.Count > 0);
+
+            FileOp.AppQuit();
+        }
+#if old //24/5 move to UT_ModelHandle
         [TestMethod]
         public void UT_Model_getGroup()
         {
@@ -53,5 +75,6 @@ namespace TSmatch.Unit_Tests.UT_Model
             Assert.AreEqual(grB.prf, "1900x1600");
             Assert.AreEqual(grB.guids.Count, 2);
         }
+#endif // 24/5 moveto UT_ModelHandle
     }
 }
