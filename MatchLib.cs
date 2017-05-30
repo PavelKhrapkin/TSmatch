@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------
  * MatchLib -- библиотека общих подпрограмм проекта match 3.0
  * 
- *  2.5.2017 П.Храпкин, А.Пасс
+ *  24.05.17 П.Храпкин, А.Пасс
  *  
  * - 20.11.13 переписано с VBA на С#
  * - 1.12.13 добавлен метод ToIntList
@@ -19,7 +19,8 @@
  * - 21.2.16 убрал static class Matchlib; метод ToLat()
  * -  2.8.16 добавлен метод ToDouble
  * - 17.10.16 перенес GetPars из Matcher
- * -  2.05.17 Windows.Form and TextBox references removed, MessageBox add
+ * - 16.05.17 log4net use with WPF, TraceOn()/TraceOff()
+ * - 24.05.17 Regex const for GetPar are local - not in Declaration anymore
  * -------------------------------------------
  *      ---- методы Mtch.Lib ----
  * fileOpen(dir, name[,OpenMode]) - открываем файл Excel по имени name в директории Dir, возвращает Workbook
@@ -40,8 +41,10 @@ using System;
 using System.Data;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.IO;
 using System.Diagnostics;
-using System.Windows;
+using log4net;
+using log4net.Config;
 
 using System.Linq;
 using System.Text;
@@ -49,6 +52,8 @@ using System.Security.Cryptography;
 using Excel = Microsoft.Office.Interop.Excel;
 
 using Decl = TSmatch.Declaration.Declaration;   // модуль с константами и определениями
+
+[assembly: XmlConfigurator(Watch = true)]
 
 namespace match.Lib
 {
@@ -60,11 +65,11 @@ namespace match.Lib
         internal static bool isWinAppExist(string nameApp)
         {
             bool ok = false;
-            foreach(var app in Process.GetProcesses())
+            foreach (var app in Process.GetProcesses())
             {
                 if (app.ProcessName.ToUpper().Contains(nameApp)) return true;
             }
-//            throw new NotImplementedException();
+            //            throw new NotImplementedException();
             return ok;
         }
 
@@ -272,7 +277,7 @@ namespace match.Lib
         /// <param name="obj">входной параметр - список объектов</param>
         /// <returns></returns>
         /// <history>12.1.2016 PKh</history>
-///TODO 21/8/2016 - сделать нестатический метод ComputeMD5(this) c Sum 
+        ///TODO 21/8/2016 - сделать нестатический метод ComputeMD5(this) c Sum 
         public static string ComputeMD5(List<object> obj)
         {
             string str = "";
@@ -322,9 +327,11 @@ namespace match.Lib
         /// <returns>List<int>возвращаемый список найденых параметров</int></returns>
         public static List<int> GetPars(string str)
         {
+            const string ATT_DELIM = @"(${must}|,|=| |\t|\*|x|X|х|Х)";
             const string VAL = @"\d+";
             List<int> pars = new List<int>();
-            string[] pvals = Regex.Split(str, Decl.ATT_DELIM);
+            if (string.IsNullOrEmpty(str)) return pars;
+            string[] pvals = Regex.Split(str, ATT_DELIM);
             foreach (var v in pvals)
             {
                 if (string.IsNullOrEmpty(v)) continue;
@@ -340,13 +347,16 @@ namespace match.Lib
     /// <history> 30.12.2013 P.Khrapkin
     /// 1.1.2016 в FATAL выводим стек имен
     /// 9.9.2016 use lof4net log&trace library
+    /// 16.5.2017 log4net with WPF, TraceOn()/TraceOff()
     /// </history>
     public class Log
     {
-        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        //16/5        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        public static readonly ILog log = LogManager.GetLogger("Log");
 
         private static string _context;
         static Stack<string> _nameStack = new Stack<string>();
+        private static int _trace_level = 0;
 
         public Log(string msg)
         {
@@ -356,7 +366,7 @@ namespace match.Lib
         }
         public static void set(string sub)
         {
-//            log.Info(sub);
+            if (_trace_level > 0) log.Info("---" + sub);
             _nameStack.Push(sub);
         }
         public static void exit() { _nameStack.Pop(); }
@@ -366,20 +376,25 @@ namespace match.Lib
             log.Fatal("\n\n[FATAL] " + msg);
             _tx("\n\tв стеке имен:");
             foreach (var s in _nameStack) _tx("\t-> " + s);
-            Debugger.Break();
+            //19/5            Debugger.Break();
         }
         public static void Warning(string msg) { new Log("\n[warning] " + msg); }
+        public static void TraceOn() { _trace_level++; }
+        public static void TraceOff() { _trace_level--; }
+        public static void Trace(string msg, params object[] arg)
+        {
+            if (_trace_level <= 0) return;
+            foreach (var a in arg) if (a != null) msg += a.ToString() + " ";
+            log.Info(msg);
+        }
+        [STAThread]
         public static void START(string msg)
         {
             log.Info(DateTime.Now.ToShortDateString() + " ---------< " + msg + " >---------");
         }
-        private static void _tx(string tx)
-        {
-            Console.WriteLine(tx);
-//2/5/2017//            MessageBox.Show(tx);
-        }
+        private static void _tx(string tx) { log.Info(tx); Console.WriteLine(tx); }
     }
-#if WindowsForm_in_Use //2.5.2017
+#if OLD
     /// <summary>
     /// TextBoxWriter - система отладки с Log в WindowsForm 
     /// из http://devnuances.com/c_sharp/kak-perenapravit-vyivod-konsoli-v-textbox-v-c-sharp/
@@ -410,5 +425,5 @@ namespace match.Lib
             get { return System.Text.Encoding.UTF8; }
         }
     } // end class
-#endif //WindowsForm_in_Use
+#endif //OLD
 }  //end namespace

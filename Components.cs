@@ -1,7 +1,7 @@
 ﻿/*----------------------------------------------------------------------------
  * Components -- работа с документами - прайс-листами поставщиков компонентов
  * 
- * 24.04.2017  П.Храпкин
+ * 29.05.2017  П.Храпкин
  *
  *----- ToDo -----
  * 29.12.2016 написать загрузку из прайс-листа setComp(..) c разбором LoadDescriptor
@@ -11,6 +11,7 @@
  * 28.02.2017 fill component fields incliding List<FP> from price-list in constructor
  * 22.04.2017 Component match isMatchGrRule=true with empty Section.body
  * 24.04.2017 getMatch method updated
+ *  9.05.2017 Msg.W in Str() about wrong CompSet Load Description
  * ---------------------------------------------------------------------------
  *      МЕТОДЫ:
  * getCompSet(name, Supplier) - getCompSet by  its name in Supplier' list
@@ -45,7 +46,7 @@ namespace TSmatch.Component
     {
         public static readonly ILog log = LogManager.GetLogger("Component");
 
-        public readonly DP compDP;
+        public DP compDP;
 
         /// <summary>
         /// constructor Component(doc, i, List<FP>cs_fps, List<FP>rule_fps) - get Component from price-list in doc line i
@@ -164,7 +165,7 @@ namespace TSmatch.Component
                 string c = strExclude(comMatPrf, Syns);
                 string g = strExclude(grMatPrf, Syns);
                 if (c == g) return true;
-                string pattern = new Sec(rule.text, stype).body.Replace("=","");
+                string pattern = new Sec(rule.text, stype).body.Replace("=", "");
                 foreach (var s in Syns) pattern = strExclude(pattern, Syns);
                 return isMatch(pattern, c, g);
             }
@@ -190,7 +191,7 @@ namespace TSmatch.Component
             var p_c = rp(pattern, c);
             var p_g = rp(pattern, g);
             int cnt = Math.Min(p_c.Count, p_g.Count);
-            for(int i = 0; i < cnt; i++)
+            for (int i = 0; i < cnt; i++)
             {
                 if (p_c[i] != p_g[i]) return false;
             }
@@ -344,6 +345,11 @@ namespace TSmatch.Component
         /// <returns>representation of Component as a string</returns>
         public string Str(SType stype)
         {
+            if (!compDP.dpStr.ContainsKey(stype))
+            {
+                Msg.W("CompSet wrong LoadDescriptor", stype);
+                return string.Empty;
+            }
             return compDP.dpStr[stype];
         }
     } // end class Component

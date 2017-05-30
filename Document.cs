@@ -1,7 +1,7 @@
 ﻿/*-------------------------------------------------------------------------------------------------------
  * Document -- works with all Documents in the system basing on TOC - Table Of Content
  * 
- * 2.05.2017  Pavel Khrapkin, Alex Pass, Alex Bobtsov
+ * 7.05.2017  Pavel Khrapkin, Alex Pass, Alex Bobtsov
  *
  *--------- History ----------------  
  * 2013-2015 заложена система управления документами на основе TOC и Штампов
@@ -27,13 +27,12 @@
  * 13.01.17 - getDoc() = getDoc(Decl.DOC_TOC)
  *  9.04.17 - getDoc optional bool arguments
  * 17.04.17 - getDoc() il = doc.Body.iEOL();
- *  2.05.17 - isDocExist() defuail = TOC
+ *  7.05.17 - bug fix -- fatal с FileOp
  * -------------------------------------------
  *      METHODS:
  * Start()              - Load from directory TOCdir of TOC all known Document attributes, prepare everithing
  * tocStart(TOCdir)     - open TSmatch.xlsx from TOCdir directory; set Windown Registry Path if OK
- * setDocTemplate(dirTemplate, val) - set #dirTtemplate value as val in list of #templates
- * IsDocExist([name])   - check if document with doc.name exists
+ * setDocTemplate(dirTemplate, val) - set #dirTtemplate value as val in list of #templates  
  * getDoc(name[,fatal][,load]) - return Document doc named in TOC name or create it. Flag fatal is to try to open only
  *                                      load=false means do not document contents load from file
  * Reset()              - "Reset" of the Document. All contents of hes Excel Sheet erased, write Header form
@@ -81,7 +80,7 @@ namespace TSmatch.Document
         public Excel.Workbook Wb;
         public Excel.Worksheet Sheet;
         private string FileName;
-        public string FileDirectory;
+        private string FileDirectory;
         private string SheetN;
         public string MadeStep;
         private DateTime MadeTime;
@@ -227,7 +226,7 @@ namespace TSmatch.Document
         }
         #endregion
 
-        public static bool IsDocExists(string name = Decl.DOC_TOC)
+        public static bool IsDocExists(string name)
         {
             if (!Documents.ContainsKey(name)) return false;
             Document doc = Documents[name];
@@ -275,7 +274,7 @@ namespace TSmatch.Document
                     if (doc.FileDirectory.Contains("#")) // #Template substitute with Path in Dictionary
                         doc.FileDirectory = Templates[doc.FileDirectory];
                     //-------- Load Document from the file or create it ------------
-                    doc.Wb = FileOp.fileOpen(doc.FileDirectory, doc.FileName, create_if_notexist);
+                    doc.Wb = FileOp.fileOpen(doc.FileDirectory, doc.FileName, create_if_notexist, fatal);
                     if (reset) doc.Reset();
                     try { doc.Sheet = doc.Wb.Worksheets[doc.SheetN]; }
                     catch (Exception e) { err += "no SheetN"; ex = doc.SheetN; doc = null; }
@@ -313,7 +312,8 @@ namespace TSmatch.Document
             Body = FileOp.getSheetValue(Sheet);
             if (str == "Now")
             {
-                Body[1, 1] = Lib.timeStr();
+                Body[1, 1] = Lib.timeStr(DateTime.Now, "d.MM.yy H:mm");
+                isChanged = true; 
                 FileOp.setRange(Sheet);
                 FileOp.saveRngValue(Body);
             }
@@ -494,7 +494,7 @@ namespace TSmatch.Document
             }
             ////           doc.Sheet = doc.Wb.Worksheets[name];
             doc.splitBodySummary();
-            doc.FetchInit();
+//24/5/17            doc.FetchInit();
 
             ////// если есть --> запускаем Handler
             ////if (doc.Loader != null) Proc.Reset(doc.Loader);
@@ -620,13 +620,14 @@ namespace TSmatch.Document
                     finally { Log.exit(); }                  
                 }
         */ //2.1.16
-           /// <summary>
-           /// инициирует Fetch-структуру Документа для Запроса fetch_rqst.
-           /// Если fetch_rqst не указан - для всех Запросов Документа.
-           /// </summary>
-           /// <param name="fetch_rqst"></param>
-           /// <history>11.1.2014 PKh
-           /// 15.1.2014 - дописан FetchInit() - просмотр всех Fetch Документа</history>
+#if FETCH
+        /// <summary>
+        /// инициирует Fetch-структуру Документа для Запроса fetch_rqst.
+        /// Если fetch_rqst не указан - для всех Запросов Документа.
+        /// </summary>
+        /// <param name="fetch_rqst"></param>
+        /// <history>11.1.2014 PKh
+        /// 15.1.2014 - дописан FetchInit() - просмотр всех Fetch Документа</history>
         public void FetchInit()
         {
             Log.set("FetchInit");
@@ -704,6 +705,7 @@ namespace TSmatch.Document
             finally { Log.exit(); }
             return result;
         }
+#endif // FETCH
         /// <summary>
         /// Класс Stamp, описывающий все штампы документа
         /// </summary>
