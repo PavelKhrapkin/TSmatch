@@ -1,7 +1,7 @@
 /*--------------------------------------------
  * FileOp - File System primitives
  * 
- *  2.05.2017  Pavel Khrapkin, Alex Pass
+ *  7.05.2017  Pavel Khrapkin, Alex Pass
  *
  *--- History ---
  * 2013 - 2016 - created
@@ -11,7 +11,7 @@
  * 17.4.2016 - isDirExist(path) created; fileRename(..); fileRenSAV(); fileDelete
  * 13.1.2016 - getRange(str)
  * 22.4.2017 - AppQuit() method add
- *  2.5.2017 - fileOpen logic changed with create_if_notexist
+ *  7.5.2017 - fileOpen logic changed with create_if_notexist and fatal flag
  * -------------------------------------------        
  * fileOpen(dir,name[,create])  - Open or Create file name in dir catalog
  * fileRename(dir, oldName, newName) - rename file in the same Directory
@@ -67,8 +67,9 @@ namespace match.FileOp
         /// 17.01.16 - реорганизовано в отдельный файл FileOp.cs, обработка [,create_ifnotexist]
         /// 27.01.16 - поправил "create_ifnotexist" моду
         ///  2.05.17 - переписан блок try{} - открытие или создание файла
+        ///  7.05.17 - добавлен аргумент fatal: return null, если fatal==false
         /// </history>
-        public static Excel.Workbook fileOpen(string dir, string name, bool create_ifnotexist = false)
+        public static Excel.Workbook fileOpen(string dir, string name, bool create_ifnotexist = false, bool fatal = true)
         {
             Log.set("fileOpen");
             if (_app == null) _app = new Excel.Application();   // Excel не запущен -> запускаем
@@ -83,10 +84,14 @@ namespace match.FileOp
                 {
                     if (!isFileExist(file) && !create_ifnotexist) { Log.exit(); return null; }
                     if (isFileExist(file)) Wb = _app.Workbooks.Open(file);
-                    else { Wb = _app.Workbooks.Add(); Wb.SaveAs2(file); }
+                    else { Wb = _app.Workbooks.Add(); Wb.SaveAs(file); }
                     _app.Visible = true;
                 }
-                catch (Exception ex) { Log.FATAL("не открыт файл " + file + "\n сообщение по CATCH= '" + ex); }
+                catch (Exception ex)
+                {
+                    if(fatal) Log.FATAL("не открыт файл " + file + "\n сообщение по CATCH= '" + ex);
+                    Wb = null;
+                }
             }
             Log.exit();
             return Wb;

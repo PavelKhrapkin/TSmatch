@@ -1,7 +1,7 @@
 ﻿/*----------------------------------------------------------------------------------------------
  * Matcher -- module fulfill matching Group of the Elements with CompSet in accrding with Rule
  *
- * 22.4.2017 Pavel Khrapkin
+ * 8.5.2017 Pavel Khrapkin
  *
  *--- History ---
  * 2016 previous editions P.Khrapkin, A.Pass, A.Bobtsov
@@ -49,12 +49,9 @@ using Rule = TSmatch.Rule.Rule;
 using TSmatch.ElmAttSet;
 using TSmatch.Rule;
 using Msg = TSmatch.Message.Message;
-//using FP = TSmatch.FingerPrint.FingerPrint;
 using Sec = TSmatch.Section.Section;
 using Elm = TSmatch.ElmAttSet.ElmAttSet;
 using SType = TSmatch.Section.Section.SType;
-//using TST = TSmatch.Test.assert;
-//using TSmatch.FingerPrint;
 using TSmatch.DPar;
 
 namespace TSmatch.Matcher
@@ -112,7 +109,7 @@ namespace TSmatch.Matcher
                 switch (sec.Key)
                 {
                     case SType.UNIT_Weight: // kg -> tonn
-                        if(elm.weight == 0) return elm.volume * 7850;
+                        if (elm.weight == 0) return elm.volume * 7850;
                         return elm.weight / 1000 * price;
                     case SType.UNIT_Vol:    // mm3 -> m3
                         return elm.volume / 1000 / 1000 / 1000 * price;
@@ -129,6 +126,7 @@ namespace TSmatch.Matcher
         {
         }
 
+#if OLD //8/5/2017
         /// <summary>
         /// проверка, соответствует ли строка str набору синонимов и параметров
         /// !допустимы str без параметров; при этом pars == null
@@ -194,8 +192,8 @@ namespace TSmatch.Matcher
         //////////////    return result;
         //////////////}
 
-        #region ------ test Matcher -----
-#if DEBUG
+  //#region ------ test Matcher -----
+
         internal static void testMtch()
         {
             Log.set("testMtch");
@@ -322,8 +320,8 @@ namespace TSmatch.Matcher
         //////////////////////            TST.Eq(match.price, 0.0);
         ////////////////////            Log.exit();
         ////////////////////        }
-#endif //#if DEBUG
-        #endregion ------ test Matcher ------
+
+        //#endregion ------ test Matcher ------
         /* 5.12.2016 ревизия
         public struct OK    // структура данных, описывающая найденное соответствие..
         {                   //..Правил, Прайс-листа комплектующих, и строки - Группы <mat,prf>
@@ -655,5 +653,6 @@ namespace TSmatch.Matcher
           return found;
         } // end SearchInComp
         2016.12.05 revision */
+#endif //#if OLD 8/5/2017
     } // end class Matcher
 } // end namespace Matcher
