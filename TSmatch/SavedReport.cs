@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------------------
  * SavedReport -- class for handle saved reports in TSmatchINFO.xlsx
  * 
- *  27.05.2017 П.Л. Храпкин
+ *  3.06.2017 П.Л. Храпкин
  *  
  *--- Unit Tests ---
  * UT_SavedReport_Raw 2017.05.27 11 sec
@@ -349,7 +349,7 @@ namespace TSmatch.SaveReport
             Log.exit();
         }
 
-        internal void Save(Mod model, bool isRawChanged, bool isRuleChanged)
+        internal void Save(Mod model, bool isRuleChanged)
         {
             // переложим все необходимый атрибуты для ModelINFO из model в this
             name = model.name;
@@ -363,20 +363,13 @@ namespace TSmatch.SaveReport
             pricingMD5 = model.pricingMD5;
 
             elements = model.elements;
-
             elmGroups = model.elmGroups;
-
-            getSavedRules();
+            Rules = model.Rules;
 
             // теперь запишем в файл
             wrModel(WrMod.ModelINFO);
             wrModel(WrMod.Report);
-            //18/5            strListRules = model.strListRules;
-            //18/5            Rules = model.Rules;
             if (isRuleChanged) wrModel(WrMod.Rules);
-
-
-            //17/5            throw new NotImplementedException();
         }
 
         public void CloseReport()
