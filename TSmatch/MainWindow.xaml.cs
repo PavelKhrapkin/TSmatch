@@ -72,7 +72,7 @@ namespace TSmatch
             model.SetModel(boot);
             WrModelInfoPanel();
             WrReportPanel();
-            model.HighLightElements(Mod.HighLightMODE.NoPrice);
+//30/5            model.HighLightElements(Mod.HighLightMODE.NoPrice);
             message = "вначале группы без цен...";
             msg.Text = message;
         }
@@ -234,7 +234,7 @@ namespace TSmatch
             if (ModelIsChanged && Msg.AskYN("Модель или цены изменились. Запишем изменения в файл?"))
             {
                 var sr = new SaveReport.SavedReport();
-                sr.Save(model, isRawChanged, isRuleChanged);
+                    sr.Save(model, isRawChanged, isRuleChanged);
             }
             model.HighLightClear();
             FileOp.AppQuit();

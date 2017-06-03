@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------
  * TS_OpenAPI -- Interaction with Tekla Structure over Open API
  * 
- * 10.4.2017  Pavel Khrapkin, Alex Bobtsov
+ * 29.05.2017  Pavel Khrapkin, Alex Bobtsov
  *
  *----- ToDo ---------------------------------------------
  * - реализовать интерфейс IAdapterCAD, при этом избавится от static
@@ -23,7 +23,8 @@
  *  5.6.2016 PKh - isTeklaModel(name) add
  * 21.6.2016 PKh - ElmAttSet module keep all Elements instead of AttSet
  * 30.6.2016 PKh - IsTeklaActive() modified
- * 22.8.2018 PKh - Scale method to account unit in Model
+ * 22.8.2016 PKh - Scale method to account unit in Model
+ * 29.5.2017 Pkh - Get Russian GOST profile from UDA
  * -------------------------------------------
  * public Structure AttSet - set of model component attribuyes, extracted from Tekla by method Read
  *                           AttSet is Comparable, means Sort is applicable, and 
@@ -42,6 +43,7 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Threading;
 using System.Diagnostics;
 using log4net.Config;
 
@@ -50,6 +52,7 @@ using TSD = Tekla.Structures.Dialog.ErrorDialog;
 using Tekla.Structures.Model;
 using Tekla.Structures.Geometry3d;
 using Tekla.Structures.Model.UI;
+using Tekla.Structures.Model.Operations;
 
 using Log = match.Lib.Log;
 using Msg = TSmatch.Message.Message;
@@ -60,11 +63,11 @@ using Elm = TSmatch.ElmAttSet.ElmAttSet;
 
 namespace TSmatch.Tekla
 {
-    class Tekla //: IAdapterCAD
+    public class Tekla //: IAdapterCAD
     {
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger("Tekla:TS_OpenAPI");
 
-        const string MYNAME = "Tekla.Read v2.0";
+        const string MYNAME = "Tekla.Read v2.1";
 
         public enum ModelDir { exceldesign, model, macro, environment };
         /* 21.6.2016 -- заменяем на ElmAttSet
@@ -143,6 +146,7 @@ namespace TSmatch.Tekla
                     string guid = "";
                     string mat_type = "";
                     double price = 0.0;
+//31/5/17                    string prf = string.Empty;
 
                     myPart.GetReportProperty("GUID", ref guid);
                     myPart.GetReportProperty("LENGTH", ref lng);
@@ -150,16 +154,16 @@ namespace TSmatch.Tekla
                     myPart.GetReportProperty("VOLUME", ref vol);
                     myPart.GetReportProperty("MATERIAL_TYPE", ref mat_type);
 
+                    string ru_prf = "";
+                    myPart.GetReportProperty("PROFILE.TPL_NAME_FULL", ref ru_prf);
+                    //31/5/17                    prf = ru_prf == string.Empty ? myPart.Profile.ProfileString : ru_prf;
+
+                    string pp = "";
+                    myPart.GetReportProperty("PROFILE", ref pp);
+
                     lng = Math.Round(lng, 0);
-                    //string cut = "";
-                    //myPart.GetReportProperty("CAST_UNIT_TYPE", ref cut);
-                    //ModAtr.Add(new AttSet(myPart.Material.MaterialString,
-                    //                      profile, lng, weight, vol));
-                    //21/6/2016 в отладке                    Elm.Elements.Add(new Elm());
                     elements.Add(new Elm(guid, myPart.Material.MaterialString,
-                        mat_type,
-                        myPart.Profile.ProfileString,
-                        lng, weight, vol, price));
+                        mat_type, myPart.Profile.ProfileString, lng, weight, vol, _ru_prf: ru_prf));
  // !!                  if (ii % 500 == 0) // progress update every 500th items
                     {
                         if (progress.Canceled())
@@ -195,6 +199,54 @@ namespace TSmatch.Tekla
             return Read(dir, name);
         }
 
+        public bool IfLockedWait(string FileName)
+        {
+            // try 10 times
+            int RetryNumber = 20;
+            while (true)
+            {
+                try
+                {
+                    using (FileStream FileStream = new FileStream(
+                    FileName, FileMode.Open,
+                    FileAccess.ReadWrite, FileShare.ReadWrite))
+                    {
+                        byte[] ReadText = new byte[FileStream.Length];
+                        FileStream.Seek(0, SeekOrigin.Begin);
+                        FileStream.Read(ReadText, 0, (int)FileStream.Length);
+                    }
+                    return true;
+                }
+                catch (IOException)
+                {
+                    // wait one second
+                    Thread.Sleep(500);
+                    RetryNumber--;
+                    if (RetryNumber == 0)
+                        return false;
+                }
+            }
+        }
+
+        public void WriteToReport(string path)
+        {
+            Operation.CreateReportFromAll("ОМ_Список", path, "MyTitle", "", "");
+            while (!File.Exists(path)) Thread.Sleep(500);
+            if (!IfLockedWait(path)) Msg.F("No Tekla Report created");
+        }
+
+        public string ReadReport(string path)
+        {
+            String rep = string.Empty;
+            try
+            {
+                using (StreamReader sr = new StreamReader(path))
+                rep = sr.ReadToEnd();
+            }
+            catch (Exception e) { Msg.F("Tekla ReadReport: can't read file: " + e.Message); }
+            return rep;
+        }
+
         public int elementsCount()
         {
             Log.set("TS_OpenAPI.elementsCount()");
@@ -216,29 +268,16 @@ namespace TSmatch.Tekla
         public void HighlightElements(Dictionary<string, Elm> els, int color = 1)
         {
             Log.set("TS_OpenAPI.HighLightElements");
-            TSM.ModelObjectSelector selector = model.GetModelObjectSelector();
-            System.Type[] Types = new System.Type[1];
-            Types.SetValue(typeof(Part), 0);
-
-            TSM.ModelObjectEnumerator objectList = selector.GetAllObjectsWithType(Types);
-            int totalCnt = objectList.GetSize();
-
             var colorObjects = new List<ModelObject>();
-
-            while (objectList.MoveNext())
+            foreach (var elm in els)
             {
-                TSM.Part myPart = objectList.Current as TSM.Part;
-                if (myPart != null)
-                {
-                    string guid = string.Empty;
-                    myPart.GetReportProperty("GUID", ref guid);
-                    if (els.ContainsKey(guid)) colorObjects.Add(myPart);
-                }
+                Identifier id = new Identifier(elm.Key);
+                var obj = model.SelectModelObject(id);
+                colorObjects.Add(obj);
             }
             var _color = new Color(0.0, 0.0, 1.0);
             ModelObjectVisualization.SetTransparencyForAll(TemporaryTransparency.SEMITRANSPARENT);
             ModelObjectVisualization.SetTemporaryState(colorObjects, _color);
-            log.Info("\tTotal elements without price = " + colorObjects.Count);
             Log.exit();
         }
 
