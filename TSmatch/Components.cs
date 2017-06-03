@@ -197,6 +197,7 @@ namespace TSmatch.Component
             }
             return true;
         }
+        // parse string str with the pattern from rule.text
         public List<string> rp(string pattern, string str)
         {
             List<string> par = new List<string>();

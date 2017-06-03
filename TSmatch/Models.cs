@@ -1,7 +1,7 @@
 ﻿/*------------------------------------------------------------------------------------------
  * Model -- класс управления моделями, ведет Журнал Моделей и управляет их сохранением
  * 
- * 29.05.2017 П.Л. Храпкин
+ * 30.05.2017 П.Л. Храпкин
  *  
  *--- History ---
  * 18.1.2016 заложено П.Храпкин, А.Пасс, А.Бобцов
@@ -146,14 +146,6 @@ namespace TSmatch.Model
                 name = Path.GetFileNameWithoutExtension(TS.ModInfo.ModelName);
                 dir = TS.ModInfo.ModelPath;
                 elementsCount = ts.elementsCount();
-                // getModInfo from Journal by name and dir
-                //17/4                iModJounal = getModJournal(name, dir);
-                //17/4                date = DateTime.Parse(modJournal(iModJounal, Decl.MODEL_DATE));
-                //17/4                savedReport.(date, dir);
-                //17/4                if (!GetSavedReport()) savedReport.SaveReport();
-                //17/4                getSavedGroups();
-                //12/4                getSavedRules();
-                //17/4 !! проверять, что elementsCount в Tekla и в памяти равны!!
             }
             else //if no Tekla active get name and dir from IFC or from INFO file if exists
             {
@@ -270,13 +262,22 @@ namespace TSmatch.Model
         public enum HighLightMODE { NoPrice, Guids }
         public void HighLightElements(HighLightMODE mode, List<string> guids = null)
         {
+            DateTime t0 = DateTime.Now;
             HighLightClear();
+            var elms = new Dictionary<string, Elm>();
+            foreach (var elm in elements) elms.Add(elm.guid, elm);
             var toBeHighghlited = new Dictionary<string, Elm>();
             switch (mode)
             {
                 case HighLightMODE.NoPrice:
-                    foreach (var elm in elements)
-                        if (elm.price == 0) toBeHighghlited.Add(elm.guid, elm);
+                    foreach(var gr in elmGroups)
+                    {
+                        if (gr.totalPrice != 0) continue;
+                        foreach (string id in gr.guids)
+                            toBeHighghlited.Add(id, elms[id]);
+                    }
+//30/5                    foreach (var elm in elements)
+//30/5                        if (elm.price == 0) toBeHighghlited.Add(elm.guid, elm);
                     break;
                 case HighLightMODE.Guids:
                     if (guids == null || guids.Count == 0) return;
@@ -286,15 +287,20 @@ namespace TSmatch.Model
                     break;
             }
             HighLightElements(toBeHighghlited);
+            log.Info("HighLight(" + mode.ToString() + ") " 
+                + toBeHighghlited.Count + " elements "
+                + (DateTime.Now - t0));
         }
         public void HighLightElements(Dictionary<string, Elm> elms)
         {
             //23/5            if (TS.isTeklaActive()) ts.HighlightElements(elms);
             if (TS.isTeklaActive())
             {
-                Type type = typeof(InvHLclass);
-                MethodInfo info = type.GetMethod("InvHL");
-                info.Invoke(null, new object[] { elms });
+                ts.HighlightElements(elms);
+                
+                //////////Type type = typeof(InvHLclass);
+                // 31.5///MethodInfo info = type.GetMethod("InvHL");
+                //////////info.Invoke(null, new object[] { elms });
             }
             else { } // in future here put the code for highlight in another Viewer
         }

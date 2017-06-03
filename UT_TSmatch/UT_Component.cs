@@ -12,7 +12,7 @@ namespace TSmatch.Component.Tests
     public class UT_Component
     {
         [TestMethod()]
-        public void UT_isMatch()
+        public void UT_Component_isMatch()
         {
             ElmAttSet.Group gr = new ElmAttSet.Group();
             gr.prf = "U10P_8240_97";
@@ -25,6 +25,15 @@ namespace TSmatch.Component.Tests
             bool b = comp.isMatch(gr, rule);
 
             Assert.IsTrue(b);
+        }
+
+        [TestMethod()]
+        public void UT_Component_rp()
+        {
+            var comp = new Component();
+            string pattern = "*x*";
+            string str = "2x1250x2500";
+            var v = comp.rp(pattern, str);
         }
     }
 }

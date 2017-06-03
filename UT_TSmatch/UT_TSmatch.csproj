@@ -62,6 +62,7 @@
     <Compile Include="UT_Model.cs" />
     <Compile Include="UT_PriceList.cs" />
     <Compile Include="UT_SavedReport.cs" />
+    <Compile Include="UT_Tekla.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
