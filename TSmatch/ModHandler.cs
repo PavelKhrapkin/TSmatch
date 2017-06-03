@@ -1,7 +1,7 @@
 ﻿/*--------------------------------------------------------------------------------------------
  * ModHandler : Model -- Handle Model for Report preparation
  * 
- *  29.05.2017 Pavel Khrapkin
+ *  3.06.2017 Pavel Khrapkin
  *  
  *--- History ---
  *  8.05.2017 taken from Model code
@@ -74,7 +74,12 @@ namespace TSmatch.Model.Handler
 
         public void Pricing(ref Mod m)
         {
-            getRules(m);
+            if (m.Rules == null || m.Rules.Count == 0)
+            {
+                if(sr == null) sr = new SaveReport.SavedReport();
+                sr.getSavedRules();
+                m.Rules = sr.Rules;
+            }
             Handler(m);
         }
 
@@ -98,14 +103,14 @@ namespace TSmatch.Model.Handler
             return elms.Values.ToList();
         }
 
-        internal void getRules(Mod mod)
-        {
-            if (mod.Rules.Count != 0) return;
-            Docs dRules = Docs.getDoc(Decl.TSMATCHINFO_RULES);
-            for (int i = dRules.i0; i <= dRules.il; i++)
-                mod.Rules.Add(new Rule.Rule(i));
-            foreach (var rule in mod.Rules) rule.CompSet.doc.Close();
-        }
+        //////////////////////////internal void getRules(Mod mod)
+        //////////////////////////{
+        //////////////////////////    if (mod.Rules.Count != 0) return;
+        // 3/6/17 ////////////////    Docs dRules = Docs.getDoc(Decl.TSMATCHINFO_RULES);
+        //////////////////////////    for (int i = dRules.i0; i <= dRules.il; i++)
+        //////////////////////////        mod.Rules.Add(new Rule.Rule(i));
+        //////////////////////////    foreach (var rule in mod.Rules) rule.CompSet.doc.Close();
+        //////////////////////////}
         /// <summary>
         /// getGroups() - groupping of elements of Model by Material and Profile
         /// </summary>
