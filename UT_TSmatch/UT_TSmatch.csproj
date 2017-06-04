@@ -60,6 +60,7 @@
     <Compile Include="UT_Bootstrap.cs" />
     <Compile Include="UT_Component.cs" />
     <Compile Include="UT_Model.cs" />
+    <Compile Include="UT_ModHandler.cs" />
     <Compile Include="UT_PriceList.cs" />
     <Compile Include="UT_SavedReport.cs" />
     <Compile Include="UT_Tekla.cs" />
