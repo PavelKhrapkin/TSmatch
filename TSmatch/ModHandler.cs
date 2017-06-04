@@ -1,7 +1,7 @@
 ﻿/*--------------------------------------------------------------------------------------------
  * ModHandler : Model -- Handle Model for Report preparation
  * 
- *  3.06.2017 Pavel Khrapkin
+ *  4.06.2017 Pavel Khrapkin
  *  
  *--- History ---
  *  8.05.2017 taken from Model code
@@ -76,7 +76,7 @@ namespace TSmatch.Model.Handler
         {
             if (m.Rules == null || m.Rules.Count == 0)
             {
-                if(sr == null) sr = new SaveReport.SavedReport();
+                if (sr == null) sr = new SaveReport.SavedReport();
                 sr.getSavedRules();
                 m.Rules = sr.Rules;
             }
@@ -164,6 +164,9 @@ namespace TSmatch.Model.Handler
                 }
                 if (guids.Count != 0) elmGroups.Add(new ElmGr(Elements, curMat, curPrf, guids));
             }
+
+            PrfUpdate();
+
             log.Info("----- <Material, Profile> Groups Count = " + this.elmGroups.Count);
             int chkSum = 0;
             foreach (var gr in this.elmGroups)
@@ -172,6 +175,48 @@ namespace TSmatch.Model.Handler
                 chkSum += gr.guids.Count;
             }
             log.Info("-------------- CheckSum: total elements count in all groups = " + chkSum);
+        }
+        /// <summary>
+        ///  PrfUpdate() - Profile code corrections for some groups
+        /// </summary>
+        public void PrfUpdate()
+        {
+            PrfNormalize(parSort: true, "—", "PL");
+            PrfNormalize("L");
+        }
+
+
+        private void PrfNormalize(bool parSort, params string[] prfMark)
+        {
+            foreach (var gr in elmGroups)
+            {
+                foreach(string s in prfMark)
+                {
+                    if (gr.Prf.Contains(s) || gr.prf.Contains(s))
+                    {
+                        var pars = Lib.GetPars(gr.Prf);
+                        switch (pars.Count)
+                        {
+                            case 1:
+                                gr.prf = gr.Prf = prfMark[0] + pars[0];
+                                break;
+                            case 2:
+                                int p1 = pars.Min();
+                                pars.Remove(p1);
+                                gr.prf = gr.Prf = prfMark[0] + p1 + 'x' + pars[0];
+                                break;
+                            case 3:
+                                int p_1 = pars.Min();
+                                pars.Remove(p_1);
+                                int p_3 = pars.Max();
+                                pars.Remove(p_3);
+                                gr.prf = gr.Prf = prfMark[0] + p_1 + 'x' + pars[0] + 'x' + p_3;
+                                break;
+                            default: Msg.F("ModHandler.grPrfPars not recognized Profile"); break;
+                        }
+                    }
+                }
+            }
         }
     } // end class ModHandler : Model
 } // end namespace Model.Handler
