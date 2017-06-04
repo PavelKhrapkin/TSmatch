@@ -181,12 +181,16 @@ namespace TSmatch.Model.Handler
         /// </summary>
         public void PrfUpdate()
         {
-            PrfNormalize(parSort: true, "—", "PL");
-            PrfNormalize("L");
+            PrfNormalize(PrfOpMode.Full, "—", "PL", "Полоса");
+            PrfNormalize(PrfOpMode.Mark, "L", "Уголок");
+            PrfNormalize(PrfOpMode.Mark, "I", "Балка");
         }
-
-
-        private void PrfNormalize(bool parSort, params string[] prfMark)
+        /// <summary>
+        /// PrfNormalize operate as pointed by PrfOpMode - only setup Mark as pointed in first argument
+        /// <para/>    or in Full mode sort digital parameters after mark in elmGroups collection;  
+        /// </summary>
+        enum PrfOpMode { Full, Mark }
+        private void PrfNormalize(PrfOpMode md, params string[] prfMark)
         {
             foreach (var gr in elmGroups)
             {
@@ -194,26 +198,39 @@ namespace TSmatch.Model.Handler
                 {
                     if (gr.Prf.Contains(s) || gr.prf.Contains(s))
                     {
+                        int p1, p3;
+                        string mark = prfMark[0];
                         var pars = Lib.GetPars(gr.Prf);
                         switch (pars.Count)
                         {
                             case 1:
-                                gr.prf = gr.Prf = prfMark[0] + pars[0];
+                                mark = mark + pars[0];
                                 break;
                             case 2:
-                                int p1 = pars.Min();
+                                if(md == PrfOpMode.Mark)
+                                {
+                                    mark = mark + pars[0] + "x" + pars[1];
+                                    break;
+                                }
+                                p1 = pars.Min();
                                 pars.Remove(p1);
-                                gr.prf = gr.Prf = prfMark[0] + p1 + 'x' + pars[0];
+                                mark = mark + p1 + 'x' + pars[0];
                                 break;
                             case 3:
-                                int p_1 = pars.Min();
-                                pars.Remove(p_1);
-                                int p_3 = pars.Max();
-                                pars.Remove(p_3);
-                                gr.prf = gr.Prf = prfMark[0] + p_1 + 'x' + pars[0] + 'x' + p_3;
+                                if (md == PrfOpMode.Mark)
+                                {
+                                    mark = mark + pars[0] + 'x' + pars[1] + 'x' + pars[2];
+                                    break;
+                                }
+                                p1 = pars.Min();
+                                pars.Remove(p1);
+                                p3 = pars.Max();
+                                pars.Remove(p3);
+                                mark = mark + p1 + 'x' + pars[0] + 'x' + p3;
                                 break;
                             default: Msg.F("ModHandler.grPrfPars not recognized Profile"); break;
                         }
+                        gr.prf = gr.Prf = mark;
                     }
                 }
             }
