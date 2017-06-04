@@ -40,7 +40,7 @@ namespace TSmatch.Model.Handler.Tests
             mod.elmGroups.Add(gr);
             mod.PrfUpdate();
             v = mod.elmGroups[2].prf;
-            Assert.AreEqual(v, "L5x75");
+            Assert.AreEqual(v, "L75x5");
         }
     }
 }

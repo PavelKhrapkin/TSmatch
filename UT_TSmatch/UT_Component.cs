@@ -10,6 +10,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using Lib = match.Lib.MatchLib;
+
 namespace TSmatch.Component.Tests
 {
     [TestClass()]
@@ -39,6 +41,28 @@ namespace TSmatch.Component.Tests
             comp.compDP = new DPar.DPar("Prf:PL10x300");
             Assert.AreEqual(comp.compDP.dpar.Count, 1);
             Assert.AreEqual(comp.compDP.dpar[Section.Section.SType.Profile], "pl10x300");
+            b = comp.isMatch(gr, rule);
+
+            //test 3: gr="L75x5" rule="Профиль: Уголок=L *x*;" => TRUE
+            gr.prf = "l75x5";
+            rule.text = Lib.ToLat("Профиль: Уголок=L *x*;");
+            rule.ruleDP = new DPar.DPar(rule.text);
+            rule.synonyms = rule.RuleSynParse(rule.text);
+            comp.compDP = new DPar.DPar("Prf:Уголок 75 x 5");
+
+            string vs = rule.synonyms[Section.Section.SType.Profile][0];
+            string vd = comp.viewComp_(Section.Section.SType.Profile);
+            for(int i=0; i< vs.Length; i++)
+            {
+                char s = vs[i];
+                char d = vd[i];
+            }
+
+            Assert.IsTrue(vd.Contains(vs));
+            Assert.AreEqual(comp.compDP.dpar.Count, 1);
+            var v = comp.compDP.dpar[Section.Section.SType.Profile];
+            Assert.AreEqual(v, "угoлoк75x5");
+            //4/6            Assert.AreEqual(comp.compDP.dpar[Section.Section.SType.Profile], "l75x5");
             b = comp.isMatch(gr, rule);
             Assert.IsTrue(b);
 #if NOT_WORKS_YET   //4/3/17
