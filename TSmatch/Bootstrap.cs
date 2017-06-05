@@ -319,16 +319,5 @@ namespace TSmatch.Bootstrap
                 SectionTab.Add(t.ToString(), lst);
             }
         } // end class initSection
-#if OLD
-        void initModJournal()
-        {
-            models = new List<Mod>();
-//24/5            Docs doc = Docs.getDoc(Decl.MODELS);
-            for (int i = doc.i0; i <= doc.il; i++)
-            {
-                models.Add(new Mod(i, doInit: false));
-            }
-        }
-#endif // OLD
     } // end class Bootsrap
 } // end namespace
