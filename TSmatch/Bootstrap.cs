@@ -1,5 +1,5 @@
-﻿/*-----------------------------------------------------------------------------------
- * Bootstrap - provide initial start of TSmatch, when necessary - startup procedure
+﻿/*--------------------------------------------------------------------------------------
+ * Bootstrap - provide initial start of TSmatch, when necessary - recovery of resources
  * 
  *  24.05.2017  Pavel Khrapkin
  *
