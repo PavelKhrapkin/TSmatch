@@ -49,6 +49,7 @@ namespace TSmatch.ElmAttSet
         public string mat = "";
         public string mat_type = "";
         public string prf = "";
+        public string ru_prf = "";
         public double length = 0.0;
         public double weight = 0.0;
         public double volume = 0.0;
@@ -59,7 +60,8 @@ namespace TSmatch.ElmAttSet
         public ElmAttSet() { }
 
         public ElmAttSet(string _guid, string _mat, string _mat_type, string _prf
-            , double _lng = 0.0, double _weight = 0.0, double _volume = 0.0, double _price = 0.0)
+            , double _lng = 0.0, double _weight = 0.0, double _volume = 0.0
+            , string _ru_prf = "", double _price = 0.0)
         {
             guid = _guid;
             mat = _mat;
@@ -69,6 +71,7 @@ namespace TSmatch.ElmAttSet
             weight = _weight;
             volume = _volume;
             price = _price;
+            ru_prf = _ru_prf;
         }
         public ElmAttSet(Ifc ifc_elm)
         {

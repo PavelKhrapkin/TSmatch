@@ -43,6 +43,7 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Threading;
 using System.Diagnostics;
 using log4net.Config;
 
@@ -51,6 +52,7 @@ using TSD = Tekla.Structures.Dialog.ErrorDialog;
 using Tekla.Structures.Model;
 using Tekla.Structures.Geometry3d;
 using Tekla.Structures.Model.UI;
+using Tekla.Structures.Model.Operations;
 
 using Log = match.Lib.Log;
 using Msg = TSmatch.Message.Message;
@@ -61,7 +63,7 @@ using Elm = TSmatch.ElmAttSet.ElmAttSet;
 
 namespace TSmatch.Tekla
 {
-    class Tekla //: IAdapterCAD
+    public class Tekla //: IAdapterCAD
     {
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger("Tekla:TS_OpenAPI");
 
@@ -144,7 +146,7 @@ namespace TSmatch.Tekla
                     string guid = "";
                     string mat_type = "";
                     double price = 0.0;
-                    string prf = string.Empty;
+//31/5/17                    string prf = string.Empty;
 
                     myPart.GetReportProperty("GUID", ref guid);
                     myPart.GetReportProperty("LENGTH", ref lng);
@@ -152,14 +154,16 @@ namespace TSmatch.Tekla
                     myPart.GetReportProperty("VOLUME", ref vol);
                     myPart.GetReportProperty("MATERIAL_TYPE", ref mat_type);
 
-                    // when local Profile.TPL_NAME_FULL is empty, set it from ProfileString
-                    string uda_prf = "";
-                    myPart.GetReportProperty("PROFILE.TPL_NAME_FULL", ref uda_prf);
-                    prf = uda_prf == string.Empty ? myPart.Profile.ProfileString : uda_prf;
+                    string ru_prf = "";
+                    myPart.GetReportProperty("PROFILE.TPL_NAME_FULL", ref ru_prf);
+                    //31/5/17                    prf = ru_prf == string.Empty ? myPart.Profile.ProfileString : ru_prf;
+
+                    string pp = "";
+                    myPart.GetReportProperty("PROFILE", ref pp);
 
                     lng = Math.Round(lng, 0);
                     elements.Add(new Elm(guid, myPart.Material.MaterialString,
-                        mat_type, prf, lng, weight, vol));
+                        mat_type, myPart.Profile.ProfileString, lng, weight, vol, _ru_prf: ru_prf));
  // !!                  if (ii % 500 == 0) // progress update every 500th items
                     {
                         if (progress.Canceled())
@@ -193,6 +197,54 @@ namespace TSmatch.Tekla
             string dir = Path.GetDirectoryName(path);
             string name = Path.GetFileName(path);
             return Read(dir, name);
+        }
+
+        public bool IfLockedWait(string FileName)
+        {
+            // try 10 times
+            int RetryNumber = 20;
+            while (true)
+            {
+                try
+                {
+                    using (FileStream FileStream = new FileStream(
+                    FileName, FileMode.Open,
+                    FileAccess.ReadWrite, FileShare.ReadWrite))
+                    {
+                        byte[] ReadText = new byte[FileStream.Length];
+                        FileStream.Seek(0, SeekOrigin.Begin);
+                        FileStream.Read(ReadText, 0, (int)FileStream.Length);
+                    }
+                    return true;
+                }
+                catch (IOException)
+                {
+                    // wait one second
+                    Thread.Sleep(500);
+                    RetryNumber--;
+                    if (RetryNumber == 0)
+                        return false;
+                }
+            }
+        }
+
+        public void WriteToReport(string path)
+        {
+            Operation.CreateReportFromAll("ОМ_Список", path, "MyTitle", "", "");
+            while (!File.Exists(path)) Thread.Sleep(500);
+            if (!IfLockedWait(path)) Msg.F("No Tekla Report created");
+        }
+
+        public string ReadReport(string path)
+        {
+            String rep = string.Empty;
+            try
+            {
+                using (StreamReader sr = new StreamReader(path))
+                rep = sr.ReadToEnd();
+            }
+            catch (Exception e) { Msg.F("Tekla ReadReport: can't read file: " + e.Message); }
+            return rep;
         }
 
         public int elementsCount()

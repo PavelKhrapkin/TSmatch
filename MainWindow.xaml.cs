@@ -1,6 +1,5 @@
 ﻿/*-------------------------------------------
- * WPF Main Windows 25.5.2017 Pavel.Khrapkin
- * ------------------------------------------
+ * WPF Main Windows 3.6.2017 Pavel.Khrapkin
  * --- History ---
  * 2017.05.15 - restored as TSmatch 1.0.1 after Source Control excident
  * 2017.05.23 - Menu OnPriceCheck
@@ -43,7 +42,7 @@ namespace TSmatch
     {
         public static readonly ILog log = LogManager.GetLogger("MainWindow");
 
-        const string ABOUT = "TSmatch v1.0.2 25.5.2017";
+        const string ABOUT = "TSmatch v1.0.2 3.6.2017";
         public static Boot boot;
         public static string MyCity = "Санкт-Петербург";
         public delegate void NextPrimeDelegate();
@@ -230,11 +229,11 @@ namespace TSmatch
 
         private void OK_button_Click(object sender, RoutedEventArgs e)
         {
-//21/5            isRuleChanged = true;
+//21/5            isRuleChanged = true; // для отладки
             if (ModelIsChanged && Msg.AskYN("Модель или цены изменились. Запишем изменения в файл?"))
             {
                 var sr = new SaveReport.SavedReport();
-                sr.Save(model, isRawChanged, isRuleChanged);
+                sr.Save(model, isRuleChanged);
             }
             model.HighLightClear();
             FileOp.AppQuit();

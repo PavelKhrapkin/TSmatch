@@ -1,18 +1,18 @@
 ﻿/*----------------------------------------------------------------------------------------------
  * Matcher -- module fulfill matching Group of the Elements with CompSet in accrding with Rule
  *
- * 8.5.2017 Pavel Khrapkin
+ * 4.6.2017 Pavel Khrapkin
  *
  *--- History ---
  * 2016 previous editions P.Khrapkin, A.Pass, A.Bobtsov
  *  5.12.2016 revision of module Matcher: class Mtch instead of OK
  *  3.03.2017 enum ok {Match, NoMatch, NoSection}
  *  7.03.2017 use Section module
+ *  4.06.2017 fair and handle Exception in Component when cannot parse Rule or Group
  *  
  *  <ToDo> 2017.03.2 Matcher revision:
  *  - check Shft/F12 all referenced to Mtch
- *  - создать класс Mtch
- *  - revision of SearchInComp
+ *  2017.06.04 move part of methods from Components to Matcher
  *  
  * ---------  Mtch - class - the result of matching
  * 
@@ -81,7 +81,11 @@ namespace TSmatch.Matcher
             group = gr;
             foreach (var comp in _rule.CompSet.Components)
             {
-                if (!comp.isMatch(gr, _rule)) continue;
+                bool found = false;
+                try { found = comp.isMatch(gr, _rule); }
+                catch { }
+//4/6               if (!comp.isMatch(gr, _rule)) continue;
+                if (!found) continue;
                 //-- Component is found - fill Price for all Guids elemets
                 ok = OK.Match;
                 component = comp;

@@ -1,7 +1,7 @@
 ﻿/*--------------------------------------------------------------------------------------------
  * ModHandler : Model -- Handle Model for Report preparation
  * 
- *  29.05.2017 Pavel Khrapkin
+ *  4.06.2017 Pavel Khrapkin
  *  
  *--- History ---
  *  8.05.2017 taken from Model code
@@ -74,7 +74,12 @@ namespace TSmatch.Model.Handler
 
         public void Pricing(ref Mod m)
         {
-            getRules(m);
+            if (m.Rules == null || m.Rules.Count == 0)
+            {
+                if (sr == null) sr = new SaveReport.SavedReport();
+                sr.getSavedRules();
+                m.Rules = sr.Rules;
+            }
             Handler(m);
         }
 
@@ -98,14 +103,14 @@ namespace TSmatch.Model.Handler
             return elms.Values.ToList();
         }
 
-        internal void getRules(Mod mod)
-        {
-            if (mod.Rules.Count != 0) return;
-            Docs dRules = Docs.getDoc(Decl.TSMATCHINFO_RULES);
-            for (int i = dRules.i0; i <= dRules.il; i++)
-                mod.Rules.Add(new Rule.Rule(i));
-            foreach (var rule in mod.Rules) rule.CompSet.doc.Close();
-        }
+        //////////////////////////internal void getRules(Mod mod)
+        //////////////////////////{
+        //////////////////////////    if (mod.Rules.Count != 0) return;
+        // 3/6/17 ////////////////    Docs dRules = Docs.getDoc(Decl.TSMATCHINFO_RULES);
+        //////////////////////////    for (int i = dRules.i0; i <= dRules.il; i++)
+        //////////////////////////        mod.Rules.Add(new Rule.Rule(i));
+        //////////////////////////    foreach (var rule in mod.Rules) rule.CompSet.doc.Close();
+        //////////////////////////}
         /// <summary>
         /// getGroups() - groupping of elements of Model by Material and Profile
         /// </summary>
@@ -159,6 +164,9 @@ namespace TSmatch.Model.Handler
                 }
                 if (guids.Count != 0) elmGroups.Add(new ElmGr(Elements, curMat, curPrf, guids));
             }
+
+            PrfUpdate();
+
             log.Info("----- <Material, Profile> Groups Count = " + this.elmGroups.Count);
             int chkSum = 0;
             foreach (var gr in this.elmGroups)
@@ -167,6 +175,65 @@ namespace TSmatch.Model.Handler
                 chkSum += gr.guids.Count;
             }
             log.Info("-------------- CheckSum: total elements count in all groups = " + chkSum);
+        }
+        /// <summary>
+        ///  PrfUpdate() - Profile code corrections for some groups
+        /// </summary>
+        public void PrfUpdate()
+        {
+            PrfNormalize(PrfOpMode.Full, "—", "PL", "Полоса");
+            PrfNormalize(PrfOpMode.Mark, "L", "Уголок");
+            PrfNormalize(PrfOpMode.Mark, "I", "Балка");
+        }
+        /// <summary>
+        /// PrfNormalize operate as pointed by PrfOpMode - only setup Mark as pointed in first argument
+        /// <para/>    or in Full mode sort digital parameters after mark in elmGroups collection;  
+        /// </summary>
+        enum PrfOpMode { Full, Mark }
+        private void PrfNormalize(PrfOpMode md, params string[] prfMark)
+        {
+            foreach (var gr in elmGroups)
+            {
+                foreach(string s in prfMark)
+                {
+                    if (gr.Prf.Contains(s) || gr.prf.Contains(s))
+                    {
+                        int p1, p3;
+                        string mark = prfMark[0];
+                        var pars = Lib.GetPars(gr.Prf);
+                        switch (pars.Count)
+                        {
+                            case 1:
+                                mark = mark + pars[0];
+                                break;
+                            case 2:
+                                if(md == PrfOpMode.Mark)
+                                {
+                                    mark = mark + pars[0] + "x" + pars[1];
+                                    break;
+                                }
+                                p1 = pars.Min();
+                                pars.Remove(p1);
+                                mark = mark + p1 + 'x' + pars[0];
+                                break;
+                            case 3:
+                                if (md == PrfOpMode.Mark)
+                                {
+                                    mark = mark + pars[0] + 'x' + pars[1] + 'x' + pars[2];
+                                    break;
+                                }
+                                p1 = pars.Min();
+                                pars.Remove(p1);
+                                p3 = pars.Max();
+                                pars.Remove(p3);
+                                mark = mark + p1 + 'x' + pars[0] + 'x' + p3;
+                                break;
+                            default: Msg.F("ModHandler.grPrfPars not recognized Profile"); break;
+                        }
+                        gr.prf = gr.Prf = mark;
+                    }
+                }
+            }
         }
     } // end class ModHandler : Model
 } // end namespace Model.Handler

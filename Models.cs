@@ -29,7 +29,7 @@
  *  8.05.2017 - part of this code moved to child ModHandler module
  * 11.05.2017 - getSavedReport() inside SetModel
  * 17.05.2017 - model.Save()
- * 19.05.2017 - ModelwrModel(Rules)
+ * 19.05.2017 - Model.wrModel(Rules)
  * 23.05.2017 - HighLight Invoke
  * 24.05.2017 - exclude ModJournal from Project
  * 27.05.2017 - XML read and write model.elements as Raw.xml in wrMod, modelWr bug fix 
@@ -296,9 +296,11 @@ namespace TSmatch.Model
             //23/5            if (TS.isTeklaActive()) ts.HighlightElements(elms);
             if (TS.isTeklaActive())
             {
-                Type type = typeof(InvHLclass);
-                MethodInfo info = type.GetMethod("InvHL");
-                info.Invoke(null, new object[] { elms });
+                ts.HighlightElements(elms);
+                
+                //////////Type type = typeof(InvHLclass);
+                // 31.5///MethodInfo info = type.GetMethod("InvHL");
+                //////////info.Invoke(null, new object[] { elms });
             }
             else { } // in future here put the code for highlight in another Viewer
         }
@@ -582,6 +584,9 @@ namespace TSmatch.Model
             return ok;
         }
 #endif //FOR_FUTURE 6/4/2017
+        #endregion -=-=- unclear region 2 to be audited
+
+        #region --- wrModel
         /// <summary>
         /// wrModel(doc_name) - write formatted data from mod to Excel file
         /// </summary>
@@ -631,10 +636,6 @@ namespace TSmatch.Model
                     }
                     break;
                 case WrMod.Rules:       // перечень Правил, используемых для обработки модели
-                                        //19/5                    doc.wrDocSetForm("HDR_ModRules", 1, AutoFit: true);
-                                        //19/5doc.wrDocSetForm("HDR_Rules", 1, AutoFit: true);
-                                        //19/5                    doc.wrDocForm(strListRules);
-                                        //19/5                    doc.wrDocSetForm("FORM_ModRuleLine");
                     doc.wrDocSetForm("FORM_RuleLine");
                     foreach (var rule in Rules)
                     {
@@ -679,6 +680,9 @@ namespace TSmatch.Model
             log.Info("Время записи в файл \"" + doc_name + "\"\t t= " + (DateTime.Now - t0).ToString() + " сек");
             Log.exit();
         }
+        #endregion --- wrModel 
+
+        #region -=-=- unclear region 3 to be audited
 #if OLD
         /// <summary>
         /// ReсentModel(List<Model> models) -- return most recent model in list
@@ -726,7 +730,7 @@ namespace TSmatch.Model
         }
         public static string RecentModelDir() { return RecentModel().dir; }
 #endif //OLD
-        #endregion -=-=- unclear region 2 to be audited
+        #endregion -=-=- unclear region 3 to be audited
 
         public void setElements(List<ElmAttSet.ElmAttSet> els)
         {
