@@ -1,5 +1,5 @@
 ﻿/*----------------------------------------------------------------------------
- * CompSet -- Set of Components got from the Supplier' price-list
+ * CompSet -- Set of Components from the Supplier' price-list
  * 
  * 29.5.2017  P.Khrapkin
  *
