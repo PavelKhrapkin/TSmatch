@@ -1,4 +1,5 @@
-﻿<Window x:Class="TSmatch.MainWindow"
+﻿<!-- MainWindow xaml design Pavel Khrapkin 2017.6.1 -->
+    <Window x:Class="TSmatch.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
