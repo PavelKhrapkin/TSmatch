@@ -1,5 +1,5 @@
 ﻿/*--------------------------------------------------------------------------------------
- * ElmAttSet -- Definitions of Properties, and their Names of the Elements in the Model 
+ * ElmAttSet -- Definitions of Model Elements Properties, and their Groups
  * 
  *  29.05.2017  Pavel Khrapkin
  * 
