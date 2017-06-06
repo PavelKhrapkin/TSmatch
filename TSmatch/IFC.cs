@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------
  * IFC -- Interaction with model in IFC file.
  * 
- * 19.8.2016  Pavel Khrapkin
+ * 19.8.2016  Oleg Turetsky, Pavel Khrapkin
  *  
  *------ ToDo ----------
  * -ISSUE- в Read на входе "Desktop\MyColumb", а открывается файл "\Desktop\out.ifc"
