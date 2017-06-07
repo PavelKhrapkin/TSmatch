@@ -263,6 +263,12 @@
         <Location left="406" top="10" />
         <Size width="160" height="50" />
       </Entity>
+      <Entity type="Comment">
+        <Text>13.03.2017
+Pavel Khrapkin</Text>
+        <Location left="10" top="10" />
+        <Size width="97" height="50" />
+      </Entity>
     </Entities>
     <Relationships>
       <Relationship type="Association" first="0" second="1">
@@ -432,6 +438,12 @@
         <Location left="678" top="389" />
         <Size width="685" height="266" />
       </Entity>
+      <Entity type="Comment">
+        <Text>13.03.2017
+Pavel Khrapkin</Text>
+        <Location left="10" top="10" />
+        <Size width="97" height="50" />
+      </Entity>
     </Entities>
     <Relationships>
       <Relationship type="Dependency" first="3" second="0">
@@ -495,7 +507,7 @@
     <Language>CSharp</Language>
     <Entities>
       <Entity type="Comment">
-        <Text>7.03.2017
+        <Text>20.03.2017
 Pavel Khrapkin</Text>
         <Location left="12" top="10" />
         <Size width="97" height="50" />
@@ -503,14 +515,13 @@ Pavel Khrapkin</Text>
       <Entity type="Class">
         <Name>FingerPrint</Name>
         <Access>Public</Access>
-        <Location left="12" top="70" />
-        <Size width="440" height="434" />
+        <Location left="12" top="71" />
+        <Size width="437" height="419" />
         <Collapsed>False</Collapsed>
         <Member type="Field">public readonly type typeFP</Member>
         <Member type="Field">public readonly Section section</Member>
         <Member type="Field">public readonly List&lt;string&gt; txs</Member>
         <Member type="Field">public readonly List&lt;object&gt; pars</Member>
-        <Member type="Field">public readonly List&lt;string&gt; synonyms</Member>
         <Member type="Constructor">public FingerPrint()</Member>
         <Member type="Constructor">static FingerPrint()</Member>
         <Member type="Constructor">public FingerPrint(type _type, string str)</Member>
@@ -523,8 +534,8 @@ Pavel Khrapkin</Text>
         <Member type="Method">private bool isSynonym(string tx, int iTx)</Member>
         <Member type="Method">private bool isMatchStr(string str1, string str2)</Member>
         <Member type="Method">private string synParser(string tx, ref int iTx)</Member>
-        <Member type="Method">internal int Int(int parNumber = 0)</Member>
-        <Member type="Method">internal int Col(int parNumber = 0)</Member>
+        <Member type="Method">public int Int(int parNumber = 0)</Member>
+        <Member type="Method">public int Col(int parNumber = 0)</Member>
         <Member type="Method">public string strINFO()</Member>
         <Modifier>None</Modifier>
       </Entity>
@@ -573,7 +584,7 @@ FP предназначен для идентификации экземпляр
 
 Если Component или ElmAttSet содержат бOльшее количество деталей - txs и pars по сравнению с Rule - они игнорируются. Но если нет одного из tx или par, упомянутых в Rule - результат идентификации FALSE.
 Требование "отсутствующие детали игнорируются" ведет к тому, что X.Equals(null) всегда TRUE (??).</Text>
-        <Location left="473" top="483" />
+        <Location left="473" top="472" />
         <Size width="467" height="225" />
       </Entity>
       <Entity type="Comment">
@@ -589,9 +600,12 @@ FP предназначен для идентификации экземпляр
 
 - &lt;ToDo&gt; 2017.1.25 - переписать и оттестировать Equals
 
--- &lt;ToDo&gt; 2017.1.29 - заново осмыслить роль и применение RuleFP В частности, что делать с FP=NULL? По требованию Equals = FALSE, а мне надо "годятся все"</Text>
-        <Location left="954" top="451" />
-        <Size width="451" height="257" />
+-- &lt;ToDo&gt; 2017.1.29 - заново осмыслить роль и применение RuleFP В частности, что делать с FP=NULL? По требованию Equals = FALSE, а мне надо "годятся все"
+
+--&lt;TpDo&gt;2017.3.9 - восстановить работоспособность FingerPrint
+- переписать constructor1 в части CompSet</Text>
+        <Location left="954" top="444" />
+        <Size width="451" height="278" />
       </Entity>
       <Entity type="Enum">
         <Name>Section</Name>
@@ -654,6 +668,11 @@ FP предназначен для идентификации экземпляр
         <Value>String</Value>
         <Value>Double</Value>
         <Value>Integer</Value>
+      </Entity>
+      <Entity type="Comment">
+        <Text>UnitTest: UT_FP_Section_Test</Text>
+        <Location left="130" top="10" />
+        <Size width="267" height="50" />
       </Entity>
     </Entities>
     <Relationships />
@@ -780,7 +799,7 @@ Pavel Khrapkin</Text>
     <Language>CSharp</Language>
     <Entities>
       <Entity type="Comment">
-        <Text>28.02.2017
+        <Text>23.03.2017
 Pavel Khrapkin</Text>
         <Location left="16" top="10" />
         <Size width="97" height="50" />
@@ -791,28 +810,32 @@ Pavel Khrapkin</Text>
         <Location left="16" top="75" />
         <Size width="497" height="230" />
         <Collapsed>False</Collapsed>
-        <Member type="Field">public readonly string description</Member>
-        <Member type="Field">public readonly string mat</Member>
-        <Member type="Field">public readonly double length</Member>
-        <Member type="Field">public readonly double weight_m</Member>
-        <Member type="Field">public readonly double? price</Member>
-        <Member type="Field">public readonly double vol_m</Member>
         <Member type="Field">public readonly List&lt;FingerPrint&gt; fps</Member>
         <Member type="Constructor">public Component(string _description, string _mat, double _length, double _weignt, double? price)</Member>
         <Member type="Constructor">public Component(Doc doc, int i, List &lt;FingerPring&gt; cs_fps)</Member>
+        <Member type="Method">public bool isMatch(Stype stype, ElmAttSet.Group gr, Dictionary&lt;Stype, List&lt;string&gt;&gt; ruleSyns)</Member>
         <Modifier>None</Modifier>
       </Entity>
       <Entity type="Comment">
-        <Text>- В классе Component нет поля Профиль, поскольку все данные для профиля беруться из description, и записываются в List&lt;FP&gt;fps с распределением по секциям &lt;материал&gt;, &lt;профиль&gt; и т.д.</Text>
+        <Text>- В классе Component нет поля Профиль, поскольку все данные для профиля беруться из description, и записываются в List&lt;FP&gt;fps с распределением по секциям &lt;материал&gt;, &lt;профиль&gt; и т.д.
+Для этого инспользуется конструкция вида
+        Профиль:  Описание: tx1 * tx2 * ;</Text>
         <Location left="546" top="10" />
-        <Size width="380" height="75" />
+        <Size width="449" height="158" />
       </Entity>
       <Entity type="Comment">
         <Text>--&lt;ToDo&gt;2017.02.28 отлаживать конструктор Component
 - пришлось сделать свой конструктор FP для Component с csFP вместо List&lt;FP&gt;csFPs. Надо разобраться, нужен ли конструктор с сигнатурой List?-- НЕ НУЖЕН!! Отобразить это в NClass FP!
+
+--&lt;ToDo&gt;
 </Text>
-        <Location left="546" top="131" />
-        <Size width="377" height="107" />
+        <Location left="546" top="187" />
+        <Size width="449" height="198" />
+      </Entity>
+      <Entity type="Comment">
+        <Text>UnitTest UT_Component 2017.03.23 OK</Text>
+        <Location left="137" top="12" />
+        <Size width="155" height="50" />
       </Entity>
     </Entities>
     <Relationships />
@@ -822,7 +845,7 @@ Pavel Khrapkin</Text>
     <Language>CSharp</Language>
     <Entities>
       <Entity type="Comment">
-        <Text>7.03.2017
+        <Text>16.03.2017
 Pavel Khrapkin</Text>
         <Location left="10" top="12" />
         <Size width="97" height="50" />
@@ -869,9 +892,12 @@ Pavel Khrapkin</Text>
 - нужна ли возможность OK.NoSectiom? Может быть из Mtch никогда не выходят с таким статусом, просто - OK.NoMatch ?
 
 --&lt;ToDo&gt; 2017.03.07 реализовать (переписать из существующего) isSectionMatch
-- удалить isRuleMatch()</Text>
+- удалить isRuleMatch()
+
+--&lt;ToDo&gt; 2017.03.16 отлаживаю Mtch
+- перебираем Components из rule.CompSet, пока не найдем подходящий</Text>
         <Location left="383" top="271" />
-        <Size width="486" height="208" />
+        <Size width="486" height="312" />
       </Entity>
       <Entity type="Enum">
         <Name>OK</Name>
@@ -892,7 +918,7 @@ Pavel Khrapkin</Text>
     <Language>CSharp</Language>
     <Entities>
       <Entity type="Comment">
-        <Text>7.03.2017
+        <Text>19.03.2017
 Pavel Khrapkin</Text>
         <Location left="20" top="21" />
         <Size width="97" height="50" />
@@ -900,35 +926,38 @@ Pavel Khrapkin</Text>
       <Entity type="Class">
         <Name>Section</Name>
         <Access>Public</Access>
-        <Location left="20" top="99" />
-        <Size width="248" height="174" />
+        <Location left="20" top="91" />
+        <Size width="444" height="204" />
         <Collapsed>False</Collapsed>
-        <Member type="Field">public Type type</Member>
-        <Member type="Field">public string body</Member>
-        <Member type="Field">static Dictionary&lt;string, List&lt;string&gt;&gt; Sections</Member>
-        <Member type="Constructor">static Section()</Member>
-        <Member type="Constructor">public Section(string str)</Member>
+        <Member type="Field">public readonly Type type</Member>
+        <Member type="Field">public readonly string body</Member>
+        <Member type="Constructor">public Section(Dictionary&lt;section, List&lt;string&gt;&gt; SectionTab, string text, SType _stype = SType.NOT_DEFINED)</Member>
+        <Member type="Method">private SType SecType(string str)</Member>
+        <Member type="Method">private string SecBody(string str)</Member>
+        <Member type="Method">public bool isSectionMatch(string template)</Member>
+        <Member type="Method">public List&lt;string&gt; sectionPars(string str, string template)</Member>
         <Modifier>None</Modifier>
       </Entity>
       <Entity type="Comment">
         <Text>Section - класс для работы с частями строки - секциями - нужными для Rules, прайс-листов и т.п.
+              &lt;Заголовок секции 1&gt; : &lt;Тело секции 1&gt; ; ... ; &lt;Заголовок секции n&gt; : &lt;ТеП. секции n&gt; ;  
 
-- Секции разделяются знаком ';'. Если в тексте несколько знаков ';',  обрабатывается только
-  текст до первой слева  ';', остальное игнорируется. При отсутствии ';' обрабатываем до конца строки
-- Секция имеет "заголовок", отделяемый от тела секции двоеточием  ':'
-- Заголовки секций распознаются  по таблице в Named Range, которая хранится в TSmatch.xlsx/Constant/TabSections.
-  Эту таблицу считывает в static Dectionary Sections статический конструктор при первом обращении к классу Section.
-  При этом распознование происходит по строкам- синонимам из таблицы и ставятся в соответствие с enum type.
-  Если секция не распознана, Section.type == NOT_DEFINED.
+- Секции разделяются знаком ';'. В начале секции есть заголовок, он отделен от тела секции двоеточием;
+- Заголовки секций распознаются  по таблице в SectionTab, которую необходимо передавать в класс Section.
+   Распознаются первые знаки строки в методе SecType; в SectionTab есть список возможных синонимов заголовка.
+   Инициализируется SectionTab в классе Bootstrap.initSectuin();
+-  Если секция не распознана, Section.type == NOT_DEFINED. Если в тексте несколько знаков ';' и/или тип секции не
+   задан - обрабатывается только текст до первой слева  ';', остальное игнорируется. При отсутствии ';',
+   обрабатываем до конца строки
 - текст секции всегда переводится Lib.ToLat() и string.ToLower(). Пробелы удаляются;
 - Для каждой секции должен быть свой уникальный FP.</Text>
-        <Location left="347" top="21" />
+        <Location left="510" top="21" />
         <Size width="633" height="253" />
       </Entity>
       <Entity type="Enum">
-        <Name>Type</Name>
+        <Name>SType</Name>
         <Access>Public</Access>
-        <Location left="20" top="292" />
+        <Location left="20" top="306" />
         <Size width="162" height="197" />
         <Collapsed>False</Collapsed>
         <Value>Material</Value>
@@ -940,7 +969,238 @@ Pavel Khrapkin</Text>
         <Value>WeightPerUnit</Value>
         <Value>NOT_DEFINED</Value>
       </Entity>
+      <Entity type="Class">
+        <Name>Bootstrap</Name>
+        <Access>Public</Access>
+        <Location left="207" top="343" />
+        <Size width="252" height="122" />
+        <Collapsed>False</Collapsed>
+        <Member type="Field">public Dictionary &lt;Type, List&lt;string&gt;&gt; SectionTab</Member>
+        <Member type="Method">public void initSection()</Member>
+        <Modifier>None</Modifier>
+      </Entity>
+      <Entity type="Comment">
+        <Text>Unit Test UT_Section_Test 19/3/2017</Text>
+        <Location left="146" top="25" />
+        <Size width="203" height="50" />
+      </Entity>
+      <Entity type="Comment">
+        <Text>ИДЕИ / ToDo
+
+28.03.2017 заимствования данных из соседних секций в LoadDescription возможны с помощью метода sectionPars(str, template).
+                    Здесь template содержит одну или несколько '*', которые в результирующем списке срок представляются в виде
+фрагментов str на месте (местах), обозначенных '*'. Так строка "Уголок 40 х 3" и template "Уголок * х*" возвращает {"40", "3"}
+
+</Text>
+        <Location left="483" top="368" />
+        <Size width="681" height="200" />
+      </Entity>
+    </Entities>
+    <Relationships>
+      <Relationship type="Association" first="4" second="1">
+        <Label>
+        </Label>
+        <StartOrientation>Vertical</StartOrientation>
+        <EndOrientation>Horizontal</EndOrientation>
+        <Direction>Unidirectional</Direction>
+        <AssociationType>Composition</AssociationType>
+      </Relationship>
+    </Relationships>
+  </ProjectItem>
+  <ProjectItem type="NClass.DiagramEditor.ClassDiagram.Diagram" assembly="NClass.DiagramEditor, Version=2.4.1823.0, Culture=neutral, PublicKeyToken=null">
+    <Name>Parameter</Name>
+    <Language>CSharp</Language>
+    <Entities>
+      <Entity type="Comment">
+        <Text>29.03.2017
+Pavel Khrapkin</Text>
+        <Location left="17" top="10" />
+        <Size width="97" height="50" />
+      </Entity>
+      <Entity type="Class">
+        <Name>Parameter</Name>
+        <Access>Internal</Access>
+        <Location left="17" top="87" />
+        <Size width="236" height="206" />
+        <Collapsed>False</Collapsed>
+        <Member type="Field">public readonly ParType ptype</Member>
+        <Member type="Field">public readonly string tx</Member>
+        <Member type="Field">public object par</Member>
+        <Member type="Constructor">public Parameter(string str)</Member>
+        <Member type="Constructor">internal Parameter(string str, ParType _type)</Member>
+        <Member type="Method">public ParType getParType(string str)</Member>
+        <Member type="Method">public string parN(int n)</Member>
+        <Modifier>None</Modifier>
+      </Entity>
+      <Entity type="Enum">
+        <Name>ParType</Name>
+        <Access>Public</Access>
+        <Location left="17" top="310" />
+        <Size width="162" height="129" />
+        <Collapsed>False</Collapsed>
+        <Value>String</Value>
+        <Value>Integer</Value>
+        <Value>Double</Value>
+        <Value>ANY</Value>
+      </Entity>
+      <Entity type="Comment">
+        <Text>Parameter - часть строки - секции вида "tx {par}", например, "В{d~1}" значит tx="В", par- десятичное число в колонке 1, где 
+    tx   - фрагмент текста, предшествующий {par}, а
+    par - текст в фигурных скобках. Он может содержать префикс вида s~ и преобразовываться как
+        s~ или по умолчанию префикса s ~ - string
+        i~ - integer - целочисленное значение, например, номер, колонки в прайс-листе
+        d~ - double - десятичное значение, например, цена. Распознаются ',' и '.' в качестве десятичных разделителей
+  здесть тип параметра распознается по первой букве
+
+- Назначение Параметра различно в зависимости от контекста:
+        - Rule    - содержит шаблон со знаками *, строки прайс-листа в этих местах содержат параметры. Сам текст
+                      шаблона при обработке Правила помещается в Rule.FP.par[0]. Последовательность секции прайс-
+                      листа и соответствующей секции элемента модели САПР на этом этапе разработки TSmatch, считаем
+                      одинаковой, однако прайс-лист может содержать больше параметров, чем элемент САПР и Правило.
+        - CompSet  - тоже содержит шаблон прайс-листа, указывая номера колонок и тип данных в них с помощью
+                      параметров вида  "tx{d~3}". Таким образом, каждая секция прайс-листа описана дважды - в Rule и
+                      в шаблоне CompSet; но шаблон Rule скорее относится к атрибуту элемента из САПР и, до тех пор,
+                      пока мы полагаемся на непротиворечивость Rule и LoadDescription, эти описания должны быть
+                      непротиворечивыми. О несоответствии - ПРОДУМАТЬ соответствующую диагностику.
+        - Component - здесь параметры заполняются значениями из прайс-листа в соответствии с шаблонами Rule и 
+                      CompSet. Если строка прайс-листа не соответствует шаблону - она не включается в коллекцию
+                      List&lt;Component&gt;, на которую ссылается CompSet. Возможен тип Параметра ANY, означающий, что 
+                      в соответствие компоненту из модели может быть поставлена ЛЮБАЯ строка из прайс-листа.
+
+-!! Если во входной строке несколько конструкций с фигурными скобками, распознается самая левая из них;
+     Пока несколько параметров {} в строке не работает</Text>
+        <Location left="323" top="10" />
+        <Size width="625" height="366" />
+      </Entity>
+      <Entity type="Comment">
+        <Text>CONCERNS/REMARCS/DOUBTS:
+- Секция относится (по крайней мере - сейчас) к одной колонке прайс-листа, однако в одной и той же колонке могут
+  быть данные для несколькох секций. Следствие: ссылка на номер колонки в LoadDescription может быть указана 
+  только один раз, все остальные более правые параметры игнорируются, хотя структура CompSet.FPs.pars может
+  их описать. ПРОДУМАТЬ!
+- поле indx, похоже, не нужно, достаточно завести локальную переменную в теле конструктора, т.к. вне модуля
+  indx никому не нужен - разбираем только первую констркцию {par}
+- та же история с isBrackets: в шаблоне Rule фигурных скобок нет, а в LoadDescriptor они всегда есть. 
+- синонимы также не имеют смысла, они нужны только в CompSet.FingerPrint и, может быть, в Rule.FP
+- конструктор 3 для разбора параметров из строки прайс-листа по шаблону из Rule.text лучше переместить в класс
+  Component. Может тогда и ParType.ANY не понадобится?
+- может вообще завести разные параметры для шаблонов Rule и CompSet и другие - для Component - только для
+  значений параметров?
+ </Text>
+        <Location left="323" top="386" />
+        <Size width="628" height="215" />
+      </Entity>
+      <Entity type="Comment">
+        <Text>UnitTest UT_Parameter_Test
+20.03.2017 OK</Text>
+        <Location left="123" top="10" />
+        <Size width="165" height="50" />
+      </Entity>
     </Entities>
     <Relationships />
+  </ProjectItem>
+  <ProjectItem type="NClass.DiagramEditor.ClassDiagram.Diagram" assembly="NClass.DiagramEditor, Version=2.4.1823.0, Culture=neutral, PublicKeyToken=null">
+    <Name>Program.Main</Name>
+    <Language>CSharp</Language>
+    <Entities>
+      <Entity type="Comment">
+        <Text>13.03.2017
+Pavel Khrapkin</Text>
+        <Location left="10" top="10" />
+        <Size width="97" height="50" />
+      </Entity>
+      <Entity type="Class">
+        <Name>Main</Name>
+        <Access>Public</Access>
+        <Location left="35" top="100" />
+        <Size width="162" height="216" />
+        <Collapsed>False</Collapsed>
+        <Modifier>None</Modifier>
+      </Entity>
+      <Entity type="Class">
+        <Name>Bootstrap</Name>
+        <Access>Public</Access>
+        <Location left="262" top="61" />
+        <Size width="162" height="94" />
+        <Collapsed>False</Collapsed>
+        <Member type="Method">internal object init()</Member>
+        <Modifier>None</Modifier>
+      </Entity>
+      <Entity type="Class">
+        <Name>Model</Name>
+        <Access>Public</Access>
+        <Location left="262" top="197" />
+        <Size width="193" height="128" />
+        <Collapsed>False</Collapsed>
+        <Member type="Method">public Model Read(string modelName)</Member>
+        <Member type="Method">public void Handler()</Member>
+        <Member type="Method">public void Report()</Member>
+        <Modifier>None</Modifier>
+      </Entity>
+      <Entity type="Class">
+        <Name>TEST</Name>
+        <Access>Public</Access>
+        <Location left="535" top="100" />
+        <Size width="162" height="162" />
+        <Collapsed>False</Collapsed>
+        <Modifier>None</Modifier>
+      </Entity>
+      <Entity type="Comment">
+        <Text>Головной модуль Program.Main выполняет следующую последовательность действий:
+
+1. Вначале запускается модуль Bootstrap, выполняя с помощью метода Bootstrap.init() необходимую инициальзацию
+    TSmatch, включая подготовку подсистемы вывода сообщений Message, проверку наличия нужных ресурсов 
+    checkResources, и пр.
+2. Для проведения Unit Test'ов вызывается модуль TEST.
+3. Далее происходит обращение к Model.Read() - методу, считывающему модель САПР из Tekla Structures или файла
+    IFC, в зависимости от того, активна ли Tekla.
+4. Далее прочитанная модель обрабатывается, то есть элементы модели группируются, группы &lt;Материал, Профиль&gt;
+     сопоставляются с прайс-листами по правилам, описанным в Rule и файле - диспетчере TSmatch.xlsx
+5. Результирующие отчеты выводятся в файл TXmatchINFO.xlsx</Text>
+        <Location left="725" top="20" />
+        <Size width="645" height="168" />
+      </Entity>
+      <Entity type="Comment">
+        <Text>2017.03.13 состояние дел
+
+- сейчас Report в TsmatchINFO.xlsx выводится весьма неполно:
+        - в ModelINFO не выводится цифра - фаза проекта
+        - фактически, не делается поиск в прайс-листах, в результате отчеты выводятся без цен
+        - поэтому отчет Materials выводится с нулевыми ценами
+        - хорошо бы в отчетах Document.wrDoc научиться менять форматирование, выделяя 000 (косметика)
+        - не отлажен вывод сводки Правил, связанных с моделью ModRules (косметика)
+        - Report - часть отчета справа, связанная с выводом подобранных строк из прайс-листов пустая
+        - сводка по поставщикам Suppliers не делается
+- Вывод: критически важный шаг выполнение поиска строки в прайс-листе по группе &lt;Материал, Профиль&gt;.
+          Этим подбором занимается метод Model.getPricing(), который, перебирая группы, подбирает подходящие
+          компоненты и записывает результаты в каждый элемент группы, перебирая их по Guids
+-- предлагаю &lt;ToDo&gt; - этим и заняться.
+- поменять в getPricing() цикл - не по mgr, а по Groups.
+- заложить Unit Test, но надо ПРИДУМАТЬ, как его вызывать после события "выполнена группировка", т.е. Groups
+  готовы. Наверно, тесты по ивентам - стандартный подход, но я не умею :(</Text>
+        <Location left="725" top="219" />
+        <Size width="616" height="266" />
+      </Entity>
+    </Entities>
+    <Relationships>
+      <Relationship type="Association" first="1" second="2">
+        <StartOrientation>Horizontal</StartOrientation>
+        <EndOrientation>Horizontal</EndOrientation>
+        <Direction>Unidirectional</Direction>
+        <AssociationType>Aggregation</AssociationType>
+      </Relationship>
+      <Relationship type="Association" first="1" second="3">
+        <StartOrientation>Horizontal</StartOrientation>
+        <EndOrientation>Horizontal</EndOrientation>
+        <Direction>Unidirectional</Direction>
+        <AssociationType>Aggregation</AssociationType>
+      </Relationship>
+      <Relationship type="Association" first="1" second="4">
+        <StartOrientation>Horizontal</StartOrientation>
+        <EndOrientation>Horizontal</EndOrientation>
+        <Direction>Unidirectional</Direction>
+        <AssociationType>Aggregation</AssociationType>
+      </Relationship>
+    </Relationships>
   </ProjectItem>
 </Project>
