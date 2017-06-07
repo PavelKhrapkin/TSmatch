@@ -1,5 +1,5 @@
 ﻿/*=================================
- * Model.Handler Unit Test 4.6.2017
+ * Model.Handler Unit Test 7.6.2017
  *=================================
  */
  using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -9,6 +9,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+
+using FileOp = match.FileOp.FileOp;
+using Boot = TSmatch.Bootstrap.Bootstrap;
+using Mod = TSmatch.Model.Model;
 
 namespace TSmatch.Model.Handler.Tests
 {
@@ -41,6 +45,14 @@ namespace TSmatch.Model.Handler.Tests
             mod.PrfUpdate();
             v = mod.elmGroups[2].prf;
             Assert.AreEqual(v, "L75x5");
+        }
+
+        [TestMethod()]
+        public void UT_ModHandler_geGroup_Native()
+        {
+            var boot = new Boot();
+            var model = new Mod();
+            model.SetModel(boot);
         }
     }
 }

@@ -59,9 +59,14 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UT_Bootstrap.cs" />
     <Compile Include="UT_Component.cs" />
+    <Compile Include="UT_MatchLib.cs" />
     <Compile Include="UT_Model.cs" />
+    <Compile Include="UT_ModHandler.cs" />
+    <Compile Include="UT_Mtch.cs" />
     <Compile Include="UT_PriceList.cs" />
+    <Compile Include="UT_Rule.cs" />
     <Compile Include="UT_SavedReport.cs" />
+    <Compile Include="UT_Tekla.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
