@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------------------
  * SavedReport -- class for handle saved reports in TSmatchINFO.xlsx
  * 
- *  3.06.2017 П.Л. Храпкин
+ *  5.06.2017 П.Л. Храпкин
  *  
  *--- Unit Tests ---
  * UT_SavedReport_Raw 2017.05.27 11 sec
@@ -10,6 +10,7 @@
  *  1.05.2017 with Document Reset and ReSave
  *  7.05.2017 написал SetFrSavedModelINFO(), переписал isReportConsystant()
  * 27.05.2017 - XML read and write model.elements as Raw.xml in Raw() 
+ *  5.06.2017 - bug fix in SetFrSavedModel - recoursive call after Reset
  *--- Methods: -------------------      
  * bool GetSavedReport()    - read TSmatchINFO.xlsx, set it as a current Model
  *                            return true if name, dir, quantity of elements is
@@ -144,7 +145,7 @@ namespace TSmatch.SaveReport
             getSavedRules();
             //12/5            mh = new ModelHandler.ModHandler();
             mh.Handler(this);
-            getSavedRules();
+//7/6            getSavedRules();
 
             return;
             throw new NotImplementedException();
@@ -225,7 +226,11 @@ namespace TSmatch.SaveReport
         {
             dINFO = Docs.getDoc(sINFO, fatal: false);
             if (dINFO == null || dINFO.il < 9
-                || isChangedStr(ref name, dINFO, 2, 2)) Reset(sINFO);
+                || isChangedStr(ref name, dINFO, 2, 2))
+            {
+                Reset(sINFO);
+                SetFrSavedModelINFO(dir);
+            }
             name = dINFO.Body.Strng(2, 2);
             phase = dINFO.Body.Strng(4, 2);
             date = DateTime.Parse(dINFO.Body.Strng(5, 2));
@@ -318,32 +323,23 @@ namespace TSmatch.SaveReport
         }
         public void getSavedRules()
         {
-#if DBG
-            Log.set("SR.getSavedRules(\"" + strListRules + "\")");
-            strListRules = "17, 4, 5, 6, 7";    // 13/5 заглушка
-            Log.set("SR.getSavedRules(\"" + strListRules + "\")");
-            //7/5            strListRules = getModJrnValue(Decl.MODEL_R_LIST);
-            foreach (int n in Lib.GetPars(strListRules))
-                Rules.Add(new Rule.Rule(n));
-            //8/5            ClosePriceLists();
-            Log.exit();
-#endif // DBG
             Log.set("SR.getSavedRules()");
             Rules.Clear();
             Docs doc = Docs.getDoc("Rules");
             for (int i = doc.i0; i <= doc.il; i++)
             {
-                //19/5                string sDate = doc.Body.Strng(i, 1);
-                date = Lib.getDateTime(doc.Body.Strng(i, 1));
-                if (date > DateTime.Now || date < Decl.OLD) continue;
-                string sSupl = doc.Body.Strng(i, 2);
-                string sCS = doc.Body.Strng(i, 3);
-                string sR = doc.Body.Strng(i, 4);
-                if (string.IsNullOrEmpty(sSupl)
-                    || string.IsNullOrEmpty(sCS)
-                    || string.IsNullOrEmpty(sR)) continue;
-                var rule = new Rule.Rule(date, sSupl, sCS, sR);
-                Rules.Add(rule);
+                try   { Rules.Add(new Rule.Rule(i)); }
+                catch { continue; }
+                //////////////////date = Lib.getDateTime(doc.Body.Strng(i, 1));
+                //////////////////if (date > DateTime.Now || date < Decl.OLD) continue;
+                //////////////////string sSupl = doc.Body.Strng(i, 2);
+                //////////////////string sCS = doc.Body.Strng(i, 3);
+                // 7/6/17 ////////string sR = doc.Body.Strng(i, 4);
+                //////////////////if (string.IsNullOrEmpty(sSupl)
+                //////////////////    || string.IsNullOrEmpty(sCS)
+                //////////////////    || string.IsNullOrEmpty(sR)) continue;
+                //////////////////var rule = new Rule.Rule(date, sSupl, sCS, sR);
+                //////////////////Rules.Add(rule);
             }
             log.Info("- getSavedRules() Rules.Count = " + Rules.Count);
             Log.exit();

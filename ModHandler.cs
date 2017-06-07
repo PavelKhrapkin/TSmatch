@@ -80,6 +80,7 @@ namespace TSmatch.Model.Handler
                 sr.getSavedRules();
                 m.Rules = sr.Rules;
             }
+            foreach(var rule in m.Rules) { rule.Init(); }
             Handler(m);
         }
 
@@ -148,6 +149,7 @@ namespace TSmatch.Model.Handler
             foreach (var Mgr in elmMgroups)
             {
                 string curMat = Mgr.mat;
+//7/6                string curPrf = Lib.ToLat(Elements[Mgr.guids[0]].prf.ToLower());
                 string curPrf = Elements[Mgr.guids[0]].prf;
                 List<string> guids = new List<string>();
                 foreach (var g in Mgr.guids)
@@ -156,7 +158,7 @@ namespace TSmatch.Model.Handler
                     if (elm.prf == curPrf) guids.Add(g);
                     else
                     {
-                        this.elmGroups.Add(new ElmGr(Elements, curMat, curPrf, guids));
+                        elmGroups.Add(new ElmGr(Elements, curMat, curPrf, guids));
                         curPrf = elm.prf;
                         guids = new List<string>();
                         guids.Add(g);

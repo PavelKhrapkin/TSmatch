@@ -36,7 +36,7 @@ namespace TSmatch
             for(int i=doc.i0; i<=doc.il; i++)
             {
                 string csName = doc.Body.Strng(i, Decl.RULE_COMPSETNAME);
-                Rule.Rule rule = new Rule.Rule(i, init:false);
+                Rule.Rule rule = new Rule.Rule(i);
                 if (rule == null || string.IsNullOrWhiteSpace(rule.Supplier.name)
                     || string.IsNullOrWhiteSpace(rule.text)) continue;
                 items.Add(new Rl(rule.date, rule.Supplier.name, csName, rule.text));
