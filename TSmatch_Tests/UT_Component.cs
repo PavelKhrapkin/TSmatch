@@ -1,8 +1,8 @@
 ﻿/*=================================
- * Components Unit Test 3.6.2017
+ * Components Unit Test 16.6.2017
  *=================================
  */
- using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using TSmatch.Component;
 using System;
 using System.Collections.Generic;
@@ -57,6 +57,22 @@ namespace TSmatch.Component.Tests
             Assert.AreEqual(v, "угoлoк75x5");
             b = comp.isMatch(gr, rule);
             Assert.IsTrue(b);
+
+            //test 4: gr="I20" rule="Профиль: Балка =I* дл;" comp="Балка 20 дл. 9м Ст3пс5" => TRUE
+            gr.Prf = "I20"; gr.prf = "i20";
+            rule.text = "Профиль: Балка =I*";
+            string comp_txt = "Балка 20";
+            rule.ruleDP = new DPar.DPar(rule.text);
+            rule.synonyms = rule.RuleSynParse(rule.text);
+            var syns = rule.synonyms[Section.Section.SType.Profile].ToList();
+            Assert.AreEqual(syns[0], "бaлкa");
+            Assert.AreEqual(syns[1], "i");
+            comp.compDP = new DPar.DPar("Prf:" + comp_txt);
+            Assert.AreEqual(comp.compDP.dpar.Count, 1);
+            Assert.AreEqual(comp.compDP.dpStr[Section.Section.SType.Profile], comp_txt);
+            b = comp.isMatch(gr, rule);
+            Assert.IsTrue(b);
+
 #if NOT_WORKS_YET   //4/3/17
             //test 3: gr="U10P_8240_97" rule="Профиль: Швеллер = U*П_;" => TRUE
             gr.prf = "U10P_8240_97";
@@ -121,6 +137,5 @@ namespace TSmatch.Component.Tests
             Assert.AreEqual(v[0], "10");
             Assert.AreEqual(v[1], "@300");
         }
-
     }
 }

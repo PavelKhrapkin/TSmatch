@@ -1,8 +1,8 @@
 ﻿/*=================================
- * Model.Handler Unit Test 7.6.2017
+ * Model.Handler Unit Test 19.6.2017
  *=================================
  */
- using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using TSmatch.Model.Handler;
 using System;
 using System.Collections.Generic;
@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using FileOp = match.FileOp.FileOp;
 using Boot = TSmatch.Bootstrap.Bootstrap;
 using Mod = TSmatch.Model.Model;
+using Msg = TSmatch.Message.Message;
 
 namespace TSmatch.Model.Handler.Tests
 {
@@ -53,6 +54,41 @@ namespace TSmatch.Model.Handler.Tests
             var boot = new Boot();
             var model = new Mod();
             model.SetModel(boot);
+        }
+
+        [TestMethod()]
+        public void UT_Hndl()
+        {
+            var boot = new Boot();
+            var model = new Mod();
+            model.SetModel(boot);
+
+            var mh = new ModHandler();
+            mh.Hndl(model);
+            int cnt = 0;
+            foreach (var gr in model.elmGroups) cnt += gr.guids.Count();
+            Assert.AreEqual(model.elements.Count(), cnt);
+
+            //Hndl performance test -- 180 sec for 100 cycles
+            DateTime t0 = DateTime.Now;
+            for (int i = 0; i < 100; i++)
+            {
+                mh.Hndl(model);
+            }
+            TimeSpan ts = DateTime.Now - t0;
+            Assert.IsTrue(ts.TotalSeconds > 0.0);
+        }
+
+        [TestMethod()]
+        public void UT_Pricing()
+        {
+            var boot = new Boot();
+            var model = new Mod();
+            model.SetModel(boot);
+
+            var mh = new ModHandler();
+            mh.Pricing(ref model);
+            Assert.IsTrue(model.matches.Count > 0);
         }
     }
 }
