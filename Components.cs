@@ -202,20 +202,20 @@ namespace TSmatch.Component
         /// rulePar(pattern, str) - parse str with rule text pattern with '*' as wildcard
         /// <para>return List of substring str suits to '*'</para>
         /// <para>suffix '@' in pattern (f.e. "*x*@") means the Component could be cutted at this parameted dimension</para>
-        /// suffix
+        /// <para>throw Exception, when str not suit to the Rule.text</para>
         /// <param name="pattern">pattern to parse</param>
         /// <param name="str">string to be parsed with pattern</param>
         /// <returns>list of substrings - parameters</returns>
         public List<string> rulePar(string pattern, string str)
         {
             List<string> par = new List<string>();
-            string atFlag= string.Empty;
-            foreach(string s in pattern.Split('*'))
+            string atFlag = string.Empty;
+            foreach (string s in pattern.Split('*'))
             {
                 if (string.IsNullOrWhiteSpace(s)) continue;
                 char uptoCh = s[0];
                 int ind_str = str.IndexOf(uptoCh);
-                if(ind_str == -1 && uptoCh == 'x')
+                if (ind_str == -1 && uptoCh == 'x')
                 {
                     ind_str = str.IndexOf('*'); // не по ГОСТ, но '*' активно используется в Tekla
                     if (ind_str == -1) break;

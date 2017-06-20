@@ -1,7 +1,7 @@
 ﻿/*--------------------------------------------------------------------------------------
  * ElmAttSet -- Definitions of Properties, and their Names of the Elements in the Model 
  * 
- *  29.05.2017  Pavel Khrapkin
+ *  16.06.2017  Pavel Khrapkin
  * 
  * ----- TODO 30.9.2016 ------
  * - закомментировать неиспользуемые методы группировки (Ctrl/F12 empty)
@@ -266,7 +266,7 @@ namespace TSmatch.ElmAttSet
         public int CompareTo(Mgroup mgr)     //to Sort Groups by Materials
         {
             return mat.CompareTo(mgr.mat);
-        }  
+        }
     } // end class Mgroup
 
     public class Group : IComparable<Group>
@@ -288,6 +288,27 @@ namespace TSmatch.ElmAttSet
 
         public Group() { }
 
+        public Group(List<ElmAttSet> elements, string _Mat, string _Prf)
+        {
+            Mat = _Mat;
+            Prf = _Prf;
+            mat = Lib.ToLat(_Mat.ToLower().Replace("*", "x"));
+            prf = Lib.ToLat(_Prf.ToLower().Replace("*", "x"));
+
+            Elements = elements.ToDictionary(elm => elm.guid);
+            guids = new List<string>();
+            var grp = from x in elements where x.mat == Mat && x.prf == Prf select x.guid;
+            foreach (var id in grp)
+            {
+                guids.Add(id);
+                totalLength += Elements[id].length;
+                totalVolume += Elements[id].volume;
+                totalWeight += Elements[id].weight;
+            }
+//////////                    if (elm.mat != mat || elm.prf != prf)
+//////////                        Msg.F("Bad Group of elements", Mat, Prf, elm.guid);
+        }
+
         public Group(Dictionary<string, ElmAttSet> Els, string _mat, string _prf, List<string> _guids)
         {
             Elements = Els;
@@ -302,9 +323,11 @@ namespace TSmatch.ElmAttSet
                 totalLength += Els[id].length;
                 totalVolume += Els[id].volume;
                 totalWeight += Els[id].weight;
+                //13/6                    v.totalPrice += elm.price;    убрать price из ElmAttSet совсем!
                 totalPrice += Els[id].price;
             }
         }
+
         public int CompareTo(Group gr)     //to Sort Groups by Materials
         {
             int x = mat.CompareTo(gr.mat);
