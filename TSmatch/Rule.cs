@@ -1,32 +1,21 @@
 ﻿/*----------------------------------------------------------------------------------------------
- * Rule.cs -- Rule, which describes how to find Components used in Model in Supplier's price-list
+ * Rule.cs -- Rule, which describes how to recognyze Components used in Model in Supplier's price-list
  *
- * 29.5.2017 П.Храпкин
+ * 7.06.2017 П.Храпкин
  *
  *--- History ---
  * 17.10.2016 code file created from module Matcher
  *  2.05.2017 FingerPrint references removed
  * 19.05.2017 public DateTime Rule.Date
  * 24.05.2017 Rule.getList
- * -----------------------------------------------------------------------------------------
- *      КОНСТРУКТОРЫ Правил - загружают Правила из листа Правил в TSmatch или из журнала моделей
- * Rule(дата, тип, текст Правила, документ-база сортаментов)    - простая инициализация из TSmatch
- * Rule(Docs doc, int n)    - инициализируем Правило из строки n листа "Matching_Rules" в TSmatch
- * Rule(int n)              - по умолчанию документа, загружаем Правило из листа в TSmatch
- * ---------  Rules - коллекция Правил -----------
- *      структура OK - содержит данные о найденных заготовках, соответствующих элементам модели   
- * OK(int _gr, string _str, Docs _doc, int _nComp, double _w, double? _p)   - конструктор
- * okToObj(OK ok, ref object[] obj, int fr) - заполняем элементы массива obj, начиная с номера fr
- * clearObj(ref object[] obj, int fr)       - обнуляем элементы массива obj, начиная с номера fr
- * ---------  OKs - коллекция найденных соответствий модели и заготовок -----------
- *      МЕТОДЫ:
- * Start()      - инициирует начальный запуск всех модулей системы TSmatch
- *    --- Вспомогательные методы - подпрограммы ---
- * RuleParsre(r.text) - синтаксический разбор Правила r.text
- * attParse(str, reg, lst, ref n) - разбор раздела Правила в строке str
- * GetPars(str) -public- разбирает строку- часть компонента или Правила, выделяя int параметры.
- * isRuleApplicable(r.text, gr.mat, gr.prf) - определяет, применимо ли Правило?
- * isOKexist(n) - возвращает true, если для группы n уже найдено соответствие в OKs
+ *  6.06.2017 remove readonly attribute for CompSet foe test
+ *  7.06.2017 Rule.SynParse bug fix, Rule module audit
+ *  ---- Unit Test ----
+ *  2017.06.07 UT_Rules_Constructor OK; UT_Rule_SynParse OK 
+ * ---- Constructors & methods ----
+ * Rule(Docs doc, int n)    - load Rule from line n of Document doc
+ * Rule(int n)              - by default of doc load Rule from TSmatchINFO.xlsx/Rules
+ * RuleSynParse(str)        - parse string - Rule.Text into Syninims Dictionary 
  */
 using System;
 using System.Collections.Generic;
@@ -48,61 +37,39 @@ using TSmatch.Section;
 
 namespace TSmatch.Rule
 {
-    public class Rule : IEquatable<Rule>	// структура, описывающая правило работы Matcher'а
+    public class Rule
     {
         public static readonly ILog log = LogManager.GetLogger("Rule");
 
-        public DateTime date;               //дата и время записи Правила
-        private int _id { get; set; }
-        public string name;        //название правила
-        public string type;        //тип правила
-        public string text;        //текст правила
-
-        //---- references to other classes - price-list conteiners
-        public readonly CmpSet CompSet;     //список компонентов, с которыми работает правило
-        public readonly Supl Supplier;      //Поставщик
-        public DP ruleDP;                   //identifiers of Materials, Profile, and others
+        public DateTime date;       //Date and Time, when the Rule is defined for the Model
+        public string text;         //internal Rule text - with ToLat & ToLower
+        public string Text;         //external Rule text - as in Excel for UI display
+        public CmpSet CompSet;      //Componet Set dedicated to the Rule
+        public Supl Supplier;       //Supplier dedicated to this Rule
+        public DP ruleDP;           //identifiers of Materials, Profile, and others
         public Dictionary<SType, List<string>> synonyms = new Dictionary<SType, List<string>>();
-
         public double RuleRedundencyPerCent = 0.0;  //коэффициент избыточности, требуемый запас по данному материалу/профилю/Правилу
-        private string sSupl;
-        private string sCS;
-        private string sR;
+        public string sSupl;
+        public string sCS;
 
         public Rule() { }
 
-        public Rule(Docs doc, int i, bool init = true)
+        public Rule(Docs doc, int i)
         {
             date = Lib.getDateTime(doc.Body.Strng(i, Decl.RULE_DATE));
-            text = Lib.ToLat((string)doc.Body[i, Decl.RULE_RULETEXT]);
-            synonyms = RuleSynParse(text);
-            ruleDP = new DP(text);  // template for identification
-            string csName = (string)doc.Body[i, Decl.RULE_COMPSETNAME];
-            string suplName = (string)doc.Body[i, Decl.RULE_SUPPLIERNAME];
-            Supplier = new Suppliers.Supplier(suplName);
-            if (init) CompSet = new CmpSet(csName, Supplier, init: init);
-        }
-        // параметр doc не указан, по умолчанию извлекаем Правила из TSmatch.xlsx/Rules
-        public Rule(int n, bool init = true) : this(Docs.getDoc(Decl.TSMATCHINFO_RULES), n, init) { }
-#if DEBUG
-        // 27/3/2017 пока - for unit test purpases only
-        public Rule(string str, CmpSet cs)
-        {
-            text = str;
-            synonyms = RuleSynParse(str);
-            ruleDP = new DP(str);
-            CompSet = cs;
-        }
-
-        public Rule(DateTime _date, string sSupl, string sCS, string sR)
-        {
-            date = _date;
-            text = sR;
+            Text = doc.Body.Strng(i, Decl.RULE_RULETEXT);
+            text = Lib.ToLat(Text.ToLower());
             synonyms = RuleSynParse(text);
             ruleDP = new DP(text);
-            Supplier = new Suppliers.Supplier(sSupl);
-            CompSet = new CmpSet(sCS, Supplier);
+            sSupl = doc.Body.Strng(i, Decl.RULE_SUPPLIERNAME);
+            sCS = doc.Body.Strng(i, Decl.RULE_COMPSETNAME);
+            if (date > DateTime.Now || date < Decl.OLD
+                || string.IsNullOrWhiteSpace(Text)
+                || string.IsNullOrWhiteSpace(sSupl)
+                || string.IsNullOrWhiteSpace(sCS)) throw new InvalidCastException("Rule line " + i);
         }
+
+        public Rule(int n) : this(Docs.getDoc(Decl.TSMATCHINFO_RULES), n) { }
 
         public Dictionary<SType, List<string>> RuleSynParse(string str)
         {
@@ -125,12 +92,12 @@ namespace TSmatch.Rule
             }
             return Syns;
         }
-#endif
 
-        public bool Equals(Rule other)
+        public void Init()
         {
-            if (other == null) return false;
-            return (this._id == other._id);
+            Supplier = new Supl(sSupl);
+            CompSet = new CmpSet(sCS, Supplier);
+            CompSet.doc.Close();
         }
 
         internal static List<string> getList(string name)
