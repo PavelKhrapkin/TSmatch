@@ -76,6 +76,7 @@ namespace TSmatch.Matcher
         /// <param name="_rule"></param>
         public Mtch(ElmAttSet.Group gr, Rule.Rule _rule)
         {
+            //28/6            gr.Elements  
             if (gr == null || gr.guids.Count < 1) return;
             ok = OK.NoMatch;
             group = gr;
@@ -84,7 +85,6 @@ namespace TSmatch.Matcher
                 bool found = false;
                 try { found = comp.isMatch(gr, _rule); }
                 catch { }
-//4/6               if (!comp.isMatch(gr, _rule)) continue;
                 if (!found) continue;
                 //-- Component is found - fill Price for all Guids elemets
                 ok = OK.Match;

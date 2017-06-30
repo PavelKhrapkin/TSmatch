@@ -1,7 +1,7 @@
 ﻿/*------------------------------------------------------------------------------------------
- * Model -- class and major methods of Model
+ * Model -- класс управления моделями, ведет Журнал Моделей и управляет их сохранением
  * 
- * 30.05.2017 Pavel Khrapkin
+ * 27.06.2017 П.Л. Храпкин
  *  
  *--- History ---
  * 18.1.2016 заложено П.Храпкин, А.Пасс, А.Бобцов
@@ -88,10 +88,11 @@ namespace TSmatch.Model
         public DateTime date;       // дата и время последнего обновления модели
         public string name;         // название модели
         public string dir;          // каталог в файловой системе, где хранится модель
-        public string ifcPath;     // полный путь к ifc-файлу, соответствующему модели
+        public string ifcPath;      // полный путь к ifc-файлу, соответствующему модели
         public string made;         // атрибут процедуры TSmatch, после которой получен MD5
         public string phase;        // текущая фаза проекта. В Tekla это int
         public string MD5;          // контрольная сумма отчета по модели
+        public double total_price;  // общая сумма стоимости материалов по модели
         public bool isChanged = false;
         public List<Elm> elements = new List<Elm>();
         public int elementsCount;
@@ -270,14 +271,14 @@ namespace TSmatch.Model
             switch (mode)
             {
                 case HighLightMODE.NoPrice:
-                    foreach(var gr in elmGroups)
+                    foreach (var gr in elmGroups)
                     {
                         if (gr.totalPrice != 0) continue;
                         foreach (string id in gr.guids)
                             toBeHighghlited.Add(id, elms[id]);
                     }
-//30/5                    foreach (var elm in elements)
-//30/5                        if (elm.price == 0) toBeHighghlited.Add(elm.guid, elm);
+                    //30/5                    foreach (var elm in elements)
+                    //30/5                        if (elm.price == 0) toBeHighghlited.Add(elm.guid, elm);
                     break;
                 case HighLightMODE.Guids:
                     if (guids == null || guids.Count == 0) return;
@@ -287,7 +288,7 @@ namespace TSmatch.Model
                     break;
             }
             HighLightElements(toBeHighghlited);
-            log.Info("HighLight(" + mode.ToString() + ") " 
+            log.Info("HighLight(" + mode.ToString() + ") "
                 + toBeHighghlited.Count + " elements "
                 + (DateTime.Now - t0));
         }
@@ -297,7 +298,7 @@ namespace TSmatch.Model
             if (TS.isTeklaActive())
             {
                 ts.HighlightElements(elms);
-                
+
                 //////////Type type = typeof(InvHLclass);
                 // 31.5///MethodInfo info = type.GetMethod("InvHL");
                 //////////info.Invoke(null, new object[] { elms });
