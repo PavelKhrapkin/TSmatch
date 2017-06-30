@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------------------
  * SavedReport -- class for handle saved reports in TSmatchINFO.xlsx
  * 
- *  3.06.2017 П.Л. Храпкин
+ *  27.06.2017 П.Л. Храпкин
  *  
  *--- Unit Tests ---
  * UT_SavedReport_Raw 2017.05.27 11 sec
@@ -10,6 +10,7 @@
  *  1.05.2017 with Document Reset and ReSave
  *  7.05.2017 написал SetFrSavedModelINFO(), переписал isReportConsystant()
  * 27.05.2017 - XML read and write model.elements as Raw.xml in Raw() 
+ *  5.06.2017 - bug fix in SetFrSavedModel - recoursive call after Reset
  *--- Methods: -------------------      
  * bool GetSavedReport()    - read TSmatchINFO.xlsx, set it as a current Model
  *                            return true if name, dir, quantity of elements is
@@ -60,17 +61,16 @@ namespace TSmatch.SaveReport
                 if (isChangedStr(ref mod.MD5, dINFO, 6, 2)) { ChangedModel(); continue; }
                 if (isChangedStr(ref mod.pricingMD5, dINFO, 9, 2)) { ChangedPricing(); continue; }
                 pricingDate = Lib.getDateTime(dINFO.Body.Strng(8, 2));
-
                 elements = Raw(mod);
                 if (elements == null && !TS.isTeklaActive()) Msg.F("No Saved elements in TSmatchINFO.xlsx");
-
-                mh.getGroups(elements);
-                elmGroups = mh.elmGroups;
-                elmMgroups = mh.elmMgroups;
-                Log.Trace("*SR.elements=", elements.Count, " gr=", elmGroups.Count);
+                ////////////////elmGroups = mh.getGrps(elements);
+                // 27/6 ////////total_price = 0;
+                ////////////////foreach (var gr in elmGroups) total_price += gr.totalPrice;                
+                Log.Trace("*SR.elements=", elements.Count, " gr=", elmGroups.Count, " total price=", total_price);
                 if (!Docs.IsDocExists(sRep)) { Reset(sRep); continue; }
                 getSavedGroups();
                 if (!Docs.IsDocExists(sRul)) { Reset(sRul); continue; }
+                //27/6                if (total_price <= 0) { Recover(sRep, RecoverToDo.ResetRep); continue; }
                 check = false;
             }
             Log.exit();
@@ -132,41 +132,17 @@ namespace TSmatch.SaveReport
 
         private bool isReportConsistent()
         {
-#endif  //OLD
+
         private void Pricing()
         {
             if (elements.Count == 0) Msg.F("elements.Count == 0");
             Docs dRep = Docs.getDoc(Decl.TSMATCHINFO_REPORT);
             dRep.Reset();
-            //12/5            mj = new ModelJournal.ModJournal(boot.models);
-            //24/5            Mod m = mj.getModJournal(name);
-            //24/5            strListRules = m.strListRules;
-            getSavedRules();
-            //12/5            mh = new ModelHandler.ModHandler();
+            getSavedRules(init: true);
+            if (mh == null) mh = new Model.Handler.ModHandler();
             mh.Handler(this);
-            getSavedRules();
-
-            return;
-            throw new NotImplementedException();
-            //8/5            getGroups();
-            //12/5 getSavedGroups();
-            //6/5           getSavedRules();
-            //6/5           if (R
-            //12/5 ules.Count <= 0) return false;
-            //7/5            if (docReport.Body.Double(docReport.il, Decl.REPORT_SUPL_PRICE) <= 0.0) return false;
-            //12/5                mj = new ModelJournal.ModJournal(boot.models);
-            //14/5                Mod m = mj.getModJournal(name);
-            //16/5---------------- перенести это в Pricing() ---------------
-            // пока почему-то нужно вызывать Handling -- делается Reset(Report)
-            //16/5                getSavedRules();
-            //16/5                mh.Handler(this);
-            // если здесь isChanged=true -- mj.SaveModJournal
-            //13/5              strListRules = m.strListRules;
-            //16/5                elmGroups = mh.elmGroups;
-            //16/5                Log.Trace("*SR.elements=", elements.Count, " gr=", elmGroups.Count);
-            //16/5-----------------------------------------------------------
         }
-
+#endif  //OLD
         private void ChangedPricing()
         {
             throw new NotImplementedException();
@@ -209,7 +185,11 @@ namespace TSmatch.SaveReport
                             wrModel(WrMod.ModelINFO);
                             break;
                         case Decl.TSMATCHINFO_REPORT:
+                            Mod model = this;
+                            mh.Pricing(ref model);
+                            total_price = model.total_price;
                             wrModel(WrMod.Report);
+                            elmGroups = model.elmGroups;
                             break;
                     }
                     break;
@@ -225,7 +205,11 @@ namespace TSmatch.SaveReport
         {
             dINFO = Docs.getDoc(sINFO, fatal: false);
             if (dINFO == null || dINFO.il < 9
-                || isChangedStr(ref name, dINFO, 2, 2)) Reset(sINFO);
+                || isChangedStr(ref name, dINFO, 2, 2))
+            {
+                Reset(sINFO);
+                SetFrSavedModelINFO(dir);
+            }
             name = dINFO.Body.Strng(2, 2);
             phase = dINFO.Body.Strng(4, 2);
             date = DateTime.Parse(dINFO.Body.Strng(5, 2));
@@ -276,9 +260,10 @@ namespace TSmatch.SaveReport
                 elms = mod.elements;
             }
             if (mod.elementsCount != elms.Count) elms = Raw(mod, write: true);
+            if (mod.MD5 == null) mod.MD5 = mod.getMD5(elms);
             Docs docModelINFO = Docs.getDoc(Decl.TSMATCHINFO_MODELINFO);
             if (mod.MD5 != docModelINFO.Body.Strng(6, 2)
-                || elementsCount != docModelINFO.Body.Int(7, 2)) Reset(sINFO);
+                || mod.elementsCount != docModelINFO.Body.Int(7, 2)) Reset(sINFO);
             Log.Trace("{ elmCount, MD5} ==", elms.Count, mod.MD5);
             Log.exit();
             return elms;
@@ -299,51 +284,42 @@ namespace TSmatch.SaveReport
 
         public void getSavedGroups()
         {
-            if (elmGroups.Count == 0) Msg.F("SavedReport.getSavedGroup: elmGroups.Count = 0");
-            string sRep = Decl.TSMATCHINFO_REPORT;
+            if (mh == null) mh = new Model.Handler.ModHandler();
+            elmGroups = mh.getGrps(elements);
             Docs dRep = Docs.getDoc(sRep, fatal: false);
-            if (dRep == null || dRep.il != (elmGroups.Count + dRep.i0)) Reset(sRep);
-            double totalPrice = dRep.Body.Double(dRep.il, Decl.REPORT_SUPL_PRICE);
-            //17/5            if (totalPrice == 0) Pricing();
-            int gr_n = dRep.i0;
-            foreach (var gr in elmGroups)
+            if (dRep == null || dRep.i0 < 2 || dRep.il != (elmGroups.Count + dRep.i0)) Reset(sRep);
+            total_price = 0;
+            for (int iGr = 1, i = dRep.i0; i < dRep.il; i++, iGr++)
             {
-                string grPrice = dRep.Body.Strng(gr_n, Decl.REPORT_SUPL_PRICE);
-                gr.totalPrice = Lib.ToDouble(grPrice);
-                gr.SupplierName = dRep.Body.Strng(gr_n, Decl.REPORT_SUPPLIER);
-                gr.CompSetName = dRep.Body.Strng(gr_n, Decl.REPORT_COMPSET);
-                gr_n++;
+                var gr = elmGroups[iGr - 1];
+                if (iGr != dRep.Body.Int(i, Decl.REPORT_N)) Msg.F("getSavedReport internal error");
+                gr.SupplierName = dRep.Body.Strng(i, Decl.REPORT_SUPPLIER);
+                gr.CompSetName = dRep.Body.Strng(i, Decl.REPORT_COMPSET);
+                gr.totalPrice = dRep.Body.Double(i, Decl.REPORT_SUPL_PRICE);
+                total_price += gr.totalPrice;
             }
             pricingMD5 = get_pricingMD5(elmGroups);
         }
-        public void getSavedRules()
+
+        public void getSavedRules(bool init = false)
         {
-#if DBG
-            Log.set("SR.getSavedRules(\"" + strListRules + "\")");
-            strListRules = "17, 4, 5, 6, 7";    // 13/5 заглушка
-            Log.set("SR.getSavedRules(\"" + strListRules + "\")");
-            //7/5            strListRules = getModJrnValue(Decl.MODEL_R_LIST);
-            foreach (int n in Lib.GetPars(strListRules))
-                Rules.Add(new Rule.Rule(n));
-            //8/5            ClosePriceLists();
-            Log.exit();
-#endif // DBG
             Log.set("SR.getSavedRules()");
             Rules.Clear();
             Docs doc = Docs.getDoc("Rules");
             for (int i = doc.i0; i <= doc.il; i++)
             {
-                //19/5                string sDate = doc.Body.Strng(i, 1);
-                date = Lib.getDateTime(doc.Body.Strng(i, 1));
-                if (date > DateTime.Now || date < Decl.OLD) continue;
-                string sSupl = doc.Body.Strng(i, 2);
-                string sCS = doc.Body.Strng(i, 3);
-                string sR = doc.Body.Strng(i, 4);
-                if (string.IsNullOrEmpty(sSupl)
-                    || string.IsNullOrEmpty(sCS)
-                    || string.IsNullOrEmpty(sR)) continue;
-                var rule = new Rule.Rule(date, sSupl, sCS, sR);
-                Rules.Add(rule);
+                try { Rules.Add(new Rule.Rule(i)); }
+                catch { continue; }
+                //////////////////date = Lib.getDateTime(doc.Body.Strng(i, 1));
+                //////////////////if (date > DateTime.Now || date < Decl.OLD) continue;
+                //////////////////string sSupl = doc.Body.Strng(i, 2);
+                //////////////////string sCS = doc.Body.Strng(i, 3);
+                // 7/6/17 ////////string sR = doc.Body.Strng(i, 4);
+                //////////////////if (string.IsNullOrEmpty(sSupl)
+                //////////////////    || string.IsNullOrEmpty(sCS)
+                //////////////////    || string.IsNullOrEmpty(sR)) continue;
+                //////////////////var rule = new Rule.Rule(date, sSupl, sCS, sR);
+                //////////////////Rules.Add(rule);
             }
             log.Info("- getSavedRules() Rules.Count = " + Rules.Count);
             Log.exit();
