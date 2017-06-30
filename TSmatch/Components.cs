@@ -1,7 +1,7 @@
 ﻿/*----------------------------------------------------------------------------
  * Components -- Supplier's price-list load and handling 
  * 
- * 4.06.2017  П.Храпкин
+ * 1.07.2017  П.Храпкин
  *
  * --- Unit Testing ---
  * 2017.06.04 UT_Component_IsMatch and UT_Component_ruleRep OK
@@ -163,7 +163,7 @@ namespace TSmatch.Component
                 if (c == g) return true;
                 string pattern = new Sec(rule.text, stype).body.Replace("=", "");
                 foreach (var s in Syns) pattern = strExclude(pattern, Syns);
-                return isMatch(pattern, c, g);
+                return isOK(pattern, c, g);
             }
 
             ////////////if(comMatPrf.Contains("50") && grMatPrf.Contains("50"))
@@ -180,9 +180,9 @@ namespace TSmatch.Component
             return comMatPrf == grMatPrf;
         }
 
-        //check if с - part of currect Component, and g - part of group
+        //check if с - part of current Component, and g - part of group
         //.. is in match in terms of template pattern string with wildcards
-        public bool isMatch(string pattern, string c, string g)
+        public bool isOK(string pattern, string c, string g)
         {
             var p_c = rulePar(pattern, c);
             var p_g = rulePar(pattern, g);
@@ -191,9 +191,10 @@ namespace TSmatch.Component
             {
                 if (p_c[i] == p_g[i]) continue;
                 if (p_c[i][0] != '@') return false;
-                int pc = Convert.ToInt32(p_c[i].Substring(1));
-                int pg = Convert.ToInt32(p_g[i].Substring(1));
-                if (pc < pg) return false;
+                List<int> pc = Lib.GetPars(p_c[i].Substring(1));
+                List<int> pg = Lib.GetPars(p_g[i].Substring(1));
+                int minPars = Math.Min(pc.Count, pg.Count);
+                for (int n = 0; n < minPars; n++) if (pc[n] < pg[n]) return false;
             }
             return true;
         }
@@ -202,20 +203,20 @@ namespace TSmatch.Component
         /// rulePar(pattern, str) - parse str with rule text pattern with '*' as wildcard
         /// <para>return List of substring str suits to '*'</para>
         /// <para>suffix '@' in pattern (f.e. "*x*@") means the Component could be cutted at this parameted dimension</para>
-        /// suffix
+        /// <para>throw Exception, when str not suit to the Rule.text</para>
         /// <param name="pattern">pattern to parse</param>
         /// <param name="str">string to be parsed with pattern</param>
         /// <returns>list of substrings - parameters</returns>
         public List<string> rulePar(string pattern, string str)
         {
             List<string> par = new List<string>();
-            string atFlag= string.Empty;
-            foreach(string s in pattern.Split('*'))
+            string atFlag = string.Empty;
+            foreach (string s in pattern.Split('*'))
             {
                 if (string.IsNullOrWhiteSpace(s)) continue;
                 char uptoCh = s[0];
                 int ind_str = str.IndexOf(uptoCh);
-                if(ind_str == -1 && uptoCh == 'x')
+                if (ind_str == -1 && uptoCh == 'x')
                 {
                     ind_str = str.IndexOf('*'); // не по ГОСТ, но '*' активно используется в Tekla
                     if (ind_str == -1) break;
