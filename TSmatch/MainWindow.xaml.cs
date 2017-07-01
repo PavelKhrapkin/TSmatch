@@ -42,7 +42,7 @@ namespace TSmatch
     {
         public static readonly ILog log = LogManager.GetLogger("MainWindow");
 
-        const string ABOUT = "TSmatch v1.0.2 3.6.2017";
+        const string ABOUT = "TSmatch v1.0.2 27.6.2017";
         public static Boot boot;
         public static string MyCity = "Санкт-Петербург";
         public delegate void NextPrimeDelegate();
@@ -64,14 +64,14 @@ namespace TSmatch
         private void MainWindowLoad()
         {
             Title = "TSmatch - согласование поставщиков в проекте";
-//20/5            message.Text = "..Load MainWindow..";
+            //20/5            message.Text = "..Load MainWindow..";
             boot = new Boot();
             var sr = new SaveReport.SavedReport();
             model = sr;
             model.SetModel(boot);
             WrModelInfoPanel();
             WrReportPanel();
-//30/5            model.HighLightElements(Mod.HighLightMODE.NoPrice);
+            //30/5            model.HighLightElements(Mod.HighLightMODE.NoPrice);
             message = "вначале группы без цен...";
             msg.Text = message;
         }
@@ -164,7 +164,7 @@ namespace TSmatch
             wSupplier.Show();
             // AskYN() если изменился - новый выбор Supplier, else return
             // RePricing();
-         }
+        }
 
         private void OnCompSet(object sender, RoutedEventArgs e)
         {
@@ -175,15 +175,15 @@ namespace TSmatch
         private void OnMaterial(object sender, RoutedEventArgs e)
         {
             Msg.AskFOK("Not ready yeat");
-//22/5            var wChoice = new WindowSupplierChain();
-//22/5            wChoice.Show();
+            //22/5            var wChoice = new WindowSupplierChain();
+            //22/5            wChoice.Show();
         }
 
         private void OnProfile(object sender, RoutedEventArgs e)
         {
             Msg.AskFOK("Not ready yeat");
-//22/5            var wChoice = new WindowSupplierChain();
-//22/5            wChoice.Show();
+            //22/5            var wChoice = new WindowSupplierChain();
+            //22/5            wChoice.Show();
         }
 
         private void OnRules(object sender, RoutedEventArgs e)
@@ -204,7 +204,7 @@ namespace TSmatch
         private void RePrice_button_Click(object sender, RoutedEventArgs e)
         {
             Msg.AskFOK("Пересчет стоимости материалов");
-//20/5            if (!Msg.AskYN("Правила годятся?")) { var W_Rules = new W_Rules(); W_Rules.Show(); }
+            //20/5            if (!Msg.AskYN("Правила годятся?")) { var W_Rules = new W_Rules(); W_Rules.Show(); }
             RePricing();
             RePrice.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal
                 , new NextPrimeDelegate(WrReportPanel));
@@ -229,7 +229,7 @@ namespace TSmatch
 
         private void OK_button_Click(object sender, RoutedEventArgs e)
         {
-//21/5            isRuleChanged = true; // для отладки
+            //21/5            isRuleChanged = true; // для отладки
             if (ModelIsChanged && Msg.AskYN("Модель или цены изменились. Запишем изменения в файл?"))
             {
                 var sr = new SaveReport.SavedReport();
