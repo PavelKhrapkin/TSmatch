@@ -102,6 +102,7 @@
     <Compile Include="ModHandler.cs" />
     <Compile Include="Parameter.cs" />
     <Compile Include="PriceList.cs" />
+    <Compile Include="ProfileUpdate.cs" />
     <Compile Include="Rule.cs" />
     <Compile Include="SavedReport.cs" />
     <Compile Include="Section.cs" />

@@ -1,5 +1,5 @@
 ﻿/*=================================
- * Saved Report Unit Test 29.5.2017
+ * Saved Report Unit Test 28.6.2017
  *=================================
  */
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -36,7 +36,11 @@ namespace TSmatch.SaveReport.Tests
             sr.GetSavedReport(sr);
 
 
-            Assert.Fail();
+            Assert.IsTrue(sr.elementsCount > 0);
+            Assert.AreEqual(sr.elementsCount, sr.elements.Count);
+            Assert.IsTrue(sr.elmGroups.Count > 0);
+            var total_price = sr.elmGroups.Sum(x => x.totalPrice);
+            Assert.IsTrue(sr.elmGroups.Sum(x => x.totalPrice) > 0);
 
             FileOp.AppQuit();
         }
@@ -148,21 +152,22 @@ namespace TSmatch.SaveReport.Tests
             FileOp.AppQuit();
         }
 
-        // проверяем как дополняются eleGroups из листа TSmatchINFO.xlsx/Report 
+        // проверяем как дополняются eleGroups из листа TSmatchINFO.xlsx/Report
+        // 2017.06.28 переписан sr.getSavedGroups() -- getGrps + читаю из файла Report
         [TestMethod()]
         public void UT_SavedReport_getSavedGroup()
         {
             var sr = init();
             model.dir = boot.ModelDir;
             sr.elements = sr.Raw(model);
-            //12/5            model.mh = new ModelHandler.ModHandler();
-            model.mh.getGroups(sr.elements);
-            model.elmGroups = model.mh.elmGroups;
 
             sr.getSavedGroups();
 
+            double sumPrice = sr.elmGroups.Select(x => x.totalPrice).Sum();
+            Assert.AreEqual(sumPrice, sr.total_price);
             Docs dRep = Docs.getDoc("Report");
-            int cnt = sr.elmGroups.Count + dRep.i0 + 1;
+            // в Report <Заголовок> + строки по числу elmGroups.Count + <Summary>
+            int cnt = sr.elmGroups.Count + dRep.i0;
             Assert.AreEqual(dRep.il, cnt);
 
             FileOp.AppQuit();
