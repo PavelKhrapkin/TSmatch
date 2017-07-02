@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------
  * MatchLib -- библиотека общих подпрограмм проекта match 3.0
  * 
- *  24.05.17 П.Храпкин, А.Пасс
+ *  2.07.17 П.Храпкин, А.Пасс
  *  
  * - 20.11.13 переписано с VBA на С#
  * - 1.12.13 добавлен метод ToIntList
@@ -21,6 +21,7 @@
  * - 17.10.16 перенес GetPars из Matcher
  * - 16.05.17 log4net use with WPF, TraceOn()/TraceOff()
  * - 24.05.17 Regex const for GetPar are local - not in Declaration anymore
+ * -  2.07.17 GetPersStr(str) - get numberic parameters as a List<string>
  * -------------------------------------------
  *      ---- методы Mtch.Lib ----
  * fileOpen(dir, name[,OpenMode]) - открываем файл Excel по имени name в директории Dir, возвращает Workbook
@@ -35,6 +36,8 @@
  * ComputeMD5(List>object> obj) - возвращает строку контрольной суммы MD5 по аргументу List<object>
  * ToLat(str) - замена в текстовой строке знаков кириллицы соотв.по написанию знаками латинского алфавита
  * ToMtch(str, reg)         - return true, if str is in match with the regular expression reg. 
+ * GetPars(str)             - return List<int> of digilat parameters in str
+ * GetParsStr(str)          - return List<string> of digital parameters in str. '.' and ',' allowed.
  */
 
 using System;
@@ -337,6 +340,22 @@ namespace match.Lib
                 if (string.IsNullOrEmpty(v)) continue;
                 if (Regex.IsMatch(v, VAL))
                     pars.Add(int.Parse(Regex.Match(v, VAL).Value));
+            }
+            return pars;
+        }
+
+        public static List<string> GetParsStr(string str)
+        {
+            const string VAL = @"(\d+\.\d.*?)|(\d+\,\d.*?)|(\d+?)";
+            List<string> pars = new List<string>();
+            if (string.IsNullOrEmpty(str)) return pars;
+            string[] pvals = Regex.Split(str, VAL);
+            foreach (var v in pvals)
+            {
+                if (string.IsNullOrEmpty(v)) continue;
+                if (Regex.IsMatch(v, "(_)|(;)")) break;
+                if (Regex.IsMatch(v, VAL))
+                    pars.Add(Regex.Match(v, VAL).Value);
             }
             return pars;
         }
