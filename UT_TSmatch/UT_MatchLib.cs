@@ -39,6 +39,12 @@ namespace match.Lib.Tests
             Assert.AreEqual(2, pars.Count);
             Assert.AreEqual("10.5", pars[0]);
             Assert.AreEqual("7,8", pars[1]);
+
+            // test 3
+            str = "I10_8239_89";
+            pars = MatchLib.GetParsStr(str);
+            Assert.AreEqual(1, pars.Count);
+            Assert.AreEqual("10", pars[0]);
         }
     }
 }

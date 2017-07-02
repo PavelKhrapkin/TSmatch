@@ -71,7 +71,7 @@ namespace TSmatch.ProfileUpdate
         string PrfNormStr(string mark)
         {
             string type = string.Empty;
-            List<int> pars = Lib.GetPars(Profile);
+            List<string> pars = Lib.GetParsStr(Profile);
             switch (mark)
             {
                 case "I":

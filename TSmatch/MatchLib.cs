@@ -346,7 +346,7 @@ namespace match.Lib
 
         public static List<string> GetParsStr(string str)
         {
-            const string VAL = @"(\d+\.\d.*?)|(\d+\,\d.*?)|(\d+?)";
+            const string VAL = @"(\d+\.\d.*?)|(\d+,\d.*?)|(\d+)";
             List<string> pars = new List<string>();
             if (string.IsNullOrEmpty(str)) return pars;
             string[] pvals = Regex.Split(str, VAL);
