@@ -24,42 +24,77 @@ namespace TSmatch.ProfileUpdate.Tests
         ElmAttSet.Group gr = new ElmAttSet.Group();
         List<ElmGr> inp = new List<ElmGr>();
 
+        [TestInitialize()]
+        public void Initialize()
+        {
+//            MessageBox.Show("TestMethodInit");
+        }
 
-        private void UT_ProfileUpdate_I()
+        // 2017.07.1 тест двутавров
+        [TestMethod()]
+        public void UT_PrfUpdate_I()
         {
             // test 0: "I10_8239_89" => "I10"
             initGr("I10_8239-89");
-            var res = mod.PrfUpdate(inp);
-            Assert.AreEqual(res[0].prf, "i10");
-            Assert.AreEqual(res[0].Prf, "I10");
+            var xx = new ProfileUpdate(ref inp);
+            Assert.AreEqual("i10", mod.elmGroups[0].prf);
+            Assert.AreEqual("I10", mod.elmGroups[0].Prf);
 
-            // test 1: "I20B1_20_93" => I20"
-            inp.Clear();
-            gr.Prf = "I20B1_20_93";
-            gr.prf = "i20b1_20_93";
-            inp.Add(gr);
-            res = mod.PrfUpdate(inp);
-            Assert.AreEqual(res[0].prf, "i20б1");
-            Assert.AreEqual(res[0].Prf, "I20Б1");
+            #region --- серия Б ---
+            // test Б1: "I20B1_20_93" => I20Б1"
+            initGr("I20B1_20_93");
+            xx = new ProfileUpdate(ref inp);
+            Assert.AreEqual("i20б1", mod.elmGroups[0].prf);
+            Assert.AreEqual("I20Б1", mod.elmGroups[0].Prf);
 
-            // test 2: "I20B2_20_93" => I20"
-            inp.Clear();
-            gr.Prf = "I20B2_20_93";
-            gr.prf = "i20b2_20_93";
-            inp.Add(gr);
-            res = mod.PrfUpdate(inp);
-            Assert.AreEqual(res[0].prf, "i20б2");
-            Assert.AreEqual(res[0].Prf, "I20Б2");
+            // test Б2: "I20B2_20_93" => I20Б2"
+            initGr("I20B2_20_93");
+            xx = new ProfileUpdate(ref inp);
+            Assert.AreEqual("i20б2", mod.elmGroups[0].prf);
+            Assert.AreEqual("I20Б2", mod.elmGroups[0].Prf);
 
-            // test 3: "I50B3_20_93" => I20"
-            inp.Clear();
-            gr.Prf = "I50B3_20_93";
-            gr.prf = "i50b3_20_93";
-            inp.Add(gr);
-            res = mod.PrfUpdate(inp);
-            Assert.AreEqual(res[0].prf, "i50б3");
-            Assert.AreEqual(res[0].Prf, "I50Б3");
+            // test Б3: "I50B3_20_93" => I20Б23"
+            initGr("I50B3_20_93");
+            xx = new ProfileUpdate(ref inp);
+            Assert.AreEqual("i50б3", mod.elmGroups[0].prf);
+            Assert.AreEqual("I50Б3", mod.elmGroups[0].Prf);
+            #endregion --- серия Б ---
+
+            #region --- серия K ---
+            // test K1: "I20K1_20_93" => I20K1"
+            initGr("I20K1_20_93");
+            xx = new ProfileUpdate(ref inp);
+            Assert.AreEqual("i20к1", mod.elmGroups[0].prf);
+            Assert.AreEqual("I20К1", mod.elmGroups[0].Prf);
+
+            // test К2: "I20К5_20_93" => I20К5"
+            initGr("I20K5_20_93");
+            xx = new ProfileUpdate(ref inp);
+            Assert.AreEqual("i20к5", mod.elmGroups[0].prf);
+            Assert.AreEqual("I20К5", mod.elmGroups[0].Prf);
+
+            // test К3: "I20К3A_20_93" => I20К3А" I20K3A_20_93
+            initGr("I20K3A_20_93");
+            xx = new ProfileUpdate(ref inp);
+            Assert.AreEqual("i20к3a", mod.elmGroups[0].prf);
+            Assert.AreEqual("I20К3A", mod.elmGroups[0].Prf);
+            #endregion --- серия K ---
+
+            #region --- серия Ш = H ---
+            // test Ш1: "I30H1_20_93" => I30Ш1"
+            initGr("I30H1_20_93");
+            xx = new ProfileUpdate(ref inp);
+            Assert.AreEqual("i30ш1", mod.elmGroups[0].prf);
+            Assert.AreEqual("I30Ш1", mod.elmGroups[0].Prf);
+
+            // test Ш2: "I100Р5_20_93" => I100Ш5"
+            initGr("I100H5_20_93");
+            xx = new ProfileUpdate(ref inp);
+            Assert.AreEqual("i100ш5", mod.elmGroups[0].prf);
+            Assert.AreEqual("I100Ш5", mod.elmGroups[0].Prf);
+            #endregion --- серия Ш = H ---
         }
+
 
         [TestMethod()]
         public void UT_ProfileUpdate_check()
@@ -98,56 +133,20 @@ namespace TSmatch.ProfileUpdate.Tests
 
         }
 
-        // 2017.06.29 тест двутавров
-        [TestMethod()]
-        public void UT_PrfUpdate_I()
-        {
-            var mod = new Handler();
-            ElmAttSet.Group gr = new ElmAttSet.Group();
-            List<ElmGr> inp = new List<ElmGr>();
-
-            // test 0: "I10_8239_89" => "I10"
-            gr.Prf = "I10_8239-89";
-            gr.prf = "i10_8239-89";
-            inp.Add(gr);
-            var res = mod.PrfUpdate(inp);
-            Assert.AreEqual(res[0].prf, "i10");
-            Assert.AreEqual(res[0].Prf, "I10");
-
-            // test 1: "I20B1_20_93" => I20"
-            inp.Clear();
-            gr.Prf = "I20B1_20_93";
-            gr.prf = "i20b1_20_93";
-            inp.Add(gr);
-            res = mod.PrfUpdate(inp);
-            Assert.AreEqual(res[0].prf, "i20б1");
-            Assert.AreEqual(res[0].Prf, "I20Б1");
-
-            // test 2: "I20B2_20_93" => I20"
-            inp.Clear();
-            gr.Prf = "I20B2_20_93";
-            gr.prf = "i20b2_20_93";
-            inp.Add(gr);
-            res = mod.PrfUpdate(inp);
-            Assert.AreEqual(res[0].prf, "i20б2");
-            Assert.AreEqual(res[0].Prf, "I20Б2");
-
-            // test 3: "I50B3_20_93" => I20"
-            inp.Clear();
-            gr.Prf = "I50B3_20_93";
-            gr.prf = "i50b3_20_93";
-            inp.Add(gr);
-            res = mod.PrfUpdate(inp);
-            Assert.AreEqual(res[0].prf, "i50б3");
-            Assert.AreEqual(res[0].Prf, "I50Б3");
-        }
-
         private void initGr(string v)
         {
             inp.Clear();
             gr.Prf = v;
             gr.prf = Lib.ToLat(v.ToLower().Replace(" ", ""));
             inp.Add(gr);
+            mod.elmGroups = inp;
         }
+
+        ////[TestMethod()]
+        ////public void UT_ProfileUpdate__()
+        ////{
+        ////    var xx = new ProfileUpdate(ref inp);
+        ////    Assert.Fail();
+        ////}
     } // end class UT_ProfileUpdate
 } // end namespace TSmatch.ProfileUpdate.Tests
