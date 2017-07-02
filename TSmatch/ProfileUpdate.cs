@@ -36,7 +36,8 @@ namespace TSmatch.ProfileUpdate
 
         private string Profile;
         private string profile;
-        
+        List<string> pars = new List<string>();
+
         static readonly Dictionary<string, string> PrfTab = new Dictionary<string, string>();
 
         static ProfileUpdate()
@@ -59,7 +60,8 @@ namespace TSmatch.ProfileUpdate
                 foreach (var Mark in PrfTab)
                 {
                     string mark = Mark.Value;
-                    if (!gr.Prf.Contains(mark) && !gr.prf.Contains(mark)) continue;
+                    if (gr.Prf[0] != Mark.Value[0] ||
+                        Mark.Value.Length > 1 && Mark.Value[1] != gr.Prf[1]) continue;
                     Profile = gr.Prf; profile = gr.prf;
                     gr.Prf = PrfNormStr(Mark.Key);
                     gr.prf = Lib.ToLat(gr.Prf.ToLower());
@@ -71,19 +73,21 @@ namespace TSmatch.ProfileUpdate
         string PrfNormStr(string mark)
         {
             string type = string.Empty;
-            List<string> pars = Lib.GetParsStr(Profile);
+            pars = Lib.GetParsStr(Profile);
             switch (mark)
             {
                 case "I":
                     if (PrfSub("Б", "b%", "", out type)) goto OK_I;
-                    if (PrfSub("К", "(k%A)|(k%)", "А", out type)) goto OK_I;
+                    if (PrfSub("К", "k%A", "А", out type)) goto OK_I;
+                    if (PrfSub("К", "k%", "", out type)) goto OK_I;
                     if (PrfSub("Ш", "h%", "", out type)) goto OK_I;
                     if (PrfSub("Д", "d%A", "А", out type)) goto OK_I;
                     if (PrfSub("У", "y%A", "А", out type)) goto OK_I;
                     if (PrfSub("М", "м%", "", out type)) goto OK_I;
                     if (PrfSub("С", "с%", "", out type)) goto OK_I;
                     OK_I: mark += pars[0] + type;
-                    if (pars.Count != 1) Msg.F("Internal error");
+                    if (type == "" && pars.Count != 1
+                        || Regex.IsMatch(type, @"\d") && pars.Count != 2) goto ERR;
                     break;
                 case "[":
                     if (PrfSub("[", "aY", "аУ", out type)) goto OK_U;
@@ -95,26 +99,27 @@ namespace TSmatch.ProfileUpdate
                     if (PrfSub("[", "ca", "Cа", out type)) goto OK_U;
                     if (PrfSub("[", "cb", "Cб", out type)) goto OK_U;
                     if (PrfSub("[", "c", "C", out type)) goto OK_U;
-                    ////if (str.Contains("ap")) { mark += "аП"; break; }
-                    ////if (str.Contains("p")) { mark += "П"; break; }
-                    ////if (str.Contains("ay")) { mark += "аУ"; break; }
-                    ////if (str.Contains("y")) { mark += "У"; break; }
-                    ////if (str.Contains("e")) { mark += "Э"; break; }
-                    ////if (str.Contains("l")) { mark += "Л"; break; }
-                    ////if (str.Contains("ca")) { mark += "Cа"; break; }
-                    ////if (str.Contains("cb")) { mark += "Cб"; break; }
-                    ////if (str.Contains("c")) { mark += "C"; break; }
-                    ////if (pars.Count != 1) Msg.F("Internal error");
                     OK_U: mark += pars[0] + type;
-                    if (pars.Count != 1) Msg.F("Internal error");
+                    if (pars.Count != 1) goto ERR;
+                    break;
+                case "L":
+                    if(pars.Count == 2) mark += pars[0] + "x" + pars[1];
+                    if(pars.Count == 3) mark += pars[0] + "x" + pars[1] + "x" + pars[2];
+                    if (pars.Count != 2  && pars.Count != 3) goto ERR;
+                    break;
+                case "—":
+                    if (pars.Count == 1) mark += pars[0];
+                    if (pars.Count == 2) mark += pars[0] + "x" + pars[1];
                     break;
                 case "Гн.[]":
                     break;
                 case "Гн.":
                     break;
             }
-            
-
+            return mark;
+            ERR: Msg.F("ProfileUpdate Internal error", Profile, pars.Count);
+            return null;
+        }
             //////////switch (pars.Count)
             //////////{
             //////////    case 1:
@@ -177,8 +182,6 @@ namespace TSmatch.ProfileUpdate
             //////////        break;
             //////////    default: Msg.F("ModHandler.grPrfPars not recognized Profile"); break;
             //////////}
-            return mark;
-        }
 
         // обнаруживает подстроки вида "Б3" или "K3A" и возвращает, если найдено, в type
         private bool PrfSub(string Type, string v, string sufix, out string type)
@@ -197,18 +200,12 @@ namespace TSmatch.ProfileUpdate
                     type = sufix;
                     return ok;
                 }
-                v = vp.Replace("(", "").Replace(")", "");
-                int iV = v.IndexOf("%");
-                int iPrf = profile.IndexOf(v[iV - 1]) + 1;
-                if (iV > 0 && iV < v.Length && iPrf > 0 && iPrf < profile.Length)
-                    typeDig = profile.Substring(iPrf, 1);
-                if (++iV < v.Length && ++iPrf < profile.Length)
-                    typeLtr = (v.Substring(iV).Length > 0)? sufix: string.Empty;
+                typeDig = pars[1];
                 int iTypeDig = Convert.ToInt32(typeDig);
-                if (iTypeDig < 0 || iTypeDig > 5) Msg.F("Wrong Gr.Prg", Profile);
+                if (iTypeDig < 0 || iTypeDig > 5) Msg.F("Wrong Group.Profile", Profile);
                 break;
             }
-            type = Type + typeDig + typeLtr;
+            type = Type + typeDig + sufix;
             return ok;
         }
     } // end class ModHandler : Model
