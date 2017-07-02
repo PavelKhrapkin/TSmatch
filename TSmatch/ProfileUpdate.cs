@@ -12,11 +12,13 @@
  * Handler()                 
  */
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 using log4net;
 using Lib = match.Lib.MatchLib;
 using Msg = TSmatch.Message.Message;
 using ElmGr = TSmatch.ElmAttSet.Group;
+using System;
 
 namespace TSmatch.ProfileUpdate
 {
@@ -32,6 +34,9 @@ namespace TSmatch.ProfileUpdate
         /// Полнота преобразования кодов проверялась по ГОСТ и среде Tekla Russia.
         /// </Description>
 
+        private string Profile;
+        private string profile;
+        
         static readonly Dictionary<string, string> PrfTab = new Dictionary<string, string>();
 
         static ProfileUpdate()
@@ -51,47 +56,64 @@ namespace TSmatch.ProfileUpdate
                 Msg.F("internal errer");
             foreach (var gr in elmGroups)
             {
-
-            }
-        }
-
-        public List<ElmGr> PrfUpdate(List<ElmGr> grp)
-        {
-            PrfNormalize(ref grp, PrfOpMode.Full, "—", "PL", "Полоса");
-            PrfNormalize(ref grp, PrfOpMode.Mark, "L", "Уголок");
-            PrfNormalize(ref grp, PrfOpMode.Mark, "I", "Балка");
-            PrfNormalize(ref grp, PrfOpMode.Full, "[", "U", "Швеллер");
-            PrfNormalize(ref grp, PrfOpMode.Full, "Гн.[]", "PP", "Тр.", "Труба пр");
-            PrfNormalize(ref grp, PrfOpMode.Full, "Гн.", "PK", "Тр.");
-            return grp;
-        }
-        /// <summary>
-        /// PrfNormalize operate in <Full>, or in <Mark> mode:
-        /// <para>  - Mark: only setup Mark (i.e. Profile type) as pointed in first argument, or</para>
-        /// <para>  - Full: setup Mark, and sort digital parameter values the profile template list;</para> 
-        /// </summary>
-        enum PrfOpMode { Full, Mark }
-        private void PrfNormalize(ref List<ElmGr> grp, PrfOpMode md, params string[] prfMark)
-        {
-            foreach (var gr in grp)
-            {
-                foreach (string s in prfMark)
+                foreach (var Mark in PrfTab)
                 {
-                    if (!gr.Prf.Contains(s) && !gr.prf.Contains(s)) continue;
-                    string initialPrf = gr.Prf;
-                    gr.Prf = PrfNormStr(gr.prf, prfMark[0], Lib.GetPars(gr.Prf));
+                    string mark = Mark.Value;
+
+                    if (!gr.Prf.Contains(mark) && !gr.prf.Contains(mark)) continue;
+                    Profile = gr.Prf; profile = gr.prf;
+                    gr.Prf = PrfNormStr(Mark.Key);
                     gr.prf = Lib.ToLat(gr.Prf.ToLower());
-                    log.Info("--- " + initialPrf + " -> " + "Prf=" + gr.Prf + "gr.prf=" + gr.prf);
-                    break;
+                    if (gr.Prf != Profile) break;
                 }
             }
         }
 
-        string PrfNormStr(string str, string mark, List<int> pars)
+        ////////////public List<ElmGr> PrfUpdate(List<ElmGr> grp)
+        ////////////{
+        ////////////    PrfNormalize(ref grp, PrfOpMode.Full, "—", "PL", "Полоса");
+        ////////////    PrfNormalize(ref grp, PrfOpMode.Mark, "L", "Уголок");
+        ////////////    PrfNormalize(ref grp, PrfOpMode.Mark, "I", "Балка");
+        ////////////    PrfNormalize(ref grp, PrfOpMode.Full, "[", "U", "Швеллер");
+        ////////////    PrfNormalize(ref grp, PrfOpMode.Full, "Гн.[]", "PP", "Тр.", "Труба пр");
+        ////////////    PrfNormalize(ref grp, PrfOpMode.Full, "Гн.", "PK", "Тр.");
+        ////////////    return grp;
+        ////////////}
+        /////////////// <summary>
+        /////////////// PrfNormalize operate in <Full>, or in <Mark> mode:
+        /////////////// <para>  - Mark: only setup Mark (i.e. Profile type) as pointed in first argument, or</para>
+        /////////////// <para>  - Full: setup Mark, and sort digital parameter values the profile template list;</para> 
+        /////////////// </summary>
+        ////////////enum PrfOpMode { Full, Mark }
+        ////////////private void PrfNormalize(ref List<ElmGr> grp, PrfOpMode md, params string[] prfMark)
+        ////////////{
+        ////////////    foreach (var gr in grp)
+        ////////////    {
+        ////////////        foreach (string s in prfMark)
+        ////////////        {
+        ////////////            if (!gr.Prf.Contains(s) && !gr.prf.Contains(s)) continue;
+        ////////////            string initialPrf = gr.Prf;
+        ////////////            gr.Prf = PrfNormStr(gr.prf, prfMark[0], Lib.GetPars(gr.Prf));
+        ////////////            gr.prf = Lib.ToLat(gr.Prf.ToLower());
+        ////////////            log.Info("--- " + initialPrf + " -> " + "Prf=" + gr.Prf + "gr.prf=" + gr.prf);
+        ////////////            break;
+        ////////////        }
+        ////////////    }
+        ////////////}
+
+        string PrfNormStr(string mark)
         {
+            string type = string.Empty;
+            List<int> pars = Lib.GetPars(Profile);
             switch (mark)
             {
                 case "I":
+                    if (PrfSub("Б", "b%", out type)) goto OK;
+                    if (PrfSub("К", "(k%A)|(k%)", out type)) goto OK;
+                    if (PrfSub("Ш", "h%", out type)) goto OK;
+                    OK: mark += pars[0] + type;
+                    break;
+#if Not_ready
                     mark += pars[0];
                     if (str.Contains("b1")) { mark += "Б1"; break; }
                     if (str.Contains("b2")) { mark += "Б2"; break; }
@@ -111,13 +133,13 @@ namespace TSmatch.ProfileUpdate
                     if (str.Contains("c")) { mark += "C"; break; }
                     if (pars.Count != 1) Msg.F("Internal error");
                     break;
-
+#endif //Not_ready
                 case "Гн.[]":
                     break;
                 case "Гн.":
                     break;
             }
-
+            
 
             //////////switch (pars.Count)
             //////////{
@@ -182,6 +204,32 @@ namespace TSmatch.ProfileUpdate
             //////////    default: Msg.F("ModHandler.grPrfPars not recognized Profile"); break;
             //////////}
             return mark;
+        }
+
+        // обнаруживает подстроки вида "Б3" или "K3A" и возвращает, если найдено, в type
+        private bool PrfSub(string Type, string v, out string type)
+        {
+            type = string.Empty;
+            bool ok = Regex.IsMatch(profile, v.Replace('%', '.'), RegexOptions.IgnoreCase);
+            if (!ok) return ok;
+
+            string typeDig = string.Empty, typeLtr = string.Empty;
+            string[] v_parts = v.Split('|');
+            foreach (string vp in v_parts)
+            {
+                if (!Regex.IsMatch(profile, vp.Replace('%', '.'), RegexOptions.IgnoreCase)) continue;
+                v = vp.Replace("(", "").Replace(")", "");
+                int iV = v.IndexOf("%");
+                int iPrf = profile.IndexOf(v[iV - 1]) + 1;
+                if (iV > 0 && iV < v.Length && iPrf > 0 && iPrf < profile.Length)
+                    typeDig = profile.Substring(iPrf, 1);
+                if (++iV < v.Length && ++iPrf < profile.Length) typeLtr = v.Substring(iV);
+                int iTypeDig = Convert.ToInt32(typeDig);
+                if (iTypeDig < 0 || iTypeDig > 5) Msg.F("Wrong Gr.Prg", Profile);
+                break;
+            }
+            type = Type + typeDig + typeLtr;
+            return ok;
         }
     } // end class ModHandler : Model
 } // end namespace Model.Handler
