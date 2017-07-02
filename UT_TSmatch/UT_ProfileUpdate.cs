@@ -125,44 +125,105 @@ namespace TSmatch.ProfileUpdate.Tests
             xx = new ProfileUpdate(ref inp);
             Assert.AreEqual("[6.5y", mod.elmGroups[0].prf);
             Assert.AreEqual("[6.5У", mod.elmGroups[0].Prf);
+
+            // test 3У: "U18AY_8240_97" => "]18аУ"
+            initGr("U18AY_8240_97");
+            xx = new ProfileUpdate(ref inp);
+            Assert.AreEqual("[18ay", mod.elmGroups[0].prf);
+            Assert.AreEqual("[18аУ", mod.elmGroups[0].Prf);
             #endregion --- серия У --- 
+
+            #region --- серия П ГОСТ 8240-97 --- 
+            // test 1П: "U30P_8240_97" => "]30П"
+            initGr("U30P_8240_97");
+            xx = new ProfileUpdate(ref inp);
+            Assert.AreEqual("[30п", mod.elmGroups[0].prf);
+            Assert.AreEqual("[30П", mod.elmGroups[0].Prf);
+
+            // test 2П: "U16AP_8240_97" => "]16аП"
+            initGr("U16AP_8240_97");
+            xx = new ProfileUpdate(ref inp);
+            Assert.AreEqual("[16aп", mod.elmGroups[0].prf);
+            Assert.AreEqual("[16аП", mod.elmGroups[0].Prf);
+            #endregion --- серия П --- 
+
+            #region --- серии Э, Л, С ГОСТ 8240-97 ---
+            // test 1Э: "U5E_8240_97" => "]5Э"
+            initGr("U5E_8240_97");
+            xx = new ProfileUpdate(ref inp);
+            Assert.AreEqual("[5э", mod.elmGroups[0].prf);
+            Assert.AreEqual("[5Э", mod.elmGroups[0].Prf);
+
+            // test 2Л: "U27L_8240_97" => "]27Л"
+            initGr("U27L_8240_97");
+            xx = new ProfileUpdate(ref inp);
+            Assert.AreEqual("[27л", mod.elmGroups[0].prf);
+            Assert.AreEqual("[27Л", mod.elmGroups[0].Prf);
+
+            // test 3C: "U26CA_8240_97" => "]26Ca"
+            initGr("U26CA_8240_97");
+            xx = new ProfileUpdate(ref inp);
+            Assert.AreEqual("[26ca", mod.elmGroups[0].prf);
+            Assert.AreEqual("[26Cа", mod.elmGroups[0].Prf);
+
+            // test 4C: "U30CB_8240_97" => "]30Cб"
+            initGr("U30CB_8240_97");
+            xx = new ProfileUpdate(ref inp);
+            Assert.AreEqual("[30cб", mod.elmGroups[0].prf);
+            Assert.AreEqual("[30Cб", mod.elmGroups[0].Prf);
+
+            // test 5C: "U26C_8240_97" => "]26C"
+            initGr("U26C_8240_97");
+            xx = new ProfileUpdate(ref inp);
+            Assert.AreEqual("[26c", mod.elmGroups[0].prf);
+            Assert.AreEqual("[26C", mod.elmGroups[0].Prf);
+            #endregion --- серии Э, Л, C ГОСТ 8240-97 ---
+        }
+
+        // 2017.07.2 тест уголков
+        [TestMethod()]
+        public void UT_PrfUpdate_L()
+        {
+            // Уголки равнополочные ГОСТ 8509-93 и неравнополочные ГОСТ 8510-86 --- 
+            // test 1L: "L40X5_8509_93" => "L40x5"
+            initGr("L40X5_8509_93");
+            var xx = new ProfileUpdate(ref inp);
+            Assert.AreEqual("l40x5", mod.elmGroups[0].prf);
+            Assert.AreEqual("L40x5", mod.elmGroups[0].Prf);
+
+            // test 2L: "L250X35_8509_93" => "L250x35"
+            initGr("L250X35_8509_93");
+            xx = new ProfileUpdate(ref inp);
+            Assert.AreEqual("l250x35", mod.elmGroups[0].prf);
+            Assert.AreEqual("L250x35", mod.elmGroups[0].Prf);
+
+            // test 3L: "L75X50X8_8510_86" => "L75x50x8"
+            initGr("L75X50X8_8510_86");
+            xx = new ProfileUpdate(ref inp);
+            Assert.AreEqual("l75x50x8", mod.elmGroups[0].prf);
+            Assert.AreEqual("L75x50x8", mod.elmGroups[0].Prf);
         }
 
         [TestMethod()]
-        public void UT_ProfileUpdate_check()
+        public void UT_ProfileUpdate_PL()
         {
             // test 0: "PL6" -> "—6"
-            gr.Prf = "PL6";
-            gr.prf = "pl6";
-            inp.Add(gr);
-            var res = mod.PrfUpdate(inp);
-            Assert.AreEqual(res[0].prf, "—6");
+            initGr("PL6");
+            var xx = new ProfileUpdate(ref inp);
+            Assert.AreEqual("—6", mod.elmGroups[0].Prf);
 
-            // test 1: "—100*6" => "—6x100"
-            inp.Clear();
-            gr.Prf = gr.prf = "—100*6";
-            inp.Add(gr);
-            res = mod.PrfUpdate(inp);
-            Assert.AreEqual(res[0].prf, "—6x100");
+            //// test 1: "—100*6" => "—6x100"
+            //initGr("PL6");
+            //var xx = new ProfileUpdate(ref inp); "—100*6";
+            //inp.Add(gr);
+            //res = mod.PrfUpdate(inp);
+            //Assert.AreEqual(res[0].prf, "—6x100");
 
-            // test 2: "—100*6" => "—6x100"
-            gr.Prf = gr.prf = "—100*6";
-            inp.Add(gr);
-            res = mod.PrfUpdate(inp);
-            Assert.AreEqual(res[1].prf, "—6x100");
-
-            // test 3: "L75X5_8509_93" => L75x5"
-            gr.Prf = gr.prf = "L75X5_8509_93";
-            inp.Add(gr);
-            res = mod.PrfUpdate(inp);
-            Assert.AreEqual(res[2].Prf, "L75x5");
-            Assert.AreEqual(res[2].prf, "l75x5");
-        }
-
-        private void Test_U(Handler mod, ElmGr gr)
-        {
-            List<ElmGr> inp = new List<ElmGr>();
-
+            //// test 2: "—100*6" => "—6x100"
+            //gr.Prf = gr.prf = "—100*6";
+            //inp.Add(gr);
+            //res = mod.PrfUpdate(inp);
+            //Assert.AreEqual(res[1].prf, "—6x100");
         }
 
         private void initGr(string v)
