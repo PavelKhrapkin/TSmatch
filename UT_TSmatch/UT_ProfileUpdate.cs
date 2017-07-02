@@ -1,5 +1,5 @@
 ﻿/*=================================
- * ProfileUpdate Unit Test 1.07.2017
+ * ProfileUpdate Unit Test 2.07.2017
  *=================================
  */
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -77,7 +77,7 @@ namespace TSmatch.ProfileUpdate.Tests
             initGr("I20K3A_20_93");
             xx = new ProfileUpdate(ref inp);
             Assert.AreEqual("i20к3a", mod.elmGroups[0].prf);
-            Assert.AreEqual("I20К3A", mod.elmGroups[0].Prf);
+            Assert.AreEqual("I20К3А", mod.elmGroups[0].Prf);
             #endregion --- серия K ---
 
             #region --- серия Ш = H ---
@@ -93,8 +93,40 @@ namespace TSmatch.ProfileUpdate.Tests
             Assert.AreEqual("i100ш5", mod.elmGroups[0].prf);
             Assert.AreEqual("I100Ш5", mod.elmGroups[0].Prf);
             #endregion --- серия Ш = H ---
+
+            #region --- серия Р40-93 Д и У ---
+            // test Д1: "I25D3A_20_93" => I25Д3A"
+            initGr("I25D3A_20_93");
+            xx = new ProfileUpdate(ref inp);
+            Assert.AreEqual("i25д3a", mod.elmGroups[0].prf);
+            Assert.AreEqual("I25Д3А", mod.elmGroups[0].Prf);
+
+            // test Ш2: "I36Y2A_20_93" => "I36У2A"
+            initGr("I36Y2A_20_93");
+            xx = new ProfileUpdate(ref inp);
+            Assert.AreEqual("i36y2a", mod.elmGroups[0].prf);
+            Assert.AreEqual("I36У2А", mod.elmGroups[0].Prf);
+            #endregion --- серия Р40-93 Д и У ---
         }
 
+        // 2017.07.2 тест швеллеров
+        [TestMethod()]
+        public void UT_PrfUpdate_U()
+        {
+            #region --- серия У ГОСТ 8240-97 --- 
+            // test 1У: "U18AY_8240_97" => "]18aУ"
+            initGr("U18AY_8240_97");
+            var xx = new ProfileUpdate(ref inp);
+            Assert.AreEqual("[18ay", mod.elmGroups[0].prf);
+            Assert.AreEqual("[18аУ", mod.elmGroups[0].Prf);
+
+            // test 2У: "U6.5Y_8240_97" => "]6.5У"
+            initGr("U6.5Y_8240_97");
+            xx = new ProfileUpdate(ref inp);
+            Assert.AreEqual("[6.5y", mod.elmGroups[0].prf);
+            Assert.AreEqual("[6.5У", mod.elmGroups[0].Prf);
+            #endregion --- серия У --- 
+        }
 
         [TestMethod()]
         public void UT_ProfileUpdate_check()
@@ -141,12 +173,5 @@ namespace TSmatch.ProfileUpdate.Tests
             inp.Add(gr);
             mod.elmGroups = inp;
         }
-
-        ////[TestMethod()]
-        ////public void UT_ProfileUpdate__()
-        ////{
-        ////    var xx = new ProfileUpdate(ref inp);
-        ////    Assert.Fail();
-        ////}
     } // end class UT_ProfileUpdate
 } // end namespace TSmatch.ProfileUpdate.Tests
