@@ -1,7 +1,7 @@
 ﻿/*------------------------------------------------------------------------------------------
  * Model -- класс управления моделями, ведет Журнал Моделей и управляет их сохранением
  * 
- * 30.05.2017 П.Л. Храпкин
+ * 27.06.2017 П.Л. Храпкин
  *  
  *--- History ---
  * 18.1.2016 заложено П.Храпкин, А.Пасс, А.Бобцов
@@ -88,10 +88,11 @@ namespace TSmatch.Model
         public DateTime date;       // дата и время последнего обновления модели
         public string name;         // название модели
         public string dir;          // каталог в файловой системе, где хранится модель
-        public string ifcPath;     // полный путь к ifc-файлу, соответствующему модели
+        public string ifcPath;      // полный путь к ifc-файлу, соответствующему модели
         public string made;         // атрибут процедуры TSmatch, после которой получен MD5
         public string phase;        // текущая фаза проекта. В Tekla это int
         public string MD5;          // контрольная сумма отчета по модели
+        public double total_price;  // общая сумма стоимости материалов по модели
         public bool isChanged = false;
         public List<Elm> elements = new List<Elm>();
         public int elementsCount;

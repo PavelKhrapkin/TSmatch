@@ -1,7 +1,7 @@
 ﻿/*--------------------------------------------------------------------------------------
  * ElmAttSet -- Definitions of Properties, and their Names of the Elements in the Model 
  * 
- *  16.06.2017  Pavel Khrapkin
+ *  28.06.2017  Pavel Khrapkin
  * 
  * ----- TODO 30.9.2016 ------
  * - закомментировать неиспользуемые методы группировки (Ctrl/F12 empty)
@@ -37,6 +37,7 @@ using Ifc = TSmatch.IFC.IfcManager.Core.IfcManager.IfcElement;
 using Mtch = TSmatch.Matcher.Mtch;
 using CmpSet = TSmatch.CompSet.CompSet;
 using Supl = TSmatch.Suppliers.Supplier;
+using TS = TSmatch.Tekla.Tekla;
 
 
 namespace TSmatch.ElmAttSet
@@ -285,8 +286,31 @@ namespace TSmatch.ElmAttSet
         //---- references to other classes - price-list conteiners
         public string CompSetName;  //список компонентов, с которыми работает правило
         public string SupplierName; //Поставщик
+        private IGrouping<string, ElmAttSet> g;
 
         public Group() { }
+
+        public Group(IGrouping<string, ElmAttSet> group)
+        {
+            Elements = group.ToDictionary(x => x.guid);
+            Mat = Elements.First().Value.mat;
+            Prf = Elements.First().Value.prf;
+            mat = Lib.ToLat(Mat.ToLower().Replace("*", "x"));
+            prf = Lib.ToLat(Prf.ToLower().Replace("*", "x"));
+            guids = group.Select(x => x.guid).ToList();
+            totalLength = group.Select(x => x.length).Sum();
+            totalWeight = group.Select(x => x.weight).Sum();
+            totalVolume = group.Select(x => x.volume).Sum();
+            //check Materials in group -- they should be the same
+            foreach (var gr in group)
+            {
+                if (gr.mat == Mat) continue;
+                Msg.W("ElmGr: various materials in Group", Prf, Mat, gr.mat);
+                var mod = new Model.Model();
+                mod.HighLightElements(Elements);
+                break;
+            }
+        }
 
         public Group(List<ElmAttSet> elements, string _Mat, string _Prf)
         {
@@ -304,6 +328,13 @@ namespace TSmatch.ElmAttSet
                 totalLength += Elements[id].length;
                 totalVolume += Elements[id].volume;
                 totalWeight += Elements[id].weight;
+                if (Elements[id].mat == Mat) continue;
+                var er_group = grp.ToDictionary(x => x);
+                Dictionary<string, ElmAttSet> er = new Dictionary<string, ElmAttSet>();
+                er.Add(id, Elements[id]);
+                var ts = new TSmatch.Tekla.Tekla();
+                ts.HighlightElements(er, 111);
+                Msg.W("ElmGr: various materials in Group", Prf, Mat, Elements[id].mat);
             }
 //////////                    if (elm.mat != mat || elm.prf != prf)
 //////////                        Msg.F("Bad Group of elements", Mat, Prf, elm.guid);

@@ -76,6 +76,7 @@ namespace TSmatch.Matcher
         /// <param name="_rule"></param>
         public Mtch(ElmAttSet.Group gr, Rule.Rule _rule)
         {
+//28/6            gr.Elements  
             if (gr == null || gr.guids.Count < 1) return;
             ok = OK.NoMatch;
             group = gr;

@@ -163,26 +163,14 @@ namespace TSmatch.Component
                 if (c == g) return true;
                 string pattern = new Sec(rule.text, stype).body.Replace("=", "");
                 foreach (var s in Syns) pattern = strExclude(pattern, Syns);
-                return isMatch(pattern, c, g);
+                return isOK(pattern, c, g);
             }
-
-            ////////////if(comMatPrf.Contains("50") && grMatPrf.Contains("50"))
-            ////////////{
-            ////////////    for(int i = 0; i < comMatPrf.Length; i++)
-            ////////////    {
-            ////////////        char cc = comMatPrf[i];
-            ////////////        char gg = grMatPrf[i];
-            ////////////        if (cc == gg) continue;
-            ////////////        int ii = 25;
-            ////////////    }
-            ////////////}
-
             return comMatPrf == grMatPrf;
         }
 
-        //check if с - part of currect Component, and g - part of group
+        //check if с - part of current Component, and g - part of group
         //.. is in match in terms of template pattern string with wildcards
-        public bool isMatch(string pattern, string c, string g)
+        public bool isOK(string pattern, string c, string g)
         {
             var p_c = rulePar(pattern, c);
             var p_g = rulePar(pattern, g);
@@ -191,9 +179,10 @@ namespace TSmatch.Component
             {
                 if (p_c[i] == p_g[i]) continue;
                 if (p_c[i][0] != '@') return false;
-                int pc = Convert.ToInt32(p_c[i].Substring(1));
-                int pg = Convert.ToInt32(p_g[i].Substring(1));
-                if (pc < pg) return false;
+                List<int> pc = Lib.GetPars(p_c[i].Substring(1));
+                List<int> pg = Lib.GetPars(p_g[i].Substring(1));
+                int minPars = Math.Min(pc.Count, pg.Count);
+                for(int n = 0; n < minPars; n++) if (pc[n] < pg[n]) return false;          
             }
             return true;
         }
