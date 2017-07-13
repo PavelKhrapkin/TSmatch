@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------------------
  * Bootstrap - provide initial start of TSmatch, when necessary - startup procedure
  * 
- *  24.05.2017  Pavel Khrapkin
+ *  11.07.2017  Pavel Khrapkin
  *
  *--- History ---
  * 25.3.2016 started 
@@ -17,6 +17,7 @@
  * 17.04.2017 - SavedModel class implementd
  *  3.05.2017 - Model Journal initialization
  * 24.05/2017 - Rules and Model journal are not global resources anymore
+ * 11.07.2017 - public DibugDir
  * ---------------------------------------------------------------------------
  *      Bootstrap Methods:
  * Bootstrap()      - check all resources and start all other modules
@@ -72,7 +73,7 @@ namespace TSmatch.Bootstrap
         static string macroDir = "";        // directory in Tekla\Environment to store button TSmatch
         static string IFCschema = "";       // IFC2X3.exd in Tekla Environment\common\inp as IFC schema 
         //static string desktop_path = string.Empty;
-        static string DebugDir = string.Empty;
+        public string DebugDir = string.Empty;
 
         //------------ Main TSmatch classes --------------------------
         public List<Mod> models;            // CAD model list used in TSmatch, model journal

@@ -37,9 +37,12 @@ namespace TSmatch
             {
                 string csName = doc.Body.Strng(i, Decl.RULE_COMPSETNAME);
                 Rule.Rule rule = new Rule.Rule(i);
-                if (rule == null || string.IsNullOrWhiteSpace(rule.Supplier.name)
+                ////if (rule == null || string.IsNullOrWhiteSpace(rule.Supplier.name)
+                ////    || string.IsNullOrWhiteSpace(rule.text)) continue;
+                if (rule == null || string.IsNullOrWhiteSpace(rule.sSupl)
                     || string.IsNullOrWhiteSpace(rule.text)) continue;
-                items.Add(new Rl(rule.date, rule.Supplier.name, csName, rule.text));
+                ////items.Add(new Rl(rule.date, rule.Supplier.name, csName, rule.text));
+                items.Add(new Rl(rule.date, rule.sSupl, csName, rule.text));
                 rules.Add(rule);
             }
             WRules.ItemsSource = items;

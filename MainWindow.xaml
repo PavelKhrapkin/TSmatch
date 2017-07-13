@@ -53,6 +53,35 @@
                        HorizontalAlignment="Right" Width="250"
                        Margin="0,20,10,0"
                        TextAlignment="Center"/>
+            <StackPanel Orientation="Horizontal" Style="{StaticResource InfoPanel}">
+                <TextBlock Text="Модель " Style="{StaticResource UnderlinedTextBlock}"/>
+                <TextBlock x:Name="ModelName" Width="190"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Style="{StaticResource InfoPanel}">
+                <TextBlock Text="Город    " Style="{StaticResource UnderlinedTextBlock}"/>
+                <TextBox x:Name="City" Width="190" Background="AliceBlue"
+                         KeyDown="OnKeyDownHandler"
+                         Cursor="Pen" BorderThickness="0">
+                    <TextBox.InputBindings>
+                        <KeyBinding Key="Enter" Command="{Binding EnterKeyCommand}"/>
+                    </TextBox.InputBindings>
+                </TextBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Style="{StaticResource InfoPanel}">
+                <TextBlock Text="Дата САПР " Style="{StaticResource UnderlinedTextBlock}"/>
+                <TextBlock x:Name="DateCAD" Width="170"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Style="{StaticResource InfoPanel}">
+                <TextBlock Text="Дата цены  " Style="{StaticResource UnderlinedTextBlock}"/>
+                <TextBlock x:Name="DatePricing" Width="170"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Style="{StaticResource InfoPanel}">
+                <TextBlock Text="Всего "/>
+                <TextBlock x:Name="elm_count" Width="45"/>
+                <TextBlock Text=" элементов, "/>
+                <TextBlock x:Name="gr_count" Width="30" />
+                <TextBlock Text=" групп"/>
+            </StackPanel>
         </StackPanel>
         <Border BorderBrush="Black" BorderThickness="1"
                 HorizontalAlignment="Right" Height="112"

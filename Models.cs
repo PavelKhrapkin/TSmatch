@@ -1,7 +1,7 @@
 ﻿/*------------------------------------------------------------------------------------------
  * Model -- класс управления моделями, ведет Журнал Моделей и управляет их сохранением
  * 
- * 27.06.2017 П.Л. Храпкин
+ * 13.07.2017 П.Л. Храпкин
  *  
  *--- History ---
  * 18.1.2016 заложено П.Храпкин, А.Пасс, А.Бобцов
@@ -33,6 +33,7 @@
  * 23.05.2017 - HighLight Invoke
  * 24.05.2017 - exclude ModJournal from Project
  * 27.05.2017 - XML read and write model.elements as Raw.xml in wrMod, modelWr bug fix 
+ * 11.07.2017 - Project address fields add to class Model
  * ---- КОНСТРУКТОРЫ: загружают Журнал Моделей из листа Models в TSmatch или из параметров
  * Model(DateTime, string, string, string, string md5, List<Mtch.Rule> r)   - простая инициализация
  * Model( .. )      - указаны все данные модели, кроме даты - записываем в список моделей TSmatch Now
@@ -57,7 +58,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 
 using log4net;
 using Boot = TSmatch.Bootstrap.Bootstrap;
@@ -92,6 +92,8 @@ namespace TSmatch.Model
         public string made;         // атрибут процедуры TSmatch, после которой получен MD5
         public string phase;        // текущая фаза проекта. В Tekla это int
         public string MD5;          // контрольная сумма отчета по модели
+        public string adrCity;      // адрес строительства по модели
+        public string adrStreet;    // улица, район, возможно, страна
         public double total_price;  // общая сумма стоимости материалов по модели
         public bool isChanged = false;
         public List<Elm> elements = new List<Elm>();
@@ -133,29 +135,8 @@ namespace TSmatch.Model
                 if (FileOp.isFileExist(newFileDir, newFileName))
                 {
                 }
-                //6/5/17               models = Start();
-                //TODO                models.savModelJournal();
             }
             return result;
-        }
-
-        public void GetModelInfo()
-        {
-            //17/4            savedReport = new SR();
-            if (TS.isTeklaActive())
-            {
-                name = Path.GetFileNameWithoutExtension(TS.ModInfo.ModelName);
-                dir = TS.ModInfo.ModelPath;
-                elementsCount = ts.elementsCount();
-            }
-            else //if no Tekla active get name and dir from IFC or from INFO file if exists
-            {
-                //17/4                if (!GetSavedReport()) Msg.F("No Tekla no saved TSmatchINFO");
-            }
-            // 12/4 //Docs doc = Docs.getDoc(Decl.TSMATCHINFO_MODELINFO);
-            //////////doc.Close();
-            var doc = Docs.getDoc();
-            doc.Close();
         }
         #endregion -=-=- unclear region to be clean-up
 
@@ -257,9 +238,9 @@ namespace TSmatch.Model
             elements = Ifc.Read(ifcPath);
         }
 #endif //OLD
-        #endregion --- Read CAD methods
+#endregion --- Read CAD methods
 
-        #region --- HighLight methods
+#region --- HighLight methods
         public enum HighLightMODE { NoPrice, Guids }
         public void HighLightElements(HighLightMODE mode, List<string> guids = null)
         {
@@ -353,9 +334,9 @@ namespace TSmatch.Model
                 ts.HighlightElements(elms);
             }
         }
-        #endregion --- HighLight methods
+#endregion --- HighLight methods
 
-        #region -=-=- unclear region 2 to be audited
+#region -=-=- unclear region 2 to be audited
 #if OLD
         /// <summary>
         /// getModel(name) - get Model by name in TSmatch.xlsx/Model Journal  
@@ -585,9 +566,9 @@ namespace TSmatch.Model
             return ok;
         }
 #endif //FOR_FUTURE 6/4/2017
-        #endregion -=-=- unclear region 2 to be audited
+#endregion -=-=- unclear region 2 to be audited
 
-        #region --- wrModel
+#region --- wrModel
         /// <summary>
         /// wrModel(doc_name) - write formatted data from mod to Excel file
         /// </summary>
@@ -598,20 +579,24 @@ namespace TSmatch.Model
         ///  1.4.2016 - re-written
         /// 21.8.2016 - case constants defined here from Decl, changed TSmatchINFO Document list, restructured
         /// 10.4.2017 - enum WrMod
+        /// 13.7.2017 - Model mod argument, default - this
         /// </history>
         public enum WrMod { ModelINFO, Raw, Materials, Suppliers, Rules, Report }
-        public void wrModel(WrMod mode)
+        public void wrModel(WrMod mode, Model mod = null)
         {
             string doc_name = mode.ToString();
             Log.set("Model.wrModel(" + doc_name + ")");
             DateTime t0 = DateTime.Now;
+            if (mod == null) mod = this;
             Docs doc = Docs.getDoc(doc_name, create_if_notexist: true);
             doc.Reset();
             switch (mode)
             {
                 case WrMod.ModelINFO:   // общая информация о модели: имя, директория, MD5 и др
                     doc.wrDocSetForm("HDR_ModelINFO", 1, AutoFit: true);
-                    doc.wrDocForm(name, dir, phase, date, MD5, elementsCount);
+                    string adr = mod.adrCity;
+                    if (adrStreet != string.Empty) adr += ", " + mod.adrStreet;
+                    doc.wrDocForm(mod.name, adr, mod.dir, mod.phase, mod.date, mod.MD5, mod.elementsCount);
                     break;
                 case WrMod.Raw:         // элементы с атрибутами, как они прочитаны из модели
                     doc.wrDocSetForm("FORM_RawLine", 2, AutoFit: true);
@@ -681,9 +666,9 @@ namespace TSmatch.Model
             log.Info("Время записи в файл \"" + doc_name + "\"\t t= " + (DateTime.Now - t0).ToString() + " сек");
             Log.exit();
         }
-        #endregion --- wrModel 
+#endregion --- wrModel 
 
-        #region -=-=- unclear region 3 to be audited
+#region -=-=- unclear region 3 to be audited
 #if OLD
         /// <summary>
         /// ReсentModel(List<Model> models) -- return most recent model in list
@@ -731,7 +716,7 @@ namespace TSmatch.Model
         }
         public static string RecentModelDir() { return RecentModel().dir; }
 #endif //OLD
-        #endregion -=-=- unclear region 3 to be audited
+#endregion -=-=- unclear region 3 to be audited
 
         public void setElements(List<ElmAttSet.ElmAttSet> els)
         {

@@ -55,7 +55,6 @@ namespace TSmatch.Model.Handler
             var grps = elements.GroupBy(x => x.prf);
             foreach (var gr in grps) groups.Add(new ElmGr(gr));
             if (elements.Count != groups.Sum(x => x.guids.Count)) Msg.F("getGrps internal error");
-            //            return PrfUpdate(groups);
             var v = new ProfileUpdate.ProfileUpdate(ref groups);
             return groups;
         }

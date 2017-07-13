@@ -1,8 +1,9 @@
 ﻿/*-------------------------------------------
- * WPF Main Windows 3.6.2017 Pavel.Khrapkin
+ * WPF Main Windows 12.07.2017 Pavel.Khrapkin
  * --- History ---
  * 2017.05.15 - restored as TSmatch 1.0.1 after Source Control excident
  * 2017.05.23 - Menu OnPriceCheck
+ * 2017.07.12 - ModelINFO with adrCity
  * --- Known Issue & ToDos ---
  * - It is good re-design XAML idea to have two column on MainWindow with the Width = "*".
  * Than with Window size changed, Group<Mat,Prf,Price> part would become wider.
@@ -72,19 +73,36 @@ namespace TSmatch
             WrModelInfoPanel();
             WrReportPanel();
 //30/5            model.HighLightElements(Mod.HighLightMODE.NoPrice);
-            message = "вначале группы без цен...";
+//12/7            message = "вначале группы без цен...";
             msg.Text = message;
         }
 
         private void WrModelInfoPanel()
         {
-            ModelINFO.Text = "Модель:\t\"" + model.name + "\""
-                    + "\nДата сохранения " + model.date.ToLongDateString()
-                        + " " + model.date.ToShortTimeString()
-                    + "\nДата расценки     " + model.pricingDate.ToLongDateString()
-                        + " " + model.pricingDate.ToShortTimeString()
-                + "\nВсего " + model.elementsCount + " элементов"
-                        + ", " + model.elmGroups.Count + " групп";
+            ModelName.Text = model.name;
+            City.Text = model.adrCity;
+            DateCAD.Text = model.date.ToLongDateString() 
+                + " " + model.date.ToShortTimeString();
+            DatePricing.Text = model.pricingDate.ToLongDateString() 
+                + " " + model.pricingDate.ToShortTimeString();
+            elm_count.Text = model.elementsCount.ToString();
+            gr_count.Text = model.elmGroups.Count.ToString();
+        }
+
+        private void OnKeyDownHandler(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Return)
+            {
+                string[] str = City.Text.Split(',');
+                string _city = str[0].Trim();
+                string _street = City.Text.Substring(str[0].Length + 1).Trim();
+                if(_city != model.adrCity || _street != model.adrStreet)
+                {
+                    ModelIsChanged = true;
+                    model.adrCity = _city;
+                    model.adrStreet = _street;
+                }
+            }
         }
 
         private void WrReportPanel()
