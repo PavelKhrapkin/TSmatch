@@ -92,6 +92,7 @@
     <Compile Include="ElmAttSet.cs" />
     <Compile Include="FileOp.cs" />
     <Compile Include="IFC.cs" />
+    <Compile Include="IModelWrFile.cs" />
     <Compile Include="Interface.cs" />
     <Compile Include="Matcher.cs" />
     <Compile Include="MatchLib.cs" />
@@ -100,6 +101,7 @@
     <Compile Include="Message.cs" />
     <Compile Include="Models.cs" />
     <Compile Include="ModHandler.cs" />
+    <Compile Include="ModelWrFile.cs" />
     <Compile Include="Parameter.cs" />
     <Compile Include="PriceList.cs" />
     <Compile Include="ProfileUpdate.cs" />
