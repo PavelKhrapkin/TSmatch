@@ -1,194 +1,307 @@
 ﻿/*=================================
- * Components Unit Test 16.6.2017
+ * Model.Handler Unit Test 19.6.2017
  *=================================
  */
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using TSmatch.Component;
+using TSmatch.Model.Handler;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using Lib = match.Lib.MatchLib;
-using Handler = TSmatch.Model.Handler.ModHandler;
+using FileOp = match.FileOp.FileOp;
+using Boot = TSmatch.Bootstrap.Bootstrap;
+using Mod = TSmatch.Model.Model;
 using ElmGr = TSmatch.ElmAttSet.Group;
+using Msg = TSmatch.Message.Message;
+using TS = TSmatch.Tekla.Tekla;
+using TSmatch.ElmAttSet;
 
-namespace TSmatch.Component.Tests
+namespace TSmatch.Model.Handler.Tests
 {
     [TestClass()]
-    public class UT_Component
+    public class UT_ModHandler
     {
-        Handler mod = new Handler();
-        ElmAttSet.Group gr = new ElmAttSet.Group();
-        List<ElmGr> inp = new List<ElmGr>();
-        Rule.Rule rule = new Rule.Rule();
-        Component comp = new Component();
-
+#if OLD //3.7/17
         [TestMethod()]
-        public void UT_Component_checkComp()
+        public void UT_ModHandler_PrfUpdate()
         {
-            //test 1: gr="PL10*100" rule="Prf: PL=—*x*" comp="PL10x100" => TRUE
-            gr.prf = "PL10*100";
-            rule.text = "Prf:PL=—*x*";
-            rule.ruleDP = new DPar.DPar(rule.text);
-            rule.synonyms = rule.RuleSynParse(rule.text);
-            comp.compDP = new DPar.DPar("PL10x100");
-            bool b = comp.isMatch(gr, rule);
-            Assert.IsTrue(b);
+            var mod = new ModHandler();
+            ElmAttSet.Group gr = new ElmAttSet.Group();
+            List<ElmGr> inp = new List<ElmGr>();
 
-            //test 2: gr="PL10*100" rule="Prf: PL=—*x@*" comp="PL10x300" => TRUE
-            gr.prf = "pl10*100";
-            rule.text = "Prf:PL=—*x@*";
-            rule.ruleDP = new DPar.DPar(rule.text);
-            rule.synonyms = rule.RuleSynParse(rule.text);
-            comp.compDP = new DPar.DPar("Prf:PL10x300");
-            Assert.AreEqual(comp.compDP.dpar.Count, 1);
-            Assert.AreEqual(comp.compDP.dpar[Section.Section.SType.Profile], "pl10x300");
-            b = comp.isMatch(gr, rule);
+            Test_I(mod, gr);
+            Test_U(mod, gr);
 
-            //test 3: gr="L75x5" rule="Профиль: Уголок=L *x*;" => TRUE
-            gr.prf = "l75x5";
-            rule.text = Lib.ToLat("Профиль: Уголок=L *x*;");
-            rule.ruleDP = new DPar.DPar(rule.text);
-            rule.synonyms = rule.RuleSynParse(rule.text.ToLower());
-            comp.compDP = new DPar.DPar("Prf:Уголок 75 x 5");
-            string vs = rule.synonyms[Section.Section.SType.Profile][0];
-            string vd = comp.viewComp_(Section.Section.SType.Profile);
-            Assert.IsTrue(vd.Contains(vs));
-            Assert.AreEqual(comp.compDP.dpar.Count, 1);
-            var v = comp.compDP.dpar[Section.Section.SType.Profile];
-            Assert.AreEqual(v, "угoлoк75x5");
-            b = comp.isMatch(gr, rule);
-            Assert.IsTrue(b);
-
-            //test 4: gr="I20" rule="Профиль: Балка =I* дл;" comp="Балка 20 дл. 9м Ст3пс5" => TRUE
-            gr.Prf = "I20"; gr.prf = "i20";
-            rule.text = "Профиль: Балка =I*";
-            string comp_txt = "Балка 20";   // <==!!
-            rule.ruleDP = new DPar.DPar(rule.text);
-            rule.synonyms = rule.RuleSynParse(rule.text);
-            var syns = rule.synonyms[Section.Section.SType.Profile].ToList();
-            Assert.AreEqual(syns[0], "бaлкa");
-            Assert.AreEqual(syns[1], "i");
-            comp.compDP = new DPar.DPar("Prf:" + comp_txt);
-            Assert.AreEqual(comp.compDP.dpar.Count, 1);
-            Assert.AreEqual(comp.compDP.dpStr[Section.Section.SType.Profile], comp_txt);
-            b = comp.isMatch(gr, rule);
-            Assert.IsTrue(b);
-
-            //test 4-1: gr="I30Ш2" rule="Профиль: Двутавр=I*Ш*" => TRUE
-            initGr("I30Ш2");
-            initRule("М: C245=C255 ; Профиль: Двутавр=I*Ш*");
-            initComp("двутавр 30Ш2");
-            b = comp.isMatch(gr, rule);
-            Assert.IsTrue(b);
-
-            //test 5: gr="Гн.100x4" rule="Профиль: Швеллер = U*П_;" => TRUE
-            initGr("Гн.100x4");
-            initRule("Профиль: Гн.*х*");
-            initComp("Гн. 100х4");
-            b = comp.isMatch(gr, rule);
-            Assert.IsTrue(b);
-
-            //test 6: gr="Гн.100x4" rule="Профиль: Швеллер = U*П_;" Comp=M:C345 => FALSE
-            initGr("Гн.100x46");
-            initRule("Профиль: Уголок=L *x*x*");
-            initComp("Гн. 100х4", "C345");
-            b = comp.isMatch(gr, rule);
-            Assert.IsTrue(!b);
-        }
-
-        [TestMethod()]
-        public void UT_isOK()
-        {
-            var comp = new Component();
-
-            string pattern = "*x@*";
-            string c = "6x1500x2500";
-            string g = "6x94";
-
-            bool ok = comp.isOK(pattern, c, g);
-            Assert.IsTrue(ok);
-        }
-
-        [TestMethod()]
-        public void UT_Component_rulePar()
-        {
-            // test 1: rp("*x*", "2x1250x2500") => "2", "1250", "2500"
-            var comp = new Component();
-            string pattern = "*x*x*";
-            string str = "2x1250x2500";
-            var v = comp.rulePar(pattern, str);
-            Assert.AreEqual(v.Count, 3);
-            Assert.AreEqual(v[0], "2");
-            Assert.AreEqual(v[1], "1250");
-            Assert.AreEqual(v[2], "2500");
-
-            // test 2: rp("*x@*x@", "2x1250x2500") => "2", "@1250", "@2500"
-            pattern = "*x@*x@";
-            v = comp.rulePar(pattern, str);
-            Assert.AreEqual(v.Count, 3);
-            Assert.AreEqual(v[0], "2");
-            Assert.AreEqual(v[1], "@1250");
-            Assert.AreEqual(v[2], "@2500");
-
-            // test 3: rp("*x@*x*", "2x1250x2500") => "2", "@1250", "2500"
-            pattern = "*x@*x*";
-            v = comp.rulePar(pattern, str);
-            Assert.AreEqual(v.Count, 3);
-            Assert.AreEqual(v[0], "2");
-            Assert.AreEqual(v[1], "@1250");
-            Assert.AreEqual(v[2], "2500");
-
-            // test 4: rp("*x@*", "6*80") => "6", "@80"
-            str = "6*80";
-            pattern = "*x@*";
-            v = comp.rulePar(pattern, str);
-            Assert.AreEqual(v.Count, 2);
-            Assert.AreEqual(v[0], "6");
-            Assert.AreEqual(v[1], "@80");
-
-            // test 5: rp("*", "6") => "6"
-            str = "6";
-            pattern = "*";
-            v = comp.rulePar(pattern, str);
-            Assert.AreEqual(v.Count, 1);
-            Assert.AreEqual(v[0], "6");
-
-            // test 6: rp("*x@*", "10x300") => "10", "@300"
-            str = "10x300";
-            pattern = "*x@*";
-            v = comp.rulePar(pattern, str);
-            Assert.AreEqual(v.Count, 2);
-            Assert.AreEqual(v[0], "10");
-            Assert.AreEqual(v[1], "@300");
-        }
-
-        private void initGr(string v, string mat = "C245")
-        {
-            inp.Clear();
-            gr.Prf = v;
-            gr.prf = Lib.ToLat(v.ToLower().Replace(" ", ""));
-            gr.Mat = mat;
-            gr.mat = Lib.ToLat(mat.ToLower().Replace(" ", ""));
+            // test 0: "PL6" -> "—6"
+            gr.Prf = "PL6";
+            gr.prf = "pl6";
             inp.Add(gr);
-            mod.elmGroups = inp;
+            var res = mod.PrfUpdate(inp);
+            Assert.AreEqual(res[0].prf, "—6");
+
+            // test 1: "—100*6" => "—6x100"
+            inp.Clear();
+            gr.Prf = gr.prf = "—100*6";
+            inp.Add(gr);
+            res = mod.PrfUpdate(inp);
+            Assert.AreEqual(res[0].prf, "—6x100");
+
+            // test 2: "—100*6" => "—6x100"
+            gr.Prf = gr.prf = "—100*6";
+            inp.Add(gr);
+            res = mod.PrfUpdate(inp);
+            Assert.AreEqual(res[1].prf, "—6x100");
+
+            // test 3: "L75X5_8509_93" => L75x5"
+            gr.Prf = gr.prf = "L75X5_8509_93";
+            inp.Add(gr);
+            res = mod.PrfUpdate(inp);
+            Assert.AreEqual(res[2].Prf, "L75x5");
+            Assert.AreEqual(res[2].prf, "l75x5");
         }
 
-        private void initRule(string v)
+        private void Test_I(ModHandler mod, ElmGr gr)
         {
-            rule.text = v;
-            rule.ruleDP = new DPar.DPar(rule.text);
-            rule.synonyms = rule.RuleSynParse(rule.text);
+            List<ElmGr> inp = new List<ElmGr>();
+
+            // test 0: "I10_8239_89" => "I10"
+            gr.Prf = "I10_8239-89";
+            gr.prf = "i10_8239-89";
+            inp.Add(gr);
+            var res = mod.PrfUpdate(inp);
+            Assert.AreEqual(res[0].prf, "i10");
+            Assert.AreEqual(res[0].Prf, "I10");
+
+            // test 1: "I20B1_20_93" => I20"
+            inp.Clear();
+            gr.Prf = "I20B1_20_93";
+            gr.prf = "i20b1_20_93";
+            inp.Add(gr);
+            res = mod.PrfUpdate(inp);
+            Assert.AreEqual(res[0].prf, "i20б1");
+            Assert.AreEqual(res[0].Prf, "I20Б1");
+
+            // test 2: "I20B2_20_93" => I20"
+            inp.Clear();
+            gr.Prf = "I20B2_20_93";
+            gr.prf = "i20b2_20_93";
+            inp.Add(gr);
+            res = mod.PrfUpdate(inp);
+            Assert.AreEqual(res[0].prf, "i20б2");
+            Assert.AreEqual(res[0].Prf, "I20Б2");
+
+            // test 3: "I50B3_20_93" => I20"
+            inp.Clear();
+            gr.Prf = "I50B3_20_93";
+            gr.prf = "i50b3_20_93";
+            inp.Add(gr);
+            res = mod.PrfUpdate(inp);
+            Assert.AreEqual(res[0].prf, "i50б3");
+            Assert.AreEqual(res[0].Prf, "I50Б3");
+
         }
 
-        private void initComp(string v, string mat = "C245")
+        private void Test_U(ModHandler mod, ElmGr gr)
         {
-            comp.compDP.dpar.Clear();
-            comp.compDP.dpStr.Clear();
-            comp.compDP.Ad(Section.Section.SType.Profile, v);
-            comp.compDP.Ad(Section.Section.SType.Material, mat);
+            List<ElmGr> inp = new List<ElmGr>();
+
+        }
+
+        // 2017.06.29 тест двутавров
+        [TestMethod()]
+        public void UT_ModHandler_PrfUpdate_I()
+        {
+            var mod = new ModHandler();
+            ElmAttSet.Group gr = new ElmAttSet.Group();
+            List<ElmGr> inp = new List<ElmGr>();
+
+            // test 0: "I10_8239_89" => "I10"
+            gr.Prf = "I10_8239-89";
+            gr.prf = "i10_8239-89";
+            inp.Add(gr);
+            var res = mod.PrfUpdate(inp);
+            Assert.AreEqual(res[0].prf, "i10");
+            Assert.AreEqual(res[0].Prf, "I10");
+
+            // test 1: "I20B1_20_93" => I20"
+            inp.Clear();
+            gr.Prf = "I20B1_20_93";
+            gr.prf = "i20b1_20_93";
+            inp.Add(gr);
+            res = mod.PrfUpdate(inp);
+            Assert.AreEqual(res[0].prf, "i20б1");
+            Assert.AreEqual(res[0].Prf, "I20Б1");
+
+            // test 2: "I20B2_20_93" => I20"
+            inp.Clear();
+            gr.Prf = "I20B2_20_93";
+            gr.prf = "i20b2_20_93";
+            inp.Add(gr);
+            res = mod.PrfUpdate(inp);
+            Assert.AreEqual(res[0].prf, "i20б2");
+            Assert.AreEqual(res[0].Prf, "I20Б2");
+
+            // test 3: "I50B3_20_93" => I20"
+            inp.Clear();
+            gr.Prf = "I50B3_20_93";
+            gr.prf = "i50b3_20_93";
+            inp.Add(gr);
+            res = mod.PrfUpdate(inp);
+            Assert.AreEqual(res[0].prf, "i50б3");
+            Assert.AreEqual(res[0].Prf, "I50Б3");
+        }
+
+
+        // 2017.06.30 тест замкнутых профилей ГОСТ 30245-2003
+        [TestMethod()]
+        public void UT_ModHandler_PrfUpdate_PP_PK()
+        {
+            var mod = new ModHandler();
+            ElmAttSet.Group gr = new ElmAttSet.Group();
+            List<ElmGr> inp = new List<ElmGr>();
+
+            // test 0: "PP140X100X5_30245_2003" => "Гн.[]140x100x5"
+            gr.Prf = "PP140X100X5_30245_2003";
+            gr.prf = "pp140X100X5_30245_2003";
+            inp.Add(gr);
+            var res = mod.PrfUpdate(inp);
+            Assert.AreEqual(res[0].prf, "гн.[]140x100x5");
+            Assert.AreEqual(res[0].Prf, "Гн.[]140x100x5");
+
+            // test 1: "PK100X4_30245_2003" => "Гн.100x4"
+            inp.Clear();
+            gr.Prf = "PK100X4_30245_2003";
+            gr.prf = "pk100X4_30245_2003";
+            inp.Add(gr);
+            res = mod.PrfUpdate(inp);
+            Assert.AreEqual(res[0].prf, "гн.100x4");
+            Assert.AreEqual(res[0].Prf, "Гн.100x4");
+        }
+        // 2017.06.29 тест швеллеров
+        [TestMethod()]
+        public void UT_ModHandler_PrfUpdate_U()
+        {
+            var mod = new ModHandler();
+            ElmAttSet.Group gr = new ElmAttSet.Group();
+            List<ElmGr> inp = new List<ElmGr>();
+
+            // test 0: "U10_8240_97" => "[10П"
+            gr.Prf = "U10_8240_97";
+            gr.prf = "u10_8240_97";
+            inp.Add(gr);
+            var res = mod.PrfUpdate(inp);
+            Assert.AreEqual(res[0].prf, "[10");
+            Assert.AreEqual(res[0].Prf, "[10");
+
+            // test 1: "U20P_8240_97" => "[20П"
+            inp.Clear();
+            gr.Prf = "U20P_8240_97";
+            gr.prf = "u20p_8240_97";
+            inp.Add(gr);
+            res = mod.PrfUpdate(inp);
+            Assert.AreEqual(res[0].prf, "[20п");
+            Assert.AreEqual(res[0].Prf, "[20П");
+
+            // test 2: "U30AP_8240_97" => "[30aП"
+            inp.Clear();
+            gr.Prf = "U30AP_8240_97";
+            gr.prf = "u30ap_8240_97";
+            inp.Add(gr);
+            res = mod.PrfUpdate(inp);
+            Assert.AreEqual(res[0].prf, "[30aп");
+            Assert.AreEqual(res[0].Prf, "[30аП");
+
+            // test 3: "U20Y_8240_97" => "[20У"
+            inp.Clear();
+            gr.Prf = "U20Y_8240_97";
+            gr.prf = "u20y_8240_97";
+            inp.Add(gr);
+            res = mod.PrfUpdate(inp);
+            Assert.AreEqual(res[0].prf, "[20y");
+            Assert.AreEqual(res[0].Prf, "[20У");
+
+            // test 4: "U30AY_8240_97" => "[30aУ"
+            inp.Clear();
+            gr.Prf = "U30AY_8240_97";
+            gr.prf = "u30ay_8240_97";
+            inp.Add(gr);
+            res = mod.PrfUpdate(inp);
+            Assert.AreEqual(res[0].prf, "[30ay");
+            Assert.AreEqual(res[0].Prf, "[30аУ");
+        }
+
+        [TestMethod()]
+        public void UT_ModHandler_geGroup_Native()
+        {
+            var boot = new Boot();
+            var model = new Mod();
+            model.SetModel(boot);
+        }
+#endif //OLD 3.7.17
+        [TestMethod()]
+        public void UT_Hndl()
+        {
+            var boot = new Boot();
+            var model = new Mod();
+            model.SetModel(boot);
+
+            var mh = new ModHandler();
+            mh.Hndl(model);
+            int cnt = 0;
+            foreach (var gr in model.elmGroups) cnt += gr.guids.Count();
+            Assert.AreEqual(model.elements.Count(), cnt);
+
+            //Hndl performance test -- 180 sec for 100 cycles
+            DateTime t0 = DateTime.Now;
+            for (int i = 0; i < 100; i++)
+            {
+                mh.Hndl(model);
+            }
+            TimeSpan ts = DateTime.Now - t0;
+            Assert.IsTrue(ts.TotalSeconds > 0.0);
+
+            FileOp.AppQuit();
+        }
+
+        [TestMethod()]
+        public void UT_Pricing()
+        {
+            var boot = new Boot();
+            var model = new Mod();
+            model.SetModel(boot);
+
+            var mh = new ModHandler();
+            mh.Pricing(ref model);
+            Assert.IsTrue(model.matches.Count > 0);
+
+            FileOp.AppQuit();
+        }
+
+        [TestMethod()]
+        public void UT_getGrps()
+        {
+            var boot = new Boot();
+            var model = new Mod();
+            model.sr = new SaveReport.SavedReport();
+            if (boot.isTeklaActive)
+            {
+                model.dir = TS.GetTeklaDir(TS.ModelDir.model);
+                var ts = new TS();
+                model.elementsCount = ts.elementsCount();
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
+            model.elements = model.sr.Raw(model);
+            var mh = new ModHandler();
+
+            var grp = mh.getGrps(model.elements);
+            Assert.IsTrue(grp.Count > 0);
+
+            FileOp.AppQuit();
         }
     }
 }
