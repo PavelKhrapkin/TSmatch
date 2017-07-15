@@ -1,5 +1,5 @@
 ﻿/*=================================
- * Saved Report Unit Test 14.7.2017
+ * Saved Report Unit Test 15.7.2017
  *=================================
  */
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -33,7 +33,7 @@ namespace TSmatch.SaveReport.Tests
         {
             var sr = init();
 
-            sr.GetSavedReport(sr);
+            sr.GetSavedReport();
 
 
             Assert.IsTrue(sr.elementsCount > 0);
