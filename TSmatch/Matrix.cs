@@ -1,11 +1,12 @@
 ﻿/*---------------------------------------------------------------------------------
 * Matrix -- базовый класс для хранения и работы со структурами данных в памяти C#
 *
-*  28.2.2016 П.Л.Храпкин 
+*  15.7.2016 П.Л.Храпкин 
 *
 *---журнал---
 * 2.1.2016 переписан из предыдущей версии, добовлен Indexer
 * 28.2.16 добавлен Double; в Int удаляются разделители тысяч
+* 15.7.17 minor cleanup
 *----------------------------------------------------------------------------------
 *   Конструкторы:
 * Matr()            - пустой, для инициирования внутреннего массива по умолчанию
@@ -180,28 +181,6 @@ namespace match.Matrix
             int col = 0;
             foreach (var s in obj) m[1, ++col] = s;
             _matr = (object[,])m;
-        }
-        /// <summary>
-        /// ComputeMD5() по private матрице _matr
-        /// </summary>
-        /// <returns>строку контрольной суммы MD5 из 32 знаков</returns>
-        /// <history>12.1.2016 PKh</history>
-        public string ComputeMD5()
-        {
-            Log.set("ComputeMD5");
-            string result = "";
-            string str="";
-            try
-            {
-                int min_i = _matr.GetLowerBound(0), max_i = iEOL(),
-                    min_j = _matr.GetLowerBound(1), max_j = iEOC();
-                for (int i = min_i; i <= max_i; i++)
-                    for (int j = min_j; j <= max_j; j++)
-                        str += _matr[i, j] == null? "" : _matr[i,j].ToString();
-                result = Lib.MatchLib.ComputeMD5(str);
-            } catch (Exception e) { Log.FATAL("ошибка MD5: _matr[" + iEOL() + ", " + iEOC() + "]"); return null; }
-            Log.exit();
-            return result;
         }
     } //class Matr
 
