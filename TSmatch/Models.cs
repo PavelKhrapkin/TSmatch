@@ -1,30 +1,10 @@
-﻿/*------------------------------------------------------------------------------------------
- * Model -- класс управления моделями, ведет Журнал Моделей и управляет их сохранением
+﻿/*-----------------------------------------------------------------------------------------------
+ * Model -- Manage major class operaions together with the child modules ModHandler and SavedMdel
  * 
- * 27.06.2017 П.Л. Храпкин
+ * 14.07.2017 Pavel Khrapkin
  *  
  *--- History ---
- * 18.1.2016 заложено П.Храпкин, А.Пасс, А.Бобцов
- * 29.2.2016 bug fix in getGroup
- *  6.3.2016 список Правил в стрке Модели, setModel(name); openModel,readModel
- * 15.3.2016 flag wrToFile in Model class - if true-> we must write down it to file
- * 19.3.2016 use Suppliers and Components classes
- *  5.4.2016 add to Model string field Current Phase; add Mgroup class
- *  5.6.2016 OpenModel modified; UpdateFrIFC created
- * 21.6.2016 Group and Mgroup classes moved to ElmAttSet module
- *  6.8.2016 - Add field elements in Model class
- *           - non static methos getModel, saveModel, setModel
- *           - Read(modelName) -- by defaul if(modelName == "") read most recent model
- * 22.8.2016 - Field ifcPath add to Model Journal
- * 29.9.2016 - re-written getGroups()
- * 22.11.2016 - get Recent model from TXmatch.xlsx, not from Models collection
- * 29.11.2016 - HashSet instead of List for Rules and Supplier collections
- * 26.12.2016 - get model from Tekla -- TEMPORAPY PATCH
- * 25.01.2017 - add bool doInit argument to Model constructor to avoid Rule int at doInit=false
- * 11.04.2017 - GetSavedReport() check with Unit Test
- * 16.04.2017 - HighLight methods
- * 22.04.2017 - ModReset method add
- *  3.05.2017 - use Model Juornal list read by Bootstrap from TSmatch.xlsx/Models
+ * Jan-16 - May-17 pre-history P.Khrapkin, A.Pass, A.Bobtsov
  *  6.05.2017 - fast MD5 calculation call in Read
  *  8.05.2017 - part of this code moved to child ModHandler module
  * 11.05.2017 - getSavedReport() inside SetModel
@@ -33,14 +13,12 @@
  * 23.05.2017 - HighLight Invoke
  * 24.05.2017 - exclude ModJournal from Project
  * 27.05.2017 - XML read and write model.elements as Raw.xml in wrMod, modelWr bug fix 
- * ---- КОНСТРУКТОРЫ: загружают Журнал Моделей из листа Models в TSmatch или из параметров
- * Model(DateTime, string, string, string, string md5, List<Mtch.Rule> r)   - простая инициализация
- * Model( .. )      - указаны все данные модели, кроме даты - записываем в список моделей TSmatch Now
- * Model(doc, n)    - инициализируем экземпляр модели из строки n Документа doc
- * Model(n)         - инициализируем экземпляр модели из строки n TSmatch.xlsx/Models
- *
- *      МЕТОДЫ:
- * Start()         - инициирует начальную загрузку Журнала Моделей; возвращает список имен моделей
+ * 11.07.2017 - Project address fields add to class Model
+ * 14.07.2017 - SetModDir setarated from SetModet for UT_
+ * --- Unit Tests --- .
+ * 2017.07.6  UT_Model.UT_SetModel   OK
+ * 2017.07.14 UT_SetModDirб setCity  OK 
+ * ---- METHODS: -----------------
  * Read(modelName) - получение модели (списка элементов с атрибутами) из Tekla или IFC
  * getModel(name)  - ищет модель по имени name в журнале моделей
  * setModel(name)  - подготавливает обработку модели name; читает все файлы компонентов
@@ -57,7 +35,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 
 using log4net;
 using Boot = TSmatch.Bootstrap.Bootstrap;
@@ -72,8 +49,6 @@ using Ifc = TSmatch.IFC.IFC;
 using Lib = match.Lib.MatchLib;
 using Log = match.Lib.Log;
 using Msg = TSmatch.Message.Message;
-using Mtch = TSmatch.Matcher.Mtch;
-using SType = TSmatch.Section.Section.SType;
 using Supplier = TSmatch.Suppliers.Supplier;
 using TS = TSmatch.Tekla.Tekla;
 using SR = TSmatch.SaveReport.SavedReport;
@@ -92,6 +67,8 @@ namespace TSmatch.Model
         public string made;         // атрибут процедуры TSmatch, после которой получен MD5
         public string phase;        // текущая фаза проекта. В Tekla это int
         public string MD5;          // контрольная сумма отчета по модели
+        public string adrCity;      // адрес строительства по модели
+        public string adrStreet;    // улица, район, возможно, страна
         public double total_price;  // общая сумма стоимости материалов по модели
         public bool isChanged = false;
         public List<Elm> elements = new List<Elm>();
@@ -115,59 +92,25 @@ namespace TSmatch.Model
 
         public Model() { }
 
-        /// <summary>
-        /// newModelOpenDialog(models) -- run when new Model must be open not exists in Model Journal models
-        /// </summary>
-        /// <param name="models">List<Models> to be updated after dialog</param>
-        /// <returns>List<Model></Model>sorted models list -- models[0] - just opened Model</returns>
-        /// <history>6.08.2016</history>
-        internal static Model newModelOpenDialog(out List<Model> models)
-        {
-            Model result = null;
-            string newFileDir = "", newFileName = "";
-
-            throw new NotImplementedException();
-
-            while (result != null)
-            {
-                if (FileOp.isFileExist(newFileDir, newFileName))
-                {
-                }
-                //6/5/17               models = Start();
-                //TODO                models.savModelJournal();
-            }
-            return result;
-        }
-
-        public void GetModelInfo()
-        {
-            //17/4            savedReport = new SR();
-            if (TS.isTeklaActive())
-            {
-                name = Path.GetFileNameWithoutExtension(TS.ModInfo.ModelName);
-                dir = TS.ModInfo.ModelPath;
-                elementsCount = ts.elementsCount();
-            }
-            else //if no Tekla active get name and dir from IFC or from INFO file if exists
-            {
-                //17/4                if (!GetSavedReport()) Msg.F("No Tekla no saved TSmatchINFO");
-            }
-            // 12/4 //Docs doc = Docs.getDoc(Decl.TSMATCHINFO_MODELINFO);
-            //////////doc.Close();
-            var doc = Docs.getDoc();
-            doc.Close();
-        }
-        #endregion -=-=- unclear region to be clean-up
-
         #region --- Setup and Read CAD methods
-
-        public void SetModel(Boot boot)      // 7/5  List<Model> models)
+        public void SetModel(Boot boot)
         {
             Log.set("SetModel");
             //create child class references mh, sr
             mh = new Handler.ModHandler();
             sr = new SR();
-            if (TS.isTeklaActive())
+            SetModDir(boot);
+            sr.GetTSmatchINFO(this);
+            date = sr.date;
+            elements = sr.elements;
+            elmGroups = sr.elmGroups;
+            pricingDate = sr.pricingDate;
+            Log.exit();
+        }
+
+        public void SetModDir(Boot boot)
+        {
+            if (boot.isTeklaActive)
             {   // if Tekla is active - get Path of TSmatch
                 name = Path.GetFileNameWithoutExtension(TS.ModInfo.ModelName);
                 dir = TS.GetTeklaDir(TS.ModelDir.model);
@@ -180,21 +123,33 @@ namespace TSmatch.Model
             else
             {   // if Tekla not active - get model attributes from TSmatchINFO.xlsx in ModelDir
                 dir = boot.ModelDir;
+                if (!FileOp.isDirExist(dir)) Msg.F("No Model Directory", dir);
+                if (!Docs.IsDocExists(Decl.TSMATCHINFO_MODELINFO)) Msg.F("No TSmatchINFO.xlsx file");
+                if (sr == null) sr = new SR();
                 Model m = sr.SetFrSavedModelINFO(dir);
                 name = m.name;
+                phase = m.phase;
+                adrCity = m.adrCity; adrStreet = m.adrStreet;
                 elementsCount = m.elementsCount;
                 if (elementsCount == 0)
                     Msg.F("SavedReport doc not exists and no CAD");
                 date = m.date;
+                MD5 = m.MD5;
+                pricingMD5 = m.pricingMD5;
                 pricingDate = m.pricingDate;
                 //24/4                classCAD = ifc;
             }
-            sr.GetSavedReport(this);
-            date = sr.date;
-            elements = sr.elements;
-            elmGroups = sr.elmGroups;
-            pricingDate = sr.pricingDate;
-            Log.exit();
+        }
+
+        public string setCity(string adr)
+        {
+            string city;
+            string[] adrs = adr.Split(',');
+            adrCity = city = adrs[0].Trim();
+            int indx = adr.IndexOf(',');
+            if (indx > 0) adrStreet = adr.Substring(indx + 1).Trim();
+            else adrStreet = string.Empty;
+            return adrCity;
         }
 
         /// <summary>
@@ -213,7 +168,8 @@ namespace TSmatch.Model
                 isChanged = true;
                 MD5 = newMD5;
                 date = DateTime.Now;
-                wrModel(WrMod.ModelINFO);
+                if (sr == null) sr = new SR();
+                sr.Save(this);
             }
             return this;
         }
@@ -257,6 +213,28 @@ namespace TSmatch.Model
             elements = Ifc.Read(ifcPath);
         }
 #endif //OLD
+        /// <summary>
+        /// newModelOpenDialog(models) -- run when new Model must be open not exists in Model Journal models
+        /// </summary>
+        /// <param name="models">List<Models> to be updated after dialog</param>
+        /// <returns>List<Model></Model>sorted models list -- models[0] - just opened Model</returns>
+        /// <history>6.08.2016</history>
+        internal static Model newModelOpenDialog(out List<Model> models)
+        {
+            Model result = null;
+            string newFileDir = "", newFileName = "";
+
+            throw new NotImplementedException();
+
+            while (result != null)
+            {
+                if (FileOp.isFileExist(newFileDir, newFileName))
+                {
+                }
+            }
+            return result;
+        }
+        #endregion -=-=- unclear region to be clean-up
         #endregion --- Read CAD methods
 
         #region --- HighLight methods
@@ -587,102 +565,6 @@ namespace TSmatch.Model
 #endif //FOR_FUTURE 6/4/2017
         #endregion -=-=- unclear region 2 to be audited
 
-        #region --- wrModel
-        /// <summary>
-        /// wrModel(doc_name) - write formatted data from mod to Excel file
-        /// </summary>
-        /// <param name="doc_name">document to be written name</param>
-        /// <history>16.3.2016
-        /// 18.3.2016 - write in Excel list of Rules in FORM_RULE
-        /// 26.3.2016 - use rule.CompSet.name reference instead of doc.name
-        ///  1.4.2016 - re-written
-        /// 21.8.2016 - case constants defined here from Decl, changed TSmatchINFO Document list, restructured
-        /// 10.4.2017 - enum WrMod
-        /// </history>
-        public enum WrMod { ModelINFO, Raw, Materials, Suppliers, Rules, Report }
-        public void wrModel(WrMod mode)
-        {
-            string doc_name = mode.ToString();
-            Log.set("Model.wrModel(" + doc_name + ")");
-            DateTime t0 = DateTime.Now;
-            Docs doc = Docs.getDoc(doc_name, create_if_notexist: true);
-            doc.Reset();
-            switch (mode)
-            {
-                case WrMod.ModelINFO:   // общая информация о модели: имя, директория, MD5 и др
-                    doc.wrDocSetForm("HDR_ModelINFO", 1, AutoFit: true);
-                    doc.wrDocForm(name, dir, phase, date, MD5, elementsCount);
-                    break;
-                case WrMod.Raw:         // элементы с атрибутами, как они прочитаны из модели
-                    doc.wrDocSetForm("FORM_RawLine", 2, AutoFit: true);
-                    foreach (var elm in elements)
-                    {
-                        double w = elm.weight;                          // elm.weight - weight [kg];
-                        double v = elm.volume; // / 1000 / 1000 / 1000;     // elm.volume [mm3] -> [m3] 
-                        doc.wrDocForm(elm.guid, elm.mat, elm.mat_type, elm.prf, elm.length, w, v);
-                    }
-                    break;
-                case WrMod.Materials:   // сводка по материалам, их типам (бетон, сталь и др)
-                    doc.wrDocSetForm("FORM_Materials", 3, AutoFit: true);
-                    foreach (var mGr in elmMgroups)
-                    {
-                        doc.wrDocForm(mGr.mat, mGr.totalVolume, mGr.totalWeight, mGr.totalPrice);
-                    }
-                    break;
-                case WrMod.Suppliers:   // сводка по поставщикам проекта (контакты, URL прайс-листа, закупки)
-                    doc.wrDocSetForm("FORM_ModSupplierLine", 4, AutoFit: true);
-                    foreach (var s in Suppliers)
-                    {
-                        doc.wrDocForm(s.name, s.Url, s.City, s.index, s.street, s.telephone);
-                    }
-                    break;
-                case WrMod.Rules:       // перечень Правил, используемых для обработки модели
-                    doc.wrDocSetForm("FORM_RuleLine");
-                    foreach (var rule in Rules)
-                    {
-                        doc.wrDocForm(rule.date, rule.Supplier.name, rule.CompSet.name, rule.text);
-                    }
-                    break;
-                case WrMod.Report:      // отчет по сопоставлению групп <материал, профиль> c прайс-листами поставщиков
-                    doc.wrDocSetForm("FORM_Report", AutoFit: true);
-                    int n = 1;
-                    foreach (var gr in elmGroups)
-                    {
-                        string foundDescr = "", suplName = "", csName = "";
-                        if (gr.match != null && gr.match.ok == Mtch.OK.Match)
-                        {
-                            foundDescr = gr.match.component.Str(SType.Description);
-                            suplName = gr.match.rule.Supplier.name;
-                            csName = gr.match.rule.CompSet.name;
-                        }
-                        doc.wrDocForm(n++, gr.Mat, gr.Prf
-                            , gr.totalLength, gr.totalWeight, gr.totalVolume
-                            , foundDescr, suplName, csName
-                            , gr.totalWeight, gr.totalPrice);
-                    }
-                    doc.isChanged = true;
-                    doc.saveDoc();
-                    //--- string - Summary
-                    double sumWgh = 0, sumPrice = 0;
-                    int iGr = doc.i0;
-                    foreach (var gr in elmGroups)
-                    {
-                        double? w = doc.Body.Double(iGr, Decl.REPORT_SUPL_WGT);
-                        double? p = doc.Body.Double(iGr++, Decl.REPORT_SUPL_PRICE);
-                        sumWgh += (w == null) ? 0 : (double)w;
-                        sumPrice += (p == null) ? 0 : (double)p;
-                    }
-                    doc.wrDocSetForm("FORM_Report_Sum", AutoFit: true);
-                    doc.wrDocForm(sumWgh, sumPrice);
-                    break;
-            }
-            doc.isChanged = true;
-            doc.saveDoc();
-            log.Info("Время записи в файл \"" + doc_name + "\"\t t= " + (DateTime.Now - t0).ToString() + " сек");
-            Log.exit();
-        }
-        #endregion --- wrModel 
-
         #region -=-=- unclear region 3 to be audited
 #if OLD
         /// <summary>
@@ -761,7 +643,7 @@ namespace TSmatch.Model
             //////////////string md5 = mod.elements.MD5();    
             return true;    // пока не реализовано TODO - для отладки
         }
-
+#if OLD //13/7/17
         internal void Report()
         {
             if (!wrToFile) return;
@@ -772,5 +654,6 @@ namespace TSmatch.Model
             wrModel(WrMod.Rules);       // перечень Правил, используемых для обработки модели
             wrModel(WrMod.Report);      // отчет-сопоставление групп <материал, профиль> c прайс-листами поставщиков      
         }
+#endif // OLD // 13/7/17
     } // end class Model
 } // end namespace Model
