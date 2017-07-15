@@ -1,7 +1,7 @@
 ﻿/*---------------------------------------------------------------
  * Declaration - common constatnt and readonly declaranion module
  *
- * 29.05.2017 Pavel Khrapkin
+ * 11.07.2017 Pavel Khrapkin
  *
  *--- History ---
  * 2013-2016 - initial history: use DataTable, adapt from match to TSmach,
@@ -12,6 +12,7 @@
  * 19.5.17  - readonly DateTime(2010.1.1);
  * 24.5.17  - TSmatch.Models and Rules removes to TSmatchINFO.xlsx
  * 27.5.17  - write to Raw.xml instead of TSmatchINFO.xlsx/Raw
+ * 11.7.17  - row number declaration for TSmachINFO.xlsx/ModelINFO
  */
 using System;
 
@@ -187,14 +188,14 @@ namespace TSmatch.Declaration
 
         #region ----------- константы TSmatchINFO.xlsx/ModelINFO -------------------
         public const int MODINFO_NAME_R = 2;
-        public const int MODINFO_DIR_R = 3;
-        public const int MODINFO_PHASE_R = 4;
-        public const int MODINFO_DATE_R = 5;
-        public const int MODINFO_MADE_R = 6;
-        public const int MODINFO_MD5_R = 6;
-        public const int MODINFO_ELMCNT_R = 7;
-        public const int MODINFO_PRCDAT_R = 8;
-        public const int MODINFO_PRCMD5_R = 9;
+        public const int MODINFO_ADDRESS_R = 3;
+        public const int MODINFO_DIR_R = 4;
+        public const int MODINFO_PHASE_R = 5;
+        public const int MODINFO_DATE_R = 6;
+        public const int MODINFO_MD5_R = 7;
+        public const int MODINFO_ELMCNT_R = 8;
+        public const int MODINFO_PRCDAT_R = 9;
+        public const int MODINFO_PRCMD5_R = 10;
         #endregion
 
         #region ----------- TSmatchINFO.xlsx/Report - Отчет по результатам подбора сортамента ----------
