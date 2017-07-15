@@ -235,7 +235,8 @@ namespace TSmatch.SaveReport.Tests
         private SR init()
         {
             boot = new Bootstrap.Bootstrap();
-            sr = new SavedReport();
+            sr = new SR();
+
             model = sr;
             model.SetModel(boot);
             return sr;
