@@ -1,7 +1,7 @@
 ﻿/*----------------------------------------------------------------------------
  * Components -- Supplier's price-list load and handling 
  * 
- * 1.07.2017  П.Храпкин
+ * 15.07.2017  П.Храпкин
  *
  * --- Unit Testing ---
  * 2017.06.04 UT_Component_IsMatch and UT_Component_ruleRep OK
@@ -165,18 +165,6 @@ namespace TSmatch.Component
                 foreach (var s in Syns) pattern = strExclude(pattern, Syns);
                 return isOK(pattern, c, g);
             }
-
-            ////////////if(comMatPrf.Contains("50") && grMatPrf.Contains("50"))
-            ////////////{
-            ////////////    for(int i = 0; i < comMatPrf.Length; i++)
-            ////////////    {
-            ////////////        char cc = comMatPrf[i];
-            ////////////        char gg = grMatPrf[i];
-            ////////////        if (cc == gg) continue;
-            ////////////        int ii = 25;
-            ////////////    }
-            ////////////}
-
             return comMatPrf == grMatPrf;
         }
 
