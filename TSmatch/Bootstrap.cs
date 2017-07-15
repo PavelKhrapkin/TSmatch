@@ -18,6 +18,8 @@
  *  3.05.2017 - Model Journal initialization
  * 24.05/2017 - Rules and Model journal are not global resources anymore
  * 11.07.2017 - public DibugDir
+ *  * --- Unit Tests ---
+ * 2017.07.15  UT_Bootstrap   OK
  * ---------------------------------------------------------------------------
  *      Bootstrap Methods:
  * Bootstrap()      - check all resources and start all other modules

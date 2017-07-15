@@ -1,17 +1,15 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using TSmatch.Bootstrap;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿/*=================================
+ * Bootstrap Test 15.7.2017
+ *=================================
+ */
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using FileOp = match.FileOp.FileOp;
 
 namespace TSmatch.Bootstrap.Tests
 {
     [TestClass()]
-    public class BootstrapTests
+    public class UT_BootstrapTests
     {
         [TestMethod()]
         public void UT_Bootstrap()

@@ -15,7 +15,7 @@
  * 27.05.2017 - XML read and write model.elements as Raw.xml in wrMod, modelWr bug fix 
  * 11.07.2017 - Project address fields add to class Model
  * 14.07.2017 - SetModDir setarated from SetModet for UT_
- * --- Unit Tests --- .
+ * --- Unit Tests ---
  * 2017.07.6  UT_Model.UT_SetModel   OK
  * 2017.07.14 UT_SetModDirб setCity  OK 
  * ---- METHODS: -----------------
