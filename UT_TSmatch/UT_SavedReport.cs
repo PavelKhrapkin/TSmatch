@@ -1,5 +1,5 @@
 ﻿/*=================================
- * Saved Report Unit Test 28.6.2017
+ * Saved Report Unit Test 14.7.2017
  *=================================
  */
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -22,14 +22,14 @@ using Boot = TSmatch.Bootstrap.Bootstrap;
 namespace TSmatch.SaveReport.Tests
 {
     [TestClass()]
-    public class SavedReportTests
+    public class UT_SavedReportTests
     {
         Boot boot;
         SR sr;
         Mod model;
 
         [TestMethod()]
-        public void UT_getSavedReport()
+        public void UT_GetSavedReport()
         {
             var sr = init();
 
@@ -45,6 +45,40 @@ namespace TSmatch.SaveReport.Tests
             FileOp.AppQuit();
         }
 
+        [TestMethod()]
+        public void UT_GetModelINFO()
+        {
+            // GetModelINFO() - базовый метод, вызываемый в SetModel.
+            //..поэтому пользоваться обычным init() для этого UT_ нельзя 
+            const string defaultModName = "MyTestName";
+            boot = new Bootstrap.Bootstrap();
+            var sr = new SavedReport();
+            sr.dir = boot.ModelDir;
+            if (string.IsNullOrEmpty(sr.dir)) sr.dir = boot.DebugDir;
+            if (!FileOp.isFileExist(sr.dir, "TSmatchINFO.xlsx"))
+            {
+                sr.name = defaultModName;
+                sr.adrCity = "Санкт-Петербург";
+                sr.adrStreet = "Кудрово";
+                sr.date = DateTime.Now;
+                sr.MD5 = "sample-MD5";
+            }
+
+            var dINFO = sr.GetModelINFO(sr);
+
+            Assert.IsNotNull(dINFO);
+            Assert.AreEqual(2, dINFO.i0);
+            Assert.IsTrue(dINFO.il > 9);
+            var b = dINFO.Body;
+            string b_name = b.Strng(Decl.MODINFO_NAME_R, 2);
+            Assert.AreEqual("Название модели =", b.Strng(Decl.MODINFO_NAME_R, 1));
+            Assert.IsTrue(b_name.Length >= 1);
+            Assert.AreEqual("Адрес проекта:", b.Strng(Decl.MODINFO_ADDRESS_R, 1));
+            Assert.IsTrue(b.Strng(Decl.MODINFO_ADDRESS_R, 2).Length >= 1);
+
+            if (b_name == defaultModName) FileOp.Delete(sr.dir, b_name);
+            FileOp.AppQuit();
+        }
         //////////////[TestMethod()]
         //////////////public void UT_SR_ChechModel()
         //////////////{
@@ -84,7 +118,7 @@ namespace TSmatch.SaveReport.Tests
 
             // проверяем создание TSmatchINFO.xlsx/ModelINFO
             string repNm = Decl.TSMATCHINFO_MODELINFO;
-            sr.Recover(repNm, SR.RecoverToDo.ResetRep);
+            //14/7            sr.Recover(repNm, SR.RecoverToDo.ResetRep);
             Assert.IsTrue(Docs.IsDocExists(repNm));
             Docs modINFO = Docs.getDoc(Decl.TSMATCHINFO_MODELINFO);
             string modName = modINFO.Body.Strng(2, 2);
@@ -110,7 +144,7 @@ namespace TSmatch.SaveReport.Tests
 
             // проверяем создание TSmatchINFO.xlsx/Report
             string report = Decl.TSMATCHINFO_REPORT;
-            sr.Recover(report, SR.RecoverToDo.ResetRep);
+            //14/7            sr.Recover(report, SR.RecoverToDo.ResetRep);
             Assert.IsTrue(Docs.IsDocExists(report));
 
             FileOp.AppQuit();
@@ -161,7 +195,7 @@ namespace TSmatch.SaveReport.Tests
             model.dir = boot.ModelDir;
             sr.elements = sr.Raw(model);
 
-            sr.getSavedGroups();
+            sr.GetSavedReport();
 
             double sumPrice = sr.elmGroups.Select(x => x.totalPrice).Sum();
             Assert.AreEqual(sumPrice, sr.total_price);
@@ -197,6 +231,7 @@ namespace TSmatch.SaveReport.Tests
         }
 
         // эта инициализация класса SavedReport общая для всех тестов этого класса
+        // Model.SetModel() здесь использовать нельзя, т.к. SetModel dspsdftn SetReport
         private SR init()
         {
             boot = new Bootstrap.Bootstrap();
