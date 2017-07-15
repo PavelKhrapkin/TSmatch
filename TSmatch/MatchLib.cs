@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------
  * MatchLib -- библиотека общих подпрограмм проекта match 3.0
  * 
- *  2.07.17 П.Храпкин, А.Пасс
+ *  15.07.17 П.Храпкин, А.Пасс
  *  
  * - 20.11.13 переписано с VBA на С#
  * - 1.12.13 добавлен метод ToIntList
@@ -22,16 +22,17 @@
  * - 16.05.17 log4net use with WPF, TraceOn()/TraceOff()
  * - 24.05.17 Regex const for GetPar are local - not in Declaration anymore
  * -  2.07.17 GetPersStr(str) - get numberic parameters as a List<string>
- * -------------------------------------------
- *      ---- методы Mtch.Lib ----
- * fileOpen(dir, name[,OpenMode]) - открываем файл Excel по имени name в директории Dir, возвращает Workbook
- * isFileExist(name)        - возвращает true, если файл name существует
- * isSheetExist(Wb, name)  - проверяет, есть ли в Workbook Wb лист name 
+ *      ---- Unit Tests ----
+ * 2017.07.15 UT_ToLat, UT_IContains, UT MatchLib_GetPars, UT_MatchLib_GetParsStr   OK
+ * ----------- методы Mtch.Lib ---------------------------------------------------------
+ * isWinAppExist(nameApp)   - return True, when Application exist in Windows 
+ *      --- region ToList ---
  * ToIntList(s, separator)  - возвращает List<int>, разбирая строку s с разделителями separator
  * ToStrList(s,[separator]) - возвращает List<string> из Range или из строки s с разделителем
+ * IContains(List<string> lst, v) возвращает true, если в списке lst есть строка, содержащаяся в v
+ *      --- ToInt & ToDouble ---
  * ToInt(s, [msg])          - разбор строки Int
  * ToDouble(s)              - разбор строки double
- * IContains(List<string> lst, v) возвращает true, если в списке lst есть строка, содержащаяся в v
  * timeStr()                - возвращает строку, соответствующую текущнму времени
  * ComputeMD5(List>object> obj) - возвращает строку контрольной суммы MD5 по аргументу List<object>
  * ToLat(str) - замена в текстовой строке знаков кириллицы соотв.по написанию знаками латинского алфавита
@@ -62,9 +63,6 @@ namespace match.Lib
 {
     public class MatchLib
     {
-        public static string dirDBs = null;             // имя каталога для Документов и базы данных
-        private static Excel.Application _app = null;   // Application Excel
-
         internal static bool isWinAppExist(string nameApp)
         {
             bool ok = false;
@@ -76,7 +74,7 @@ namespace match.Lib
             return ok;
         }
 
-        #region ToList
+        #region --- ToList ---
         /// <summary>
         /// ToStrList(Excel.Range)  - возвращает лист строк, содержащийся в ячейках
         /// </summary>
@@ -147,7 +145,6 @@ namespace match.Lib
             foreach (var item in ar) strs.Add(item);
             return strs;
         }
-        #endregion ToList
 
         /// <summary>
         /// IContains(List<string> lst, v) возвращает true, если в списке lst есть строка, содержащаяся в v
@@ -162,6 +159,9 @@ namespace match.Lib
                 if (v.Contains(s)) { flag = true; break; }
             return flag;
         }
+        #endregion --- ToList ---
+
+        #region --- ToInt & ToDouble ---
         /// <summary>
         /// если в rng null, пусто или ошибка - возвращаем 0, а иначе целое число
         /// </summary>
@@ -215,6 +215,8 @@ namespace match.Lib
             double.TryParse(s, out d);
             return d;
         }
+        #endregion --- ToInt & ToDouble ---
+
         /// <summary>
         /// isCellEmpty(sh,row,col)     - возвращает true, если ячейка листа sh[rw,col] пуста или строка с пробелами
         /// </summary>
@@ -261,40 +263,7 @@ namespace match.Lib
         public static string timeStr() { return timeStr(DateTime.Now); }
         public static string timeStr(DateTime t) { return t.ToString("d.MM.yy H:mm:ss"); }
         public static string timeStr(DateTime t, string format) { return t.ToString(format); }
-#if testComputeMD5
-        static void Main(string[] args)
-        {
-            List<object> lst = new List<object>();
-            lst.Add(25);
-            lst.Add(null);
-            lst.Add(15);
-            lst.Add(-1);
-            lst.Add("txt");
-            lst.Add(null);
-            string key = ComputeMD5(lst);
-        }
-#endif
-        /// <summary>
-        /// ComputeMD5 - возвращает строку контрольной суммы MD5 по входному списку
-        /// </summary>
-        /// <param name="obj">входной параметр - список объектов</param>
-        /// <returns></returns>
-        /// <history>12.1.2016 PKh</history>
-        ///TODO 21/8/2016 - сделать нестатический метод ComputeMD5(this) c Sum 
-        public static string ComputeMD5(List<object> obj)
-        {
-            string str = "";
-            foreach (var v in obj) str += v == null ? "" : v.ToString();
-            return ComputeMD5(str);
-        }
-        public static string ComputeMD5(string s)
-        {
-            string str = "";
-            MD5 md5 = new MD5CryptoServiceProvider();
-            for (int i = 0; i < s.Length; i++) str += s[i];
-            byte[] data = md5.ComputeHash(Encoding.UTF8.GetBytes(str));
-            return BitConverter.ToString(data).Replace("-", "");
-        }
+
         /// <summary>
         /// ToLat() - замена в текстовой строке знаков кириллицы аналогичными
         ///           по написалию знаками латинского алфавита       
@@ -444,5 +413,63 @@ namespace match.Lib
             get { return System.Text.Encoding.UTF8; }
         }
     } // end class
+//#if testComputeMD5
+        static void Main(string[] args)
+        {
+            List<object> lst = new List<object>();
+            lst.Add(25);
+            lst.Add(null);
+            lst.Add(15);
+            lst.Add(-1);
+            lst.Add("txt");
+            lst.Add(null);
+            string key = ComputeMD5(lst);
+        }
+//#endif
+        /// <summary>
+        /// ComputeMD5 - возвращает строку контрольной суммы MD5 по входному списку
+        /// </summary>
+        /// <param name="obj">входной параметр - список объектов</param>
+        /// <returns></returns>
+        /// <history>12.1.2016 PKh</history>
+        ///TODO 21/8/2016 - сделать нестатический метод ComputeMD5(this) c Sum 
+        public static string ComputeMD5(List<object> obj)
+        {
+            string str = "";
+            foreach (var v in obj) str += v == null ? "" : v.ToString();
+            return ComputeMD5(str);
+        }
+        public static string ComputeMD5(string s)
+        {
+            string str = "";
+            MD5 md5 = new MD5CryptoServiceProvider();
+            for (int i = 0; i < s.Length; i++) str += s[i];
+            byte[] data = md5.ComputeHash(Encoding.UTF8.GetBytes(str));
+            return BitConverter.ToString(data).Replace("-", "");
+        }
+    
+        /// <summary>
+        /// ComputeMD5() по private матрице _matr
+        /// </summary>
+        /// <returns>строку контрольной суммы MD5 из 32 знаков</returns>
+        /// <history>12.1.2016 PKh</history>
+        public string ComputeMD5()
+        {
+            Log.set("ComputeMD5");
+            string result = "";
+            string str="";
+            try
+            {
+                int min_i = _matr.GetLowerBound(0), max_i = iEOL(),
+                    min_j = _matr.GetLowerBound(1), max_j = iEOC();
+                for (int i = min_i; i <= max_i; i++)
+                    for (int j = min_j; j <= max_j; j++)
+                        str += _matr[i, j] == null? "" : _matr[i,j].ToString();
+                result = Lib.MatchLib.ComputeMD5(str);
+            } catch (Exception e) { Log.FATAL("ошибка MD5: _matr[" + iEOL() + ", " + iEOC() + "]"); return null; }
+            Log.exit();
+            return result;
+        }
+
 #endif //OLD
 }  //end namespace
