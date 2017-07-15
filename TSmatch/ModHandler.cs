@@ -1,13 +1,14 @@
 ﻿/*--------------------------------------------------------------------------------------------
  * ModHandler : Model -- Handle Model for Report preparation
  * 
- *  28.06.2017 Pavel Khrapkin
+ *  15.07.2017 Pavel Khrapkin
  *  
  *--- History ---
  *  8.05.2017 taken from Model code
  * 27.05.2017 getRules
  * 20.06.2017 getGroup re-make with LINQ
  * 28.06.2017 bug fix in PrfUpdate()
+ *  3.07.2017 ProfileUpdate module add instead of PrfUdate in ModHandler
  *--- Unit Tests --- 
  * 2017.06.19 UT_ModHandler.UT_Hndl, UT_Pricing OK
  * -------------------------------------------------------------------------------------------
@@ -54,7 +55,8 @@ namespace TSmatch.Model.Handler
             var grps = elements.GroupBy(x => x.prf);
             foreach (var gr in grps) groups.Add(new ElmGr(gr));
             if (elements.Count != groups.Sum(x => x.guids.Count)) Msg.F("getGrps internal error");
-            return PrfUpdate(groups);
+            var v = new ProfileUpdate.ProfileUpdate(ref groups);
+            return groups;
         }
 #if OLD //27/6/17
         public void getGroups(List<Elm> elements)
@@ -215,7 +217,7 @@ namespace TSmatch.Model.Handler
             Log.exit();
             return elms.Values.ToList();
         }
-
+#if OLD //3.7.17
         /// <summary>
         ///  PrfUpdate() - Profile code corrections for some groups
         /// </summary>
@@ -230,12 +232,12 @@ namespace TSmatch.Model.Handler
         /// </Description>
         public List<ElmGr> PrfUpdate(List<ElmGr> grp)
         {
-            PrfNormalize(ref grp, PrfOpMode.Full, "—", "PL", "Полоса");
-            PrfNormalize(ref grp, PrfOpMode.Mark, "L", "Уголок");
-            PrfNormalize(ref grp, PrfOpMode.Mark, "I", "Балка");
-            PrfNormalize(ref grp, PrfOpMode.Full, "[", "U", "Швеллер");
-            PrfNormalize(ref grp, PrfOpMode.Full, "Гн.[]", "PP", "Тр.", "Труба пр");
-            PrfNormalize(ref grp, PrfOpMode.Full, "Гн.", "PK", "Тр.");
+            PrfNormalize(ref grp, "—", "PL", "Полоса");
+            PrfNormalize(ref grp, "L", "Уголок");
+            PrfNormalize(ref grp, "I", "Балка");
+            PrfNormalize(ref grp, "[", "U", "Швеллер");
+            PrfNormalize(ref grp, "Гн.[]", "PP", "Тр.", "Труба пр");
+            PrfNormalize(ref grp, "Гн.", "PK", "Тр.");
             return grp;
         }
         /// <summary>
@@ -243,8 +245,7 @@ namespace TSmatch.Model.Handler
         /// <para>  - Mark: only setup Mark (i.e. Profile type) as pointed in first argument, or</para>
         /// <para>  - Full: setup Mark, and sort digital parameter values the profile template list;</para> 
         /// </summary>
-        enum PrfOpMode { Full, Mark }
-        private void PrfNormalize(ref List<ElmGr> grp, PrfOpMode md, params string[] prfMark)
+        private void PrfNormalize(ref List<ElmGr> grp, params string[] prfMark)
         {
             foreach (var gr in grp)
             {
@@ -274,17 +275,17 @@ namespace TSmatch.Model.Handler
                 case "[":
                     mark += pars[0];
                     if (str.Contains("ap")) { mark += "аП"; break; }
-                    if (str.Contains("p")) { mark += "П"; break; }
+                    if (str.Contains("p"))  { mark += "П";  break; }
                     if (str.Contains("ay")) { mark += "аУ"; break; }
-                    if (str.Contains("y")) { mark += "У"; break; }
-                    if (str.Contains("e")) { mark += "Э"; break; }
-                    if (str.Contains("l")) { mark += "Л"; break; }
+                    if (str.Contains("y"))  { mark += "У";  break; }
+                    if (str.Contains("e"))  { mark += "Э";  break; }
+                    if (str.Contains("l"))  { mark += "Л";  break; }
                     if (str.Contains("ca")) { mark += "Cа"; break; }
                     if (str.Contains("cb")) { mark += "Cб"; break; }
-                    if (str.Contains("c")) { mark += "C"; break; }
+                    if (str.Contains("c"))  { mark += "C";  break; }
                     if (pars.Count != 1) Msg.F("Internal error");
                     break;
-
+                
                 case "Гн.[]":
                     break;
                 case "Гн.":
@@ -356,5 +357,6 @@ namespace TSmatch.Model.Handler
             //////////}
             return mark;
         }
+#endif //OLD 3.7.17
     } // end class ModHandler : Model
 } // end namespace Model.Handler
