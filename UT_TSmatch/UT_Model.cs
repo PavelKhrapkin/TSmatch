@@ -1,8 +1,9 @@
-﻿/*=================================
- * Model Unit Test 24.5.2017
- *=================================
- */
- using System;
+﻿using TSmatch.Model;
+/*=================================
+* Model Unit Test 14.07.2017
+*=================================
+*/
+using System;
 using System.Linq;
 using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -13,9 +14,9 @@ using Elm = TSmatch.ElmAttSet.ElmAttSet;
 using Mod = TSmatch.Model.Model;
 using Decl = TSmatch.Declaration.Declaration;
 
-namespace TSmatch.Unit_Tests.UT_Model
+namespace TSmatch.Model.Tests
 {
-    [TestClass]
+    [TestClass()]
     public class UT_Model
     {
         Boot boot;
@@ -40,6 +41,39 @@ namespace TSmatch.Unit_Tests.UT_Model
             Assert.IsTrue(model.elmGroups.Count > 0);
 
             FileOp.AppQuit();
+        }
+
+        [TestMethod()]
+        public void UT_SetModDir()
+        {
+            boot = new Bootstrap.Bootstrap();
+            model = new Mod();
+            model.SetModDir(boot);
+
+            Assert.IsNotNull(model.dir);
+            Assert.IsTrue(FileOp.isDirExist(model.dir));
+            Assert.IsTrue(model.name.Length > 0);
+            Assert.IsTrue(model.elementsCount > 0);
+            Assert.IsTrue(model.phase.Length > 0);
+            //            Assert.IsTrue(model.date > Decl.OLD & model.date < DateTime.Now);
+            //            Assert.IsTrue(model.pricingDate > Decl.OLD & model.pricingDate < DateTime.Now);
+            Assert.IsTrue(model.elementsCount > 0);
+            //            Assert.AreEqual(32, model.MD5.Length);
+            //            Assert.AreEqual(32, model.pricingMD5.Length);
+
+            FileOp.AppQuit();
+        }
+
+        [TestMethod()]
+        public void UT_setCity()
+        {
+            string str = "Cанкт-Петербург, Кудрово";
+
+            Mod mod = new Mod();
+            mod.setCity(str);
+
+            Assert.AreEqual("Cанкт-Петербург", mod.adrCity);
+            Assert.AreEqual("Кудрово", mod.adrStreet);
         }
 #if old //24/5 move to UT_ModelHandle
         [TestMethod]

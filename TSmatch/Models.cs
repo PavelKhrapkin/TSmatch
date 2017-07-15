@@ -17,7 +17,7 @@
  * 14.07.2017 - SetModDir setarated from SetModet for UT_
  * --- Unit Tests ---
  * 2017.07.6  UT_Model.UT_SetModel   OK
- * 2017.07.14 UT_SetModDirб setCity  OK 
+ * 2017.07.14 UT_SetModDir, setCity  OK 
  * ---- METHODS: -----------------
  * Read(modelName) - получение модели (списка элементов с атрибутами) из Tekla или IFC
  * getModel(name)  - ищет модель по имени name в журнале моделей
