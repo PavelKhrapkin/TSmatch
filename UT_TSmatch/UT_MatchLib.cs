@@ -46,5 +46,29 @@ namespace match.Lib.Tests
             Assert.AreEqual(1, pars.Count);
             Assert.AreEqual("10", pars[0]);
         }
+
+        [TestMethod()]
+        public void UT_IContains()
+        {
+            // test 1: 
+            string v = "yгoлoк75x6";
+            v = MatchLib.ToLat(v);
+            List<string> lst0 = new List<string>() { "угoлoк", "l" };
+            lst0[0] = MatchLib.ToLat(lst0[0]);
+            bool b0 = MatchLib.IContains(lst0, v);
+            Assert.IsTrue(b0);
+
+            // test 2:
+            List<string> lst = new List<string>() { "уголок", "l" };
+            v = "уголок";
+            bool b = MatchLib.IContains(lst, v);
+            Assert.IsTrue(b);
+
+            // test 3:
+            lst = new List<string>() { "балка", "i" };
+            v = "i20";
+            b = MatchLib.IContains(lst, v);
+            Assert.IsTrue(b);
+        }
     }
 }
