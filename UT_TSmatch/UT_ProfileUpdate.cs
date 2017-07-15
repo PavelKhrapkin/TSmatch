@@ -1,5 +1,5 @@
 ﻿/*=================================
- * ProfileUpdate Unit Test 2.07.2017
+ * ProfileUpdate Unit Test 3.07.2017
  *=================================
  */
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -27,12 +27,12 @@ namespace TSmatch.ProfileUpdate.Tests
         [TestInitialize()]
         public void Initialize()
         {
-//            MessageBox.Show("TestMethodInit");
+            //            MessageBox.Show("TestMethodInit");
         }
 
         // 2017.07.1 тест двутавров
         [TestMethod()]
-        public void UT_PrfUpdate_I()
+        public void UT_ProfleUpdate_I()
         {
             // test 0: "I10_8239_89" => "I10"
             initGr("I10_8239-89");
@@ -80,7 +80,7 @@ namespace TSmatch.ProfileUpdate.Tests
             Assert.AreEqual("I20К3А", mod.elmGroups[0].Prf);
             #endregion --- серия K ---
 
-            #region --- серия Ш = H ---
+            #region --- серия Ш = H = ДВУТАВР ---
             // test Ш1: "I30H1_20_93" => I30Ш1"
             initGr("I30H1_20_93");
             xx = new ProfileUpdate(ref inp);
@@ -92,6 +92,12 @@ namespace TSmatch.ProfileUpdate.Tests
             xx = new ProfileUpdate(ref inp);
             Assert.AreEqual("i100ш5", mod.elmGroups[0].prf);
             Assert.AreEqual("I100Ш5", mod.elmGroups[0].Prf);
+
+            // test Ш3: "ДВУТAВР30Ш2" => I30Ш2"
+            initGr("ДВУТAВР30Ш2");
+            xx = new ProfileUpdate(ref inp);
+            Assert.AreEqual("i30ш2", mod.elmGroups[0].prf);
+            Assert.AreEqual("I30Ш2", mod.elmGroups[0].Prf);
             #endregion --- серия Ш = H ---
 
             #region --- серия Р40-93 Д и У ---
@@ -111,7 +117,7 @@ namespace TSmatch.ProfileUpdate.Tests
 
         // 2017.07.2 тест швеллеров
         [TestMethod()]
-        public void UT_PrfUpdate_U()
+        public void UT_ProfileUpdate_U()
         {
             #region --- серия У ГОСТ 8240-97 --- 
             // test 1У: "U18AY_8240_97" => "]18aУ"
@@ -182,7 +188,7 @@ namespace TSmatch.ProfileUpdate.Tests
 
         // 2017.07.2 тест уголков
         [TestMethod()]
-        public void UT_PrfUpdate_L()
+        public void UT_ProfileUpdate_L()
         {
             // Уголки равнополочные ГОСТ 8509-93 и неравнополочные ГОСТ 8510-86 --- 
             // test 1L: "L40X5_8509_93" => "L40x5"
@@ -212,18 +218,34 @@ namespace TSmatch.ProfileUpdate.Tests
             var xx = new ProfileUpdate(ref inp);
             Assert.AreEqual("—6", mod.elmGroups[0].Prf);
 
-            //// test 1: "—100*6" => "—6x100"
-            //initGr("PL6");
-            //var xx = new ProfileUpdate(ref inp); "—100*6";
-            //inp.Add(gr);
-            //res = mod.PrfUpdate(inp);
-            //Assert.AreEqual(res[0].prf, "—6x100");
+            // test 1: "PL100*6" => "—6x100"
+            initGr("PL100x6");
+            xx = new ProfileUpdate(ref inp);
+            Assert.AreEqual("—6x100", mod.elmGroups[0].Prf);
 
-            //// test 2: "—100*6" => "—6x100"
-            //gr.Prf = gr.prf = "—100*6";
-            //inp.Add(gr);
-            //res = mod.PrfUpdate(inp);
-            //Assert.AreEqual(res[1].prf, "—6x100");
+            // test 2: "PL6*100" => "—6x100"
+            initGr("PL6*100");
+            xx = new ProfileUpdate(ref inp); ;
+            Assert.AreEqual("—6x100", mod.elmGroups[0].Prf);
+        }
+
+        [TestMethod()]
+        public void UT_ProfileUpdate_PK_PP()
+        {
+            // test 0PP: "PP140X100X6_67_2287_80" -> "Гн.[] 140x100x6"
+            initGr("PP140X100X6_67_2287_80");
+            var xx = new ProfileUpdate(ref inp);
+            Assert.AreEqual("Гн.[]140x100x6", mod.elmGroups[0].Prf);
+
+            // test 1PK: "PK160X5_36_2287_80" -> "Гн.[] 160x5"
+            initGr("PK160X5_36_2287_80");
+            xx = new ProfileUpdate(ref inp);
+            Assert.AreEqual("Гн.160x5", mod.elmGroups[0].Prf);
+
+            // test 2PK: "Профиль(кв.)120X120X7.0" -> "Гн.120x7"
+            initGr("Профиль(кв.)120X120X7.0");
+            xx = new ProfileUpdate(ref inp);
+            Assert.AreEqual("Гн.120x7", mod.elmGroups[0].Prf);
         }
 
         private void initGr(string v)
