@@ -6,8 +6,8 @@
  *  2.07.2017 code taken from ModHandled code, separated into this class
  *  4.07.2017 multiple PrfTab values separated with '|', f.e "PL|-"
  *--- Unit Tests --- .
- * 2017.07.6 UT_ProfileUpdate_I, UT_ProfileUpdate_U, UT ProfileUpdate_L, 
- *           UT_ProfileUpdate_PL, UT_ProfileUpdate_PK_PP                    OK
+ * 2017.07.15 UT_ProfileUpdate_I, UT_ProfileUpdate_U, UT ProfileUpdate_L, 
+ *            UT_ProfileUpdate_PL, UT_ProfileUpdate_PK_PP                    OK
  * -------------------------------------------------------------------------------------------
  *      Methods:
  * ProfileUpdate()      - Modify group profiles in according with Russian Gost
