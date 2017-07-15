@@ -4,7 +4,7 @@
  * 15.07.2017  П.Храпкин
  *
  * --- Unit Testing ---
- * 2017.06.04 UT_Component_IsMatch and UT_Component_ruleRep OK
+ * 2017.07.15 UT_Component_checkComp, UT_Component_rulePar, UT_isOK OK
  * --- History ---
  * 30.11.2016 made as separate module, CompSet is now in another file
  * 30.12.2016 fill matFP, prfFP in setComp()
