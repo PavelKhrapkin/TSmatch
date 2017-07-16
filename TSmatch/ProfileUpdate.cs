@@ -129,47 +129,18 @@ namespace TSmatch.ProfileUpdate
                     }
                     break;
                 case "Гн.[]":
-                    ////if (pars.Count == 2) mark = "Гн." + pars[0] + "x" + pars[1].Replace(".0", ""); ;
-                    ////if (pars.Count == 3) mark += pars[0] + "x" + pars[1] + "x" + pars[2].Replace(".0", "");
-                    ////if (pars.Count != 2 && pars.Count != 3) error(pars);
-                    ////break;
                 case "Гн.":
-                    if (pars.Count == 2) mark = "Гн." + pars[0] + "x" + pars[1].Replace(".0", ""); ;
-                    if (pars.Count == 3) mark = "Гн.[]" + pars[0] + "x" + pars[1] + "x" + pars[2].Replace(".0", "");
+                    if (pars.Count == 2) mark = "Гн." + pars[0] + "x" + pars[1].Replace(".0", "");
+                    if (pars.Count == 3)
+                    {
+                        if(pars[0] == pars[1]) mark = "Гн." + pars[0] + "x" + pars[2].Replace(".0", "");
+                        else mark = "Гн.[]" + pars[0] + "x" + pars[1] + "x" + pars[2].Replace(".0", "");
+                    }
                     if (pars.Count != 2 && pars.Count != 3) error(pars);
                     break;
-                    //////////16/7                    if (Profile.Contains("Профиль(кв.)") && pars[0] == pars[1])
-                    ////////if (Profile.Contains("Профиль(кв.)") || pars[0] == pars[1])
-                    ////////{
-                    ////////    if(pars.Count == 2)
-                    ////////    {
-                    ////////        mark += pars[0] + "x" + pars[1];
-                    ////////        break;
-                    ////////    }
-                    ////////    if (pars.Count != 3) goto ERR;
-                    ////////    mark += pars[0] + "x" + pars[2].Replace(".0", "");
-                    ////////}
-                    ////////else
-                    ////////{
-                    ////////    if (pars.Count != 3) goto ERR;
-                    ////////    mark += "[]" + pars[0] + "x" + pars[1] + "x" + pars[2].Replace(".0", "");
-                    ////////}
-                    ////////break;
                 default: error(pars); break;
             }
             return mark;
-        }
-
-        private string PK3(List<string> pars)
-        {
-            if (pars.Count != 3) error(pars);
-            return "Гн." + pars[0] + "x" + pars[2].Replace(".0", "");
-        }
-
-        private string PP3(List<string> pars)
-        {
-            if (pars.Count != 3) error(pars);
-            return "Гн.[]" + pars[0] + "x" + pars[1] + "x" + pars[2].Replace(".0", "");
         }
 
         private void error(List<string> pars)
