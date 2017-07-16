@@ -1,10 +1,11 @@
 ﻿/*--------------------------------------------------------------------------------------------
  * ProfileUpdate -- Update Group Profiles in accouding Russian GOST
- *  7.07.2017 Pavel Khrapkin
+ *  16.07.2017 Pavel Khrapkin
  *  
  *--- History ---
  *  2.07.2017 code taken from ModHandled code, separated into this class
  *  4.07.2017 multiple PrfTab values separated with '|', f.e "PL|-"
+ * 16.07.2017 vjht logic for ghjabkt "Гн." recognition
  *--- Unit Tests --- .
  * 2017.07.15 UT_ProfileUpdate_I, UT_ProfileUpdate_U, UT ProfileUpdate_L, 
  *            UT_ProfileUpdate_PL, UT_ProfileUpdate_PK_PP                    OK
@@ -48,7 +49,7 @@ namespace TSmatch.ProfileUpdate
             PrfTab.Add("L", "L|Уголок");  //уголок
             PrfTab.Add("I", "I|ДВУТАВР"); //балка двутавровая
             PrfTab.Add("[", "U|Швеллер"); //швеллер
-            PrfTab.Add("Гн.", "PK|Профиль");    //замкнутый профиль - квадрат
+            PrfTab.Add("Гн.", "PK|Профиль|Гн.");    //замкнутый профиль - квадрат
             PrfTab.Add("Гн.[]", "PP");  //замкнутый прямоугольный профиль, труба профильная
 
         }
@@ -97,7 +98,7 @@ namespace TSmatch.ProfileUpdate
                     if (PrfSub("С", "с%", "", out type)) goto OK_I;
                     OK_I: mark += pars[0] + type;
                     if (type == "" && pars.Count != 1
-                        || Regex.IsMatch(type, @"\d") && pars.Count != 2) goto ERR;
+                        || Regex.IsMatch(type, @"\d") && pars.Count != 2) error(pars);
                     break;
                 case "[":
                     if (PrfSub("[", "aY", "аУ", out type)) goto OK_U;
@@ -110,12 +111,12 @@ namespace TSmatch.ProfileUpdate
                     if (PrfSub("[", "cb", "Cб", out type)) goto OK_U;
                     if (PrfSub("[", "c", "C", out type)) goto OK_U;
                     OK_U: mark += pars[0] + type;
-                    if (pars.Count != 1) goto ERR;
+                    if (pars.Count != 1) error(pars);
                     break;
                 case "L":
                     if (pars.Count == 2) mark += pars[0] + "x" + pars[1];
                     if (pars.Count == 3) mark += pars[0] + "x" + pars[1] + "x" + pars[2];
-                    if (pars.Count != 2 && pars.Count != 3) goto ERR;
+                    if (pars.Count != 2 && pars.Count != 3) error(pars);
                     break;
                 case "—":
                     if (pars.Count == 1) mark += pars[0];
@@ -128,27 +129,51 @@ namespace TSmatch.ProfileUpdate
                     }
                     break;
                 case "Гн.[]":
-                    mark += pars[0] + "x" + pars[1] + "x" + pars[2];
-                    if (pars.Count != 3) goto ERR;
-                    break;
+                    ////if (pars.Count == 2) mark = "Гн." + pars[0] + "x" + pars[1].Replace(".0", ""); ;
+                    ////if (pars.Count == 3) mark += pars[0] + "x" + pars[1] + "x" + pars[2].Replace(".0", "");
+                    ////if (pars.Count != 2 && pars.Count != 3) error(pars);
+                    ////break;
                 case "Гн.":
-                    if (Profile.Contains("Профиль(кв.)") && pars[0] == pars[1])
-                    {
-                        if (pars.Count != 3) goto ERR;
-                        mark += pars[0] + "x" + pars[2].Replace(".0", "");
-                    }
-                    else
-                    {
-                        mark += pars[0] + "x" + pars[1];
-                        if (pars.Count != 2) goto ERR;
-                    }
+                    if (pars.Count == 2) mark = "Гн." + pars[0] + "x" + pars[1].Replace(".0", ""); ;
+                    if (pars.Count == 3) mark = "Гн.[]" + pars[0] + "x" + pars[1] + "x" + pars[2].Replace(".0", "");
+                    if (pars.Count != 2 && pars.Count != 3) error(pars);
                     break;
+                    //////////16/7                    if (Profile.Contains("Профиль(кв.)") && pars[0] == pars[1])
+                    ////////if (Profile.Contains("Профиль(кв.)") || pars[0] == pars[1])
+                    ////////{
+                    ////////    if(pars.Count == 2)
+                    ////////    {
+                    ////////        mark += pars[0] + "x" + pars[1];
+                    ////////        break;
+                    ////////    }
+                    ////////    if (pars.Count != 3) goto ERR;
+                    ////////    mark += pars[0] + "x" + pars[2].Replace(".0", "");
+                    ////////}
+                    ////////else
+                    ////////{
+                    ////////    if (pars.Count != 3) goto ERR;
+                    ////////    mark += "[]" + pars[0] + "x" + pars[1] + "x" + pars[2].Replace(".0", "");
+                    ////////}
+                    ////////break;
+                default: error(pars); break;
             }
             return mark;
-            ERR: Msg.F("ProfileUpdate Internal error", Profile, pars.Count);
-            return null;
         }
-        //////////    default: Msg.F("ModHandler.grPrfPars not recognized Profile"); break;
+
+        private string PK3(List<string> pars)
+        {
+            if (pars.Count != 3) error(pars);
+            return "Гн." + pars[0] + "x" + pars[2].Replace(".0", "");
+        }
+
+        private string PP3(List<string> pars)
+        {
+            if (pars.Count != 3) error(pars);
+            return "Гн.[]" + pars[0] + "x" + pars[1] + "x" + pars[2].Replace(".0", "");
+        }
+
+        private void error(List<string> pars)
+        { Msg.F("ProfileUpdate Internal error", Profile, pars.Count); }
 
         // обнаруживает подстроки вида "Б3" или "K3A" и возвращает, если найдено, в type
         private bool PrfSub(string Type, string v, string sufix, out string type)
