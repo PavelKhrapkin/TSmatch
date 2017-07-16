@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------------------
  * Bootstrap - provide initial start of TSmatch, when necessary - startup procedure
  * 
- *  15.07.2017  Pavel Khrapkin
+ *  17.07.2017  Pavel Khrapkin
  *
  *--- History ---
  * 25.3.2016 started 
@@ -18,16 +18,14 @@
  *  3.05.2017 - Model Journal initialization
  * 24.05/2017 - Rules and Model journal are not global resources anymore
  * 11.07.2017 - public DibugDir
- * 15.07.2017 - check resources
+ * 17.07.2017 - check Property.TSmatch resources 
  *  * --- Unit Tests ---
  * 2017.07.15  UT_Bootstrap   OK
  * ---------------------------------------------------------------------------
  *      Bootstrap Methods:
  * Bootstrap()      - check all resources and start all other modules
- * Init(name)       - Inuitiate C# code Module name
- *      sub-class Resource Methods:
- * Start()              - initiate #templates, which would be used in TOC to adapt TSmatch to the user environment
- * checkResource([name]) - check Resource name or all Resources; if resource is absent or obsolete - Recover
+
+ * checkResx([name], ResName) - check Resource name
  * Recover(fault reason) - try to restore or recover Resource
  *! checkFile(name, date) - check if file name exists and not obsolete; Recover it if necessary
  *! getFile()           - get file with Resource name to replace or resore the Resource
@@ -40,8 +38,10 @@
  */
 
 using System;
+using System.IO;
 using System.Collections.Generic;
 
+using Resx = TSmatch.Properties.TSmatch;
 using Decl = TSmatch.Declaration.Declaration;
 using Lib = match.Lib.MatchLib;
 using Log = match.Lib.Log;
@@ -84,18 +84,8 @@ namespace TSmatch.Bootstrap
         public object classCAD;
         public Mod model;
 
-        public Bootstrap()
+        public Bootstrap() 
         {
-//15/7            List<Resource> Resources = new List<Resource>();
-            var v = new All_Resources();                //Initiate Resosrse list with their types and dates
-                                                        //15/7            Resources.Find(x => x.name == Decl.R_TEKLA).checkResource(Resource.R_name.Tekla);
-//16/7            All_Resources.Check(Decl.R_TEKLA);
-            ////////////Resource.checkResource(Decl.R_TEKLA);   // проверяем, активна ли Tekla
-            ////////////Resource.checkResource(Decl.R_TSMATCH); // проверяем, доступен ли файл TSmach.xlsx
-            ////////////Template.Start();               // подготавливаем #шаблоны - в Bootstrap
-            ////////////Docs.Start(TOCdir);             // инициируем Документы из TSmatch.xlsx/TOC
-            ////////////Msg.Start();                    // инициируем Сообщения из TSmatch.xlsx/Messages
-            ////////////Resource.checkResource();       // проверяем все ресурсы, в частности, актуальность даты в [1,1]          
             desktop_path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
             debug_path = desktop_path;
             if (isTeklaActive)
@@ -113,10 +103,8 @@ namespace TSmatch.Bootstrap
                 ModelDir = desktop_path;
                 classCAD = ifc;
             }
-            //22.12.16 позже, при реинжиниринге TSmatch, нужно будет специально заняться ресурсами - RESX .Net
-            //.. тогда и понадобится эта строчка    Console.WriteLine("IsTeklaActive=" + isTeklaActive + "\tTOCdir=" + TOCdir);
- //16/7           Resource.checkResource(Resources, Resource.R_name.TSmatch, TOCdir);
-
+            CheckResx(Path.Combine(_TOCdir, "TSmatch.xlsx"), Resx.TSmatch_xlsx);
+            //--- initiate Docs with #Templates
             Dictionary<string, string> Templates = new Dictionary<string, string>
                     {
                         {"#TOC",    TOCdir },
@@ -129,7 +117,67 @@ namespace TSmatch.Bootstrap
                     };
             Docs.Start(Templates);
             docTSmatch = Docs.getDoc();
+            //--- initiate Messages
             Msg.Start();
+            CheckResx("Messages", Resx.Messages);
+            //--check other Resources and we're in air
+            CheckResx("Forms", Resx.Forms);
+        }
+
+        Dictionary<ResType, string> ResTab = new Dictionary<ResType, string>()
+        {
+            {ResType.Date, "Dat" },
+            {ResType.File, "Fil" },
+            {ResType.Doc , "Doc" }
+        };
+        enum ResType { Date, File, Doc, Err}
+        private void CheckResx(string rName, string rValue)
+        {
+            ResType type = ResType.Err;
+            foreach (var x in ResTab)
+            {
+                if (!rValue.Contains(x.Value)) continue;
+                type = x.Key;
+                break;
+            }
+            int indx = rValue.IndexOf(':') + 1;
+            string v = rValue.Substring(indx).Trim();
+            switch (type)
+            {
+                case ResType.Doc:
+                    if (!Docs.IsDocExists(rName)) resError(ResErr.NoDoc, rName);
+                    break;
+                case ResType.File:
+                    if (!FileOp.isFileExist(rName)) resError(ResErr.NoFile, rName);
+                    break;
+                case ResType.Date:
+                    DateTime d = Lib.getDateTime(v);
+                    Docs doc = Docs.getDoc(rName, fatal:false);
+                    if (doc == null) resError(ResErr.NoDoc, rName);
+                    string sdd = doc.Body.Strng(1, 1);
+                    DateTime dd = Lib.getDateTime(sdd);
+                    if (dd < d) resError(ResErr.Obsolete, rName);
+                    break;
+                default: resError(ResErr.ErrResource, rName); break;
+            }
+        }
+        enum ResErr { ErrResource, NoFile, NoDoc, Obsolete }
+        void resError(ResErr errType, string rName)
+        {
+            switch (errType)
+            {
+                case ResErr.NoFile:
+                    Msg.F("No TSmatch Resource file", rName);
+                    break;
+                case ResErr.NoDoc:
+                    Msg.F("No TSmatch Resource Document", rName);
+                    break;
+                case ResErr.Obsolete:
+                    Msg.F("TSmatch Resource Obsolete", rName);
+                    break;
+                default: Msg.F("TSmatch internal Resource error", rName);
+                    break;
+            }
         }
 #if OLD //15/7
         /// <summary>
@@ -239,7 +287,7 @@ namespace TSmatch.Bootstrap
             }
             return moduleApp;
         }
-#endif // OLD  7/4/17 
+
         /// <summary>
         /// Resource - internal resource of TSmatch being checked in Bootstrap
         /// </summary>
@@ -357,7 +405,7 @@ namespace TSmatch.Bootstrap
                 return ok;
             }
         } // end class Resource
-
+#endif // OLD  7/4/17 
         /// <summary>
         /// class Section initialization - fill SectionTab Dictionary
         /// </summary>

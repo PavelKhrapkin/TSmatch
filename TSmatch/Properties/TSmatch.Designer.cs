@@ -59,5 +59,32 @@ namespace TSmatch.Properties {
                 resourceCulture = value;
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Date: 16.7.2017.
+        /// </summary>
+        internal static string Forms {
+            get {
+                return ResourceManager.GetString("Forms", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Date: 16.7.2017.
+        /// </summary>
+        internal static string Messages {
+            get {
+                return ResourceManager.GetString("Messages", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to File: TSmatch.xlsx.
+        /// </summary>
+        internal static string TSmatch_xlsx {
+            get {
+                return ResourceManager.GetString("TSmatch_xlsx", resourceCulture);
+            }
+        }
     }
 }

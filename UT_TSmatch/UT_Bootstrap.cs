@@ -1,7 +1,7 @@
 ﻿/*=================================
- * Bootstrap Test 15.7.2017
- *=================================
- */
+* Bootstrap Test 17.7.2017
+*=================================
+*/
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using FileOp = match.FileOp.FileOp;
