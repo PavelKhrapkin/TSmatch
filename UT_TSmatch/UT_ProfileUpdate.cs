@@ -1,5 +1,5 @@
 ﻿/*=================================
- * ProfileUpdate Unit Test 3.07.2017
+ * ProfileUpdate Unit Test 16.07.2017
  *=================================
  */
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -244,6 +244,11 @@ namespace TSmatch.ProfileUpdate.Tests
 
             // test 2PK: "Профиль(кв.)120X120X7.0" -> "Гн.120x7"
             initGr("Профиль(кв.)120X120X7.0");
+            xx = new ProfileUpdate(ref inp);
+            Assert.AreEqual("Гн.120x7", mod.elmGroups[0].Prf);
+
+            // test 3PK from Issue 2017.07.06 : "Гн.120x120x7" -> "Гн. 120x7"
+            initGr("Гн.120x120x7");
             xx = new ProfileUpdate(ref inp);
             Assert.AreEqual("Гн.120x7", mod.elmGroups[0].Prf);
         }

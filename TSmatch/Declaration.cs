@@ -85,7 +85,7 @@ namespace TSmatch.Declaration
 
         public const string R_FORM = FORMS;                //TSmatch.xlsx/Forms - Формы
         public const string R_FORM_TYPE = TEMPL_TOC;
-        public const string R_FORM_DATE = "2.7.2016 7:40";
+        public const string R_FORM_DATE = "11.7.2017 17:40";
 
         public const string R_CONST = CONST;               //TSmatch.xlsx/Constants - Таблицы и константы TSmatch
         public const string R_CONST_TYPE = TEMPL_TOC;
