@@ -1,5 +1,5 @@
 ﻿/*=================================
- * Saved Report Unit Test 15.7.2017
+ * Saved Report Unit Test 18.7.2017
  *=================================
  */
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -114,27 +114,35 @@ namespace TSmatch.SaveReport.Tests
         [TestMethod()]
         public void UT_Recover()
         {
-            var sr = init();
+            var sr = init(set_model: false);
+            model.date = new DateTime(2015, 6, 12);
+            model.MD5 = "-- моя имитация MD5 --";
+            model.pricingMD5 = "-- моя имитация MD5 --";
+            model.pricingDate = new DateTime(2017, 4, 4);
+            model.setCity("Санкт-Петербург, Зенит-Арена");
 
             // проверяем создание TSmatchINFO.xlsx/ModelINFO
             string repNm = Decl.TSMATCHINFO_MODELINFO;
-            //14/7            sr.Recover(repNm, SR.RecoverToDo.ResetRep);
+            sr.Recover(model, repNm, SR.RecoverToDo.ResetRep);
             Assert.IsTrue(Docs.IsDocExists(repNm));
             Docs modINFO = Docs.getDoc(Decl.TSMATCHINFO_MODELINFO);
-            string modName = modINFO.Body.Strng(2, 2);
-            string dir = modINFO.Body.Strng(3, 2);
-            string dat = modINFO.Body.Strng(5, 2);
+            string modName = modINFO.Body.Strng(Decl.MODINFO_NAME_R, 2);
+            string dir = modINFO.Body.Strng(Decl.MODINFO_DIR_R, 2);
+            string dat = modINFO.Body.Strng(Decl.MODINFO_DATE_R, 2);
             DateTime date = Lib.getDateTime(dat);
-            int cnt = modINFO.Body.Int(7, 2);
+            string adr = modINFO.Body.Strng(Decl.MODINFO_ADDRESS_R, 2);
+            int cnt = modINFO.Body.Int(Decl.MODINFO_ELMCNT_R, 2);
             Assert.IsTrue(modName.Length > 0);
             Assert.IsTrue(dir.Length > 0);
             Assert.IsTrue(dir.Contains(@"\"));
             Assert.IsTrue(dir.Contains(":"));
             Assert.IsFalse(dir.Contains("."));
             Assert.IsTrue(dat.Length > 0);
-            DateTime old = new DateTime(2010, 1, 1);
-            Assert.IsTrue(date > old);
-            Assert.IsTrue(date < DateTime.Now);
+            Assert.IsTrue(date > Decl.OLD && date < DateTime.Now);
+            Assert.AreEqual("-- моя имитация MD5 --", model.MD5);
+            Assert.AreEqual("-- моя имитация MD5 --", model.pricingMD5);
+            Assert.AreEqual("Санкт-Петербург", model.adrCity);
+            Assert.AreEqual("Зенит-Арена", model.adrStreet);
 
             //-- Raw теперь - отдельный xml файл, его не надо проверять 27.05.2017
             //// проверяем создание TSmatchINFO.xlsx/Raw
@@ -232,13 +240,13 @@ namespace TSmatch.SaveReport.Tests
 
         // эта инициализация класса SavedReport общая для всех тестов этого класса
         // Model.SetModel() здесь использовать нельзя, т.к. SetModel dspsdftn SetReport
-        private SR init()
+        private SR init(bool set_model = true)
         {
-            boot = new Bootstrap.Bootstrap();
+            boot = new Boot();
             sr = new SR();
-
             model = sr;
-            model.SetModel(boot);
+            if (set_model) model.SetModel(boot);
+            else model.SetModDir(boot);
             return sr;
         }
     }
