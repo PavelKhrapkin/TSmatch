@@ -74,9 +74,17 @@ namespace TSmatch.SaveReport
                 GetModelINFO(mod);
             }
             CheckModINFO(mod, mod.name, Decl.MODINFO_NAME_R);
-            CheckModINFO(mod, mod.dir, Decl.MODINFO_DIR_R);
+            string adr = dINFO.Body.Strng(Decl.MODINFO_ADDRESS_R, 2);
+            mod.adrStreet = setCity(adr);
+            mod.adrStreet = adrStreet;
+            mod.dir = dINFO.Body.Strng(Decl.MODINFO_DIR_R, 2).Trim();
+            mod.date = Lib.getDateTime(dINFO.Body.Strng(Decl.MODINFO_DATE_R, 2));
+            if (mod.date > DateTime.Now || mod.date < Decl.OLD) error();
+//17/7            CheckModINFO(mod, mod.dir, Decl.MODINFO_DIR_R);
             CheckModINFO(mod, mod.MD5, Decl.MODINFO_MD5_R);
             CheckModINFO(mod, mod.pricingMD5, Decl.MODINFO_PRCMD5_R);
+            mod.pricingDate = Lib.getDateTime(dINFO.Body.Strng(Decl.MODINFO_PRCDAT_R, 2));
+            if (mod.pricingDate > DateTime.Now || mod.pricingDate < Decl.OLD) error();
             return dINFO;
         }
 #if OLD // 14/7/17
