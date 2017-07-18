@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------------------
  * Bootstrap - provide initial start of TSmatch, when necessary - startup procedure
  * 
- *  17.07.2017  Pavel Khrapkin
+ *  18.07.2017  Pavel Khrapkin
  *
  *--- History ---
  * 25.3.2016 started 
@@ -118,7 +118,7 @@ namespace TSmatch.Bootstrap
             Docs.Start(Templates);
             docTSmatch = Docs.getDoc();
             //--- initiate Messages
-            Msg.Start();
+            Msg.Init();
             CheckResx("Messages", Resx.Messages);
             //--check other Resources and we're in air
             CheckResx("Forms", Resx.Forms);

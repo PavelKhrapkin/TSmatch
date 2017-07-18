@@ -52,7 +52,7 @@ namespace TSmatch.SaveReport.Tests
             //..поэтому пользоваться обычным init() для этого UT_ нельзя 
             const string defaultModName = "MyTestName";
             boot = new Bootstrap.Bootstrap();
-            var sr = new SavedReport();
+            var sr = new SR();
             sr.dir = boot.ModelDir;
             if (string.IsNullOrEmpty(sr.dir)) sr.dir = boot.DebugDir;
             if (!FileOp.isFileExist(sr.dir, "TSmatchINFO.xlsx"))
