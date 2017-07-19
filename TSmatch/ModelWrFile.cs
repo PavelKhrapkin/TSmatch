@@ -1,10 +1,11 @@
 ﻿/*--------------------------------------------------------------------------------------------
  * ModelWrFile : Model -- Write ModelINFO, Report and other documents in file TSmatchINFO.xlsx
  *
- *  15.07.2017 Pavel Khrapkin
+ *  19.07.2017 Pavel Khrapkin
  *
  *--- History ---
  *  13.07.2017 taken from Model code
+ *  19.07.2017 Lib.timeStr(date) instead of DateTime format- it is strange behavior of Excel fix
  *--- Unit Tests --- 
  * 2017.06.19 UT_ModHandler.UT_Hndl, UT_Pricing OK
  * -------------------------------------------------------------------------------------------
@@ -16,6 +17,7 @@ using System;
 using log4net;
 using Decl = TSmatch.Declaration.Declaration;
 using Log = match.Lib.Log;
+using Lib = match.Lib.MatchLib;
 using Docs = TSmatch.Document.Document;
 using Mtch = TSmatch.Matcher.Mtch;
 using SType = TSmatch.Section.Section.SType;
@@ -52,7 +54,9 @@ namespace TSmatch.Model.WrModelInfo
                     doc.wrDocSetForm("HDR_ModelINFO", 1, AutoFit: true);
                     string adr = mod.adrCity;
                     if (mod.adrStreet != string.Empty) adr += ", " + mod.adrStreet;
-                    doc.wrDocForm(mod.name, adr, mod.dir, mod.phase, mod.date, mod.MD5, mod.elementsCount);
+                    doc.wrDocForm(mod.name, adr, mod.dir, mod.phase
+                        , Lib.timeStr(mod.date), mod.MD5
+                        , mod.elementsCount, Lib.timeStr(mod.pricingDate), mod.pricingMD5);
                     break;
                 case WrMod.Materials:   // сводка по материалам, их типам (бетон, сталь и др)
                     doc.wrDocSetForm("FORM_Materials", 3, AutoFit: true);

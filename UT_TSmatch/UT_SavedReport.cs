@@ -18,6 +18,7 @@ using Docs = TSmatch.Document.Document;
 using Mod = TSmatch.Model.Model;
 using SR = TSmatch.SaveReport.SavedReport;
 using Boot = TSmatch.Bootstrap.Bootstrap;
+using TSmatch.Model;
 
 namespace TSmatch.SaveReport.Tests
 {
@@ -115,17 +116,26 @@ namespace TSmatch.SaveReport.Tests
         public void UT_Recover()
         {
             var sr = init(set_model: false);
-            model.date = new DateTime(2015, 6, 12);
+            model.SetModDir(boot);
+            model.date = new DateTime(2015, 6, 12, 14, 15, 16);
             model.MD5 = "-- моя имитация MD5 --";
             model.pricingMD5 = "-- моя имитация MD5 --";
-            model.pricingDate = new DateTime(2017, 4, 4);
+            model.pricingDate = new DateTime(2017, 4, 4, 20, 19, 18);
             model.setCity("Санкт-Петербург, Зенит-Арена");
+            sr.resetDialog = false;
 
             // проверяем создание TSmatchINFO.xlsx/ModelINFO
             string repNm = Decl.TSMATCHINFO_MODELINFO;
             sr.Recover(model, repNm, SR.RecoverToDo.ResetRep);
+
+            //закрываем модель и открываем ее заново для чистоты проверки
             Assert.IsTrue(Docs.IsDocExists(repNm));
             Docs modINFO = Docs.getDoc(Decl.TSMATCHINFO_MODELINFO);
+            modINFO.Close();
+            model = new Mod();
+            Assert.IsNull(model.name);
+
+            modINFO = Docs.getDoc(repNm);
             string modName = modINFO.Body.Strng(Decl.MODINFO_NAME_R, 2);
             string dir = modINFO.Body.Strng(Decl.MODINFO_DIR_R, 2);
             string dat = modINFO.Body.Strng(Decl.MODINFO_DATE_R, 2);
@@ -246,7 +256,6 @@ namespace TSmatch.SaveReport.Tests
             sr = new SR();
             model = sr;
             if (set_model) model.SetModel(boot);
-            else model.SetModDir(boot);
             return sr;
         }
     }
