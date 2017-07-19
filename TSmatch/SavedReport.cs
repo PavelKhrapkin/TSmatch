@@ -263,7 +263,8 @@ namespace TSmatch.SaveReport
             ChangedDir,
             ChangedPricing
         }
-        bool resetDialog = true;
+
+        public bool resetDialog = true;
         public void Recover(Mod mod, string repNm, RecoverToDo to_do)
         {
             switch (to_do)
@@ -281,7 +282,7 @@ namespace TSmatch.SaveReport
                     switch (repNm)
                     {
                         case Decl.TSMATCHINFO_MODELINFO:
-                            w.wrModel(WrM.ModelINFO, this);
+                            w.wrModel(WrM.ModelINFO, mod);
                             break;
                         case Decl.TSMATCHINFO_REPORT:
                             Mod model = this;

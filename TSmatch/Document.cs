@@ -1,7 +1,7 @@
 ﻿/*-------------------------------------------------------------------------------------------------------
  * Document -- works with all Documents in the system basing on TOC - Table Of Content
  * 
- * 7.05.2017  Pavel Khrapkin, Alex Pass, Alex Bobtsov
+ * 19.07.2017  Pavel Khrapkin, Alex Pass, Alex Bobtsov
  *
  *--------- History ----------------  
  * 2013-2015 заложена система управления документами на основе TOC и Штампов
@@ -28,6 +28,7 @@
  *  9.04.17 - getDoc optional bool arguments
  * 17.04.17 - getDoc() il = doc.Body.iEOL();
  *  7.05.17 - bug fix -- fatal с FileOp
+ * 19.07.17 - add wrDoc diagnostics
  * -------------------------------------------
  *      METHODS:
  * Start()              - Load from directory TOCdir of TOC all known Document attributes, prepare everithing
@@ -384,6 +385,9 @@ namespace TSmatch.Document
 
             Form frm = forms.Find(x => x.name == formName);
             if (frm == null) Msg.F("Document.wrDoc no form", formName, this.name);
+            if (frm.col.Count != frm.row.Count) Msg.F("wrDoc Form corrupted"
+                , formName, frm.row.Count, frm.col.Count);
+            if (frm.col.Count != obj.Length) Msg.F("wrDoc wrong agroments", obj);
             if (frm.name == Form.last_name)
             {
                 Body.AddRow(obj);
