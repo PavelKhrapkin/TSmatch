@@ -34,7 +34,7 @@ namespace TSmatch.SaveReport.Tests
         {
             var sr = init();
 
-            sr.GetSavedReport();
+            sr.GetSavedReport(model);
 
 
             Assert.IsTrue(sr.elementsCount > 0);
@@ -135,13 +135,15 @@ namespace TSmatch.SaveReport.Tests
             model = new Mod();
             Assert.IsNull(model.name);
 
-            modINFO = Docs.getDoc(repNm);
-            string modName = modINFO.Body.Strng(Decl.MODINFO_NAME_R, 2);
-            string dir = modINFO.Body.Strng(Decl.MODINFO_DIR_R, 2);
-            string dat = modINFO.Body.Strng(Decl.MODINFO_DATE_R, 2);
+            var m = Docs.getDoc(repNm).Body;
+            string modName = m.Strng(Decl.MODINFO_NAME_R, 2);
+            string dir = m.Strng(Decl.MODINFO_DIR_R, 2);
+            string dat = m.Strng(Decl.MODINFO_DATE_R, 2);
             DateTime date = Lib.getDateTime(dat);
-            string adr = modINFO.Body.Strng(Decl.MODINFO_ADDRESS_R, 2);
-            int cnt = modINFO.Body.Int(Decl.MODINFO_ELMCNT_R, 2);
+            string adr = m.Strng(Decl.MODINFO_ADDRESS_R, 2);
+            int cnt = m.Int(Decl.MODINFO_ELMCNT_R, 2);
+            string MD5 = m.Strng(Decl.MODINFO_MD5_R, 2);
+            string pricingMD5 = m.Strng(Decl.MODINFO_PRCMD5_R, 2);
             Assert.IsTrue(modName.Length > 0);
             Assert.IsTrue(dir.Length > 0);
             Assert.IsTrue(dir.Contains(@"\"));
@@ -149,10 +151,9 @@ namespace TSmatch.SaveReport.Tests
             Assert.IsFalse(dir.Contains("."));
             Assert.IsTrue(dat.Length > 0);
             Assert.IsTrue(date > Decl.OLD && date < DateTime.Now);
-            Assert.AreEqual("-- моя имитация MD5 --", model.MD5);
-            Assert.AreEqual("-- моя имитация MD5 --", model.pricingMD5);
-            Assert.AreEqual("Санкт-Петербург", model.adrCity);
-            Assert.AreEqual("Зенит-Арена", model.adrStreet);
+            Assert.AreEqual("-- моя имитация MD5 --", MD5);
+            Assert.AreEqual("-- моя имитация MD5 --", pricingMD5);
+            Assert.AreEqual("Санкт-Петербург, Зенит-Арена", adr);
 
             //-- Raw теперь - отдельный xml файл, его не надо проверять 27.05.2017
             //// проверяем создание TSmatchINFO.xlsx/Raw
@@ -213,7 +214,7 @@ namespace TSmatch.SaveReport.Tests
             model.dir = boot.ModelDir;
             sr.elements = sr.Raw(model);
 
-            sr.GetSavedReport();
+            sr.GetSavedReport(model);
 
             double sumPrice = sr.elmGroups.Select(x => x.totalPrice).Sum();
             Assert.AreEqual(sumPrice, sr.total_price);
