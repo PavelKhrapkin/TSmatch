@@ -61,7 +61,7 @@ namespace TSmatch.Message
                 {
                     string nextLine = doc.Body.Strng(++i, iLanguage);
                     emptyNextLine = string.IsNullOrWhiteSpace(nextLine);
-                    mes += nextLine;
+                    mes += "\n\r" + nextLine;
                 } while (!emptyNextLine);
                 try { msgs.Add(keyMsg, mes.Trim()); }
                 catch { F("Messages.Init fault", i-1, keyMsg, mes);  }
