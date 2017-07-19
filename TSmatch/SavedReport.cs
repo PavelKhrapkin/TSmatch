@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------------------
  * SavedReport -- class for handle saved reports in TSmatchINFO.xlsx
  * 
- *  15.07.2017 П.Л. Храпкин
+ *  19.07.2017 П.Л. Храпкин
  *  
  *--- Unit Tests ---
  * UT_GetModelInfo  2-17.7.14 
@@ -12,7 +12,7 @@
  *  7.05.2017 написал SetFrSavedModelINFO(), переписал isReportConsystant()
  * 27.05.2017 - XML read and write model.elements as Raw.xml in Raw() 
  *  5.06.2017 - bug fix in SetFrSavedModel - recoursive call after Reset
- * 14.07.2017 - Audit SavedReport: IsModINFO_OK, cosmetc and fixes in Raw, GetTSmatchINFO
+ * 19.07.2017 - Audit SavedReport: IsModINFO_OK, cosmetc and fixes in Raw, GetTSmatchINFO
  *--- Methods: -------------------      
  * bool GetTSmatchINFO()    - read TSmatchINFO.xlsx, set it as a current Model
  *                            return true if name, dir, quantity of elements is
@@ -58,7 +58,8 @@ namespace TSmatch.SaveReport
             Log.set("SR.GetSavedReport(\"" + mod.name + "\")");
             dINFO = GetModelINFO(mod);
             elements = Raw(mod);
-            GetSavedReport();
+            GetSavedReport(mod);
+            CheckModelIntegrity(mod);
             SetSavedMod(mod);
             Log.exit();
         }
@@ -167,7 +168,11 @@ namespace TSmatch.SaveReport
             if (_date > DateTime.Now || _date < Decl.OLD) error();
             return _date;
         }
-        private void error() { Msg.F("Corrupted SavedReport TSmatchINFO.xlsx"); }
+
+        private void error()
+        {
+            Msg.AskFOK("Corrupted TSmatchINFO.xlsx or Raw.xml");
+        }
         #endregion ------ ModelINFO region ------
 
         private void SetSavedMod(Mod mod)
@@ -282,6 +287,7 @@ namespace TSmatch.SaveReport
                     switch (repNm)
                     {
                         case Decl.TSMATCHINFO_MODELINFO:
+                            CheckModelIntegrity(mod);
                             w.wrModel(WrM.ModelINFO, mod);
                             break;
                         case Decl.TSMATCHINFO_REPORT:
@@ -294,6 +300,13 @@ namespace TSmatch.SaveReport
                     }
                     break;
             }
+        }
+
+        private void CheckModelIntegrity(Mod mod)
+        {
+            if (mod.elementsCount != mod.elements.Count) error();
+            if (mod.MD5 != mod.getMD5(mod.elements)) error();
+            if (mod.pricingMD5 != get_pricingMD5(elmGroups)) error();
         }
         #endregion ------ Reset & Recovery area ------
 
@@ -335,13 +348,13 @@ namespace TSmatch.SaveReport
         }
         #endregion ------ Raw - read/write Raw.xml area ------
 
-        public void GetSavedReport()
+        public void GetSavedReport(Mod mod)
         {
             if (mh == null) mh = new Model.Handler.ModHandler();
-            elmGroups = mh.getGrps(elements);
+            elmGroups = mh.getGrps(mod.elements);
             Docs dRep = Docs.getDoc(sRep, fatal: false);
-            if (dRep == null || dRep.i0 < 2 || dRep.il != (elmGroups.Count + dRep.i0))
-                Recover(this, sRep, RecoverToDo.ResetRep);
+            if (dRep == null || dRep.i0 < 2 || dRep.il != (mod.elmGroups.Count + dRep.i0))
+                Recover(mod, sRep, RecoverToDo.ResetRep);
             total_price = 0;
             for (int iGr = 1, i = dRep.i0; i < dRep.il; i++, iGr++)
             {
@@ -352,7 +365,7 @@ namespace TSmatch.SaveReport
                 gr.totalPrice = dRep.Body.Double(i, Decl.REPORT_SUPL_PRICE);
                 total_price += gr.totalPrice;
             }
-            pricingMD5 = get_pricingMD5(elmGroups);
+            mod.pricingMD5 = get_pricingMD5(mod.elmGroups);
         }
 
         public void getSavedRules(bool init = false)
