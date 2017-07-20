@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------------------
  * SavedReport -- class for handle saved reports in TSmatchINFO.xlsx
  * 
- *  19.07.2017 П.Л. Храпкин
+ *  20.07.2017 П.Л. Храпкин
  *  
  *--- Unit Tests ---
  * UT_GetModelInfo  2-17.7.14 
@@ -12,7 +12,7 @@
  *  7.05.2017 написал SetFrSavedModelINFO(), переписал isReportConsystant()
  * 27.05.2017 - XML read and write model.elements as Raw.xml in Raw() 
  *  5.06.2017 - bug fix in SetFrSavedModel - recoursive call after Reset
- * 19.07.2017 - Audit SavedReport: IsModINFO_OK, cosmetc and fixes in Raw, GetTSmatchINFO
+ * 19.07.2017 - Audit SavedReport
  *--- Methods: -------------------      
  * bool GetTSmatchINFO()    - read TSmatchINFO.xlsx, set it as a current Model
  *                            return true if name, dir, quantity of elements is
@@ -169,11 +169,13 @@ namespace TSmatch.SaveReport
             return _date;
         }
 
-        private void error(Mod mod)
+        private void error(Mod mod, bool errRep = false)
         {
             Msg.AskFOK("Corrupted saved report TSmatchINFO.xlsx");
             elements = Raw(mod);
- //19/7           GetSavedReport(mod);
+            dRep = Docs.getDoc(sRep);
+            if (dRep == null ||errRep) Msg.F("SavedReport recover impossible");
+            GetSavedReport(mod);
             Recover(mod, sINFO, RecoverToDo.ResetRep);
             Recover(mod, sRep,  RecoverToDo.ResetRep);
         }
@@ -242,11 +244,9 @@ namespace TSmatch.SaveReport
                             w.wrModel(WrM.ModelINFO, mod);
                             break;
                         case Decl.TSMATCHINFO_REPORT:
-                            Mod model = this;
-                            mh.Pricing(ref model);
-                            total_price = model.total_price;
-                            w.wrModel(WrM.Report, this);
-                            elmGroups = model.elmGroups;
+                            mh.Pricing(ref mod);
+                            CheckModelIntegrity(mod);
+                            w.wrModel(WrM.Report, mod);
                             break;
                     }
                     break;
@@ -257,7 +257,7 @@ namespace TSmatch.SaveReport
         {
             if (mod.elementsCount != mod.elements.Count) error(mod);
             if (mod.MD5 != mod.getMD5(mod.elements)) error(mod);
-//19/7            if (mod.pricingMD5 != get_pricingMD5(elmGroups)) error(mod);
+            if (mod.pricingMD5 != get_pricingMD5(elmGroups)) error(mod);
         }
         #endregion ------ Reset & Recovery area ------
 
@@ -297,16 +297,21 @@ namespace TSmatch.SaveReport
 
         public void GetSavedReport(Mod mod)
         {
+            bool errRep = true;
             if (mh == null) mh = new Model.Handler.ModHandler();
-            elmGroups = mh.getGrps(mod.elements);
-            Docs dRep = Docs.getDoc(sRep, fatal: false);
-            if (dRep == null || dRep.i0 < 2 || dRep.il != (mod.elmGroups.Count + dRep.i0))
+            elmGroups = mh.getGrps(mod.elements, errDialog: false);
+            Docs dRep = Docs.getDoc(sRep, fatal: false, create_if_notexist: true);
+            if (dRep == null || dRep.i0 < 2) error(mod, errRep);
+            if (dRep.il != (mod.elmGroups.Count + dRep.i0))
+            {
+                Msg.AskFOK("Saved Report should be recovered, OK?");
                 Recover(mod, sRep, RecoverToDo.ResetRep);
+            }
             total_price = 0;
             for (int iGr = 1, i = dRep.i0; i < dRep.il; i++, iGr++)
             {
                 var gr = elmGroups[iGr - 1];
-                if (iGr != dRep.Body.Int(i, Decl.REPORT_N)) Msg.F("getSavedReport internal error");
+                if (iGr != dRep.Body.Int(i, Decl.REPORT_N)) error(mod, errRep);
                 gr.SupplierName = dRep.Body.Strng(i, Decl.REPORT_SUPPLIER);
                 gr.CompSetName = dRep.Body.Strng(i, Decl.REPORT_COMPSET);
                 gr.totalPrice = dRep.Body.Double(i, Decl.REPORT_SUPL_PRICE);
