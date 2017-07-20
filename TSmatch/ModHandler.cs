@@ -1,7 +1,7 @@
 ﻿/*--------------------------------------------------------------------------------------------
  * ModHandler : Model -- Handle Model for Report preparation
  * 
- *  15.07.2017 Pavel Khrapkin
+ *  20.07.2017 Pavel Khrapkin
  *  
  *--- History ---
  *  8.05.2017 taken from Model code
@@ -48,12 +48,14 @@ namespace TSmatch.Model.Handler
         /// 2016.09.29 created
         /// 2017.05.8  перенес в модуль ModHandling, добавил аргумент elements
         /// 2017.06.27 переписано
+        /// 2017.07.20 argument errDialo flag add
         /// </history>
-        public List<ElmGr> getGrps(List<Elm> elements)
+        public List<ElmGr> getGrps(List<Elm> elements, bool errDialog = true)
         {
+            var gr = new ElmGr(errDialog);
             List<ElmGr> groups = new List<ElmGr>();
             var grps = elements.GroupBy(x => x.prf);
-            foreach (var gr in grps) groups.Add(new ElmGr(gr));
+            foreach (var grp in grps) groups.Add(new ElmGr(grp));
             if (elements.Count != groups.Sum(x => x.guids.Count)) Msg.F("getGrps internal error");
             var v = new ProfileUpdate.ProfileUpdate(ref groups);
             return groups;

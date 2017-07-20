@@ -1,13 +1,14 @@
 ﻿/*--------------------------------------------------------------------------------------
  * ElmAttSet -- Definitions of Properties, and their Names of the Elements in the Model 
  * 
- *  28.06.2017  Pavel Khrapkin
+ *  20.07.2017  Pavel Khrapkin
  * 
- * ----- TODO 30.9.2016 ------
+ * ----- TODO 30.9.2016, 20.07.2017 ------
  * - закомментировать неиспользуемые методы группировки (Ctrl/F12 empty)
  * - разобраться в MatTypeGroup: задействовать те же коды, что в Group, если не получится - совсем закомментировать
  * - заменить Dictionary Elements на поле в Model
  * - убрать все static
+ * - выделить Mgroup и Group в отдельные классы 
  *----- History ------------------------------------------
  * 01.06.2016 - created from structure AttSet in Tekla.Open_API module
  * 19.06.2016 - move Group and Mgroup classes from module Model
@@ -16,6 +17,7 @@
  * 22.08.2016 - методы Scale и SetScale
  * 30.09.2016 - clean up, Group class audited
  * 27.05.2017 - preparation to XML serialized save - parameterless constructors
+ * 20.07.2017 - error message "different meterials in group"  supress, group cleanup
  * -------------------------------------------
  * public class ElmAttSet - set of model component attribuyes, extracted from Tekla or IFC by method Read
  * public class Group     - Group elements by Materials and Profile
@@ -287,8 +289,9 @@ namespace TSmatch.ElmAttSet
         public string CompSetName;  //список компонентов, с которыми работает правило
         public string SupplierName; //Поставщик
         private IGrouping<string, ElmAttSet> g;
+        private bool errDialog;
 
-        public Group() { }
+        public Group(bool _errDialog = true) { errDialog = _errDialog;  }
 
         public Group(IGrouping<string, ElmAttSet> group)
         {
@@ -304,58 +307,10 @@ namespace TSmatch.ElmAttSet
             //check Materials in group -- they should be the same
             foreach (var gr in group)
             {
-                if (gr.mat == Mat) continue;
-                Msg.W("ElmGr: various materials in Group", Prf, Mat, gr.mat);
+                if (gr.mat == Mat || !errDialog) continue;
                 var mod = new Model.Model();
                 mod.HighLightElements(Elements);
-                break;
-            }
-        }
-
-        public Group(List<ElmAttSet> elements, string _Mat, string _Prf)
-        {
-            Mat = _Mat;
-            Prf = _Prf;
-            mat = Lib.ToLat(_Mat.ToLower().Replace("*", "x"));
-            prf = Lib.ToLat(_Prf.ToLower().Replace("*", "x"));
-
-            Elements = elements.ToDictionary(elm => elm.guid);
-            guids = new List<string>();
-            var grp = from x in elements where x.mat == Mat && x.prf == Prf select x.guid;
-            foreach (var id in grp)
-            {
-                guids.Add(id);
-                totalLength += Elements[id].length;
-                totalVolume += Elements[id].volume;
-                totalWeight += Elements[id].weight;
-                if (Elements[id].mat == Mat) continue;
-                var er_group = grp.ToDictionary(x => x);
-                Dictionary<string, ElmAttSet> er = new Dictionary<string, ElmAttSet>();
-                er.Add(id, Elements[id]);
-                var ts = new TSmatch.Tekla.Tekla();
-                ts.HighlightElements(er, 111);
-                Msg.W("ElmGr: various materials in Group", Prf, Mat, Elements[id].mat);
-            }
-            //////////                    if (elm.mat != mat || elm.prf != prf)
-            //////////                        Msg.F("Bad Group of elements", Mat, Prf, elm.guid);
-        }
-
-        public Group(Dictionary<string, ElmAttSet> Els, string _mat, string _prf, List<string> _guids)
-        {
-            Elements = Els;
-            Mat = _mat;
-            Prf = _prf;
-            mat = Lib.ToLat(_mat.ToLower().Replace("*", "x"));
-            prf = Lib.ToLat(_prf.ToLower().Replace("*", "x"));
-            guids = _guids;
-            totalLength = totalWeight = totalVolume = totalPrice = 0.0;
-            foreach (var id in guids)
-            {
-                totalLength += Els[id].length;
-                totalVolume += Els[id].volume;
-                totalWeight += Els[id].weight;
-                //13/6                    v.totalPrice += elm.price;    убрать price из ElmAttSet совсем!
-                totalPrice += Els[id].price;
+                Msg.W("ElmGr: various materials in Group", Prf, Mat, gr.mat);
             }
         }
 
@@ -376,7 +331,7 @@ namespace TSmatch.ElmAttSet
             return grGuids;
         }
     } // end class Group
-    #endregion
+#endregion
     /* 21/6/2016
         public class Group : IComparable<Group>
         {
