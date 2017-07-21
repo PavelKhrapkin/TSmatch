@@ -56,7 +56,7 @@ namespace TSmatch.SaveReport
         public void GetTSmatchINFO(Mod mod)
         {
             Log.set("SR.GetSavedReport(\"" + mod.name + "\")");
-Log.TraceOn();  //21/7
+//21/7 Log.TraceOn();  //21/7
             dINFO = GetModelINFO(mod);
             mod.elements = Raw(mod);
             GetSavedReport(mod);
@@ -249,7 +249,9 @@ Log.TraceOn();  //21/7
                             w.wrModel(WrM.ModelINFO, mod);
                             break;
                         case Decl.TSMATCHINFO_REPORT:
+log.Info(">>mod.MD5=" + mod.MD5 + " =?= " + mod.getMD5(mod.elements));
                             mh.Pricing(ref mod);
+log.Info(">>mod.MD5=" + mod.MD5 + " =?= " + mod.getMD5(mod.elements));
                             CheckModelIntegrity(mod);
                             w.wrModel(WrM.Report, mod);
                             break;

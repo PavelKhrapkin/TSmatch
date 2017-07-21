@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------
  * MatchLib -- библиотека общих подпрограмм проекта match 3.0
  * 
- *  15.07.17 П.Храпкин, А.Пасс
+ *  21.07.17 П.Храпкин, А.Пасс
  *  
  * - 20.11.13 переписано с VBA на С#
  * - 1.12.13 добавлен метод ToIntList
@@ -22,6 +22,7 @@
  * - 16.05.17 log4net use with WPF, TraceOn()/TraceOff()
  * - 24.05.17 Regex const for GetPar are local - not in Declaration anymore
  * -  2.07.17 GetPersStr(str) - get numberic parameters as a List<string>
+ * - 21.07.17 Log Trace cosmeics
  *      ---- Unit Tests ----
  * 2017.07.15 UT_ToLat, UT_IContains, UT MatchLib_GetPars, UT_MatchLib_GetParsStr   OK
  * ----------- методы Mtch.Lib ---------------------------------------------------------
@@ -367,7 +368,11 @@ namespace match.Lib
             //19/5            Debugger.Break();
         }
         public static void Warning(string msg) { new Log("\n[warning] " + msg); }
-        public static void TraceOn() { _trace_level++; }
+        public static void TraceOn()
+        {
+            _trace_level++;
+            log.Info("===================== TraceOn ============================");
+        }
         public static void TraceOff() { _trace_level--; }
         public static void Trace(string msg, params object[] arg)
         {

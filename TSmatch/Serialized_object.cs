@@ -1,27 +1,24 @@
-﻿/*-----------------------------------------------------------------------------------
+﻿/*------------------------------------------------------------------------------
  * Serialyzed_object containes serialysed list of obect for MD5 key generation
  * 
- *  9.05.2017 П.Л. Храпкин
+ *  21.07.2017 П.Л. Храпкин
  *  
  *--- Unit Tests ---
+ * UT_Model/UT_get_pricingMD5 2017.07.21 OK
  *--- History  ---
  *  7.05.2017 created ansed with MD5gen with elements
  *  9.05.2017 Serialiesd_Group add with similar code
- * -------------- TODO --------------
- * ---------------------------------------------------------------------------------
+ * 21.07.2017 class Match found is not Serializable -- changed Serialized_Group field set
+ * ----------------------------------------------------------------------------
  *      Classes & constructors:
  * Serialyzed_elements(elements)    - prepare MD5 key calculation of List<ElmAttSet> elements
  * Serialyzed_Groups(elementGroups) - similar preparaion fer Groups with Matches and Rules
  */
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using Elm = TSmatch.ElmAttSet.ElmAttSet;
 using ElmGr = TSmatch.ElmAttSet.Group;
-using Mtch = TSmatch.Matcher.Mtch;
 
 namespace TSmatch.Model
 {
@@ -50,7 +47,7 @@ namespace TSmatch.Model
         public List<string> guids = new List<string>();
         public string mat, prf, Mat, Prf;
         public double wgt, lng, vol, pr;
-        public Mtch match;
+        public DateTime Rule_date, CompSet_date;
         public string Supplier_name, CompSet_name;
         public string LoadDescriptor, Rule_Text;
 
@@ -65,7 +62,6 @@ namespace TSmatch.Model
             lng = elmGr.totalLength;
             vol = elmGr.totalVolume;
             pr = elmGr.totalPrice;
-            match = elmGr.match;
             Supplier_name = elmGr.SupplierName;
             CompSet_name = elmGr.CompSetName;
             try
@@ -73,7 +69,11 @@ namespace TSmatch.Model
                 Rule_Text = elmGr.match.rule.text;
                 LoadDescriptor = elmGr.match.rule.CompSet.doc.LoadDescription;
             }
-            catch { Rule_Text = LoadDescriptor = string.Empty; }
+            catch
+            {
+                Rule_Text = LoadDescriptor = string.Empty;
+                Rule_date = DateTime.MinValue;
+            }
         }
     }
 
