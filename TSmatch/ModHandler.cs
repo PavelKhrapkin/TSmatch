@@ -136,9 +136,11 @@ namespace TSmatch.Model.Handler
                 bool b = false;
                 foreach (var rule in mod.Rules)
                 {
+log.Info("==>Hndl.MD5=" + mod.MD5 + " =?= " + mod.getMD5(mod.elements));
                     Mtch _match = new Mtch(gr, rule);
                     if (_match.ok == Mtch.OK.Match)
                     {
+log.Info("=match.ok=>Hndl.MD5=" + mod.MD5 + " =?= " + mod.getMD5(mod.elements));
                         mod.matches.Add(_match);
                         gr.SupplierName = _match.rule.Supplier.name;
                         b = true; break;
@@ -202,7 +204,9 @@ namespace TSmatch.Model.Handler
                 m.Rules = sr.Rules;
             }
             foreach (var rule in m.Rules) rule.Init();
+log.Info(">m.MD5=" + m.MD5 + " =?= " + m.getMD5(m.elements));
             Hndl(ref m);
+log.Info(">m.MD5=" + m.MD5 + " =?= " + m.getMD5(m.elements));
             Log.Trace("      date=\t" + m.date + "\tMD5=" + m.MD5 + "\telementsCount=" + m.elementsCount);
             Log.Trace("price date=\t" + m.pricingDate + "\tMD5=" + m.pricingMD5 + "\ttotal price" + m.total_price);
             Log.exit();
