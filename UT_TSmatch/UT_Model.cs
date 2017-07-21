@@ -75,6 +75,12 @@ namespace TSmatch.Model.Tests
             Assert.AreEqual("Cанкт-Петербург", mod.adrCity);
             Assert.AreEqual("Кудрово", mod.adrStreet);
         }
+
+        [TestMethod()]
+        public void UT_get_pricingMD5()
+        {
+            Assert.Fail();
+        }
 #if old //24/5 move to UT_ModelHandle
         [TestMethod]
         public void UT_Model_getGroup()

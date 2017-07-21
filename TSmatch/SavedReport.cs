@@ -56,8 +56,9 @@ namespace TSmatch.SaveReport
         public void GetTSmatchINFO(Mod mod)
         {
             Log.set("SR.GetSavedReport(\"" + mod.name + "\")");
+Log.TraceOn();  //21/7
             dINFO = GetModelINFO(mod);
-            elements = Raw(mod);
+            mod.elements = Raw(mod);
             GetSavedReport(mod);
             CheckModelIntegrity(mod);
             SetSavedMod(mod);
@@ -171,13 +172,16 @@ namespace TSmatch.SaveReport
 
         private void error(Mod mod, bool errRep = false)
         {
+            Log.set("SR.errer()");
+            Log.Trace("SavedReport.error: Mod.MD5=" + mod.MD5);
             Msg.AskFOK("Corrupted saved report TSmatchINFO.xlsx");
-            elements = Raw(mod);
+            mod.elements = Raw(mod);
             dRep = Docs.getDoc(sRep);
             if (dRep == null ||errRep) Msg.F("SavedReport recover impossible");
             GetSavedReport(mod);
             Recover(mod, sINFO, RecoverToDo.ResetRep);
             Recover(mod, sRep,  RecoverToDo.ResetRep);
+            Log.exit();
         }
         #endregion ------ ModelINFO region ------
 
@@ -225,6 +229,7 @@ namespace TSmatch.SaveReport
         public bool resetDialog = true;
         public void Recover(Mod mod, string repNm, RecoverToDo to_do)
         {
+            Log.set(@"SR.Recover(" + repNm + "\")");
             switch (to_do)
             {
                 case RecoverToDo.CreateRep:
@@ -251,13 +256,18 @@ namespace TSmatch.SaveReport
                     }
                     break;
             }
+            Log.exit();
         }
 
         private void CheckModelIntegrity(Mod mod)
         {
+            Log.set("SR.error");
+            Log.Trace("mod.elmentsCount=" + mod.elementsCount + " =?= " + mod.elements.Count);
             if (mod.elementsCount != mod.elements.Count) error(mod);
+            Log.Trace("Mod.MD5=" + mod.MD5 + " =?= " + mod.getMD5(mod.elements));
             if (mod.MD5 != mod.getMD5(mod.elements)) error(mod);
             if (mod.pricingMD5 != get_pricingMD5(elmGroups)) error(mod);
+            Log.exit();
         }
         #endregion ------ Reset & Recovery area ------
 
@@ -297,6 +307,7 @@ namespace TSmatch.SaveReport
 
         public void GetSavedReport(Mod mod)
         {
+            Log.set("SR.GetSavedReport");
             bool errRep = true;
             if (mh == null) mh = new Model.Handler.ModHandler();
             elmGroups = mh.getGrps(mod.elements, errDialog: false);
@@ -318,6 +329,7 @@ namespace TSmatch.SaveReport
                 total_price += gr.totalPrice;
             }
             mod.pricingMD5 = get_pricingMD5(mod.elmGroups);
+            Log.exit();
         }
 
         public void getSavedRules(bool init = false)

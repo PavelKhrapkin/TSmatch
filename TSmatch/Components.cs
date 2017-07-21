@@ -336,6 +336,7 @@ namespace TSmatch.Component
         {
             if (!compDP.dpStr.ContainsKey(stype))
             {
+                if (stype == SType.Price) throw new KeyNotFoundException();
                 Msg.W("CompSet wrong LoadDescriptor", stype);
                 return string.Empty;
             }
