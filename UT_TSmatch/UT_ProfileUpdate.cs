@@ -10,7 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using Handler = TSmatch.Model.Handler.ModHandler;
+using MH = TSmatch.Handler.Handler;
 using ElmGr = TSmatch.ElmAttSet.Group;
 using Lib = match.Lib.MatchLib;
 using TSmatch.ElmAttSet;
@@ -20,7 +20,7 @@ namespace TSmatch.ProfileUpdate.Tests
     [TestClass()]
     public class UT_ProfileUpdate
     {
-        Handler mod = new Handler();
+        MH mod = new MH();
         ElmAttSet.Group gr = new ElmAttSet.Group();
         List<ElmGr> inp = new List<ElmGr>();
 
@@ -34,6 +34,7 @@ namespace TSmatch.ProfileUpdate.Tests
         [TestMethod()]
         public void UT_ProfleUpdate_I()
         {
+#if UPDATE //23/7
             // test 0: "I10_8239_89" => "I10"
             initGr("I10_8239-89");
             var xx = new ProfileUpdate(ref inp);
@@ -260,6 +261,7 @@ namespace TSmatch.ProfileUpdate.Tests
             gr.prf = Lib.ToLat(v.ToLower().Replace(" ", ""));
             inp.Add(gr);
             mod.elmGroups = inp;
+#endif //UPDATE //23/7
         }
     } // end class UT_ProfileUpdate
 } // end namespace TSmatch.ProfileUpdate.Tests

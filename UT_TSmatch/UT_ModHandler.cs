@@ -1,5 +1,5 @@
 ﻿/*=================================
- * Model.Handler Unit Test 19.6.2017
+ * Handler Unit Test 23.6.2017
  *=================================
  */
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -16,6 +16,7 @@ using Mod = TSmatch.Model.Model;
 using ElmGr = TSmatch.ElmAttSet.Group;
 using Msg = TSmatch.Message.Message;
 using TS = TSmatch.Tekla.Tekla;
+using MH = TSmatch.Handler.Handler;
 using TSmatch.ElmAttSet;
 
 namespace TSmatch.Model.Handler.Tests
@@ -247,7 +248,7 @@ namespace TSmatch.Model.Handler.Tests
             var model = new Mod();
             model.SetModel(boot);
 
-            var mh = new ModHandler();
+            var mh = new MH();
             mh.Hndl(ref model);
             int cnt = 0;
             foreach (var gr in model.elmGroups) cnt += gr.guids.Count();
@@ -272,7 +273,7 @@ namespace TSmatch.Model.Handler.Tests
             var model = new Mod();
             model.SetModel(boot);
 
-            var mh = new ModHandler();
+            var mh = new MH();
             mh.Pricing(ref model);
             Assert.IsTrue(model.matches.Count > 0);
 
@@ -296,7 +297,7 @@ namespace TSmatch.Model.Handler.Tests
                 throw new NotImplementedException();
             }
             model.elements = model.sr.Raw(model);
-            var mh = new ModHandler();
+            var mh = new MH();
 
             var grp = mh.getGrps(model.elements);
             Assert.IsTrue(grp.Count > 0);

@@ -1,12 +1,12 @@
 ﻿/*-----------------------------------------------------------------------------------------------
- * Model -- Manage major class operaions together with the child modules ModHandler and SavedMdel
+ * Model -- Manage major class operaions together with the child modules Handler and SavedMdel
  * 
  * 14.07.2017 Pavel Khrapkin
  *  
  *--- History ---
  * Jan-16 - May-17 pre-history P.Khrapkin, A.Pass, A.Bobtsov
  *  6.05.2017 - fast MD5 calculation call in Read
- *  8.05.2017 - part of this code moved to child ModHandler module
+ *  8.05.2017 - part of this code moved to child Handler module
  * 11.05.2017 - getSavedReport() inside SetModel
  * 17.05.2017 - model.Save()
  * 19.05.2017 - Model.wrModel(Rules)
@@ -85,7 +85,7 @@ namespace TSmatch.Model
         public bool wrToFile = true;   // when true- we should write into the file TSmatchINFO.xlsx, else- no changes
         public Docs docReport;
         TS ts = new TS();
-        public Handler.ModHandler mh;
+        public Handler.Handler mh;
         public SR sr;
 
         public int CompareTo(Model mod) { return mod.date.CompareTo(date); }    //to Sort Models by time
@@ -97,7 +97,7 @@ namespace TSmatch.Model
         {
             Log.set("SetModel");
             //create child class references mh, sr
-            mh = new Handler.ModHandler();
+            mh = new Handler.Handler();
             sr = new SR();
             SetModDir(boot);
             sr.GetTSmatchINFO(this);
