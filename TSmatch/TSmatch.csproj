@@ -100,7 +100,7 @@
     <Compile Include="MD5gen.cs" />
     <Compile Include="Message.cs" />
     <Compile Include="Models.cs" />
-    <Compile Include="ModHandler.cs" />
+    <Compile Include="Handler.cs" />
     <Compile Include="ModelWrFile.cs" />
     <Compile Include="Parameter.cs" />
     <Compile Include="PriceList.cs" />

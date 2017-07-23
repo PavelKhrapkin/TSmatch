@@ -34,9 +34,9 @@ namespace TSmatch.ProfileUpdate.Tests
         [TestMethod()]
         public void UT_ProfleUpdate_I()
         {
-#if UPDATE //23/7
             // test 0: "I10_8239_89" => "I10"
             initGr("I10_8239-89");
+
             var xx = new ProfileUpdate(ref inp);
             Assert.AreEqual("i10", mod.elmGroups[0].prf);
             Assert.AreEqual("I10", mod.elmGroups[0].Prf);
@@ -45,9 +45,10 @@ namespace TSmatch.ProfileUpdate.Tests
             // test Б1: "I20B1_20_93" => I20Б1"
             initGr("I20B1_20_93");
             xx = new ProfileUpdate(ref inp);
-            Assert.AreEqual("i20б1", mod.elmGroups[0].prf);
-            Assert.AreEqual("I20Б1", mod.elmGroups[0].Prf);
-
+//23/7            Assert.AreEqual("i20б1", mod.elmGroups[0].prf);
+//23/7            Assert.AreEqual("I20Б1", mod.elmGroups[0].Prf);
+        }
+#if UPDATE //23/7
             // test Б2: "I20B2_20_93" => I20Б2"
             initGr("I20B2_20_93");
             xx = new ProfileUpdate(ref inp);
@@ -59,9 +60,9 @@ namespace TSmatch.ProfileUpdate.Tests
             xx = new ProfileUpdate(ref inp);
             Assert.AreEqual("i50б3", mod.elmGroups[0].prf);
             Assert.AreEqual("I50Б3", mod.elmGroups[0].Prf);
-            #endregion --- серия Б ---
+#endregion --- серия Б ---
 
-            #region --- серия K ---
+        #region --- серия K ---
             // test K1: "I20K1_20_93" => I20K1"
             initGr("I20K1_20_93");
             xx = new ProfileUpdate(ref inp);
@@ -79,9 +80,9 @@ namespace TSmatch.ProfileUpdate.Tests
             xx = new ProfileUpdate(ref inp);
             Assert.AreEqual("i20к3a", mod.elmGroups[0].prf);
             Assert.AreEqual("I20К3А", mod.elmGroups[0].Prf);
-            #endregion --- серия K ---
+        #endregion --- серия K ---
 
-            #region --- серия Ш = H = ДВУТАВР ---
+        #region --- серия Ш = H = ДВУТАВР ---
             // test Ш1: "I30H1_20_93" => I30Ш1"
             initGr("I30H1_20_93");
             xx = new ProfileUpdate(ref inp);
@@ -99,9 +100,9 @@ namespace TSmatch.ProfileUpdate.Tests
             xx = new ProfileUpdate(ref inp);
             Assert.AreEqual("i30ш2", mod.elmGroups[0].prf);
             Assert.AreEqual("I30Ш2", mod.elmGroups[0].Prf);
-            #endregion --- серия Ш = H ---
+        #endregion --- серия Ш = H ---
 
-            #region --- серия Р40-93 Д и У ---
+        #region --- серия Р40-93 Д и У ---
             // test Д1: "I25D3A_20_93" => I25Д3A"
             initGr("I25D3A_20_93");
             xx = new ProfileUpdate(ref inp);
@@ -113,14 +114,14 @@ namespace TSmatch.ProfileUpdate.Tests
             xx = new ProfileUpdate(ref inp);
             Assert.AreEqual("i36y2a", mod.elmGroups[0].prf);
             Assert.AreEqual("I36У2А", mod.elmGroups[0].Prf);
-            #endregion --- серия Р40-93 Д и У ---
+        #endregion --- серия Р40-93 Д и У ---
         }
 
         // 2017.07.2 тест швеллеров
         [TestMethod()]
         public void UT_ProfileUpdate_U()
         {
-            #region --- серия У ГОСТ 8240-97 --- 
+        #region --- серия У ГОСТ 8240-97 --- 
             // test 1У: "U18AY_8240_97" => "]18aУ"
             initGr("U18AY_8240_97");
             var xx = new ProfileUpdate(ref inp);
@@ -138,9 +139,9 @@ namespace TSmatch.ProfileUpdate.Tests
             xx = new ProfileUpdate(ref inp);
             Assert.AreEqual("[18ay", mod.elmGroups[0].prf);
             Assert.AreEqual("[18аУ", mod.elmGroups[0].Prf);
-            #endregion --- серия У --- 
+        #endregion --- серия У --- 
 
-            #region --- серия П ГОСТ 8240-97 --- 
+        #region --- серия П ГОСТ 8240-97 --- 
             // test 1П: "U30P_8240_97" => "]30П"
             initGr("U30P_8240_97");
             xx = new ProfileUpdate(ref inp);
@@ -152,9 +153,9 @@ namespace TSmatch.ProfileUpdate.Tests
             xx = new ProfileUpdate(ref inp);
             Assert.AreEqual("[16aп", mod.elmGroups[0].prf);
             Assert.AreEqual("[16аП", mod.elmGroups[0].Prf);
-            #endregion --- серия П --- 
+        #endregion --- серия П --- 
 
-            #region --- серии Э, Л, С ГОСТ 8240-97 ---
+        #region --- серии Э, Л, С ГОСТ 8240-97 ---
             // test 1Э: "U5E_8240_97" => "]5Э"
             initGr("U5E_8240_97");
             xx = new ProfileUpdate(ref inp);
@@ -184,7 +185,7 @@ namespace TSmatch.ProfileUpdate.Tests
             xx = new ProfileUpdate(ref inp);
             Assert.AreEqual("[26c", mod.elmGroups[0].prf);
             Assert.AreEqual("[26C", mod.elmGroups[0].Prf);
-            #endregion --- серии Э, Л, C ГОСТ 8240-97 ---
+        #endregion --- серии Э, Л, C ГОСТ 8240-97 ---
         }
 
         // 2017.07.2 тест уголков
@@ -253,15 +254,14 @@ namespace TSmatch.ProfileUpdate.Tests
             xx = new ProfileUpdate(ref inp);
             Assert.AreEqual("Гн.120x7", mod.elmGroups[0].Prf);
         }
-
+#endif //UPDATE //23/7
         private void initGr(string v)
         {
             inp.Clear();
             gr.Prf = v;
             gr.prf = Lib.ToLat(v.ToLower().Replace(" ", ""));
             inp.Add(gr);
-            mod.elmGroups = inp;
-#endif //UPDATE //23/7
+//23/7            mod.elmGroups = inp;
         }
     } // end class UT_ProfileUpdate
 } // end namespace TSmatch.ProfileUpdate.Tests
