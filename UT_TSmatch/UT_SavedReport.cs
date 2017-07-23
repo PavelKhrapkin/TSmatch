@@ -1,5 +1,5 @@
 ﻿/*=================================
- * Saved Report Unit Test 15.7.2017
+ * Saved Report Unit Test 18.7.2017
  *=================================
  */
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -18,6 +18,7 @@ using Docs = TSmatch.Document.Document;
 using Mod = TSmatch.Model.Model;
 using SR = TSmatch.SaveReport.SavedReport;
 using Boot = TSmatch.Bootstrap.Bootstrap;
+using TSmatch.Model;
 
 namespace TSmatch.SaveReport.Tests
 {
@@ -33,7 +34,7 @@ namespace TSmatch.SaveReport.Tests
         {
             var sr = init();
 
-            sr.GetSavedReport();
+            sr.GetSavedReport(model);
 
 
             Assert.IsTrue(sr.elementsCount > 0);
@@ -52,7 +53,7 @@ namespace TSmatch.SaveReport.Tests
             //..поэтому пользоваться обычным init() для этого UT_ нельзя 
             const string defaultModName = "MyTestName";
             boot = new Bootstrap.Bootstrap();
-            var sr = new SavedReport();
+            var sr = new SR();
             sr.dir = boot.ModelDir;
             if (string.IsNullOrEmpty(sr.dir)) sr.dir = boot.DebugDir;
             if (!FileOp.isFileExist(sr.dir, "TSmatchINFO.xlsx"))
@@ -114,27 +115,45 @@ namespace TSmatch.SaveReport.Tests
         [TestMethod()]
         public void UT_Recover()
         {
-            var sr = init();
+            var sr = init(set_model: false);
+            model.SetModDir(boot);
+            model.date = new DateTime(2015, 6, 12, 14, 15, 16);
+            model.MD5 = "-- моя имитация MD5 --";
+            model.pricingMD5 = "-- моя имитация MD5 --";
+            model.pricingDate = new DateTime(2017, 4, 4, 20, 19, 18);
+            model.setCity("Санкт-Петербург, Зенит-Арена");
+            sr.resetDialog = false;
 
             // проверяем создание TSmatchINFO.xlsx/ModelINFO
             string repNm = Decl.TSMATCHINFO_MODELINFO;
-            //14/7            sr.Recover(repNm, SR.RecoverToDo.ResetRep);
+            sr.Recover(model, repNm, SR.RecoverToDo.ResetRep);
+
+            //закрываем модель и открываем ее заново для чистоты проверки
             Assert.IsTrue(Docs.IsDocExists(repNm));
             Docs modINFO = Docs.getDoc(Decl.TSMATCHINFO_MODELINFO);
-            string modName = modINFO.Body.Strng(2, 2);
-            string dir = modINFO.Body.Strng(3, 2);
-            string dat = modINFO.Body.Strng(5, 2);
+            modINFO.Close();
+            model = new Mod();
+            Assert.IsNull(model.name);
+
+            var m = Docs.getDoc(repNm).Body;
+            string modName = m.Strng(Decl.MODINFO_NAME_R, 2);
+            string dir = m.Strng(Decl.MODINFO_DIR_R, 2);
+            string dat = m.Strng(Decl.MODINFO_DATE_R, 2);
             DateTime date = Lib.getDateTime(dat);
-            int cnt = modINFO.Body.Int(7, 2);
+            string adr = m.Strng(Decl.MODINFO_ADDRESS_R, 2);
+            int cnt = m.Int(Decl.MODINFO_ELMCNT_R, 2);
+            string MD5 = m.Strng(Decl.MODINFO_MD5_R, 2);
+            string pricingMD5 = m.Strng(Decl.MODINFO_PRCMD5_R, 2);
             Assert.IsTrue(modName.Length > 0);
             Assert.IsTrue(dir.Length > 0);
             Assert.IsTrue(dir.Contains(@"\"));
             Assert.IsTrue(dir.Contains(":"));
             Assert.IsFalse(dir.Contains("."));
             Assert.IsTrue(dat.Length > 0);
-            DateTime old = new DateTime(2010, 1, 1);
-            Assert.IsTrue(date > old);
-            Assert.IsTrue(date < DateTime.Now);
+            Assert.IsTrue(date > Decl.OLD && date < DateTime.Now);
+            Assert.AreEqual("-- моя имитация MD5 --", MD5);
+            Assert.AreEqual("-- моя имитация MD5 --", pricingMD5);
+            Assert.AreEqual("Санкт-Петербург, Зенит-Арена", adr);
 
             //-- Raw теперь - отдельный xml файл, его не надо проверять 27.05.2017
             //// проверяем создание TSmatchINFO.xlsx/Raw
@@ -195,7 +214,7 @@ namespace TSmatch.SaveReport.Tests
             model.dir = boot.ModelDir;
             sr.elements = sr.Raw(model);
 
-            sr.GetSavedReport();
+            sr.GetSavedReport(model);
 
             double sumPrice = sr.elmGroups.Select(x => x.totalPrice).Sum();
             Assert.AreEqual(sumPrice, sr.total_price);
@@ -232,13 +251,12 @@ namespace TSmatch.SaveReport.Tests
 
         // эта инициализация класса SavedReport общая для всех тестов этого класса
         // Model.SetModel() здесь использовать нельзя, т.к. SetModel dspsdftn SetReport
-        private SR init()
+        private SR init(bool set_model = true)
         {
-            boot = new Bootstrap.Bootstrap();
+            boot = new Boot();
             sr = new SR();
-
             model = sr;
-            model.SetModel(boot);
+            if (set_model) model.SetModel(boot);
             return sr;
         }
     }

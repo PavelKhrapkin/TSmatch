@@ -1,7 +1,7 @@
 ﻿/*--------------------------------------------------------------------------------------------
  * ModHandler : Model -- Handle Model for Report preparation
  * 
- *  15.07.2017 Pavel Khrapkin
+ *  21.07.2017 Pavel Khrapkin
  *  
  *--- History ---
  *  8.05.2017 taken from Model code
@@ -9,6 +9,7 @@
  * 20.06.2017 getGroup re-make with LINQ
  * 28.06.2017 bug fix in PrfUpdate()
  *  3.07.2017 ProfileUpdate module add instead of PrfUdate in ModHandler
+ * 21.07.2017 Audit GetGrps and Hndl
  *--- Unit Tests --- 
  * 2017.06.19 UT_ModHandler.UT_Hndl, UT_Pricing OK
  * -------------------------------------------------------------------------------------------
@@ -48,12 +49,15 @@ namespace TSmatch.Model.Handler
         /// 2016.09.29 created
         /// 2017.05.8  перенес в модуль ModHandling, добавил аргумент elements
         /// 2017.06.27 переписано
+        /// 2017.07.20 argument errDialo flag add
         /// </history>
-        public List<ElmGr> getGrps(List<Elm> elements)
+        public List<ElmGr> getGrps(List<Elm> elements, bool errDialog = true)
         {
+            if (elements == null || elements.Count == 0) Msg.F("getGrps: no elements");
+            var gr = new ElmGr(errDialog);
             List<ElmGr> groups = new List<ElmGr>();
             var grps = elements.GroupBy(x => x.prf);
-            foreach (var gr in grps) groups.Add(new ElmGr(gr));
+            foreach (var grp in grps) groups.Add(new ElmGr(grp));
             if (elements.Count != groups.Sum(x => x.guids.Count)) Msg.F("getGrps internal error");
             var v = new ProfileUpdate.ProfileUpdate(ref groups);
             return groups;
@@ -123,9 +127,9 @@ namespace TSmatch.Model.Handler
         /// Hndl(model) - find matching Components for model and total_price
         /// </summary>
         /// <param name="mod">model to be handled</param>
-        /// <returns>List of found matches</returns>
-        public List<Mtch> Hndl(Mod mod)
+        public void Hndl(ref Mod mod)
         {
+            Log.set("MH.Hndl");
             mod.elmGroups = getGrps(mod.elements);
             // find matching Components with Rules by Match 
             foreach (var gr in mod.elmGroups)
@@ -133,9 +137,11 @@ namespace TSmatch.Model.Handler
                 bool b = false;
                 foreach (var rule in mod.Rules)
                 {
+log.Info("==>Hndl.MD5=" + mod.MD5 + " =?= " + mod.getMD5(mod.elements));
                     Mtch _match = new Mtch(gr, rule);
                     if (_match.ok == Mtch.OK.Match)
                     {
+log.Info("=match.ok=>Hndl.MD5=" + mod.MD5 + " =?= " + mod.getMD5(mod.elements));
                         mod.matches.Add(_match);
                         gr.SupplierName = _match.rule.Supplier.name;
                         b = true; break;
@@ -145,8 +151,11 @@ namespace TSmatch.Model.Handler
             }
             // calculate prices for matches      
             mod.total_price = mod.elmGroups.Sum(x => x.totalPrice);
+            mod.pricingDate = DateTime.Now;
+            mod.pricingMD5 = mod.get_pricingMD5(mod.elmGroups);
+            Log.Trace("price date=\t" + mod.pricingDate + "\tMD5=" + mod.pricingMD5);
             log.Info("Model.Hndl set " + mod.matches.Count + " groups. Total price=" + mod.total_price + " rub");
-            return mod.matches;
+            Log.exit();
         }
 #if OLD //27/6/17
         public void Handler(Mod mod)
@@ -188,14 +197,20 @@ namespace TSmatch.Model.Handler
 #endif //OLD 27/6/17
         public void Pricing(ref Mod m)
         {
+            Log.set("mh.Pricing");
             if (m.Rules == null || m.Rules.Count == 0)
             {
                 if (sr == null) sr = new SaveReport.SavedReport();
                 sr.getSavedRules();
                 m.Rules = sr.Rules;
             }
-            foreach (var rule in m.Rules) { rule.Init(); }
-            matches = Hndl(m);
+            foreach (var rule in m.Rules) rule.Init();
+log.Info(">m.MD5=" + m.MD5 + " =?= " + m.getMD5(m.elements));
+            Hndl(ref m);
+log.Info(">m.MD5=" + m.MD5 + " =?= " + m.getMD5(m.elements));
+            Log.Trace("      date=\t" + m.date + "\tMD5=" + m.MD5 + "\telementsCount=" + m.elementsCount);
+            Log.Trace("price date=\t" + m.pricingDate + "\tMD5=" + m.pricingMD5 + "\ttotal price" + m.total_price);
+            Log.exit();
         }
 
         public List<Elm> getPricingFrGroups()

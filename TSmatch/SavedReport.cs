@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------------------
  * SavedReport -- class for handle saved reports in TSmatchINFO.xlsx
  * 
- *  15.07.2017 П.Л. Храпкин
+ *  20.07.2017 П.Л. Храпкин
  *  
  *--- Unit Tests ---
  * UT_GetModelInfo  2-17.7.14 
@@ -12,7 +12,7 @@
  *  7.05.2017 написал SetFrSavedModelINFO(), переписал isReportConsystant()
  * 27.05.2017 - XML read and write model.elements as Raw.xml in Raw() 
  *  5.06.2017 - bug fix in SetFrSavedModel - recoursive call after Reset
- * 14.07.2017 - Audit SavedReport: IsModINFO_OK, cosmetc and fixes in Raw, GetTSmatchINFO
+ * 19.07.2017 - Audit SavedReport
  *--- Methods: -------------------      
  * bool GetTSmatchINFO()    - read TSmatchINFO.xlsx, set it as a current Model
  *                            return true if name, dir, quantity of elements is
@@ -50,15 +50,16 @@ namespace TSmatch.SaveReport
         string sINFO = Decl.TSMATCHINFO_MODELINFO;
         string sRep = Decl.TSMATCHINFO_REPORT;
         string sRul = Decl.TSMATCHINFO_RULES;
-        Docs dINFO, dRaw, dRep, dRul;
+        Docs dINFO, dRep, dRul;
         private Mod ModelInCad;
 
         public void GetTSmatchINFO(Mod mod)
         {
             Log.set("SR.GetSavedReport(\"" + mod.name + "\")");
             dINFO = GetModelINFO(mod);
-            elements = Raw(mod);
-            GetSavedReport();
+            mod.elements = Raw(mod);
+            GetSavedReport(mod);
+            CheckModelIntegrity(mod);
             SetSavedMod(mod);
             Log.exit();
         }
@@ -74,9 +75,17 @@ namespace TSmatch.SaveReport
                 GetModelINFO(mod);
             }
             CheckModINFO(mod, mod.name, Decl.MODINFO_NAME_R);
-            CheckModINFO(mod, mod.dir, Decl.MODINFO_DIR_R);
+            string adr = dINFO.Body.Strng(Decl.MODINFO_ADDRESS_R, 2);
+            mod.adrStreet = setCity(adr);
+            mod.adrStreet = adrStreet;
+            mod.dir = dINFO.Body.Strng(Decl.MODINFO_DIR_R, 2).Trim();
+            mod.date = Lib.getDateTime(dINFO.Body.Strng(Decl.MODINFO_DATE_R, 2));
+            if (mod.date > DateTime.Now || mod.date < Decl.OLD) error(mod);
+//17/7            CheckModINFO(mod, mod.dir, Decl.MODINFO_DIR_R);
             CheckModINFO(mod, mod.MD5, Decl.MODINFO_MD5_R);
             CheckModINFO(mod, mod.pricingMD5, Decl.MODINFO_PRCMD5_R);
+            mod.pricingDate = Lib.getDateTime(dINFO.Body.Strng(Decl.MODINFO_PRCDAT_R, 2));
+            if (mod.pricingDate > DateTime.Now || mod.pricingDate < Decl.OLD) error(mod);
             return dINFO;
         }
 #if OLD // 14/7/17
@@ -132,10 +141,10 @@ namespace TSmatch.SaveReport
         public Mod SetFrSavedModelINFO(string dir)
         {
             dINFO = Docs.getDoc(sINFO, fatal: false);
-            if (dINFO == null || dINFO.il < 10) error();
+            if (dINFO == null || dINFO.il < 10) error(this);
             name = strSub(Decl.MODINFO_NAME_R);
             string directory = strSub(Decl.MODINFO_DIR_R);
-            if (dir != directory) error();
+            if (dir != directory) error(this);
             //14/7            adrCity = setCity(strSub(Decl.MODINFO_ADDRESS_R));
             phase = strSub(Decl.MODINFO_PHASE_R);
             //14/7            date = dateSub(Decl.MODINFO_DATE_R);
@@ -149,17 +158,29 @@ namespace TSmatch.SaveReport
         private string strSub(int iRow)
         {
             string str = dINFO.Body.Strng(iRow, 2);
-            if (str.Length <= 0) error();
+            if (str.Length <= 0) error(this);
             return str;
         }
         private DateTime dateSub(int iRow)
         {
             string str = strSub(iRow);
             DateTime _date = Lib.getDateTime(str);
-            if (_date > DateTime.Now || _date < Decl.OLD) error();
+            if (_date > DateTime.Now || _date < Decl.OLD) error(this);
             return _date;
         }
-        private void error() { Msg.F("Corrupted SavedReport TSmatchINFO.xlsx"); }
+
+        private void error(Mod mod, bool errRep = false)
+        {
+            Log.set("SR.errer()");
+            Msg.AskFOK("Corrupted saved report TSmatchINFO.xlsx");
+            mod.elements = Raw(mod);
+            dRep = Docs.getDoc(sRep);
+            if (dRep == null ||errRep) Msg.F("SavedReport recover impossible");
+            GetSavedReport(mod);
+            Recover(mod, sINFO, RecoverToDo.ResetRep);
+ //21/7           Recover(mod, sRep,  RecoverToDo.ResetRep);
+            Log.exit();
+        }
         #endregion ------ ModelINFO region ------
 
         private void SetSavedMod(Mod mod)
@@ -180,7 +201,6 @@ namespace TSmatch.SaveReport
             pricingMD5 = mod.pricingMD5;
             mh = mod.mh;
 
-            Log.TraceOn();
             if (TS.isTeklaActive()) Log.Trace("Tekla active");
             else Log.Trace("No Tekla");
             Log.Trace("name =", name);
@@ -196,68 +216,17 @@ namespace TSmatch.SaveReport
         }
 
         #region ------ Reset & Recovery area ------
-#if OLD
-            if (isReportConsistent()) return;
-
-            // сюда мы вообще-то не должны приходить - Recovery или Fatal происходят при проверке isReportConsistent()
-
-            TS ts = new TS();
-            //ToDo 21/4/17: когда буду делать САПР помимо Tekla, здесь переписать!
-            if (!TS.isTeklaActive()) Msg.F("SavedReport inconsistant and no Tekla");
-            name = TS.getModInfo();
-            dir = TS.ModInfo.ModelPath;
-            Mod m = mj.getModJournal(name, dir);
-            date = m.date;
-            dINFO = Docs.getDoc(Decl.TSMATCHINFO_MODELINFO
-                , create_if_notexist: true, reset: true);
-            wrModel(WrMod.ModelINFO);
-            Read();
-            getSavedRules();
-            Handler();
-            wrModel(WrMod.Report);
-            if (!isReportConsistent()) Msg.F("internal error");
-        }
-
-        private bool isReportConsistent()
-        {
-
-        private void Pricing()
-        {
-            if (elements.Count == 0) Msg.F("elements.Count == 0");
-            Docs dRep = Docs.getDoc(Decl.TSMATCHINFO_REPORT);
-            dRep.Reset();
-            getSavedRules(init: true);
-            if (mh == null) mh = new Model.Handler.ModHandler();
-            mh.Handler(this);
-        }
-        private void ChangedPricing()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void ChangedModel()
-        {
-            Msg.AskFOK("Нет сохраненной корректной модели. Читаем модель заново?");
-//14/7            Reset(sINFO);
-            elements = Raw(this, write: true);
-//14/7            Reset(sRep);
-        }
-
-        private void Reset(Mod mod, string doc_name)
-        {
-            if (!Docs.IsDocExists(doc_name)) Recover(mod, doc_name, RecoverToDo.CreateRep);
-            else                             Recover(mod, doc_name, RecoverToDo.ResetRep);
-        }
-#endif  //OLD
         public enum RecoverToDo
         {
             CreateRep, ResetRep, NewMod,
             ChangedDir,
             ChangedPricing
         }
-        bool resetDialog = true;
+
+        public bool resetDialog = true;
         public void Recover(Mod mod, string repNm, RecoverToDo to_do)
         {
+            Log.set(@"SR.Recover(" + repNm + "\")");
             switch (to_do)
             {
                 case RecoverToDo.CreateRep:
@@ -273,18 +242,31 @@ namespace TSmatch.SaveReport
                     switch (repNm)
                     {
                         case Decl.TSMATCHINFO_MODELINFO:
-                            w.wrModel(WrM.ModelINFO, this);
+                            CheckModelIntegrity(mod);
+                            w.wrModel(WrM.ModelINFO, mod);
                             break;
                         case Decl.TSMATCHINFO_REPORT:
-                            Mod model = this;
-                            mh.Pricing(ref model);
-                            total_price = model.total_price;
-                            w.wrModel(WrM.Report, this);
-                            elmGroups = model.elmGroups;
+log.Info(">>mod.MD5=" + mod.MD5 + " =?= " + mod.getMD5(mod.elements));
+                            mh.Pricing(ref mod);
+log.Info(">>mod.MD5=" + mod.MD5 + " =?= " + mod.getMD5(mod.elements));
+                            CheckModelIntegrity(mod);
+                            w.wrModel(WrM.Report, mod);
                             break;
                     }
                     break;
             }
+            Log.exit();
+        }
+
+        private void CheckModelIntegrity(Mod mod)
+        {
+            Log.set("SR.error");
+            Log.Trace("mod.elmentsCount=" + mod.elementsCount + " =?= " + mod.elements.Count);
+            if (mod.elementsCount != mod.elements.Count) error(mod);
+            Log.Trace("Mod.MD5=" + mod.MD5 + " =?= " + mod.getMD5(mod.elements));
+//21/7            if (mod.MD5 != mod.getMD5(mod.elements)) error(mod);
+ //21/7           if (mod.pricingMD5 != get_pricingMD5(elmGroups)) error(mod);
+            Log.exit();
         }
         #endregion ------ Reset & Recovery area ------
 
@@ -315,35 +297,39 @@ namespace TSmatch.SaveReport
                 elms = mod.elements;
             }
             if (mod.elementsCount != elms.Count) elms = Raw(mod, write: true);
-            if (mod.MD5 == null) mod.MD5 = mod.getMD5(elms);
-            Docs docModelINFO = Docs.getDoc(Decl.TSMATCHINFO_MODELINFO);
-            if (mod.MD5 != docModelINFO.Body.Strng(Decl.MODINFO_MD5_R, 2)
-                || mod.elementsCount != docModelINFO.Body.Int(Decl.MODINFO_ELMCNT_R, 2))
-                Recover(mod, sINFO, RecoverToDo.ResetRep);
+            mod.MD5 = mod.getMD5(elms);
             Log.Trace("{ elmCount, MD5} ==", elms.Count, mod.MD5);
             Log.exit();
             return elms;
         }
         #endregion ------ Raw - read/write Raw.xml area ------
 
-        public void GetSavedReport()
+        public void GetSavedReport(Mod mod)
         {
+            Log.set("SR.GetSavedReport");
+            bool errRep = true;
             if (mh == null) mh = new Model.Handler.ModHandler();
-            elmGroups = mh.getGrps(elements);
-            Docs dRep = Docs.getDoc(sRep, fatal: false);
-            if (dRep == null || dRep.i0 < 2 || dRep.il != (elmGroups.Count + dRep.i0))
-                Recover(this, sRep, RecoverToDo.ResetRep);
+            elmGroups = mh.getGrps(mod.elements, errDialog: false);
+            Docs dRep = Docs.getDoc(sRep, fatal: false, create_if_notexist: true);
+            if (dRep == null || dRep.i0 < 2) error(mod, errRep);
+//21/7            if (dRep.il != (mod.elmGroups.Count + dRep.i0))
+//21/7            {
+//21/7                Msg.AskFOK("Saved Report should be recovered, OK?");
+//21/7                Recover(mod, sRep, RecoverToDo.ResetRep);
+//21/7            }
             total_price = 0;
             for (int iGr = 1, i = dRep.i0; i < dRep.il; i++, iGr++)
             {
+                if (iGr > elmGroups.Count) break;   // group.Count decreased from saved Report
                 var gr = elmGroups[iGr - 1];
-                if (iGr != dRep.Body.Int(i, Decl.REPORT_N)) Msg.F("getSavedReport internal error");
+                if (iGr != dRep.Body.Int(i, Decl.REPORT_N)) error(mod, errRep);
                 gr.SupplierName = dRep.Body.Strng(i, Decl.REPORT_SUPPLIER);
                 gr.CompSetName = dRep.Body.Strng(i, Decl.REPORT_COMPSET);
                 gr.totalPrice = dRep.Body.Double(i, Decl.REPORT_SUPL_PRICE);
                 total_price += gr.totalPrice;
             }
-            pricingMD5 = get_pricingMD5(elmGroups);
+            mod.pricingMD5 = get_pricingMD5(mod.elmGroups);
+            Log.exit();
         }
 
         public void getSavedRules(bool init = false)
@@ -372,22 +358,6 @@ namespace TSmatch.SaveReport
 
         internal void Save(Mod model, bool isRuleChanged = false)
         {
-            //////////////////// переложим все необходимый атрибуты для ModelINFO из model в this
-            //////////////////name = model.name;
-            //////////////////dir = model.dir;
-            //////////////////phase = model.phase;
-            //////////////////date = model.date;
-            //////////////////made = model.made;
-            // 13/7 //////////MD5 = model.MD5;
-            //////////////////elementsCount = model.elementsCount;
-            //////////////////pricingDate = model.pricingDate;
-            //////////////////pricingMD5 = model.pricingMD5;
-
-            //////////////////elements = model.elements;
-            //////////////////elmGroups = model.elmGroups;
-            //////////////////Rules = model.Rules;
-
-            //////////////////// теперь запишем в файл
             var w = new WrMod();
             w.wrModel(WrM.ModelINFO, model);
             w.wrModel(WrM.Report, model);

@@ -60,8 +60,10 @@
     <Compile Include="UT_Bootstrap.cs" />
     <Compile Include="UT_Component.cs" />
     <Compile Include="UT_MatchLib.cs" />
+    <Compile Include="UT_Message.cs" />
     <Compile Include="UT_Model.cs" />
     <Compile Include="UT_ModHandler.cs" />
+    <Compile Include="UT_Mtch.cs" />
     <Compile Include="UT_PriceList.cs" />
     <Compile Include="UT_ProfileUpdate.cs" />
     <Compile Include="UT_Rule.cs" />

@@ -1,7 +1,7 @@
 ﻿/*----------------------------------------------------------------------------
  * Message -- multilanguage message system
  * 
- * 22.05.2017  Pavel Khrapkin
+ * 18.07.2017  Pavel Khrapkin
  *
  *--- History ---
  * Feb-2016 Created
@@ -10,6 +10,7 @@
  *  9.5.2017 - MessageBox.Show use
  * 11.5.2017 - Fatal error handling with Application.Current.Sutdown, AskFOK, and SPLAS messages
  * 22.5.2017 - AskYN, Msg.OK()
+ * 18.7.2017 - remake with Dictionary as a Messages store
  * ---------------------------------------------------------------------------------------
  *      Methods:
  * Start()    - Copy messages into the static list from TSmatch.xlsx/Messages Sheet
@@ -21,15 +22,13 @@
 using System;
 using System.Collections.Generic;
 using System.Windows;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Globalization;
 using log4net;
 
 using FileOp = match.FileOp.FileOp;
 using Docs = TSmatch.Document.Document;
 using Decl = TSmatch.Declaration.Declaration;
+using Lib = match.Lib.MatchLib;
 using Log = match.Lib.Log;
 
 namespace TSmatch.Message
@@ -37,26 +36,16 @@ namespace TSmatch.Message
     public class Message
     {
         public static readonly ILog log = LogManager.GetLogger("Message");
-        public enum Severity { INFO = 0, WARNING, FATAL, SPLASH };
 
+        public enum Severity { INFO = 0, WARNING, FATAL, SPLASH };
         public static bool Trace = false;  // For TRACE mode chage to "true";
 
-        readonly string MessageID;
-        readonly string text;
+        public Message() { }
 
-        internal static List<Message> Messages = new List<Message>();
-
-        Message(string _MessageID, string _text)
-        {
-            MessageID = _MessageID;
-            text = _text;
-        }
-        /// <summary>
-        /// Start() - Multilanguage Message system initialize from TSmatch.xlsx/Messages
-        /// </summary>
-        /// <history> 7.3.2016 P.Khrapkin
-        /// 12.3.16 - bootstrap error handling</history>
-        public static void Start()
+        public static Dictionary<string, string> msgs = new Dictionary<string, string>();
+     
+        //        static Message() singleton Meggage system initialization -- now manualy
+        public static void Init()
         {
             int iLanguage = 3;   //iLanguage =2 - ru-Ru; iLanguage = 3 - en-US
             if (getLanguage() == Decl.RUSSIAN) iLanguage = 2;
@@ -64,21 +53,21 @@ namespace TSmatch.Message
             Docs doc = Docs.getDoc(Decl.MESSAGES);
             for (int i = doc.i0; i <= doc.il; i++)
             {
-                string id = doc.Body.Strng(i, 1);
-                if (string.IsNullOrWhiteSpace(id)) continue;    // ignore messages without ID
-                string txt = doc.Body.Strng(i, iLanguage);
-                while (i < doc.il)
-                {                                               // multiline messages
-                    if (!string.IsNullOrWhiteSpace(doc.Body.Strng(i + 1, 1).ToString())) break;
-                    string line = doc.Body.Strng(++i, iLanguage);
-                    if (string.IsNullOrWhiteSpace(line)) continue;  //go toll empty line
-                    txt += "\n" + line;
-                }
-                foreach (var v in Messages)                     // healthchech for unique MessageID
-                    if (id == v.MessageID) F("ERR_02_START_FAULT", id);
-                Messages.Add(new Message(id, txt));
+                string keyMsg = doc.Body.Strng(i, 1);
+                if (string.IsNullOrWhiteSpace(keyMsg)) continue;
+                string mes = doc.Body.Strng(i, iLanguage);
+                bool emptyNextLine;
+                do
+                {
+                    string nextLine = doc.Body.Strng(++i, iLanguage);
+                    emptyNextLine = string.IsNullOrWhiteSpace(nextLine);
+                    mes += "\n\r" + nextLine;
+                } while (!emptyNextLine);
+                try { msgs.Add(keyMsg, mes.Trim()); }
+                catch { F("Messages.Init fault", i-1, keyMsg, mes);  }
             }
-        } // end Start()
+        }
+
         /// <summary>
         /// getLanguage() - return Windows system language
         /// </summary>
@@ -96,40 +85,22 @@ namespace TSmatch.Message
             return;
         }
 
-        public static void txt(Severity type, string msgcode, params object[] p)
+        public static string msg, errType;
+        static void txt(Severity type, string msgcode, object[] p, bool doMsgBox=true)
         {
-            Message msg = Messages.Find(x => x.MessageID == msgcode);
-            if (msg == null)
-            {
-                MessageBox.Show(msgcode, "(*) TSmatch " + type);
-                Log.FATAL(msgcode);
-            }
-            else
-            {
-                string str = string.Format(msg.text, p);
-                MessageBox.Show(str, "TSmatch " + type);
-                Log.FATAL(str);
-            }
+            bool knownMsg = msgs.ContainsKey(msgcode);
+            msg = knownMsg? string.Format(msgs[msgcode], p): string.Format(msgcode, p);
+            errType = "TSmatch " + type;
+            if (!knownMsg) errType = "(*)" + errType;
+            if(doMsgBox) MessageBox.Show(msg, errType);
+            if (type == Severity.FATAL) Stop();
         }
-#if OLD
-        public static void txt(Severity type, string msgcode, object p0 = null, object p1 = null, object p2 = null)
-        {
-            Message msg = Messages.Find(x => x.MessageID == msgcode);
-            if (msg == null)
-            {
-                MessageBox.Show(msgcode, "(*) TSmatch " + type);
-            }
-            else
-            {
-                string str = string.Format(msg.text, p0, p1, p2);
-                MessageBox.Show(str, "TSmatch " + type);
-            }
-        }
-#endif 
-        public static void txt(string str, params object[] p) { txt(Severity.FATAL, str, p); }
-        public static void F(string str, params object[] p) { txt(Severity.FATAL, str, p); Stop(); }
-        public static void W(string str, params object[] p) { txt(Severity.WARNING, str, p); }
-        public static void I(string str, params object[] p) { txt(Severity.INFO, str, p); }
+
+        public static void txt(string str, params object[] p) { txt(Severity.INFO, str, p, doMsgBox: false); }
+        public static void F(string str, params object[] p)   { txt(Severity.FATAL, str, p); }
+        public static void W(string str, params object[] p)   { txt(Severity.WARNING, str, p); }
+        public static void I(string str, params object[] p)   { txt(Severity.INFO, str, p); }
+
 #if NotWorkingYet
         public static void S(string str, object p0 = null, object p1 = null, object p2 = null)
         {
@@ -140,19 +111,8 @@ namespace TSmatch.Message
 #endif // Splash еще не умею...
         public static bool AskYN(string msgcode, params object[] p)   //16/5 0 = null, object p1 = null, object p2 = null)
         {
-            var X = MessageBoxResult.Yes;
-            string str = msgcode;
-            Message msg = Messages.Find(x => x.MessageID == msgcode);
-            if (msg == null)
-            {
-                str = string.Format(msgcode, p);
-                X = MessageBox.Show(str, "(*) TSmatch", MessageBoxButton.YesNo, MessageBoxImage.Question);
-            }
-            else
-            {
-                str = string.Format(msg.text, p);
-                X = MessageBox.Show(str, "TSmatch", MessageBoxButton.YesNo, MessageBoxImage.Question);
-            }
+            txt(Severity.INFO, msgcode, p, doMsgBox: false);
+            var X = MessageBox.Show(msg, errType, MessageBoxButton.YesNo, MessageBoxImage.Question);
             return X == MessageBoxResult.Yes;
         }
 
@@ -160,19 +120,8 @@ namespace TSmatch.Message
 
         public static void AskOK(string msgcode, params object[] p)
         {
-            reply = MessageBoxResult.OK;
-            string str = msgcode;
-            Message msg = Messages.Find(x => x.MessageID == msgcode);
-            if (msg == null)
-            {
-                str = string.Format(msgcode, p);
-                reply = MessageBox.Show(str, "(*) TSmatch", MessageBoxButton.OKCancel, MessageBoxImage.Question);
-            }
-            else
-            {
-                str = string.Format(msg.text, p);
-                reply = MessageBox.Show(str, "TSmatch", MessageBoxButton.OKCancel, MessageBoxImage.Question);
-            }
+            txt(Severity.INFO, msgcode, p, doMsgBox: false);
+            reply = MessageBox.Show(msg, errType, MessageBoxButton.OKCancel, MessageBoxImage.Question);
         }
 
         public static void AskFOK(string msgcode, params object[] p)
