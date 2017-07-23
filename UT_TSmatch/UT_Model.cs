@@ -14,7 +14,7 @@ using Elm = TSmatch.ElmAttSet.ElmAttSet;
 using Mod = TSmatch.Model.Model;
 using Decl = TSmatch.Declaration.Declaration;
 using SR = TSmatch.SaveReport.SavedReport;
-using MH = TSmatch.Model.Handler.ModHandler;
+using MH = TSmatch.Handler.Handler;
 
 namespace TSmatch.Model.Tests
 {

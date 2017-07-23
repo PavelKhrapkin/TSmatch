@@ -171,5 +171,5 @@ namespace TSmatch.ProfileUpdate
             type = Type + typeDig + sufix;
             return ok;
         }
-    } // end class ModHandler : Model
+    } // end class Handler : Model
 } // end namespace Model.Handler

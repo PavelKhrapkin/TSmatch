@@ -8,7 +8,7 @@ using FileOp = match.FileOp.FileOp;
 using Boot = TSmatch.Bootstrap.Bootstrap;
 using Mod = TSmatch.Model.Model;
 using SR = TSmatch.SaveReport.SavedReport;
-using MH = TSmatch.Model.Handler.ModHandler;
+using MH = TSmatch.Handler.Handler;
 
 namespace TSmatch.Matcher.Tests
 {

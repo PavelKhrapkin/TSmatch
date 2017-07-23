@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------------------
  * SavedReport -- class for handle saved reports in TSmatchINFO.xlsx
  * 
- *  20.07.2017 П.Л. Храпкин
+ *  23.07.2017 П.Л. Храпкин
  *  
  *--- Unit Tests ---
  * UT_GetModelInfo  2-17.7.14 
@@ -12,7 +12,7 @@
  *  7.05.2017 написал SetFrSavedModelINFO(), переписал isReportConsystant()
  * 27.05.2017 - XML read and write model.elements as Raw.xml in Raw() 
  *  5.06.2017 - bug fix in SetFrSavedModel - recoursive call after Reset
- * 19.07.2017 - Audit SavedReport
+ * 23.07.2017 - re-engineering with no heritage from Model
  *--- Methods: -------------------      
  * bool GetTSmatchINFO()    - read TSmatchINFO.xlsx, set it as a current Model
  *                            return true if name, dir, quantity of elements is
@@ -37,6 +37,7 @@ using Mod = TSmatch.Model.Model;
 using WrMod = TSmatch.Model.WrModelInfo.ModelWrFile;
 using WrM = TSmatch.Model.WrModelInfo.ModelWrFile.WrMod;
 using TS = TSmatch.Tekla.Tekla;
+using MH = TSmatch.Handler.Handler;
 using TSmatch.Document;
 using TSmatch.Model;
 using static TSmatch.Model.WrModelInfo.ModelWrFile;
@@ -46,6 +47,8 @@ namespace TSmatch.SaveReport
     public class SavedReport : Mod
     {
         public static readonly ILog log = LogManager.GetLogger("SavedReport");
+
+        MH mh;
 
         string sINFO = Decl.TSMATCHINFO_MODELINFO;
         string sRep = Decl.TSMATCHINFO_REPORT;
@@ -308,7 +311,7 @@ log.Info(">>mod.MD5=" + mod.MD5 + " =?= " + mod.getMD5(mod.elements));
         {
             Log.set("SR.GetSavedReport");
             bool errRep = true;
-            if (mh == null) mh = new Model.Handler.ModHandler();
+            if (mh == null) mh = new MH();
             elmGroups = mh.getGrps(mod.elements, errDialog: false);
             Docs dRep = Docs.getDoc(sRep, fatal: false, create_if_notexist: true);
             if (dRep == null || dRep.i0 < 2) error(mod, errRep);
