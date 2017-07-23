@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------------------------------
  * Model -- Manage major class operaions together with the child modules Handler and SavedMdel
  * 
- * 14.07.2017 Pavel Khrapkin
+ * 23.07.2017 Pavel Khrapkin
  *  
  *--- History ---
  * Jan-16 - May-17 pre-history P.Khrapkin, A.Pass, A.Bobtsov
@@ -15,6 +15,7 @@
  * 27.05.2017 - XML read and write model.elements as Raw.xml in wrMod, modelWr bug fix 
  * 11.07.2017 - Project address fields add to class Model
  * 14.07.2017 - SetModDir setarated from SetModet for UT_
+ * 23.07.2017 - exclude elementsCound from Model propertties; now account elements.Count
  * --- Unit Tests ---
  * 2017.07.6  UT_Model.UT_SetModel   OK
  * 2017.07.14 UT_SetModDir, setCity  OK 
@@ -72,7 +73,6 @@ namespace TSmatch.Model
         public double total_price;  // общая сумма стоимости материалов по модели
         public bool isChanged = false;
         public List<Elm> elements = new List<Elm>();
-        public int elementsCount;
         public string pricingMD5;   // контр.сумма цен и правил при расчете Report
         public DateTime pricingDate;
         public List<ElmMGr> elmMgroups = new List<ElmMGr>();
@@ -101,10 +101,10 @@ namespace TSmatch.Model
             sr = new SR();
             SetModDir(boot);
             sr.GetTSmatchINFO(this);
-            date = sr.date;
-            elements = sr.elements;
-            elmGroups = sr.elmGroups;
-            pricingDate = sr.pricingDate;
+//23/7            date = sr.date;
+//23/7            elements = sr.elements;
+//23/7            elmGroups = sr.elmGroups;
+//23/7            pricingDate = sr.pricingDate;
             Log.exit();
         }
 
@@ -116,7 +116,7 @@ namespace TSmatch.Model
                 dir = TS.GetTeklaDir(TS.ModelDir.model);
                 phase = TS.ModInfo.CurrentPhase.ToString();
                 made = TS.MyName;
-                elementsCount = ts.elementsCount();
+//23/7                elementsCount = ts.elementsCount();
                 //6/4/17                        macroDir = TS.GetTeklaDir(TS.ModelDir.macro);
                 HighLightClear();
             }
@@ -130,9 +130,9 @@ namespace TSmatch.Model
                 name = m.name;
                 phase = m.phase;
                 adrCity = m.adrCity; adrStreet = m.adrStreet;
-                elementsCount = m.elementsCount;
-                if (elementsCount == 0)
-                    Msg.F("SavedReport doc not exists and no CAD");
+//23/7                elementsCount = m.elementsCount;
+//23/7                if (elementsCount == 0)
+//23/7                    Msg.F("SavedReport doc not exists and no CAD");
                 date = m.date;
                 MD5 = m.MD5;
                 pricingMD5 = m.pricingMD5;
@@ -141,7 +141,8 @@ namespace TSmatch.Model
             }
         }
 
-        public string setCity(string adr)
+//23/7        public string setCity(string adr)
+        public void setCity(string adr)
         {
             string city;
             string[] adrs = adr.Split(',');
@@ -149,7 +150,7 @@ namespace TSmatch.Model
             int indx = adr.IndexOf(',');
             if (indx > 0) adrStreet = adr.Substring(indx + 1).Trim();
             else adrStreet = string.Empty;
-            return adrCity;
+//23/7            return adrCity;
         }
 
         /// <summary>
@@ -161,7 +162,7 @@ namespace TSmatch.Model
             elements.Clear();
             if (TS.isTeklaActive()) elements = ts.Read();
             else elements = Ifc.Read(ifcPath);
-            elementsCount = elements.Count;
+//23/7            elementsCount = elements.Count;
             string newMD5 = getMD5(elements);
             if (newMD5 != MD5)
             {
@@ -614,7 +615,7 @@ namespace TSmatch.Model
         public static string RecentModelDir() { return RecentModel().dir; }
 #endif //OLD
         #endregion -=-=- unclear region 3 to be audited
-
+#if OLD //23/7
         public void setElements(List<ElmAttSet.ElmAttSet> els)
         {
             elements.Clear();
@@ -627,10 +628,12 @@ namespace TSmatch.Model
             foreach (var elm in els) elements.Add(elm.Value);
             elementsCount = elements.Count;
         }
+
         private void getSuppliers()
         {
             //29.11            Suppliers = Supplier.Start(); //!! времянка - список всех Поставщиков
         }
+#endif //OLD 23/7
         /// <summary>
         /// ifWrToFile() возвращает true, если модель изменилась относительно имеющейся в журнале записи о ней
         /// </summary>

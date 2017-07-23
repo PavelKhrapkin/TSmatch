@@ -56,7 +56,7 @@ namespace TSmatch.Model.WrModelInfo
                     if (mod.adrStreet != string.Empty) adr += ", " + mod.adrStreet;
                     doc.wrDocForm(mod.name, adr, mod.dir, mod.phase
                         , Lib.timeStr(mod.date), mod.MD5
-                        , mod.elementsCount, Lib.timeStr(mod.pricingDate), mod.pricingMD5);
+                        , mod.elements.Count, Lib.timeStr(mod.pricingDate), mod.pricingMD5);
                     break;
                 case WrMod.Materials:   // сводка по материалам, их типам (бетон, сталь и др)
                     doc.wrDocSetForm("FORM_Materials", 3, AutoFit: true);

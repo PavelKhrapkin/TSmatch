@@ -141,13 +141,13 @@ namespace TSmatch.Handler
             {
                 if (sr == null) sr = new SaveReport.SavedReport();
                 sr.getSavedRules();
-                m.Rules = sr.Rules;
+//23/7                m.Rules = sr.Rules;
             }
             foreach (var rule in m.Rules) rule.Init();
             log.Info(">m.MD5=" + m.MD5 + " =?= " + m.getMD5(m.elements));
             Hndl(ref m);
             log.Info(">m.MD5=" + m.MD5 + " =?= " + m.getMD5(m.elements));
-            Log.Trace("      date=\t" + m.date + "\tMD5=" + m.MD5 + "\telementsCount=" + m.elementsCount);
+            Log.Trace("      date=\t" + m.date + "\tMD5=" + m.MD5 + "\telements.Count=" + m.elements.Count);
             Log.Trace("price date=\t" + m.pricingDate + "\tMD5=" + m.pricingMD5 + "\ttotal price" + m.total_price);
             Log.exit();
         }
