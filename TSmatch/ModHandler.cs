@@ -1,7 +1,7 @@
 ﻿/*--------------------------------------------------------------------------------------------
  * ModHandler : Model -- Handle Model for Report preparation
  * 
- *  20.07.2017 Pavel Khrapkin
+ *  21.07.2017 Pavel Khrapkin
  *  
  *--- History ---
  *  8.05.2017 taken from Model code
@@ -9,7 +9,7 @@
  * 20.06.2017 getGroup re-make with LINQ
  * 28.06.2017 bug fix in PrfUpdate()
  *  3.07.2017 ProfileUpdate module add instead of PrfUdate in ModHandler
- * 20.07.2017 Audit GetGps and Hndl
+ * 21.07.2017 Audit GetGrps and Hndl
  *--- Unit Tests --- 
  * 2017.06.19 UT_ModHandler.UT_Hndl, UT_Pricing OK
  * -------------------------------------------------------------------------------------------
@@ -53,6 +53,7 @@ namespace TSmatch.Model.Handler
         /// </history>
         public List<ElmGr> getGrps(List<Elm> elements, bool errDialog = true)
         {
+            if (elements == null || elements.Count == 0) Msg.F("getGrps: no elements");
             var gr = new ElmGr(errDialog);
             List<ElmGr> groups = new List<ElmGr>();
             var grps = elements.GroupBy(x => x.prf);
