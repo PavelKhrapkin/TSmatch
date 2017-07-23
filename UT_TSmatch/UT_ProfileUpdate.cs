@@ -30,7 +30,7 @@ namespace TSmatch.ProfileUpdate.Tests
             //            MessageBox.Show("TestMethodInit");
         }
 
-        // 2017.07.1 тест двутавров
+        // 2017.07.23 тест двутавров
         [TestMethod()]
         public void UT_ProfleUpdate_I()
         {
@@ -116,7 +116,7 @@ namespace TSmatch.ProfileUpdate.Tests
             #endregion --- серия Р40-93 Д и У ---
         }
 
-        // 2017.07.2 тест швеллеров
+        // 2017.07.23 тест швеллеров
         [TestMethod()]
         public void UT_ProfileUpdate_U()
         {
@@ -187,7 +187,7 @@ namespace TSmatch.ProfileUpdate.Tests
             #endregion --- серии Э, Л, C ГОСТ 8240-97 ---
         }
 
-        // 2017.07.2 тест уголков
+        // 2017.07.23 тест уголков
         [TestMethod()]
         public void UT_ProfileUpdate_L()
         {

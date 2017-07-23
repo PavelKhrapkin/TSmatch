@@ -3,7 +3,7 @@
  *=================================
  */
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using TSmatch.Model.Handler;
+using TSmatch.Handler;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,12 +17,13 @@ using ElmGr = TSmatch.ElmAttSet.Group;
 using Msg = TSmatch.Message.Message;
 using TS = TSmatch.Tekla.Tekla;
 using MH = TSmatch.Handler.Handler;
+using SR = TSmatch.SaveReport.SavedReport;
 using TSmatch.ElmAttSet;
 
-namespace TSmatch.Model.Handler.Tests
+namespace TSmatch.Handler.Tests
 {
     [TestClass()]
-    public class UT_ModHandler
+    public class UT_Handler
     {
 #if OLD //3.7/17
         [TestMethod()]
@@ -285,23 +286,19 @@ namespace TSmatch.Model.Handler.Tests
         {
             var boot = new Boot();
             var model = new Mod();
-            model.sr = new SaveReport.SavedReport();
-            if (boot.isTeklaActive)
-            {
-                model.dir = TS.GetTeklaDir(TS.ModelDir.model);
-                var ts = new TS();
-                model.elementsCount = ts.elementsCount();
-            }
-            else
-            {
-                throw new NotImplementedException();
-            }
-            model.elements = model.sr.Raw(model);
             var mh = new MH();
+            var sr =new SR();
+            if (boot.isTeklaActive) model.dir = TS.GetTeklaDir(TS.ModelDir.model);
+            else                    model.dir = boot.ModelDir;
+
+            model.elements = sr.Raw(model);
+            string md5 = model.getMD5(model.elements);
+            Assert.AreEqual(32, md5.Length);     
 
             var grp = mh.getGrps(model.elements);
             Assert.IsTrue(grp.Count > 0);
-            Assert.AreEqual(model.elements.Count, model.elementsCount);
+            string pricing_md5 = model.get_pricingMD5(grp);
+            Assert.AreEqual(32, pricing_md5.Length);
 
             FileOp.AppQuit();
         }

@@ -39,7 +39,6 @@ namespace TSmatch.Model.Tests
             Assert.IsTrue(model.date > Decl.OLD);
             Assert.IsTrue(model.date < DateTime.Now);
             Assert.IsTrue(model.elements.Count > 0);
-            Assert.AreEqual(model.elements.Count, model.elementsCount);
             Assert.IsTrue(model.elmGroups.Count > 0);
 
             FileOp.AppQuit();
@@ -55,11 +54,10 @@ namespace TSmatch.Model.Tests
             Assert.IsNotNull(model.dir);
             Assert.IsTrue(FileOp.isDirExist(model.dir));
             Assert.IsTrue(model.name.Length > 0);
-            Assert.IsTrue(model.elementsCount > 0);
+            Assert.IsTrue(model.elements.Count > 0);
             Assert.IsTrue(model.phase.Length > 0);
             //            Assert.IsTrue(model.date > Decl.OLD & model.date < DateTime.Now);
             //            Assert.IsTrue(model.pricingDate > Decl.OLD & model.pricingDate < DateTime.Now);
-            Assert.IsTrue(model.elementsCount > 0);
             //            Assert.AreEqual(32, model.MD5.Length);
             //            Assert.AreEqual(32, model.pricingMD5.Length);
 
@@ -79,17 +77,36 @@ namespace TSmatch.Model.Tests
         }
 
         [TestMethod()]
+        public void UT_getMD5()
+        {
+            var model = new Mod();
+            Assert.AreEqual(0, model.elements.Count);
+
+            // test empty list of elements MD5
+            string md5 = model.getMD5(model.elements);
+            Assert.AreEqual("4F76940A4522CE97A52FFEE1FBE74DA2", md5);
+        }
+
+
+        [TestMethod()]
         public void UT_get_pricingMD5()
         {
-            var boot = new Boot();
             var model = new Mod();
+            Assert.AreEqual(0, model.elements.Count);
+            Assert.AreEqual(0, model.elmGroups.Count);
+
+            // test empty list of groups pricingMD5
+            string pricingMD5 = model.get_pricingMD5(model.elmGroups);
+            Assert.AreEqual("5E7AD112B9369E41723DDFD797758E62", pricingMD5);
+
+            var boot = new Boot();
             model.sr = new SaveReport.SavedReport();
             model.SetModDir(boot);
             model.elements = model.sr.Raw(model);
             var mh = new MH();
             var grp = mh.getGrps(model.elements);
 
-            string pricingMD5 = model.get_pricingMD5(grp);
+            pricingMD5 = model.get_pricingMD5(grp);
 
             Assert.IsNotNull(pricingMD5);
             Assert.AreEqual(32, pricingMD5.Length);

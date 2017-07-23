@@ -67,7 +67,7 @@ namespace TSmatch
             //20/5            message.Text = "..Load MainWindow..";
             boot = new Boot();
             var sr = new SaveReport.SavedReport();
-            model = sr;
+//23/7            model = sr;
             model.SetModel(boot);
             WrModelInfoPanel();
             WrReportPanel();
@@ -83,7 +83,7 @@ namespace TSmatch
                         + " " + model.date.ToShortTimeString()
                     + "\nДата расценки     " + model.pricingDate.ToLongDateString()
                         + " " + model.pricingDate.ToShortTimeString()
-                + "\nВсего " + model.elementsCount + " элементов"
+                + "\nВсего " + model.elements.Count + " элементов"
                         + ", " + model.elmGroups.Count + " групп";
         }
 
