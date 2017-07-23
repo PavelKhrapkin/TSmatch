@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using FileOp = match.FileOp.FileOp;
+using Docs = TSmatch.Document.Document;
 using Boot = TSmatch.Bootstrap.Bootstrap;
 using Elm = TSmatch.ElmAttSet.ElmAttSet;
 using Mod = TSmatch.Model.Model;
@@ -33,13 +34,18 @@ namespace TSmatch.Model.Tests
 
             Assert.IsTrue(model.name.Length > 0);
             Assert.IsTrue(model.dir.Length > 0);
-            Assert.IsTrue(model.dir.Length > 0);
+            Assert.IsTrue(FileOp.isDirExist(model.dir));
             Assert.IsTrue(model.dir.Contains(@"\"));
             Assert.IsTrue(model.dir.Contains(":"));
             Assert.IsTrue(model.date > Decl.OLD);
             Assert.IsTrue(model.date < DateTime.Now);
+            Assert.IsTrue(model.pricingDate > Decl.OLD);
+            Assert.IsTrue(model.pricingDate < DateTime.Now);
+            Assert.IsNotNull(Docs.getDoc(Decl.TSMATCHINFO_MODELINFO));
             Assert.IsTrue(model.elements.Count > 0);
             Assert.IsTrue(model.elmGroups.Count > 0);
+            Assert.AreEqual(model.getMD5(model.elements), model.MD5);
+            Assert.AreEqual(model.get_pricingMD5(model.elmGroups), model.pricingMD5);
 
             FileOp.AppQuit();
         }
@@ -49,18 +55,13 @@ namespace TSmatch.Model.Tests
         {
             boot = new Bootstrap.Bootstrap();
             model = new Mod();
+
             model.SetModDir(boot);
 
             Assert.IsNotNull(model.dir);
             Assert.IsTrue(FileOp.isDirExist(model.dir));
             Assert.IsTrue(model.name.Length > 0);
-            Assert.IsTrue(model.elements.Count > 0);
             Assert.IsTrue(model.phase.Length > 0);
-            //            Assert.IsTrue(model.date > Decl.OLD & model.date < DateTime.Now);
-            //            Assert.IsTrue(model.pricingDate > Decl.OLD & model.pricingDate < DateTime.Now);
-            //            Assert.AreEqual(32, model.MD5.Length);
-            //            Assert.AreEqual(32, model.pricingMD5.Length);
-
             FileOp.AppQuit();
         }
 
@@ -97,10 +98,12 @@ namespace TSmatch.Model.Tests
 
             // test empty list of groups pricingMD5
             string pricingMD5 = model.get_pricingMD5(model.elmGroups);
-            Assert.AreEqual("5E7AD112B9369E41723DDFD797758E62", pricingMD5);
+            const string EMPTY_GROUP_LIST_PRICINGMD5 = "5E7AD112B9369E41723DDFD797758E62";
+            Assert.AreEqual(EMPTY_GROUP_LIST_PRICINGMD5, pricingMD5);
 
+            // test real model and TSmatchINFO.xlsx
             var boot = new Boot();
-            model.sr = new SaveReport.SavedReport();
+            model.sr = new SR();
             model.SetModDir(boot);
             model.elements = model.sr.Raw(model);
             var mh = new MH();
@@ -110,6 +113,7 @@ namespace TSmatch.Model.Tests
 
             Assert.IsNotNull(pricingMD5);
             Assert.AreEqual(32, pricingMD5.Length);
+            Assert.IsTrue(EMPTY_GROUP_LIST_PRICINGMD5 != pricingMD5);
 
             FileOp.AppQuit();
         }
