@@ -56,7 +56,6 @@ namespace TSmatch.SaveReport
         public void GetTSmatchINFO(Mod mod)
         {
             Log.set("SR.GetSavedReport(\"" + mod.name + "\")");
-//21/7 Log.TraceOn();  //21/7
             dINFO = GetModelINFO(mod);
             mod.elements = Raw(mod);
             GetSavedReport(mod);
@@ -173,14 +172,13 @@ namespace TSmatch.SaveReport
         private void error(Mod mod, bool errRep = false)
         {
             Log.set("SR.errer()");
-            Log.Trace("SavedReport.error: Mod.MD5=" + mod.MD5);
             Msg.AskFOK("Corrupted saved report TSmatchINFO.xlsx");
             mod.elements = Raw(mod);
             dRep = Docs.getDoc(sRep);
             if (dRep == null ||errRep) Msg.F("SavedReport recover impossible");
             GetSavedReport(mod);
             Recover(mod, sINFO, RecoverToDo.ResetRep);
-            Recover(mod, sRep,  RecoverToDo.ResetRep);
+ //21/7           Recover(mod, sRep,  RecoverToDo.ResetRep);
             Log.exit();
         }
         #endregion ------ ModelINFO region ------
@@ -203,7 +201,6 @@ namespace TSmatch.SaveReport
             pricingMD5 = mod.pricingMD5;
             mh = mod.mh;
 
-            Log.TraceOn();
             if (TS.isTeklaActive()) Log.Trace("Tekla active");
             else Log.Trace("No Tekla");
             Log.Trace("name =", name);
@@ -267,8 +264,8 @@ log.Info(">>mod.MD5=" + mod.MD5 + " =?= " + mod.getMD5(mod.elements));
             Log.Trace("mod.elmentsCount=" + mod.elementsCount + " =?= " + mod.elements.Count);
             if (mod.elementsCount != mod.elements.Count) error(mod);
             Log.Trace("Mod.MD5=" + mod.MD5 + " =?= " + mod.getMD5(mod.elements));
-            if (mod.MD5 != mod.getMD5(mod.elements)) error(mod);
-            if (mod.pricingMD5 != get_pricingMD5(elmGroups)) error(mod);
+//21/7            if (mod.MD5 != mod.getMD5(mod.elements)) error(mod);
+ //21/7           if (mod.pricingMD5 != get_pricingMD5(elmGroups)) error(mod);
             Log.exit();
         }
         #endregion ------ Reset & Recovery area ------
@@ -315,14 +312,15 @@ log.Info(">>mod.MD5=" + mod.MD5 + " =?= " + mod.getMD5(mod.elements));
             elmGroups = mh.getGrps(mod.elements, errDialog: false);
             Docs dRep = Docs.getDoc(sRep, fatal: false, create_if_notexist: true);
             if (dRep == null || dRep.i0 < 2) error(mod, errRep);
-            if (dRep.il != (mod.elmGroups.Count + dRep.i0))
-            {
-                Msg.AskFOK("Saved Report should be recovered, OK?");
-                Recover(mod, sRep, RecoverToDo.ResetRep);
-            }
+//21/7            if (dRep.il != (mod.elmGroups.Count + dRep.i0))
+//21/7            {
+//21/7                Msg.AskFOK("Saved Report should be recovered, OK?");
+//21/7                Recover(mod, sRep, RecoverToDo.ResetRep);
+//21/7            }
             total_price = 0;
             for (int iGr = 1, i = dRep.i0; i < dRep.il; i++, iGr++)
             {
+                if (iGr > elmGroups.Count) break;   // group.Count decreased from saved Report
                 var gr = elmGroups[iGr - 1];
                 if (iGr != dRep.Body.Int(i, Decl.REPORT_N)) error(mod, errRep);
                 gr.SupplierName = dRep.Body.Strng(i, Decl.REPORT_SUPPLIER);
