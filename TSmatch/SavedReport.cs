@@ -59,8 +59,7 @@ namespace TSmatch.SaveReport
         {
             Log.set("SR.GetSavedReport(\"" + mod.name + "\")");
             dINFO = GetModelINFO(mod);
-            mod.elements = Raw(mod);
-            GetSavedReport(mod);
+            GetSavedReport();
             CheckModelIntegrity();
             SetSavedMod(mod);
             Log.exit();
@@ -139,29 +138,21 @@ namespace TSmatch.SaveReport
         }
 
         /// <summary>
-        /// SetFrSavedModelINFO(string dir) - set model attributes from 
+        /// SetFrSavedModelINFO(ref model) - set model attributes from 
         /// TSmatchINFO.xlsx/ModuleINFO. When this documents corrupred -
         /// fatal error. This method call only when Tekla not available
         /// </summary>
         /// <param name="dir">directory, where TSmatchINFO.xlsx stored</param>
-        public Mod SetFrSavedModelINFO(string dir)
+        public Mod SetFrSavedModelINFO(Mod model)
         {
             dINFO = Docs.getDoc(sINFO, fatal: false);
-            if (dINFO == null || dINFO.il < 10) error();
-//23/7            name = strSub(Decl.MODINFO_NAME_R);
-            string directory = strSub(Decl.MODINFO_DIR_R);
-            if (dir != directory) error();
-            //14/7            adrCity = setCity(strSub(Decl.MODINFO_ADDRESS_R));
-//23/7            phase = strSub(Decl.MODINFO_PHASE_R);
-            //14/7            date = dateSub(Decl.MODINFO_DATE_R);
-            //14/7            MD5 = strSub(Decl.MODINFO_MD5_R);
- //23/7           elementsCount = Convert.ToInt32(strSub(Decl.MODINFO_ELMCNT_R));
-            //14/7            pricingDate = dateSub(Decl.MODINFO_PRCDAT_R);
-            //14/7            pricingMD5 = strSub(Decl.MODINFO_PRCMD5_R);
+            if (dINFO == null || dINFO.il < 10 || !FileOp.isDirExist(model.dir)) error();
+            model.name = strSub(Decl.MODINFO_NAME_R);
+            model.phase = strSub(Decl.MODINFO_PHASE_R, "1");
             return model;
         }
 
-        private string strSub(int iRow)
+        private string strSub(int iRow, string def = "")
         {
             string str = dINFO.Body.Strng(iRow, 2);
             if (str.Length <= 0) error();
@@ -182,7 +173,7 @@ namespace TSmatch.SaveReport
             model.elements = Raw(model);
             dRep = Docs.getDoc(sRep);
             if (dRep == null ||errRep) Msg.F("SavedReport recover impossible");
-            GetSavedReport(model);
+            GetSavedReport();
             Recover(sINFO, RecoverToDo.ResetRep);
  //21/7           Recover(mod, sRep,  RecoverToDo.ResetRep);
             Log.exit();
@@ -313,7 +304,7 @@ log.Info(">>mod.MD5=" + model.MD5 + " =?= " + model.getMD5(model.elements));
         }
 #endregion ------ Raw - read/write Raw.xml area ------
 
-        public void GetSavedReport(Mod mod)
+        public Mod GetSavedReport()
         {
             Log.set("SR.GetSavedReport");
             bool errRep = true;
@@ -337,8 +328,9 @@ log.Info(">>mod.MD5=" + model.MD5 + " =?= " + model.getMD5(model.elements));
                 gr.totalPrice = dRep.Body.Double(i, Decl.REPORT_SUPL_PRICE);
                 model.total_price += gr.totalPrice;
             }
-            mod.pricingMD5 = model.get_pricingMD5(mod.elmGroups);
+            model.pricingMD5 = model.get_pricingMD5(model.elmGroups);
             Log.exit();
+            return model;
         }
 
         public void getSavedRules(bool init = false)

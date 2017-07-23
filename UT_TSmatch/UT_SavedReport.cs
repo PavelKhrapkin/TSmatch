@@ -17,6 +17,7 @@ using FileOp = match.FileOp.FileOp;
 using Docs = TSmatch.Document.Document;
 using Mod = TSmatch.Model.Model;
 using SR = TSmatch.SaveReport.SavedReport;
+using MH = TSmatch.Handler.Handler;
 using Boot = TSmatch.Bootstrap.Bootstrap;
 using TSmatch.Model;
 
@@ -27,18 +28,23 @@ namespace TSmatch.SaveReport.Tests
     {
         Boot boot;
         SR sr;
+        MH mh; 
         Mod model;
 
         [TestMethod()]
         public void UT_GetSavedReport()
         {
             var sr = init();
-
-            sr.GetSavedReport(model);
+            model.SetModDir(boot);
+            var dINFO = sr.GetModelINFO(model);
+            model = sr.GetSavedReport();
+            model.elements = sr.Raw(model);
+            mh = new MH();
+            model.elmGroups = mh.getGrps(model.elements);
 
             Assert.IsTrue(model.elmGroups.Count > 0);
             var total_price = model.elmGroups.Sum(x => x.totalPrice);
-            Assert.IsTrue(model.elmGroups.Sum(x => x.totalPrice) > 0);
+ //           Assert.IsTrue(model.elmGroups.Sum(x => x.totalPrice) > 0);
 
             FileOp.AppQuit();
         }
@@ -117,7 +123,7 @@ namespace TSmatch.SaveReport.Tests
         [TestMethod()]
         public void UT_Recover()
         {
-            var sr = init(set_model: false);
+            var sr = init();
             model.SetModDir(boot);
             model.date = new DateTime(2015, 6, 12, 14, 15, 16);
             model.MD5 = "-- моя имитация MD5 --";
@@ -172,23 +178,31 @@ namespace TSmatch.SaveReport.Tests
         }
 
         [TestMethod()]
-        public void UT_SavedReport_SetFrSavedModelINFO()
+        public void UT_SR_SetFrSavedModelINFO()
         {
             var sr = init();
             model.dir = boot.ModelDir;
 
-            if (boot.isTeklaActive) sr.SetFrSavedModelINFO(model.dir);
-            // else -- sr.SetFrSavedModelINFO(model.dir); -- вызывается init-Model.SetModel
+            // SetFrSavedMoodel работает только если нет Tekla
+            //..вызывается из Model.SetModel
+            if (boot.isTeklaActive) { Assert.IsTrue(true); return; }
 
-            Assert.IsTrue(Test_ModelINFO());
+            Mod m = sr.SetFrSavedModelINFO(model);
+            model.name = m.name;
+            model.phase = m.phase;
+
+            Assert.IsTrue(model.name.Length > 0);
+            Assert.IsTrue(model.phase.Length > 0);
+            Assert.IsTrue(FileOp.isDirExist(model.dir));
 
             FileOp.AppQuit();
+
         }
 
         [TestMethod()]
-        public void UT_SavedReport_Raw()
+        public void UT_SR_Raw()
         {
-            var sr = init(set_model: false);
+            var sr = init();
             model.dir = boot.ModelDir;
 
             model.elements = sr.Raw(model);
@@ -245,12 +259,11 @@ namespace TSmatch.SaveReport.Tests
 
         // эта инициализация класса SavedReport общая для всех тестов этого класса
         // Model.SetModel() здесь использовать нельзя, т.к. SetModel dspsdftn SetReport
-        private SR init(bool set_model = true)
+        private SR init()
         {
             boot = new Boot();
             sr = new SR();
             model = new Mod();
-            if (set_model) model.SetModel(boot);
             return sr;
         }
     }

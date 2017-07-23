@@ -23,6 +23,7 @@
  * Read(modelName) - получение модели (списка элементов с атрибутами) из Tekla или IFC
  * getModel(name)  - ищет модель по имени name в журнале моделей
  * setModel(name)  - подготавливает обработку модели name; читает все файлы компонентов
+ * setCity(adr)    - parse string adr; set model.adrCity and model.adrStreet
  * saveModel(name) - сохраняет модель с именем name
  * UpdateFrTekla() - обновление модели из данных в C# в файловую систему (ЕЩЕ НЕ ОТЛАЖЕНО!!)
  * modelListUpdate(name, dir, Made, MD5) - update list of models in TSmatch.xlsx/Models
@@ -101,6 +102,7 @@ namespace TSmatch.Model
             sr = new SR();
             SetModDir(boot);
             sr.GetTSmatchINFO(this);
+
 //23/7            date = sr.date;
 //23/7            elements = sr.elements;
 //23/7            elmGroups = sr.elmGroups;
@@ -115,8 +117,6 @@ namespace TSmatch.Model
                 name = Path.GetFileNameWithoutExtension(TS.ModInfo.ModelName);
                 dir = TS.GetTeklaDir(TS.ModelDir.model);
                 phase = TS.ModInfo.CurrentPhase.ToString();
-                made = TS.MyName;
-//23/7                elementsCount = ts.elementsCount();
                 //6/4/17                        macroDir = TS.GetTeklaDir(TS.ModelDir.macro);
                 HighLightClear();
             }
@@ -126,31 +126,29 @@ namespace TSmatch.Model
                 if (!FileOp.isDirExist(dir)) Msg.F("No Model Directory", dir);
                 if (!Docs.IsDocExists(Decl.TSMATCHINFO_MODELINFO)) Msg.F("No TSmatchINFO.xlsx file");
                 if (sr == null) sr = new SR();
-                Model m = sr.SetFrSavedModelINFO(dir);
+                Model m = sr.SetFrSavedModelINFO(this);
                 name = m.name;
                 phase = m.phase;
-                adrCity = m.adrCity; adrStreet = m.adrStreet;
-//23/7                elementsCount = m.elementsCount;
-//23/7                if (elementsCount == 0)
-//23/7                    Msg.F("SavedReport doc not exists and no CAD");
-                date = m.date;
-                MD5 = m.MD5;
-                pricingMD5 = m.pricingMD5;
-                pricingDate = m.pricingDate;
-                //24/4                classCAD = ifc;
+
+//////////                adrCity = m.adrCity; adrStreet = m.adrStreet;
+////////////23/7                elementsCount = m.elementsCount;
+////////////23/7                if (elementsCount == 0)
+////////////23/7                    Msg.F("SavedReport doc not exists and no CAD");
+//////////                date = m.date;
+//////////                MD5 = m.MD5;
+//////////                pricingMD5 = m.pricingMD5;
+//////////                pricingDate = m.pricingDate;
+//////////                //24/4                classCAD = ifc;
             }
         }
 
-//23/7        public string setCity(string adr)
         public void setCity(string adr)
         {
-            string city;
             string[] adrs = adr.Split(',');
-            adrCity = city = adrs[0].Trim();
+            adrCity = adrs[0].Trim();
             int indx = adr.IndexOf(',');
             if (indx > 0) adrStreet = adr.Substring(indx + 1).Trim();
             else adrStreet = string.Empty;
-//23/7            return adrCity;
         }
 
         /// <summary>
