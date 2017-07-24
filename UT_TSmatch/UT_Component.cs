@@ -1,5 +1,5 @@
 ﻿/*=================================
- * Components Unit Test 16.6.2017
+ * Components Unit Test 23.6.2017
  *=================================
  */
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using Lib = match.Lib.MatchLib;
-using Handler = TSmatch.Model.Handler.ModHandler;
+using MH = TSmatch.Handler.Handler;
 using ElmGr = TSmatch.ElmAttSet.Group;
 
 namespace TSmatch.Component.Tests
@@ -15,7 +15,7 @@ namespace TSmatch.Component.Tests
     [TestClass()]
     public class UT_Component
     {
-        Handler mod = new Handler();
+        MH mod = new MH();
         ElmAttSet.Group gr = new ElmAttSet.Group();
         List<ElmGr> inp = new List<ElmGr>();
         Rule.Rule rule = new Rule.Rule();
@@ -169,7 +169,7 @@ namespace TSmatch.Component.Tests
             gr.Mat = mat;
             gr.mat = Lib.ToLat(mat.ToLower().Replace(" ", ""));
             inp.Add(gr);
-            mod.elmGroups = inp;
+            //23/7            mod.elmGroups = inp;
         }
 
         private void initRule(string v)
