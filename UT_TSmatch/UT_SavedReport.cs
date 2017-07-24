@@ -71,8 +71,9 @@ namespace TSmatch.SaveReport.Tests
                 model.MD5 = "sample-MD5";
             }
 
-            var dINFO = sr.GetModelINFO(model);
+            model = sr.GetModelINFO(model);
 
+            Docs dINFO = Docs.getDoc(Decl.TSMATCHINFO_MODELINFO);
             Assert.IsNotNull(dINFO);
             Assert.AreEqual(2, dINFO.i0);
             Assert.IsTrue(dINFO.il > 9);
@@ -83,6 +84,10 @@ namespace TSmatch.SaveReport.Tests
             Assert.AreEqual("Адрес проекта:", b.Strng(Decl.MODINFO_ADDRESS_R, 1));
             Assert.IsTrue(b.Strng(Decl.MODINFO_ADDRESS_R, 2).Length >= 1);
             sr.CheckModelIntegrity();
+            Assert.IsTrue(model.elements.Count > 0);
+            Assert.AreEqual(model.MD5, dINFO.Body.Strng(Decl.MODINFO_MD5_R, 2));
+            Assert.IsTrue(model.elmGroups.Count > 0);
+            Assert.AreEqual(model.pricingMD5, dINFO.Body.Strng(Decl.MODINFO_PRCMD5_R, 2));
 
             if (b_name == defaultModName) FileOp.Delete(model.dir, b_name);
 

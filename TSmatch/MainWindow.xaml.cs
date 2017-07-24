@@ -1,5 +1,5 @@
 ﻿/*-------------------------------------------
- * WPF Main Windows 23.6.2017 Pavel.Khrapkin
+ * WPF Main Windows 24.6.2017 Pavel.Khrapkin
  * --- History ---
  * 2017.05.15 - restored as TSmatch 1.0.1 after Source Control excident
  * 2017.05.23 - Menu OnPriceCheck
@@ -50,7 +50,7 @@ namespace TSmatch
         public static Mod model;
         public static ElmGr currentGroup;
         public static string SuplName;
-        private static bool ModelIsChanged = false, isRawChanged = false, isRuleChanged = false;
+        public static bool ModelIsChanged = false, isRawChanged = false, isRuleChanged = false;
         public static string message;
 
         public MainWindow()

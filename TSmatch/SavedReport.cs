@@ -58,7 +58,7 @@ namespace TSmatch.SaveReport
         public void GetTSmatchINFO(Mod mod)
         {
             Log.set("SR.GetSavedReport(\"" + mod.name + "\")");
-            dINFO = GetModelINFO(mod);
+            GetModelINFO(mod);
             GetSavedReport();
             CheckModelIntegrity();
             SetSavedMod(mod);
@@ -66,9 +66,10 @@ namespace TSmatch.SaveReport
         }
 
         #region ------ ModelINFO region ------
-        public Docs GetModelINFO(Mod _mod)
+        public Mod GetModelINFO(Mod _mod)
         {
             model = _mod;
+            if (mh == null) mh = new MH();
             dINFO = Docs.getDoc(sINFO, fatal: false);
             if (dINFO == null)
             {
@@ -81,11 +82,14 @@ namespace TSmatch.SaveReport
             model.dir = dINFO.Body.Strng(Decl.MODINFO_DIR_R, 2).Trim();
             model.date = getModINFOdate(Decl.MODINFO_DATE_R);
             model.elements = Raw(model);
+            model.MD5 = model.getMD5(model.elements);
             model.MD5 = getModINFOstr(Decl.MODINFO_MD5_R, model.MD5);
+            model.elmGroups = mh.getGrps(model.elements);
+            model.pricingMD5 = model.get_pricingMD5(model.elmGroups);
             model.pricingDate = getModINFOdate(Decl.MODINFO_PRCDAT_R);
             model.pricingMD5 = getModINFOstr(Decl.MODINFO_PRCMD5_R, model.pricingMD5);
             CheckModelIntegrity();
-            return dINFO;
+            return model;
         }
 #if OLD // 14/7/17
             bool check = true;
