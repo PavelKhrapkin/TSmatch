@@ -8,7 +8,7 @@ using FileOp = match.FileOp.FileOp;
 using Boot = TSmatch.Bootstrap.Bootstrap;
 using Mod = TSmatch.Model.Model;
 using SR = TSmatch.SaveReport.SavedReport;
-using MH = TSmatch.Model.Handler.ModHandler;
+using MH = TSmatch.Handler.Handler;
 
 namespace TSmatch.Matcher.Tests
 {
@@ -22,9 +22,9 @@ namespace TSmatch.Matcher.Tests
             var model = new Mod();
             var sr = model.sr = new SR();
             model.mh = new MH();
-            sr.SetModDir(boot);
-            model.dir = model.sr.dir;
-            model.name = sr.name;
+            model.SetModDir(boot);
+            //23/7            model.dir = model.sr.dir;
+            //23/7            model.name = sr.name;
             var elements = model.elements = sr.Raw(model);
             model.elmGroups = model.mh.getGrps(model.elements);
             model.sr.getSavedRules();
