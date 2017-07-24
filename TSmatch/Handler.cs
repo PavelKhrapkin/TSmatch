@@ -1,18 +1,19 @@
-﻿/*--------------------------------------------------------------------------------------------
- * ModHandler : Model -- Handle Model for Report preparation
+﻿/*---------------------------------------------------------------------------------
+ * Handler -- Handle Model for Report preparation
  * 
- *  21.07.2017 Pavel Khrapkin
+ *  23.07.2017 Pavel Khrapkin
  *  
  *--- History ---
  *  8.05.2017 taken from Model code
  * 27.05.2017 getRules
  * 20.06.2017 getGroup re-make with LINQ
  * 28.06.2017 bug fix in PrfUpdate()
- *  3.07.2017 ProfileUpdate module add instead of PrfUdate in ModHandler
+ *  3.07.2017 ProfileUpdate module add instead of PrfUdate in Handler
  * 21.07.2017 Audit GetGrps and Hndl
+ * 23.07.2017 No heritage with Model we-engineering; rename ModHandler -> Handler
  *--- Unit Tests --- 
  * 2017.06.19 UT_ModHandler.UT_Hndl, UT_Pricing OK
- * -------------------------------------------------------------------------------------------
+ * -------------------------------------------------------------------------------
  *      Methods:
  * getGroups()      - groupping of elements of Model by Material and Profile
  * Handler()                 
@@ -20,39 +21,36 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using log4net;
-using Decl = TSmatch.Declaration.Declaration;
-using Lib = match.Lib.MatchLib;
 using Log = match.Lib.Log;
 using Msg = TSmatch.Message.Message;
-using Docs = TSmatch.Document.Document;
 using Elm = TSmatch.ElmAttSet.ElmAttSet;
 using ElmGr = TSmatch.ElmAttSet.Group;
 using Mod = TSmatch.Model.Model;
+using SR = TSmatch.SaveReport.SavedReport;
 using Mtch = TSmatch.Matcher.Mtch;
-using TSmatch.ElmAttSet;
 
-namespace TSmatch.Model.Handler
+namespace TSmatch.Handler
 {
-    public class ModHandler : Mod
+    public class Handler
     {
-        public static readonly ILog log = LogManager.GetLogger("Model.Handler");
+        public static readonly ILog log = LogManager.GetLogger("Handler");
+
+        SR sr;
 
         /// <summary>
         /// getGroups() - groupping of elements of Model by Material and Profile
         /// </summary>
-        /// <ToDo>30.9.2016 - попробовать перенести этот метод в ElmAttSet.Groups или вообще выделить Groups в отдельный класс</ToDo>
         /// <history> 
         /// 2016.09.29 created
         /// 2017.05.8  перенес в модуль ModHandling, добавил аргумент elements
         /// 2017.06.27 переписано
-        /// 2017.07.20 argument errDialo flag add
+        /// 2017.07.20 field bool errDialog add
         /// </history>
         public List<ElmGr> getGrps(List<Elm> elements, bool errDialog = true)
         {
+            Log.set("getGrps(" + elements.Count + ")");
             if (elements == null || elements.Count == 0) Msg.F("getGrps: no elements");
             var gr = new ElmGr(errDialog);
             List<ElmGr> groups = new List<ElmGr>();
@@ -60,69 +58,10 @@ namespace TSmatch.Model.Handler
             foreach (var grp in grps) groups.Add(new ElmGr(grp));
             if (elements.Count != groups.Sum(x => x.guids.Count)) Msg.F("getGrps internal error");
             var v = new ProfileUpdate.ProfileUpdate(ref groups);
+            Log.exit();
             return groups;
         }
-#if OLD //27/6/17
-        public void getGroups(List<Elm> elements)
-        {
-            elmMgroups.Clear();
-            elmGroups.Clear();
-            Dictionary<string, ElmAttSet.ElmAttSet> Elements = new Dictionary<string, ElmAttSet.ElmAttSet>();
-            try { Elements = elements.ToDictionary(elm => elm.guid); }
-            catch { Msg.F("Model.getGroups inconsystent elements "); }
 
-            //-- группы по Материалам elm.mat
-            var matGroups = from elm in elements group elm by elm.mat;
-            foreach (var matGr in matGroups)
-            {
-                List<string> guids = new List<string>();
-                foreach (ElmAttSet.ElmAttSet element in matGr)
-                {
-                    //                      log.Info("mgr.mat=" + matGr.Key + " mgr.element.guid=" + element.guid);
-                    guids.Add(element.guid);
-                }
-                ElmAttSet.Mgroup Mgr = new ElmAttSet.Mgroup(elements, matGr.Key, guids);
-                elmMgroups.Add(Mgr);
-            }
-            log.Info("----- Material Groups Count = " + elmMgroups.Count + "\tfrom " + elements.Count + " elements ----");
-            foreach (var mtGr in elmMgroups)
-                log.Info("material= " + mtGr.mat + "\tCount= " + mtGr.guids.Count + "\tвес=" + mtGr.totalWeight + "\tобъем=" + mtGr.totalVolume);
-
-            //-- группы по Материалу и Профилю elm.mat && elm.prf
-            foreach (var Mgr in elmMgroups)
-            {
-                string curMat = Mgr.mat;
-                //7/6                string curPrf = Lib.ToLat(Elements[Mgr.guids[0]].prf.ToLower());
-                string curPrf = Elements[Mgr.guids[0]].prf;
-                List<string> guids = new List<string>();
-                foreach (var g in Mgr.guids)
-                {
-                    ElmAttSet.ElmAttSet elm = Elements[g];
-                    if (elm.prf == curPrf) guids.Add(g);
-                    else
-                    {
-                        elmGroups.Add(new ElmGr(Elements, curMat, curPrf, guids));
-                        curPrf = elm.prf;
-                        guids = new List<string>();
-                        guids.Add(g);
-                    }
-                }
-                if (guids.Count != 0) elmGroups.Add(new ElmGr(Elements, curMat, curPrf, guids));
-            }
-
-            elmGroups = PrfUpdate(elmGroups);
-//26/6            PrfUpdate();
-
-            log.Info("----- <Material, Profile> Groups Count = " + this.elmGroups.Count);
-            int chkSum = 0;
-            foreach (var gr in this.elmGroups)
-            {
-                log.Info("material= " + gr.mat + "\tprofile= " + gr.prf + "\tCount= " + gr.guids.Count);
-                chkSum += gr.guids.Count;
-            }
-            log.Info("-------------- CheckSum: total elements count in all groups = " + chkSum);
-        }
-#endif //OLD 27/7/17
         /// <summary>
         /// Hndl(model) - find matching Components for model and total_price
         /// </summary>
@@ -137,11 +76,11 @@ namespace TSmatch.Model.Handler
                 bool b = false;
                 foreach (var rule in mod.Rules)
                 {
-log.Info("==>Hndl.MD5=" + mod.MD5 + " =?= " + mod.getMD5(mod.elements));
+                    log.Info("==>Hndl.MD5=" + mod.MD5 + " =?= " + mod.getMD5(mod.elements));
                     Mtch _match = new Mtch(gr, rule);
                     if (_match.ok == Mtch.OK.Match)
                     {
-log.Info("=match.ok=>Hndl.MD5=" + mod.MD5 + " =?= " + mod.getMD5(mod.elements));
+                        log.Info("=match.ok=>Hndl.MD5=" + mod.MD5 + " =?= " + mod.getMD5(mod.elements));
                         mod.matches.Add(_match);
                         gr.SupplierName = _match.rule.Supplier.name;
                         b = true; break;
@@ -202,17 +141,17 @@ log.Info("=match.ok=>Hndl.MD5=" + mod.MD5 + " =?= " + mod.getMD5(mod.elements));
             {
                 if (sr == null) sr = new SaveReport.SavedReport();
                 sr.getSavedRules();
-                m.Rules = sr.Rules;
+                //23/7                m.Rules = sr.Rules;
             }
             foreach (var rule in m.Rules) rule.Init();
-log.Info(">m.MD5=" + m.MD5 + " =?= " + m.getMD5(m.elements));
+            log.Info(">m.MD5=" + m.MD5 + " =?= " + m.getMD5(m.elements));
             Hndl(ref m);
-log.Info(">m.MD5=" + m.MD5 + " =?= " + m.getMD5(m.elements));
-            Log.Trace("      date=\t" + m.date + "\tMD5=" + m.MD5 + "\telementsCount=" + m.elementsCount);
+            log.Info(">m.MD5=" + m.MD5 + " =?= " + m.getMD5(m.elements));
+            Log.Trace("      date=\t" + m.date + "\tMD5=" + m.MD5 + "\telements.Count=" + m.elements.Count);
             Log.Trace("price date=\t" + m.pricingDate + "\tMD5=" + m.pricingMD5 + "\ttotal price" + m.total_price);
             Log.exit();
         }
-
+#if OLD //23.7.17
         public List<Elm> getPricingFrGroups()
         {
             Log.set("Models.getPricing()");
@@ -232,7 +171,6 @@ log.Info(">m.MD5=" + m.MD5 + " =?= " + m.getMD5(m.elements));
             Log.exit();
             return elms.Values.ToList();
         }
-#if OLD //3.7.17
         /// <summary>
         ///  PrfUpdate() - Profile code corrections for some groups
         /// </summary>
@@ -373,5 +311,5 @@ log.Info(">m.MD5=" + m.MD5 + " =?= " + m.getMD5(m.elements));
             return mark;
         }
 #endif //OLD 3.7.17
-    } // end class ModHandler : Model
+    } // end class Handler : Model
 } // end namespace Model.Handler

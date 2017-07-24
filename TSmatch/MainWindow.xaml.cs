@@ -1,5 +1,5 @@
 ﻿/*-------------------------------------------
- * WPF Main Windows 3.6.2017 Pavel.Khrapkin
+ * WPF Main Windows 23.6.2017 Pavel.Khrapkin
  * --- History ---
  * 2017.05.15 - restored as TSmatch 1.0.1 after Source Control excident
  * 2017.05.23 - Menu OnPriceCheck
@@ -67,7 +67,7 @@ namespace TSmatch
             //20/5            message.Text = "..Load MainWindow..";
             boot = new Boot();
             var sr = new SaveReport.SavedReport();
-            model = sr;
+            //23/7            model = sr;
             model.SetModel(boot);
             WrModelInfoPanel();
             WrReportPanel();
@@ -83,7 +83,7 @@ namespace TSmatch
                         + " " + model.date.ToShortTimeString()
                     + "\nДата расценки     " + model.pricingDate.ToLongDateString()
                         + " " + model.pricingDate.ToShortTimeString()
-                + "\nВсего " + model.elementsCount + " элементов"
+                + "\nВсего " + model.elements.Count + " элементов"
                         + ", " + model.elmGroups.Count + " групп";
         }
 
