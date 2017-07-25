@@ -4,6 +4,8 @@
              xmlns:local="clr-namespace:TSmatch"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-         
+        <Style x:Key="RightJustifiedDigit" TargetType="Control">
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+        </Style>
     </Application.Resources>
 </Application>

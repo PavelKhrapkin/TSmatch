@@ -92,8 +92,12 @@ namespace TSmatch
             List<gr> items = new List<gr>();
             foreach (var gr in model.elmGroups)
             {
-                string sPrice = String.Format("{0, 20:N2}", gr.totalPrice);
-                var g = new gr() { mat = gr.Mat, prf = gr.Prf, price = sPrice };
+                string sPrice = String.Format("{0, 14:N2}", gr.totalPrice);
+                string sWgt = String.Format("{0, 10:N3}", gr.totalWeight);
+                string sVol = String.Format("{0, 10:N3}", gr.totalVolume);
+                string sLng = String.Format("{0, 10:N0}", gr.totalLength);
+                var g = new gr() { mat = gr.Mat, prf = gr.Prf, price = sPrice,
+                                   wgt = sWgt,   vol = sVol,   lng = sLng };
                 items.Add(g);
             }
             elm_groups.ItemsSource = items;

@@ -6,14 +6,24 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TSmatch"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="600">
+        Title="MainWindow" Height="350" Width="750">
 
-    <Grid Background="Ivory">
-        <Border BorderBrush="Black" BorderThickness="2"
-                Margin="0,0,0,0" />
+    <Grid Background="Ivory"> 
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="270"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="18"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Border BorderBrush="Black" BorderThickness="2" 
+                Grid.Column="0" Grid.ColumnSpan="2"
+                Grid.Row="0" Grid.RowSpan="2"/>
 
         <!-- Menu -->
-        <DockPanel>
+        <DockPanel Grid.ColumnSpan="2">
             <Menu IsMainMenu="True" VerticalAlignment="Top"
                  Height="16" Margin="2,2,0,0">
                 <MenuItem Header="Файл">
@@ -47,59 +57,66 @@
         </DockPanel>
 
         <!-- ModelINFO Text Block -->
-        <TextBlock x:Name="ModelINFO"
-            HorizontalAlignment="Right" Width="250" Margin="0,30,10,0" 
+        <TextBlock x:Name="ModelINFO" Grid.Row="2" Grid.Column="2"
+            HorizontalAlignment="Stretch" Margin="5,22,10,0" 
             TextWrapping="Wrap" Padding="5"
             VerticalAlignment="Top" Height="90" Background="AliceBlue" >
         </TextBlock>
-        <StackPanel>
+        <StackPanel Grid.Column="2" Grid.Row="2">
             <TextBlock x:Name="ModelINFO_header" Background="Yellow" 
                        Text="Общая информация по модели"
-                       HorizontalAlignment="Right" Width="250"
-                       Margin="0,20,10,0"
+                       HorizontalAlignment="Stretch" 
+                       Margin="0,5,10,0"
                        TextAlignment="Center"/>
         </StackPanel>
         <Border BorderBrush="Black" BorderThickness="1"
-                HorizontalAlignment="Right" Height="112"
-                Margin="0,20,10,0" VerticalAlignment="Top" Width="250" />
+                HorizontalAlignment="Stretch" Height="112"
+                Margin="0,5,10,0" VerticalAlignment="Top"
+                Grid.Column="2" Grid.Row="2"/>
         <Border BorderBrush="Black" BorderThickness="1"
-                HorizontalAlignment="Right" Height="16"
-                Margin="0,20,10,0" VerticalAlignment="Top" Width="250" />
+                HorizontalAlignment="Stretch" Height="16"
+                Margin="0,5,10,0" VerticalAlignment="Top" 
+                Grid.Column="2" Grid.Row="2"/>
 
         <!-- Supplier and CompSet Text Block -->
         <TextBlock x:Name="Supl_CS_Mat_Prf" 
-                HorizontalAlignment="Right" Height="20"
+                HorizontalAlignment="Stretch" Height="20"
                 VerticalAlignment="Top"
-                Margin="0,115, 10,80"  Width="250"
+                Margin="0,115, 10,80"  
                 TextAlignment="Center"   
-                Background="Lightgreen" />
+                Background="Lightgreen"
+                Grid.Column="2" Grid.Row="2"/>
         <TextBlock x:Name="Supl_CS"
             HorizontalAlignment="Right" Width="250"
             VerticalAlignment="Top" Height="100"
-            Margin="0, 136,10,0" Background="White" />
+            Margin="0, 136,10,0" Background="White" 
+            Grid.Column="2"/>
         <TextBlock x:Name="TotalSupl_price"
             HorizontalAlignment="Right" Width="250"
             VerticalAlignment="Top" Height="16"
+            Grid.Column="2"
             Margin="0, 220,10,0" Background="LightCyan" />
 
         <!-- Total model price Text Block -->
         <TextBlock x:Name ="ModPriceSummary"
-            HorizontalAlignment="Right" Height="16"
+            HorizontalAlignment="Stretch" Height="16"
             VerticalAlignment="Bottom"
-            Margin="0,0,10,60"  Width="250"
-            TextWrapping="Wrap" 
+            Margin="0,0,10,60"  
+            TextWrapping="Wrap" Grid.Column="2" Grid.Row="2"
             Background="DarkOrange"
             TextAlignment="Center"
             />
         <Border BorderBrush="Black" BorderThickness="1" 
                 HorizontalAlignment="Right" Height="16"
-                VerticalAlignment="Bottom"
+                VerticalAlignment="Bottom" Grid.Column="2"
                 Margin="0,0, 10,60"  Width="250" />
 
-        <!-- Groups <Material,Profile,Price> Panel -->
+        <!-- Groups <Material,Profile,Price, Weight, Volume, Length> Panel -->
         <ListView Name="elm_groups"
-                  Margin="10 20 10 10" HorizontalAlignment="Left" Width="300"
-                  SelectionChanged="elmGroups_SelectionChanged" FontSize="11" >
+                  HorizontalAlignment="Stretch"
+                  SelectionChanged="elmGroups_SelectionChanged" FontSize="12"
+                  Margin="0,0,0,5"
+                  Grid.Row="2">
 
             <ListView.ItemContainerStyle>
                 <Style TargetType="ListViewItem">
@@ -107,24 +124,37 @@
                 </Style>
             </ListView.ItemContainerStyle>
 
-
             <ListView.View>
                 <GridView>
                     <GridViewColumn Header="Материал" Width="Auto"
                         DisplayMemberBinding="{Binding mat}" />
                     <GridViewColumn Header="Профиль" Width="Auto"
                         DisplayMemberBinding="{Binding prf}" />
-                    <GridViewColumn Header="Цена" Width="Auto">
+                    <GridViewColumn Header="Цена (руб)" Width="Auto">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding price}" TextAlignment="Right" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Header="Вес" Width="Auto">
+                    <GridViewColumn Header="Вес (кг)" Width="Auto">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding wgt}" TextAlignment="Right" />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Header="Объем (м3)" Width="Auto">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding vol}" TextAlignment="Right" />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Header="Длина (м)" Width="Auto">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding lng}" TextAlignment="Right" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
@@ -133,7 +163,8 @@
         </ListView>
         <!-- Button Tekla Read -->
         <Button Name="TeklaRead" HorizontalAlignment="Right" Margin="10 10 200 10" 
-                VerticalAlignment="bottom" Width="46" Click="OnTeklaRead_button_click" Height="29">
+                VerticalAlignment="bottom" Width="46" Click="OnTeklaRead_button_click" Height="29"
+                Grid.Column="2" Grid.Row="2">
             <Button.Background>
                 <ImageBrush ImageSource="logo.png"/>
             </Button.Background>
@@ -143,7 +174,8 @@
         <Button Name="RePrice" HorizontalAlignment="Right" 
                 Margin="10,10,110,10" Height="35"
                 VerticalAlignment="Bottom" Width="35"
-                Click="RePrice_button_Click">
+                Click="RePrice_button_Click"
+                Grid.Column="2" Grid.Row="2">
             <Button.Background>
                 <ImageBrush ImageSource="TSmatch.ico"/>
             </Button.Background>
@@ -153,7 +185,8 @@
                 Margin="10,10,10,2" 
                 VerticalAlignment="Bottom" Width="50" 
                 Click="OK_button_Click" Height="50" 
-                BorderBrush="#FF707070" BorderThickness="0" >
+                BorderBrush="#FF707070" BorderThickness="0"
+                Grid.Column="2" Grid.Row="2">
             <Button.Background>
                 <ImageBrush ImageSource="OK.jpg"/>
             </Button.Background>
