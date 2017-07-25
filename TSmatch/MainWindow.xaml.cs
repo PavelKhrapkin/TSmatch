@@ -108,8 +108,11 @@ namespace TSmatch
         {
             public string mat { get; set; }
             public string prf { get; set; }
-            //3/5           public double price { get; set; }
             public string price { get; set; }
+            public string wgt { get; set; }
+            public string vol { get; set; }
+            public string lng { get; set; }
+            public string supl { get; set; }
         }
         private void elmGroups_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -222,6 +225,15 @@ namespace TSmatch
             string helpPath = boot.TOCdir + @"\TSmatchHelp.mht";
             System.Diagnostics.Process.Start(helpPath);
         }
+
+        private void OnDetailed(object sender, RoutedEventArgs e)
+        {
+            //var w = Application.Current.Windows[0];
+            //w.Hide();
+            W_Det vd = new W_Det();
+            vd.Show();
+        }
+
         private void OnAbout(object sender, RoutedEventArgs e)
         {
             Msg.AskFOK(ABOUT);
@@ -232,22 +244,6 @@ namespace TSmatch
             model.Exit();
             Application.Current.Shutdown();
         }
-
-        //////////////public void TSmatchExit(Mod mod)
-        //25/7 ///////{
-        //////////////    //21/5            isRuleChanged = true; // для отладки
-        //////////////    bool modIsChanged = false;
-        //////////////    bool ruleIsChanged = false;
-
-        //////////////    if (modIsChanged && Msg.AskYN("Модель или цены изменились. Запишем изменения в файл?"))
-        //////////////    {
-        //////////////        var sr = new SaveReport.SavedReport();
-        //////////////        sr.Save(model, isRuleChanged);
-        //////////////    }
-        //////////////    model.HighLightClear();
-        //////////////    FileOp.AppQuit();
-        //////////////    Application.Current.Shutdown();
-        //////////////}
         #endregion --- [Read], [RePrice], and [OK] buttons ---
     }
 } //end namespace

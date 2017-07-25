@@ -25,7 +25,7 @@
                     <MenuItem Header="Выход" Click="OK_button_Click"/>
                 </MenuItem>
                 <MenuItem Header="Вид">
-                    <MenuItem Header="Группы детально" Click="OnFontSize"/>
+                    <MenuItem Header="Группы детально" Click="OnDetailed"/>
                     <Separator/>
                     <MenuItem Header="Размер шрифта" Click="OnPriceCheck"/>
                 </MenuItem>
@@ -115,16 +115,18 @@
                     <GridViewColumn Header="Профиль" Width="Auto"
                         DisplayMemberBinding="{Binding prf}" />
                     <GridViewColumn Header="Цена" Width="Auto">
-                        <!--
-                        DisplayMemberBinding="{Binding price}"
-                        TextBlock.TextAlignment="Right">
-                        -->
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding price}" TextAlignment="Right" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
-
+                    </GridViewColumn>
+                    <GridViewColumn Header="Вес" Width="Auto">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding wgt}" TextAlignment="Right" />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
                     </GridViewColumn>
                 </GridView>
             </ListView.View>
