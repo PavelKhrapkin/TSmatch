@@ -6,7 +6,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TSmatch"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="750">
+        Title="MainWindow" Height="380" Width="750">
 
     <Grid Background="Ivory"> 
         <Grid.ColumnDefinitions>
@@ -58,10 +58,9 @@
 
         <!-- ModelINFO Text Block -->
         <TextBlock x:Name="ModelINFO" Grid.Row="2" Grid.Column="2"
-            HorizontalAlignment="Stretch" Margin="5,22,10,0" 
-            TextWrapping="Wrap" Padding="5"
-            VerticalAlignment="Top" Height="90" Background="AliceBlue" >
-        </TextBlock>
+            HorizontalAlignment="Stretch" Margin="0,22,10,0" 
+            TextWrapping="Wrap" Padding="10"
+            VerticalAlignment="Top" Height="94" Background="AliceBlue" />
         <StackPanel Grid.Column="2" Grid.Row="2">
             <TextBlock x:Name="ModelINFO_header" Background="Yellow" 
                        Text="Общая информация по модели"
@@ -82,20 +81,20 @@
         <TextBlock x:Name="Supl_CS_Mat_Prf" 
                 HorizontalAlignment="Stretch" Height="20"
                 VerticalAlignment="Top"
-                Margin="0,115, 10,80"  
+                Margin="0,120, 10,80"  
                 TextAlignment="Center"   
                 Background="Lightgreen"
-                Grid.Column="2" Grid.Row="2"/>
+                Grid.Column="2" Grid.Row="2" FontWeight="Bold"/>
         <TextBlock x:Name="Supl_CS"
-            HorizontalAlignment="Right" Width="250"
+            HorizontalAlignment="Stretch"
             VerticalAlignment="Top" Height="100"
-            Margin="0, 136,10,0" Background="White" 
-            Grid.Column="2"/>
+            Margin="0, 138,10,0" Background="White" 
+            Padding="5" Grid.Column="2" Grid.Row="2"/>
         <TextBlock x:Name="TotalSupl_price"
-            HorizontalAlignment="Right" Width="250"
+            HorizontalAlignment="Center" 
             VerticalAlignment="Top" Height="16"
-            Grid.Column="2"
-            Margin="0, 220,10,0" Background="LightCyan" />
+            Grid.Column="2" Grid.Row="2" 
+            Margin="0, 207,10,0" Background="LightCyan" />
 
         <!-- Total model price Text Block -->
         <TextBlock x:Name ="ModPriceSummary"
@@ -104,12 +103,12 @@
             Margin="0,0,10,60"  
             TextWrapping="Wrap" Grid.Column="2" Grid.Row="2"
             Background="DarkOrange"
-            TextAlignment="Center"
+            TextAlignment="Center" FontWeight="Bold"
             />
         <Border BorderBrush="Black" BorderThickness="1" 
-                HorizontalAlignment="Right" Height="16"
-                VerticalAlignment="Bottom" Grid.Column="2"
-                Margin="0,0, 10,60"  Width="250" />
+                HorizontalAlignment="Stretch" Height="16"
+                VerticalAlignment="Bottom" Grid.Column="2" Grid.Row="2"
+                Margin="0,0, 10,60"  />
 
         <!-- Groups <Material,Profile,Price, Weight, Volume, Length> Panel -->
         <ListView Name="elm_groups"
@@ -133,7 +132,7 @@
                     <GridViewColumn Header="Цена (руб)" Width="Auto">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding price}" TextAlignment="Right" />
+                                <TextBlock Text="{Binding price}" TextAlignment="Right" FontWeight="Bold" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
