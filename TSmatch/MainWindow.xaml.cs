@@ -229,16 +229,25 @@ namespace TSmatch
 
         private void OK_button_Click(object sender, RoutedEventArgs e)
         {
-            //21/5            isRuleChanged = true; // для отладки
-            if (ModelIsChanged && Msg.AskYN("Модель или цены изменились. Запишем изменения в файл?"))
-            {
-                var sr = new SaveReport.SavedReport();
-                sr.Save(model, isRuleChanged);
-            }
-            model.HighLightClear();
-            FileOp.AppQuit();
+            model.Exit();
             Application.Current.Shutdown();
         }
+
+        //////////////public void TSmatchExit(Mod mod)
+        //25/7 ///////{
+        //////////////    //21/5            isRuleChanged = true; // для отладки
+        //////////////    bool modIsChanged = false;
+        //////////////    bool ruleIsChanged = false;
+
+        //////////////    if (modIsChanged && Msg.AskYN("Модель или цены изменились. Запишем изменения в файл?"))
+        //////////////    {
+        //////////////        var sr = new SaveReport.SavedReport();
+        //////////////        sr.Save(model, isRuleChanged);
+        //////////////    }
+        //////////////    model.HighLightClear();
+        //////////////    FileOp.AppQuit();
+        //////////////    Application.Current.Shutdown();
+        //////////////}
         #endregion --- [Read], [RePrice], and [OK] buttons ---
     }
 } //end namespace

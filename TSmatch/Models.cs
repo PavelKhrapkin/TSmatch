@@ -180,6 +180,7 @@ namespace TSmatch.Model
             foreach (var elm in elements) { s_e.Add(new Serialized_element(elm)); }
             return MD5gen.MD5HashGenerator.GenerateKey(s_e);
         }
+
         public string get_pricingMD5(List<ElmGr> elmGr)
         {
             var s_g = new List<Serialized_Group>();
@@ -657,5 +658,22 @@ namespace TSmatch.Model
             wrModel(WrMod.Report);      // отчет-сопоставление групп <материал, профиль> c прайс-листами поставщиков      
         }
 #endif // OLD // 13/7/17
+        /// <summary>
+        /// Exit from TSmatch application
+        /// </summary>
+        internal void Exit()
+        {
+            //21/5            isRuleChanged = true; // для отладки
+            bool modIsChanged = false;
+            bool ruleIsChanged = false;
+
+            if (modIsChanged && Msg.AskYN("Модель или цены изменились. Запишем изменения в файл?"))
+            {
+                var sr = new SaveReport.SavedReport();
+                sr.Save(this, ruleIsChanged);
+            }
+            HighLightClear();
+            FileOp.AppQuit();
+        }
     } // end class Model
 } // end namespace Model
