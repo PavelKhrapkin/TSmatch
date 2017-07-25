@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------------------
  * SavedReport -- class for handle saved reports in TSmatchINFO.xlsx
  * 
- *  23.07.2017 П.Л. Храпкин
+ *  24.07.2017 П.Л. Храпкин
  *  
  *--- Unit Tests ---
  * UT_GetModelInfo  2-17.7.14 
@@ -173,13 +173,17 @@ namespace TSmatch.SaveReport
         private void error(bool errRep = false)
         {
             Log.set("SR.errer()");
-            Msg.AskFOK("Corrupted saved report TSmatchINFO.xlsx");
-            model.elements = Raw(model);
-            dRep = Docs.getDoc(sRep);
-            if (dRep == null || errRep) Msg.F("SavedReport recover impossible");
-            GetSavedReport();
-            Recover(sINFO, RecoverToDo.ResetRep);
-            //21/7           Recover(mod, sRep,  RecoverToDo.ResetRep);
+            if (model.errRecover)
+            {
+                Msg.AskFOK("Corrupted saved report TSmatchINFO.xlsx");
+                model.elements = Raw(model);
+                dRep = Docs.getDoc(sRep);
+                if (dRep == null || errRep) Msg.F("SavedReport recover impossible");
+                GetSavedReport();
+                Recover(sINFO, RecoverToDo.ResetRep);
+                //21/7           Recover(mod, sRep,  RecoverToDo.ResetRep);
+            }
+            else MainWindow.ModelIsChanged = true;  // say, that TSmatchINFO.xlsx should be re-written
             Log.exit();
         }
         #endregion ------ ModelINFO region ------
@@ -313,7 +317,6 @@ namespace TSmatch.SaveReport
             Log.set("SR.GetSavedReport");
             bool errRep = true;
             if (mh == null) mh = new MH();
-            //23/7            elmGroups = mh.getGrps(mod.elements, errDialog: false);
             Docs dRep = Docs.getDoc(sRep, fatal: false, create_if_notexist: true);
             if (dRep == null || dRep.i0 < 2) error(errRep);
             //21/7            if (dRep.il != (mod.elmGroups.Count + dRep.i0))
@@ -337,9 +340,10 @@ namespace TSmatch.SaveReport
             return model;
         }
 
-        public void getSavedRules(bool init = false)
+        public void getSavedRules(Mod mod, bool init = false)
         {
             Log.set("SR.getSavedRules()");
+            model = mod;
             model.Rules.Clear();
             Docs doc = Docs.getDoc("Rules");
             for (int i = doc.i0; i <= doc.il; i++)

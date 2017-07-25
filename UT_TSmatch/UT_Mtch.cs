@@ -27,7 +27,7 @@ namespace TSmatch.Matcher.Tests
             //23/7            model.name = sr.name;
             var elements = model.elements = sr.Raw(model);
             model.elmGroups = model.mh.getGrps(model.elements);
-            model.sr.getSavedRules();
+            model.sr.getSavedRules(model);
 
             string md5 = model.getMD5(model.elements);
 

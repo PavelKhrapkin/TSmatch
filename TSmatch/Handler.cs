@@ -140,7 +140,7 @@ namespace TSmatch.Handler
             if (m.Rules == null || m.Rules.Count == 0)
             {
                 if (sr == null) sr = new SaveReport.SavedReport();
-                sr.getSavedRules();
+                sr.getSavedRules(m);
                 //23/7                m.Rules = sr.Rules;
             }
             foreach (var rule in m.Rules) rule.Init();

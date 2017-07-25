@@ -116,6 +116,9 @@
     <Compile Include="Serialized_object.cs" />
     <Compile Include="Suppliers.cs" />
     <Compile Include="TS_OpenAPI.cs" />
+    <Compile Include="W_Detailed.xaml.cs">
+      <DependentUpon>W_Detailed.xaml</DependentUpon>
+    </Compile>
     <Compile Include="W_Rules.xaml.cs">
       <DependentUpon>W_Rules.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -136,6 +139,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="W_Detailed.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="W_Rules.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

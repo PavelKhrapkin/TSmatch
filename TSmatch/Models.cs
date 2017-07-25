@@ -83,7 +83,8 @@ namespace TSmatch.Model
         public readonly HashSet<Supplier> Suppliers = new HashSet<Supplier>();
         public List<CmpSet> CompSets = new List<CmpSet>();
         public List<Matcher.Mtch> matches = new List<Matcher.Mtch>();
-        public bool wrToFile = true;   // when true- we should write into the file TSmatchINFO.xlsx, else- no changes
+        public bool wrToFile = true;    // when true- we should write into the file TSmatchINFO.xlsx, else- no changes
+        public bool errRecover = false; // when true - do Recovery with reWrite TSmatchINFO, else - write later on
         public Docs docReport;
         TS ts = new TS();
         public Handler.Handler mh;

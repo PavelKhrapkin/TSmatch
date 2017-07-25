@@ -67,7 +67,7 @@ namespace TSmatch
             //20/5            message.Text = "..Load MainWindow..";
             boot = new Boot();
             var sr = new SaveReport.SavedReport();
-            //23/7            model = sr;
+            model = new Mod();
             model.SetModel(boot);
             WrModelInfoPanel();
             WrReportPanel();
