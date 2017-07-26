@@ -6,12 +6,12 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TSmatch"
         mc:Ignorable="d"
-        Title="MainWindow" Height="380" Width="750">
+        Title="MainWindow" Height="380" Width="850">
 
     <Grid Background="Ivory"> 
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="270"/>
+            <ColumnDefinition Width="280"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="18"/>
@@ -35,8 +35,6 @@
                     <MenuItem Header="Выход" Click="OK_button_Click"/>
                 </MenuItem>
                 <MenuItem Header="Вид">
-                    <MenuItem Header="Группы детально" Click="OnDetailed"/>
-                    <Separator/>
                     <MenuItem Header="Размер шрифта" Click="OnPriceCheck"/>
                 </MenuItem>
                 <MenuItem Header="Выбор">
@@ -87,14 +85,26 @@
                 Grid.Column="2" Grid.Row="2" FontWeight="Bold"/>
         <TextBlock x:Name="Supl_CS"
             HorizontalAlignment="Stretch"
-            VerticalAlignment="Top" Height="100"
+            VerticalAlignment="Top" Height="85"
             Margin="0, 138,10,0" Background="White" 
             Padding="5" Grid.Column="2" Grid.Row="2"/>
+        <TextBlock x:Name="Supl_URL"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Top" Height="15" Background="White"
+                   Margin="5,190,10,0"
+                   Grid.Column="2" Grid.Row="2">
+            <Hyperlink NavigateUri="http://www.google.com" RequestNavigate="Hyperlink_RequestNavigate"/>
+        </TextBlock>
+        <TextBlock x:Name="TotalSupl_weight_volume"
+            HorizontalAlignment="Center" 
+            VerticalAlignment="Top" Height="16"
+            Grid.Column="2" Grid.Row="2" 
+            Margin="0, 210,10,0" Background="LightCyan"/>
         <TextBlock x:Name="TotalSupl_price"
             HorizontalAlignment="Center" 
             VerticalAlignment="Top" Height="16"
             Grid.Column="2" Grid.Row="2" 
-            Margin="0, 207,10,0" Background="LightCyan" />
+            Margin="0, 225,10,0" Background="LightCyan" FontWeight="Bold" />
 
         <!-- Total model price Text Block -->
         <TextBlock x:Name ="ModPriceSummary"
@@ -157,6 +167,8 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
+                    <GridViewColumn Header="Поставщик" Width="Auto"
+                        DisplayMemberBinding="{Binding supl}" />
                 </GridView>
             </ListView.View>
         </ListView>

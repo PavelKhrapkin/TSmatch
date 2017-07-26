@@ -23,6 +23,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Diagnostics;
 
 using log4net;
 using Log = match.Lib.Log;
@@ -72,7 +73,7 @@ namespace TSmatch
             WrModelInfoPanel();
             WrReportPanel();
             //30/5            model.HighLightElements(Mod.HighLightMODE.NoPrice);
-            message = "вначале группы без цен...";
+            //25/7 message = "вначале группы без цен...";
             msg.Text = message;
         }
 
@@ -93,11 +94,12 @@ namespace TSmatch
             foreach (var gr in model.elmGroups)
             {
                 string sPrice = String.Format("{0, 14:N2}", gr.totalPrice);
-                string sWgt = String.Format("{0, 10:N3}", gr.totalWeight);
+                string sWgt = String.Format("{0, 10:N1}", gr.totalWeight);
                 string sVol = String.Format("{0, 10:N3}", gr.totalVolume);
-                string sLng = String.Format("{0, 10:N0}", gr.totalLength);
+                string sLng = String.Format("{0, 10:N1}", gr.totalLength/1000);
                 var g = new gr() { mat = gr.Mat, prf = gr.Prf, price = sPrice,
-                                   wgt = sWgt,   vol = sVol,   lng = sLng };
+                                   wgt = sWgt,   vol = sVol,   lng = sLng,
+                                   supl = gr.SupplierName};
                 items.Add(g);
             }
             elm_groups.ItemsSource = items;
@@ -120,25 +122,45 @@ namespace TSmatch
         }
         private void elmGroups_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            gr v = (gr)elm_groups.SelectedValue;
-            if (v == null) return;
-            currentGroup = model.elmGroups.Find(x => x.Mat == v.mat && x.Prf == v.prf);
+            gr g = (gr)elm_groups.SelectedValue;
+            if (g == null) return;
+            currentGroup = model.elmGroups.Find(x => x.Mat == g.mat && x.Prf == g.prf);
             SuplName = currentGroup.SupplierName;
             Supl supl = new Supl(currentGroup.SupplierName);
             Supl_CS_Mat_Prf.Text = SuplName + "\t" + currentGroup.CompSetName;
-            Supl_CS.Text = supl.getSupplierStr();
-            double p = 0;
+            string str = "Адрес: ";
+            if (!string.IsNullOrEmpty(supl.index)) str += supl.index + ", ";
+            str += supl.City + ", ";
+            if (str.Length > 20) str += "\n";
+            str += supl.street + "\nтел." + supl.telephone;
+            Supl_CS.Text = str;
+            //--2017.07.26 не вполне работает Hyperlink- нет вызова сайта при клике. Пока оставил так..
+                        Supl_URL.Inlines.Clear();
+                        Run myURL = new Run(supl.Url);
+                        Hyperlink hyperl = new Hyperlink(myURL);
+                        Supl_URL.Inlines.Add(hyperl);           
+            //--
+            double p = 0, w=0, v=0;
             foreach (var gr in model.elmGroups)
             {
                 if (gr.SupplierName != currentGroup.SupplierName) continue;
+                w += gr.totalWeight;
+                v += gr.totalVolume;
                 p += gr.totalPrice;
             }
+            TotalSupl_weight_volume.Text = String.Format("Общий вес= {0:N1} кг, объем = {1:N1} м3", w, v);
             string sP = string.Format("{0:N2}", p);
-            TotalSupl_price.Text = "Всего по этому поставщику " + sP + " руб";
+            TotalSupl_price.Text = "Цена по этому поставщику " + sP + " руб";
 
             message = "выделяю группу..";
             elm_groups.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal
                 , new NextPrimeDelegate(HighLighting));
+        }
+
+        private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
+        {
+            Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri));
+            e.Handled = true;
         }
 
         private void HighLighting()
@@ -228,14 +250,6 @@ namespace TSmatch
         {
             string helpPath = boot.TOCdir + @"\TSmatchHelp.mht";
             System.Diagnostics.Process.Start(helpPath);
-        }
-
-        private void OnDetailed(object sender, RoutedEventArgs e)
-        {
-            //var w = Application.Current.Windows[0];
-            //w.Hide();
-            W_Det vd = new W_Det();
-            vd.Show();
         }
 
         private void OnAbout(object sender, RoutedEventArgs e)
