@@ -79,13 +79,40 @@ namespace TSmatch
 
         private void WrModelInfoPanel()
         {
-            ModelINFO.Text = "Модель:\t\"" + model.name + "\""
-                    + "\nДата сохранения " + model.date.ToLongDateString()
-                        + " " + model.date.ToShortTimeString()
-                    + "\nДата расценки     " + model.pricingDate.ToLongDateString()
-                        + " " + model.pricingDate.ToShortTimeString()
-                + "\nВсего " + model.elements.Count + " элементов"
-                        + ", " + model.elmGroups.Count + " групп";
+            ModelName.Text = model.name;
+            City.Text = model.adrCity;
+            DateCAD.Text = model.date.ToLongDateString()
+                + " " + model.date.ToShortTimeString();
+            DatePricing.Text = model.pricingDate.ToLongDateString()
+                + " " + model.pricingDate.ToShortTimeString();
+            elm_count.Text = model.elements.Count.ToString();
+            gr_count.Text = model.elmGroups.Count.ToString();
+            //ModelINFO.Text = "Модель:\t\"" + model.name + "\""
+            //        + "\nДата сохранения " + model.date.ToLongDateString()
+            //            + " " + model.date.ToShortTimeString()
+            //        + "\nДата расценки     " + model.pricingDate.ToLongDateString()
+            //            + " " + model.pricingDate.ToShortTimeString()
+            //    + "\nВсего " + model.elements.Count + " элементов"
+            //            + ", " + model.elmGroups.Count + " групп";
+        }
+
+        private bool adrIsChanged = false;
+        private void OnKeyDownHandler(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Return)
+            {
+                string[] str = City.Text.Split(',');
+                string _city = str[0].Trim();
+                string _street = City.Text.Substring(str[0].Length + 1).Trim();
+                if (_city != model.adrCity || _street != model.adrStreet)
+                {
+                    ModelIsChanged = true;
+                    DataContext = this;
+                    adrIsChanged = true;
+                    model.adrCity = _city;
+                    model.adrStreet = _street;
+                }
+            }
         }
 
         private void WrReportPanel()
