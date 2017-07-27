@@ -81,6 +81,8 @@ namespace TSmatch
         {
             ModelName.Text = model.name;
             City.Text = model.adrCity;
+            if (model.adrStreet != string.Empty)
+                City.Text = model.adrCity + ", " + model.adrStreet;
             DateCAD.Text = model.date.ToLongDateString()
                 + " " + model.date.ToShortTimeString();
             DatePricing.Text = model.pricingDate.ToLongDateString()
@@ -117,9 +119,18 @@ namespace TSmatch
                 string sWgt = String.Format("{0, 10:N1}", gr.totalWeight);
                 string sVol = String.Format("{0, 10:N3}", gr.totalVolume);
                 string sLng = String.Format("{0, 10:N1}", gr.totalLength/1000);
-                var g = new gr() { mat = gr.Mat, prf = gr.Prf, price = sPrice,
-                                   wgt = sWgt,   vol = sVol,   lng = sLng,
-                                   supl = gr.SupplierName};
+                string sSupl = string.IsNullOrEmpty(gr.SupplierName) ? "---" : gr.SupplierName;
+                var g = new gr()
+                {
+                    mat = gr.Mat,
+                    prf = gr.Prf,
+                    price = sPrice,
+                    wgt = sWgt,
+                    vol = sVol,
+                    lng = sLng,
+                    //27/7                                   supl = gr.SupplierName};
+                    supl = sSupl
+                };
                 items.Add(g);
             }
             elm_groups.ItemsSource = items;
