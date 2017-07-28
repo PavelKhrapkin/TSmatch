@@ -1,29 +1,29 @@
 ﻿/*=================================
- * Components Unit Test 16.6.2017
+ * Components Unit Test 23.6.2017
  *=================================
  */
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using TSmatch.Component;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using Lib = match.Lib.MatchLib;
+using MH = TSmatch.Handler.Handler;
+using ElmGr = TSmatch.ElmAttSet.Group;
 
 namespace TSmatch.Component.Tests
 {
     [TestClass()]
     public class UT_Component
     {
-        [TestMethod()]
-        public void UT_Component_isMatch()
-        {
-            ElmAttSet.Group gr = new ElmAttSet.Group();
-            Rule.Rule rule = new Rule.Rule();
-            var comp = new Component();
+        MH mod = new MH();
+        ElmAttSet.Group gr = new ElmAttSet.Group();
+        List<ElmGr> inp = new List<ElmGr>();
+        Rule.Rule rule = new Rule.Rule();
+        Component comp = new Component();
 
+        [TestMethod()]
+        public void UT_Component_checkComp()
+        {
             //test 1: gr="PL10*100" rule="Prf: PL=—*x*" comp="PL10x100" => TRUE
             gr.prf = "PL10*100";
             rule.text = "Prf:PL=—*x*";
@@ -61,7 +61,7 @@ namespace TSmatch.Component.Tests
             //test 4: gr="I20" rule="Профиль: Балка =I* дл;" comp="Балка 20 дл. 9м Ст3пс5" => TRUE
             gr.Prf = "I20"; gr.prf = "i20";
             rule.text = "Профиль: Балка =I*";
-            string comp_txt = "Балка 20";
+            string comp_txt = "Балка 20";   // <==!!
             rule.ruleDP = new DPar.DPar(rule.text);
             rule.synonyms = rule.RuleSynParse(rule.text);
             var syns = rule.synonyms[Section.Section.SType.Profile].ToList();
@@ -73,16 +73,39 @@ namespace TSmatch.Component.Tests
             b = comp.isMatch(gr, rule);
             Assert.IsTrue(b);
 
-#if NOT_WORKS_YET   //4/3/17
-            //test 3: gr="U10P_8240_97" rule="Профиль: Швеллер = U*П_;" => TRUE
-            gr.prf = "U10P_8240_97";
-            rule.text = "Профиль: Швеллер = U*П_;";
-            rule.ruleDP = new DPar.DPar("Профиль: Швеллер = U*П_;");
-            rule.synonyms = rule.RuleSynParse(rule.text);
-            comp.compDP = new DPar.DPar("Prf: Швеллер 10П");
+            //test 4-1: gr="I30Ш2" rule="Профиль: Двутавр=I*Ш*" => TRUE
+            initGr("I30Ш2");
+            initRule("М: C245=C255 ; Профиль: Двутавр=I*Ш*");
+            initComp("двутавр 30Ш2");
             b = comp.isMatch(gr, rule);
             Assert.IsTrue(b);
-#endif //NOT_WORKS_YET 4/6/17
+
+            //test 5: gr="Гн.100x4" rule="Профиль: Швеллер = U*П_;" => TRUE
+            initGr("Гн.100x4");
+            initRule("Профиль: Гн.*х*");
+            initComp("Гн. 100х4");
+            b = comp.isMatch(gr, rule);
+            Assert.IsTrue(b);
+
+            //test 6: gr="Гн.100x4" rule="Профиль: Швеллер = U*П_;" Comp=M:C345 => FALSE
+            initGr("Гн.100x46");
+            initRule("Профиль: Уголок=L *x*x*");
+            initComp("Гн. 100х4", "C345");
+            b = comp.isMatch(gr, rule);
+            Assert.IsTrue(!b);
+        }
+
+        [TestMethod()]
+        public void UT_isOK()
+        {
+            var comp = new Component();
+
+            string pattern = "*x@*";
+            string c = "6x1500x2500";
+            string g = "6x94";
+
+            bool ok = comp.isOK(pattern, c, g);
+            Assert.IsTrue(ok);
         }
 
         [TestMethod()]
@@ -136,6 +159,32 @@ namespace TSmatch.Component.Tests
             Assert.AreEqual(v.Count, 2);
             Assert.AreEqual(v[0], "10");
             Assert.AreEqual(v[1], "@300");
+        }
+
+        private void initGr(string v, string mat = "C245")
+        {
+            inp.Clear();
+            gr.Prf = v;
+            gr.prf = Lib.ToLat(v.ToLower().Replace(" ", ""));
+            gr.Mat = mat;
+            gr.mat = Lib.ToLat(mat.ToLower().Replace(" ", ""));
+            inp.Add(gr);
+            //23/7            mod.elmGroups = inp;
+        }
+
+        private void initRule(string v)
+        {
+            rule.text = v;
+            rule.ruleDP = new DPar.DPar(rule.text);
+            rule.synonyms = rule.RuleSynParse(rule.text);
+        }
+
+        private void initComp(string v, string mat = "C245")
+        {
+            comp.compDP.dpar.Clear();
+            comp.compDP.dpStr.Clear();
+            comp.compDP.Ad(Section.Section.SType.Profile, v);
+            comp.compDP.Ad(Section.Section.SType.Material, mat);
         }
     }
 }

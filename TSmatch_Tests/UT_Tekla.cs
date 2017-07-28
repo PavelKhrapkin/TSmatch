@@ -1,14 +1,8 @@
 ﻿/*=========================================
- * Model Unit Tekla = TS_OpenAPI 2.6.2017
+ * Model Unit Tekla = TS_OpenAPI 28.7.2017
  *=========================================
  */
- using Microsoft.VisualStudio.TestTools.UnitTesting;
-using TSmatch.Tekla;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using TS = TSmatch.Tekla.Tekla;
 using FileOp = match.FileOp.FileOp;
@@ -26,6 +20,8 @@ namespace TSmatch.Tekla.Tests
             ts.WriteToReport(path);
             Assert.IsTrue(FileOp.isFileExist(path));
             var rd = ts.ReadReport(path);
+
+            FileOp.AppQuit();
         }
     }
 }

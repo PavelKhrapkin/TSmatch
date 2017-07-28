@@ -1,5 +1,5 @@
 ﻿/*=================================
- * Rules Unit Test 19.6.2017
+ * Rule Unit Test 4.6.2017
  *=================================
  */
  using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -18,8 +18,6 @@ namespace TSmatch.Rule.Tests
         [TestMethod()]
         public void UT_RuleSynParse()
         {
-            Rule rule = new Rule();
-            string txt = "Prf: PL =—*x * ";
             Assert.Fail();
         }
     }
