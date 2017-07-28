@@ -43,7 +43,7 @@ namespace TSmatch
     {
         public static readonly ILog log = LogManager.GetLogger("MainWindow");
 
-        const string ABOUT = "TSmatch v1.0.2 27.6.2017";
+        const string ABOUT = "TSmatch v1.0.2 27.7.2017";
         public static Boot boot;
         public static string MyCity = "Санкт-Петербург";
         public delegate void NextPrimeDelegate();
@@ -51,7 +51,6 @@ namespace TSmatch
         public static Mod model;
         public static ElmGr currentGroup;
         public static string SuplName;
-        public static bool ModelIsChanged = false, isRawChanged = false, isRuleChanged = false;
         public static string message;
 
         public MainWindow()
@@ -101,7 +100,8 @@ namespace TSmatch
                 string _street = City.Text.Substring(str[0].Length + 1).Trim();
                 if (_city != model.adrCity || _street != model.adrStreet)
                 {
-                    ModelIsChanged = true;
+                    //27/7                    ModelIsChanged = true;
+                    model.isChanged = true;
                     DataContext = this;
                     adrIsChanged = true;
                     model.adrCity = _city;
@@ -258,7 +258,8 @@ namespace TSmatch
         {
             MessageBox.Show("Читать?", "TSmatch", MessageBoxButton.OK);
             model.Read();
-            isRawChanged = true;
+            //27/7            isRawChanged = true;
+            model.isChanged = true;
         }
 
         private void RePrice_button_Click(object sender, RoutedEventArgs e)
@@ -274,7 +275,8 @@ namespace TSmatch
         internal static void RePricing()
         {
             model.mh.Pricing(ref model);
-            ModelIsChanged = true;
+            //27/7            ModelIsChanged = true;
+            model.isChanged = true;
         }
 
         private void OnHelp(object sender, RoutedEventArgs e)

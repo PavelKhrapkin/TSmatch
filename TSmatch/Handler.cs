@@ -70,7 +70,7 @@ namespace TSmatch.Handler
         {
             Log.set("MH.Hndl");
             mod.elmGroups = getGrps(mod.elements);
-            // find matching Components with Rules by Match 
+            // find matching Components with Rules by module Mtch 
             foreach (var gr in mod.elmGroups)
             {
                 bool b = false;

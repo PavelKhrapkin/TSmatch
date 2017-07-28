@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------------------
  * SavedReport -- class for handle saved reports in TSmatchINFO.xlsx
  * 
- *  24.07.2017 П.Л. Храпкин
+ *  28.07.2017 П.Л. Храпкин
  *  
  *--- Unit Tests ---
  * UT_GetModelInfo  2-17.7.14 
@@ -13,6 +13,7 @@
  * 27.05.2017 - XML read and write model.elements as Raw.xml in Raw() 
  *  5.06.2017 - bug fix in SetFrSavedModel - recoursive call after Reset
  * 23.07.2017 - re-engineering with no heritage from Model
+ * 27.07.2017 - no isRuleChanged -- model.isChanged handle in Save() method
  *--- Methods: -------------------      
  * bool GetTSmatchINFO()    - read TSmatchINFO.xlsx, set it as a current Model
  *                            return true if name, dir, quantity of elements is
@@ -183,7 +184,7 @@ namespace TSmatch.SaveReport
                 Recover(sINFO, RecoverToDo.ResetRep);
                 //21/7           Recover(mod, sRep,  RecoverToDo.ResetRep);
             }
-            else MainWindow.ModelIsChanged = true;  // say, that TSmatchINFO.xlsx should be re-written
+            else model.isChanged = true;  // say, that TSmatchINFO.xlsx should be re-written
             Log.exit();
         }
         #endregion ------ ModelINFO region ------
@@ -340,7 +341,7 @@ namespace TSmatch.SaveReport
             return model;
         }
 
-        public void getSavedRules(Mod mod, bool init = false)
+        public Mod getSavedRules(Mod mod, bool init = false)
         {
             Log.set("SR.getSavedRules()");
             model = mod;
@@ -350,27 +351,18 @@ namespace TSmatch.SaveReport
             {
                 try { model.Rules.Add(new Rule.Rule(i)); }
                 catch { continue; }
-                //////////////////date = Lib.getDateTime(doc.Body.Strng(i, 1));
-                //////////////////if (date > DateTime.Now || date < Decl.OLD) continue;
-                //////////////////string sSupl = doc.Body.Strng(i, 2);
-                //////////////////string sCS = doc.Body.Strng(i, 3);
-                // 7/6/17 ////////string sR = doc.Body.Strng(i, 4);
-                //////////////////if (string.IsNullOrEmpty(sSupl)
-                //////////////////    || string.IsNullOrEmpty(sCS)
-                //////////////////    || string.IsNullOrEmpty(sR)) continue;
-                //////////////////var rule = new Rule.Rule(date, sSupl, sCS, sR);
-                //////////////////Rules.Add(rule);
             }
             log.Info("- getSavedRules() Rules.Count = " + model.Rules.Count);
+            return model;
             Log.exit();
         }
 
-        internal void Save(Mod model, bool isRuleChanged = false)
+        internal void Save(Mod model)
         {
             var w = new WrMod();
             w.wrModel(WrM.ModelINFO, model);
             w.wrModel(WrM.Report, model);
-            if (isRuleChanged) w.wrModel(WrM.Rules, model);
+            w.wrModel(WrM.Rules, model);
         }
     } // end class SavedReport
 } // end namespace

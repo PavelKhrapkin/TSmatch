@@ -80,20 +80,32 @@ namespace TSmatch.Model.WrModelInfo
                     }
                     break;
                 case WrMod.Report:      // отчет по сопоставлению групп <материал, профиль> c прайс-листами поставщиков
+                    bool noMatchFlag = true;
+                    foreach(var gr in mod.elmGroups)
+                    {
+                        if (gr.match == null || gr.match.ok != Mtch.OK.Match) continue;
+                        noMatchFlag = false;
+                        break;
+                    }
+                    if (noMatchFlag)
+                    {
+                        if (mod.mh == null) mod.mh = new Handler.Handler();
+                        mod.mh.Pricing(ref mod);
+                    }               
                     doc.wrDocSetForm("FORM_Report", AutoFit: true);
                     int n = 1;
                     foreach (var gr in mod.elmGroups)
                     {
-                        string foundDescr = "", suplName = "", csName = "";
+                        string compDescription = "", suplName = "", csName = "";
                         if (gr.match != null && gr.match.ok == Mtch.OK.Match)
                         {
-                            foundDescr = gr.match.component.Str(SType.Description);
+                            compDescription = gr.match.component.Str(SType.Description);
                             suplName = gr.match.rule.Supplier.name;
                             csName = gr.match.rule.CompSet.name;
                         }
                         doc.wrDocForm(n++, gr.Mat, gr.Prf
                             , gr.totalLength, gr.totalWeight, gr.totalVolume
-                            , foundDescr, suplName, csName
+                            , compDescription, suplName, csName
                             , gr.totalWeight, gr.totalPrice);
                     }
                     doc.isChanged = true;

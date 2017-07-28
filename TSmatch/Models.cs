@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------------------------------
  * Model -- Manage major class operaions together with the child modules Handler and SavedMdel
  * 
- * 23.07.2017 Pavel Khrapkin
+ * 27.07.2017 Pavel Khrapkin
  *  
  *--- History ---
  * Jan-16 - May-17 pre-history P.Khrapkin, A.Pass, A.Bobtsov
@@ -16,6 +16,7 @@
  * 11.07.2017 - Project address fields add to class Model
  * 14.07.2017 - SetModDir setarated from SetModet for UT_
  * 23.07.2017 - exclude elementsCound from Model propertties; now account elements.Count
+ * 27.07.2017 - remove isRuleChanged. Always write Rules, when modelIsChanged
  * --- Unit Tests ---
  * 2017.07.6  UT_Model.UT_SetModel   OK
  * 2017.07.14 UT_SetModDir, setCity  OK 
@@ -663,14 +664,10 @@ namespace TSmatch.Model
         /// </summary>
         internal void Exit()
         {
-            //21/5            isRuleChanged = true; // для отладки
-            bool modIsChanged = false;
-            bool ruleIsChanged = false;
-
-            if (modIsChanged && Msg.AskYN("Модель или цены изменились. Запишем изменения в файл?"))
+            if (isChanged && Msg.AskYN("Модель или цены изменились. Запишем изменения в файл?"))
             {
                 var sr = new SaveReport.SavedReport();
-                sr.Save(this, ruleIsChanged);
+                sr.Save(this);
             }
             HighLightClear();
             FileOp.AppQuit();
