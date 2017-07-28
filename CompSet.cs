@@ -1,7 +1,7 @@
 ﻿/*----------------------------------------------------------------------------
- * CompSet -- Set of Components got from the Supplier' price-list
+ * CompSet -- Set of Components from the Supplier' price-list
  * 
- * 6.6.2017  P.Khrapkin
+ * 29.5.2017  P.Khrapkin
  *
  * -- ToDo
  * 31.12.16 использовать Rule.FPs и LoadDescription при конструировании CompSet
@@ -12,7 +12,6 @@
  *  2.04.2017 simplified with PRICE - DPar instead of FPs, don't use Rule.Parser
  *  2.05.2017 FingerPrint reference removed, audit
  * 22.05.2017 Not existing CompSet event handle;
- *  6.06.2017 csDP readonly attribute removed
  * ---------------------------------------------------------------------------
  *      Methods:
  * getCompSet(name, Supplier) - getCompSet by  its name in Supplier' list
@@ -61,10 +60,8 @@ namespace TSmatch.CompSet
         public readonly Supl Supplier;     // организация - поставщик сортамента
         public readonly Docs doc;          // Документ, содержащий набор компонентов, прайс-лист поставщика 
         // parsed LoadDescriptor of price list document
-        public DP csDP;
-        public List<Comp> Components = new List<Comp>();
-
-        public CompSet() { }
+        public readonly DP csDP;
+        public readonly List<Comp> Components = new List<Comp>();
 
         public CompSet(string _name, Supl _supl, string LoadDescription = "", List<Comp> comps = null, bool init = true)
         {

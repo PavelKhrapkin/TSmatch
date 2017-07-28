@@ -92,6 +92,7 @@
     <Compile Include="ElmAttSet.cs" />
     <Compile Include="FileOp.cs" />
     <Compile Include="IFC.cs" />
+    <Compile Include="IModelWrFile.cs" />
     <Compile Include="Interface.cs" />
     <Compile Include="Matcher.cs" />
     <Compile Include="MatchLib.cs" />
@@ -99,10 +100,16 @@
     <Compile Include="MD5gen.cs" />
     <Compile Include="Message.cs" />
     <Compile Include="Models.cs" />
-    <Compile Include="ModHandler.cs" />
+    <Compile Include="Handler.cs" />
+    <Compile Include="ModelWrFile.cs" />
     <Compile Include="Parameter.cs" />
     <Compile Include="PriceList.cs" />
     <Compile Include="ProfileUpdate.cs" />
+    <Compile Include="Properties\TSmatch.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>TSmatch.resx</DependentUpon>
+    </Compile>
     <Compile Include="Rule.cs" />
     <Compile Include="SavedReport.cs" />
     <Compile Include="Section.cs" />
@@ -142,19 +149,14 @@
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <EmbeddedResource Include="Properties\Resources.resx">
+    <EmbeddedResource Include="Properties\TSmatch.resx">
       <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <LastGenOutput>TSmatch.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <None Include="PriceList.cd" />
     <None Include="Properties\Settings.settings">

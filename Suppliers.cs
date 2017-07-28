@@ -1,13 +1,14 @@
 ﻿/*----------------------------------------------------------------------------
  * Suppliers - componets supplier organisations
  * 
- *  29.5.2017  Pavel Khrapkin
+ *  26.7.2017  Pavel Khrapkin
  *
  *--- History ---
  * 27.4.2016 - Remove List<string> doc_names from the Supplier class
  * 29.11.2016 - get Supplier directly from TSmach.xlsx/Supplier, not from Suppliers List
  * 16.04.2017 - getSupplierStr() method add for Windows Form use
  * 10.05.2017 - Not existing Supplier Handle
+ * 26.07.2017 - move getSupplierStr to MainWindow
  * ---------------------------------------------------------------------------
  *      METHODS:
  * getSupplier(name)    - create Suplier(name), get data from TSmatch.xlsx/Supplier    
@@ -151,16 +152,6 @@ namespace TSmatch.Suppliers
             }
             doc.saveDoc();
             doc.Close();
-        }
-        public string getSupplierStr()
-        {
-            string str = "Адрес: ";
-            if (!string.IsNullOrEmpty(index)) str += index + ", ";
-            str += City + ", ";
-            if (str.Length > 20) str += "\n";
-            str += street;
-            str += "\n Web: " + Url + "\n тел." + telephone;
-            return str;
         }
 
         /// <summary>

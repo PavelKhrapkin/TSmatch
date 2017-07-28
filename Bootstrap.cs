@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------------------
  * Bootstrap - provide initial start of TSmatch, when necessary - startup procedure
  * 
- *  11.07.2017  Pavel Khrapkin
+ *  18.07.2017  Pavel Khrapkin
  *
  *--- History ---
  * 25.3.2016 started 
@@ -18,13 +18,14 @@
  *  3.05.2017 - Model Journal initialization
  * 24.05/2017 - Rules and Model journal are not global resources anymore
  * 11.07.2017 - public DibugDir
+ * 17.07.2017 - check Property.TSmatch resources 
+ *  * --- Unit Tests ---
+ * 2017.07.15  UT_Bootstrap   OK
  * ---------------------------------------------------------------------------
  *      Bootstrap Methods:
  * Bootstrap()      - check all resources and start all other modules
- * Init(name)       - Inuitiate C# code Module name
- *      sub-class Resource Methods:
- * Start()              - initiate #templates, which would be used in TOC to adapt TSmatch to the user environment
- * checkResource([name]) - check Resource name or all Resources; if resource is absent or obsolete - Recover
+
+ * checkResx([name], ResName) - check Resource name
  * Recover(fault reason) - try to restore or recover Resource
  *! checkFile(name, date) - check if file name exists and not obsolete; Recover it if necessary
  *! getFile()           - get file with Resource name to replace or resore the Resource
@@ -37,8 +38,10 @@
  */
 
 using System;
+using System.IO;
 using System.Collections.Generic;
 
+using Resx = TSmatch.Properties.TSmatch;
 using Decl = TSmatch.Declaration.Declaration;
 using Lib = match.Lib.MatchLib;
 using Log = match.Lib.Log;
@@ -81,10 +84,102 @@ namespace TSmatch.Bootstrap
         public object classCAD;
         public Mod model;
 
-        public Bootstrap()
+        public Bootstrap() 
         {
-            init(BootInitMode.Bootstrap);
+            desktop_path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            debug_path = desktop_path;
+            if (isTeklaActive)
+            {   // if Tekla is active - get Path of TSmatch
+                classCAD = new TS();
+                _TOCdir = TS.GetTeklaDir(TS.ModelDir.exceldesign);
+                ModelDir = TS.GetTeklaDir(TS.ModelDir.model);
+                //6/4/17                        macroDir = TS.GetTeklaDir(TS.ModelDir.macro);
+                classCAD = new TS();
+            }
+            else
+            {   // if not active - Windows Environment Variable value
+                _TOCdir = Environment.GetEnvironmentVariable(Decl.WIN_TSMATCH_DIR,
+                    EnvironmentVariableTarget.User);
+                ModelDir = desktop_path;
+                classCAD = ifc;
+            }
+            CheckResx(Path.Combine(_TOCdir, "TSmatch.xlsx"), Resx.TSmatch_xlsx);
+            //--- initiate Docs with #Templates
+            Dictionary<string, string> Templates = new Dictionary<string, string>
+                    {
+                        {"#TOC",    TOCdir },
+                        {"#Model",  ModelDir},
+                        {"#Components", TOCdir + @"\База комплектующих"},
+                        {"#TMP",    TMPdir},
+                        {"#DEBUG",  DebugDir},
+                        {"#Macros", macroDir},
+                        {"#Envir",  IFCschema}
+                    };
+            Docs.Start(Templates);
+            docTSmatch = Docs.getDoc();
+            //--- initiate Messages
+            Msg.Init();
+            CheckResx("Messages", Resx.Messages);
+            //--check other Resources and we're in air
+            CheckResx("Forms", Resx.Forms);
         }
+
+        Dictionary<ResType, string> ResTab = new Dictionary<ResType, string>()
+        {
+            {ResType.Date, "Dat" },
+            {ResType.File, "Fil" },
+            {ResType.Doc , "Doc" }
+        };
+        enum ResType { Date, File, Doc, Err}
+        private void CheckResx(string rName, string rValue)
+        {
+            ResType type = ResType.Err;
+            foreach (var x in ResTab)
+            {
+                if (!rValue.Contains(x.Value)) continue;
+                type = x.Key;
+                break;
+            }
+            int indx = rValue.IndexOf(':') + 1;
+            string v = rValue.Substring(indx).Trim();
+            switch (type)
+            {
+                case ResType.Doc:
+                    if (!Docs.IsDocExists(rName)) resError(ResErr.NoDoc, rName);
+                    break;
+                case ResType.File:
+                    if (!FileOp.isFileExist(rName)) resError(ResErr.NoFile, rName);
+                    break;
+                case ResType.Date:
+                    DateTime d = Lib.getDateTime(v);
+                    Docs doc = Docs.getDoc(rName, fatal:false);
+                    if (doc == null) resError(ResErr.NoDoc, rName);
+                    string sdd = doc.Body.Strng(1, 1);
+                    DateTime dd = Lib.getDateTime(sdd);
+                    if (dd < d) resError(ResErr.Obsolete, rName);
+                    break;
+                default: resError(ResErr.ErrResource, rName); break;
+            }
+        }
+        enum ResErr { ErrResource, NoFile, NoDoc, Obsolete }
+        void resError(ResErr errType, string rName)
+        {
+            switch (errType)
+            {
+                case ResErr.NoFile:
+                    Msg.F("No TSmatch Resource file", rName);
+                    break;
+                case ResErr.NoDoc:
+                    Msg.F("No TSmatch Resource Document", rName);
+                    break;
+                case ResErr.Obsolete:
+                    Msg.F("TSmatch Resource Obsolete", rName);
+                    break;
+                default: Msg.F("TSmatch internal Resource error", rName);
+                    break;
+            }
+        }
+#if OLD //15/7
         /// <summary>
         /// init(name [,arg]) - initiate TSmatch module name
         /// </summary>
@@ -142,9 +237,8 @@ namespace TSmatch.Bootstrap
                     Docs.Start(Templates);
                     docTSmatch = Docs.getDoc();
                     Msg.Start();
-//24/5                    initModJournal();
                     break;
-#if OLD
+
                     //17/3/2017                    new initSection();
                     recentModel = Model.Model.RecentModel();
                     //            bool flg = Resource.Check();
@@ -190,7 +284,6 @@ namespace TSmatch.Bootstrap
                         classCAD = ifc;
                     }
                     break;
-#endif // OLD  7/4/17 
             }
             return moduleApp;
         }
@@ -201,9 +294,38 @@ namespace TSmatch.Bootstrap
         /// <history>
         /// 2016.12.14 - re-created without static
         /// </history>
+        private class All_Resources
+        {
+            List<Resource> Resources = new List<Resource>();
+            public All_Resources()
+            {
+                Resources.Add(new Resource(Decl.R_TEKLA,       Decl.R_TEKLA_TYPE,       Decl.R_TEKLA_DATE));
+                Resources.Add(new Resource(Decl.R_TSMATCH,     Decl.R_TSMATCH_TYPE,     Decl.R_TSMATCH_DATE));
+                Resources.Add(new Resource(Decl.R_TOC,         Decl.R_TOC_TYPE,         Decl.R_TOC_DATE));
+                Resources.Add(new Resource(Decl.R_MSG,         Decl.R_MSG_TYPE,         Decl.R_MSG_DATE));
+                Resources.Add(new Resource(Decl.R_FORM,        Decl.R_FORM_TYPE,        Decl.R_FORM_DATE));
+                Resources.Add(new Resource(Decl.R_SUPPLIERS,   Decl.R_SUPPLIERS_TYPE,   Decl.R_SUPPLIERS_DATE));
+                Resources.Add(new Resource(Decl.R_CONST,       Decl.R_CONST_TYPE,       Decl.R_CONST_DATE));
+                Resources.Add(new Resource(Decl.R_TSMATCH_EXE, Decl.R_TSMATCH_EXE_TYPE, Decl.R_TSMATCH_EXE_DATE));
+                Resources.Add(new Resource(Decl.R_BUTTON_CS,   Decl.R_BUTTON_CS_TYPE,   Decl.R_BUTTON_CS_DATE));
+                Resources.Add(new Resource(Decl.R_BUTTON_BMP,  Decl.R_BUTTON_BMP_TYPE,  Decl.R_BUTTON_BMP_DATE));
+                Resources.Add(new Resource(Decl.R_IFC2X3,      Decl.R_IFC2X3_TYPE,      Decl.R_IFC2X3_DATE));
+            }
+
+            internal void Check(string rName)
+            {
+                var r = Resources.Find(x => x.name == rName);
+                switch (r.type)
+                {
+
+                }
+        //        r.checkResource(Resources, rName);
+                //Resources.Find(x => x.name == Decl.R_TEKLA).checkResource(Resource.R_name.Tekla);
+            }
+        }
         private class Resource
         {
-            private string type;
+            public string type;
             public string name;
             private DateTime date;
 
@@ -214,24 +336,24 @@ namespace TSmatch.Bootstrap
                 date = Lib.getDateTime(_dat);
             }
 
-            internal static List<Resource> Start()
-            {
-                Log.set("Bootstrap.Resource.Start");
-                List<Resource> result = new List<Resource>();
-                result.Add(new Resource(Decl.R_TEKLA, Decl.R_TEKLA_TYPE, Decl.R_TEKLA_DATE));
-                result.Add(new Resource(Decl.R_TSMATCH, Decl.R_TSMATCH_TYPE, Decl.R_TSMATCH_DATE));
-                result.Add(new Resource(Decl.R_TOC, Decl.R_TOC_TYPE, Decl.R_TOC_DATE));
-                result.Add(new Resource(Decl.R_MSG, Decl.R_MSG_TYPE, Decl.R_MSG_DATE));
-                result.Add(new Resource(Decl.R_FORM, Decl.R_FORM_TYPE, Decl.R_FORM_DATE));
-                result.Add(new Resource(Decl.R_SUPPLIERS, Decl.R_SUPPLIERS_TYPE, Decl.R_SUPPLIERS_DATE));
-                result.Add(new Resource(Decl.R_CONST, Decl.R_CONST_TYPE, Decl.R_CONST_DATE));
-                result.Add(new Resource(Decl.R_TSMATCH_EXE, Decl.R_TSMATCH_EXE_TYPE, Decl.R_TSMATCH_EXE_DATE));
-                result.Add(new Resource(Decl.R_BUTTON_CS, Decl.R_BUTTON_CS_TYPE, Decl.R_BUTTON_CS_DATE));
-                result.Add(new Resource(Decl.R_BUTTON_BMP, Decl.R_BUTTON_BMP_TYPE, Decl.R_BUTTON_BMP_DATE));
-                result.Add(new Resource(Decl.R_IFC2X3, Decl.R_IFC2X3_TYPE, Decl.R_IFC2X3_DATE));
-                Log.exit();
-                return result;
-            }
+            //////internal static List<Resource> Start()
+            //////{
+            //////    Log.set("Bootstrap.Resource.Start");
+            //////    List<Resource> result = new List<Resource>();
+            //////    result.Add(new Resource(Decl.R_TEKLA, Decl.R_TEKLA_TYPE, Decl.R_TEKLA_DATE));
+            //////    result.Add(new Resource(Decl.R_TSMATCH, Decl.R_TSMATCH_TYPE, Decl.R_TSMATCH_DATE));
+            //////    result.Add(new Resource(Decl.R_TOC, Decl.R_TOC_TYPE, Decl.R_TOC_DATE));
+            //////    result.Add(new Resource(Decl.R_MSG, Decl.R_MSG_TYPE, Decl.R_MSG_DATE));
+            //////    result.Add(new Resource(Decl.R_FORM, Decl.R_FORM_TYPE, Decl.R_FORM_DATE));
+            //////    result.Add(new Resource(Decl.R_SUPPLIERS, Decl.R_SUPPLIERS_TYPE, Decl.R_SUPPLIERS_DATE));
+            //////    result.Add(new Resource(Decl.R_CONST, Decl.R_CONST_TYPE, Decl.R_CONST_DATE));
+            //////    result.Add(new Resource(Decl.R_TSMATCH_EXE, Decl.R_TSMATCH_EXE_TYPE, Decl.R_TSMATCH_EXE_DATE));
+            //////    result.Add(new Resource(Decl.R_BUTTON_CS, Decl.R_BUTTON_CS_TYPE, Decl.R_BUTTON_CS_DATE));
+            //////    result.Add(new Resource(Decl.R_BUTTON_BMP, Decl.R_BUTTON_BMP_TYPE, Decl.R_BUTTON_BMP_DATE));
+            //////    result.Add(new Resource(Decl.R_IFC2X3, Decl.R_IFC2X3_TYPE, Decl.R_IFC2X3_DATE));
+            //////    Log.exit();
+            //////    return result;
+            //////}
             /// <summary>
             /// checkResource([name]) - check Resource name with the date in [1,1]. Default - check all
             /// </summary>
@@ -281,10 +403,9 @@ namespace TSmatch.Bootstrap
                         break;
                 }
                 return ok;
-                throw new NotImplementedException();
             }
         } // end class Resource
-
+#endif // OLD  7/4/17 
         /// <summary>
         /// class Section initialization - fill SectionTab Dictionary
         /// </summary>

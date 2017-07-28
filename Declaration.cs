@@ -85,7 +85,7 @@ namespace TSmatch.Declaration
 
         public const string R_FORM = FORMS;                //TSmatch.xlsx/Forms - Формы
         public const string R_FORM_TYPE = TEMPL_TOC;
-        public const string R_FORM_DATE = "2.7.2016 7:40";
+        public const string R_FORM_DATE = "11.7.2017 17:40";
 
         public const string R_CONST = CONST;               //TSmatch.xlsx/Constants - Таблицы и константы TSmatch
         public const string R_CONST_TYPE = TEMPL_TOC;
@@ -187,15 +187,15 @@ namespace TSmatch.Declaration
         #endregion
 
         #region ----------- константы TSmatchINFO.xlsx/ModelINFO -------------------
-        public const int MODINFO_NAME_R     = 2;
-        public const int MODINFO_ADDRESS_R  = 3;
-        public const int MODINFO_DIR_R      = 4;
-        public const int MODINFO_PHASE_R    = 5;
-        public const int MODINFO_DATE_R     = 6;
-        public const int MODINFO_MD5_R      = 7;
-        public const int MODINFO_ELMCNT_R   = 8;
-        public const int MODINFO_PRCDAT_R   = 9;
-        public const int MODINFO_PRCMD5_R   = 10;
+        public const int MODINFO_NAME_R = 2;
+        public const int MODINFO_ADDRESS_R = 3;
+        public const int MODINFO_DIR_R = 4;
+        public const int MODINFO_PHASE_R = 5;
+        public const int MODINFO_DATE_R = 6;
+        public const int MODINFO_MD5_R = 7;
+        public const int MODINFO_ELMCNT_R = 8;
+        public const int MODINFO_PRCDAT_R = 9;
+        public const int MODINFO_PRCMD5_R = 10;
         #endregion
 
         #region ----------- TSmatchINFO.xlsx/Report - Отчет по результатам подбора сортамента ----------

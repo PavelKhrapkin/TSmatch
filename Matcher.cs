@@ -76,7 +76,7 @@ namespace TSmatch.Matcher
         /// <param name="_rule"></param>
         public Mtch(ElmAttSet.Group gr, Rule.Rule _rule)
         {
-//28/6            gr.Elements  
+            //28/6            gr.Elements  
             if (gr == null || gr.guids.Count < 1) return;
             ok = OK.NoMatch;
             group = gr;
@@ -88,6 +88,9 @@ namespace TSmatch.Matcher
                 if (!found) continue;
                 //-- Component is found - fill Price for all Guids elemets
                 ok = OK.Match;
+                string priceStr;
+                try { priceStr = comp.Str(SType.Price); }
+                catch { Msg.F("Match: Bad Price descriptor", _rule.sSupl, _rule.sCS); }
                 component = comp;
                 gr.match = this;    //27/3!!
                 rule = _rule;
@@ -95,7 +98,7 @@ namespace TSmatch.Matcher
                 foreach (var id in gr.guids)
                 {
                     Elm elm = gr.Elements[id];
-                    string priceStr = comp.Str(SType.Price);
+                    priceStr = comp.Str(SType.Price);
                     double price = getPrice(elm, rule.CompSet.csDP, priceStr);
                     gr.Elements[id].price = price;
                     gr.totalPrice += price;
@@ -125,11 +128,6 @@ namespace TSmatch.Matcher
             }
             return 0;
         }
-
-        public Mtch()   //for test only
-        {
-        }
-
 #if OLD //8/5/2017
         /// <summary>
         /// проверка, соответствует ли строка str набору синонимов и параметров

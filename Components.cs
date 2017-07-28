@@ -1,10 +1,10 @@
 ﻿/*----------------------------------------------------------------------------
  * Components -- Supplier's price-list load and handling 
  * 
- * 4.06.2017  П.Храпкин
+ * 15.07.2017  П.Храпкин
  *
  * --- Unit Testing ---
- * 2017.06.04 UT_Component_IsMatch and UT_Component_ruleRep OK
+ * 2017.07.15 UT_Component_checkComp, UT_Component_rulePar, UT_isOK OK
  * --- History ---
  * 30.11.2016 made as separate module, CompSet is now in another file
  * 30.12.2016 fill matFP, prfFP in setComp()
@@ -182,7 +182,7 @@ namespace TSmatch.Component
                 List<int> pc = Lib.GetPars(p_c[i].Substring(1));
                 List<int> pg = Lib.GetPars(p_g[i].Substring(1));
                 int minPars = Math.Min(pc.Count, pg.Count);
-                for(int n = 0; n < minPars; n++) if (pc[n] < pg[n]) return false;          
+                for (int n = 0; n < minPars; n++) if (pc[n] < pg[n]) return false;
             }
             return true;
         }
@@ -336,6 +336,7 @@ namespace TSmatch.Component
         {
             if (!compDP.dpStr.ContainsKey(stype))
             {
+                if (stype == SType.Price) throw new KeyNotFoundException();
                 Msg.W("CompSet wrong LoadDescriptor", stype);
                 return string.Empty;
             }
