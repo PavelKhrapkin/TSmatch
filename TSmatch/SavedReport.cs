@@ -82,9 +82,12 @@ namespace TSmatch.SaveReport
                 model.dir = dINFO.Body.Strng(Decl.MODINFO_DIR_R, 2).Trim();
                 model.date = getModINFOdate(Decl.MODINFO_DATE_R);
             }
-            model.elements = Raw(model);
-            model.MD5 = model.getMD5(model.elements);          
+            model.elements = Raw(model);        
             model.elmGroups = mh.getGrps(model.elements);
+            if(model.isChanged)
+            {
+                mh.Pricing(ref model);
+            }
 //31/7            model.MD5 = getModINFOstr(Decl.MODINFO_MD5_R, model.MD5);
             model.pricingMD5 = model.get_pricingMD5(model.elmGroups);
             model.pricingDate = getModINFOdate(Decl.MODINFO_PRCDAT_R);
@@ -346,17 +349,29 @@ namespace TSmatch.SaveReport
         {
             Log.set("SR.getSavedRules()");
             model = mod;
-            model.Rules.Clear();
-            Docs doc = Docs.getDoc("Rules");
-            for (int i = doc.i0; i <= doc.il; i++)
+            if (dINFO == null)
             {
-                try
+                Docs ir = Docs.getDoc("InitialRules");
+                for (int i = ir.i0; i < ir.il; i++)
+                    model.Rules.Add(new Rule.Rule(ir, i));
+                foreach (var rule in model.Rules) rule.Init();
+                //////////////string file = Path.Combine(model, Decl.RAWXML);
+                //31/7////////model.Rules = rwXML.XML.ReadFromXmlFile<List<Rule>>(file);
+            }
+            else
+            {
+                model.Rules.Clear();
+                Docs doc = Docs.getDoc("Rules");
+                for (int i = doc.i0; i <= doc.il; i++)
                 {
-                    var rule = new Rule.Rule(i);
-                    if (init) rule.Init();
-                    model.Rules.Add(rule);
+                    try
+                    {
+                        var rule = new Rule.Rule(i);
+                        if (init) rule.Init();
+                        model.Rules.Add(rule);
+                    }
+                    catch { continue; }
                 }
-                catch { continue; }
             }
             log.Info("- getSavedRules() Rules.Count = " + model.Rules.Count);
             return model;

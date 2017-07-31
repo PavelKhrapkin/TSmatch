@@ -1,7 +1,7 @@
 ﻿/*-------------------------------------------------------------------------------------------------------
  * Document -- works with all Documents in the system basing on TOC - Table Of Content
  * 
- * 19.07.2017  Pavel Khrapkin, Alex Pass, Alex Bobtsov
+ * 31.07.2017  Pavel Khrapkin, Alex Pass, Alex Bobtsov
  *
  *--------- History ----------------  
  * 2013-2015 заложена система управления документами на основе TOC и Штампов
@@ -29,6 +29,7 @@
  * 17.04.17 - getDoc() il = doc.Body.iEOL();
  *  7.05.17 - bug fix -- fatal с FileOp
  * 19.07.17 - add wrDoc diagnostics
+ * 31.07.17 - read XML file into doc.Body
  * -------------------------------------------
  *      METHODS:
  * Start()              - Load from directory TOCdir of TOC all known Document attributes, prepare everithing
@@ -62,6 +63,7 @@ using Mtr = match.Matrix.Matr;  // класс для работы с внутр�
 using Lib = match.Lib.MatchLib;
 using Log = match.Lib.Log;
 using Msg = TSmatch.Message.Message;
+using System.IO;
 
 namespace TSmatch.Document
 {
@@ -259,6 +261,7 @@ namespace TSmatch.Document
         ///  9.4.17 - optional create_if_not_exist argument
         /// 17.4.17 - doc.il = doc.Body.iEOL();
         /// 27.4.17 - move Reset() later in code, error logic changed
+        /// 31.7.17 - read XML file in doc.Body
         /// </history>
         public static Document getDoc(string name = Decl.DOC_TOC
             , bool fatal = true, bool load = true, bool create_if_notexist = false, bool reset = false)
@@ -275,11 +278,20 @@ namespace TSmatch.Document
                     if (doc.FileDirectory.Contains("#")) // #Template substitute with Path in Dictionary
                         doc.FileDirectory = Templates[doc.FileDirectory];
                     //-------- Load Document from the file or create it ------------
-                    doc.Wb = FileOp.fileOpen(doc.FileDirectory, doc.FileName, create_if_notexist, fatal);
-                    if (reset) doc.Reset();
-                    try { doc.Sheet = doc.Wb.Worksheets[doc.SheetN]; }
-                    catch (Exception e) { err += "no SheetN"; ex = doc.SheetN; doc = null; }
-                    if(doc != null) doc.Body = FileOp.getSheetValue(doc.Sheet);
+                    if (doc.type == "XML")
+                    {
+                        string file = Path.Combine(doc.FileDirectory, doc.FileName);
+                        throw new NotImplementedException();
+                        doc.Body = rwXML.XML.ReadFromXmlFile<Mtr>(file);
+                    }
+                    else
+                    {
+                        doc.Wb = FileOp.fileOpen(doc.FileDirectory, doc.FileName, create_if_notexist, fatal);
+                        if (reset) doc.Reset();
+                        try { doc.Sheet = doc.Wb.Worksheets[doc.SheetN]; }
+                        catch (Exception e) { err += "no SheetN"; ex = doc.SheetN; doc = null; }
+                        if (doc != null) doc.Body = FileOp.getSheetValue(doc.Sheet);
+                    }
                 }
             } // end if(!doc.isOpen)
             if (doc != null)

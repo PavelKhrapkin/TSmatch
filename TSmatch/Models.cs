@@ -169,8 +169,6 @@ namespace TSmatch.Model
                 isChanged = true;
                 MD5 = newMD5;
                 date = DateTime.Now;
-//31/7                if (sr == null) sr = new SR();
-//31/7                sr.Save(this);
             }
             return this;
         }

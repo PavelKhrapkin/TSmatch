@@ -28,6 +28,7 @@ using System.Collections.Generic;
 using System.Security.Cryptography;
 
 using Log = match.Lib.Log;
+using System.Xml.Serialization;
 
 namespace match.Matrix
 {
