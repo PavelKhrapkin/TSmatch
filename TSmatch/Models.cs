@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------------------------------
  * Model -- Manage major class operaions together with the child modules Handler and SavedMdel
  * 
- * 27.07.2017 Pavel Khrapkin
+ * 31.07.2017 Pavel Khrapkin
  *  
  *--- History ---
  * Jan-16 - May-17 pre-history P.Khrapkin, A.Pass, A.Bobtsov
@@ -17,6 +17,7 @@
  * 14.07.2017 - SetModDir setarated from SetModet for UT_
  * 23.07.2017 - exclude elementsCound from Model propertties; now account elements.Count
  * 27.07.2017 - remove isRuleChanged. Always write Rules, when modelIsChanged
+ * 31.07.2017 - no SR.Save is necessary after Model.Read - Save will made later on exit 
  * --- Unit Tests ---
  * 2017.07.6  UT_Model.UT_SetModel   OK
  * 2017.07.14 UT_SetModDir, setCity  OK 
@@ -162,15 +163,14 @@ namespace TSmatch.Model
             elements.Clear();
             if (TS.isTeklaActive()) elements = ts.Read();
             else elements = Ifc.Read(ifcPath);
-            //23/7            elementsCount = elements.Count;
             string newMD5 = getMD5(elements);
             if (newMD5 != MD5)
             {
                 isChanged = true;
                 MD5 = newMD5;
                 date = DateTime.Now;
-                if (sr == null) sr = new SR();
-                sr.Save(this);
+//31/7                if (sr == null) sr = new SR();
+//31/7                sr.Save(this);
             }
             return this;
         }

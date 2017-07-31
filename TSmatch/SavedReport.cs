@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------------------
  * SavedReport -- class for handle saved reports in TSmatchINFO.xlsx
  * 
- *  28.07.2017 П.Л. Храпкин
+ *  31.07.2017 П.Л. Храпкин
  *  
  *--- Unit Tests ---
  * UT_GetModelInfo  2-17.7.14 
@@ -14,6 +14,8 @@
  *  5.06.2017 - bug fix in SetFrSavedModel - recoursive call after Reset
  * 23.07.2017 - re-engineering with no heritage from Model
  * 27.07.2017 - no isRuleChanged -- model.isChanged handle in Save() method
+ * 28.07.2017 - getSavedInit() init flag handle
+ * 31.07.2017 - remove local ref mh - it is in Model; fix FATAL "No TSmatchINFO.xlsx"
  *--- Methods: -------------------      
  * bool GetTSmatchINFO()    - read TSmatchINFO.xlsx, set it as a current Model
  *                            return true if name, dir, quantity of elements is
@@ -72,20 +74,18 @@ namespace TSmatch.SaveReport
             model = _mod;
             if (mh == null) mh = new MH();
             dINFO = Docs.getDoc(sINFO, fatal: false);
-            if (dINFO == null)
+            if (dINFO == null) error();
+            if (!model.isChanged)
             {
-                Msg.F("No saved TSmatchINFO.xlsx");
-                Recover(sINFO, RecoverToDo.CreateRep);
-                GetModelINFO(model);
+                model.name = getModINFOstr(Decl.MODINFO_NAME_R);
+                model.setCity(dINFO.Body.Strng(Decl.MODINFO_ADDRESS_R, 2));
+                model.dir = dINFO.Body.Strng(Decl.MODINFO_DIR_R, 2).Trim();
+                model.date = getModINFOdate(Decl.MODINFO_DATE_R);
             }
-            model.name = getModINFOstr(Decl.MODINFO_NAME_R);
-            model.setCity(dINFO.Body.Strng(Decl.MODINFO_ADDRESS_R, 2));
-            model.dir = dINFO.Body.Strng(Decl.MODINFO_DIR_R, 2).Trim();
-            model.date = getModINFOdate(Decl.MODINFO_DATE_R);
             model.elements = Raw(model);
-            model.MD5 = model.getMD5(model.elements);
-            model.MD5 = getModINFOstr(Decl.MODINFO_MD5_R, model.MD5);
+            model.MD5 = model.getMD5(model.elements);          
             model.elmGroups = mh.getGrps(model.elements);
+//31/7            model.MD5 = getModINFOstr(Decl.MODINFO_MD5_R, model.MD5);
             model.pricingMD5 = model.get_pricingMD5(model.elmGroups);
             model.pricingDate = getModINFOdate(Decl.MODINFO_PRCDAT_R);
             model.pricingMD5 = getModINFOstr(Decl.MODINFO_PRCMD5_R, model.pricingMD5);
@@ -174,6 +174,7 @@ namespace TSmatch.SaveReport
         private void error(bool errRep = false)
         {
             Log.set("SR.errer()");
+            log.Info("error() model.errRecover = " + model.errRecover.ToString());
             if (model.errRecover)
             {
                 Msg.AskFOK("Corrupted saved report TSmatchINFO.xlsx");
@@ -349,7 +350,12 @@ namespace TSmatch.SaveReport
             Docs doc = Docs.getDoc("Rules");
             for (int i = doc.i0; i <= doc.il; i++)
             {
-                try { model.Rules.Add(new Rule.Rule(i)); }
+                try
+                {
+                    var rule = new Rule.Rule(i);
+                    if (init) rule.Init();
+                    model.Rules.Add(rule);
+                }
                 catch { continue; }
             }
             log.Info("- getSavedRules() Rules.Count = " + model.Rules.Count);

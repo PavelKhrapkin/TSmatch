@@ -225,9 +225,26 @@ namespace TSmatch.SaveReport.Tests
             var sr = init();
             model.SetModDir(boot);
 
-            sr.getSavedRules(model);
+            // test no Rules Init
+            model = sr.getSavedRules(model);
 
             Assert.IsTrue(model.Rules.Count > 0);
+            foreach(var rule in model.Rules)
+            {
+                Assert.IsNull(rule.Supplier);
+                Assert.IsNull(rule.CompSet);
+            }
+
+            // test with Rules Init = true
+            model = sr.getSavedRules(model, init: true);
+
+            Assert.IsTrue(model.Rules.Count > 0);
+            foreach(var rule in model.Rules)
+            {
+                Assert.IsNotNull(rule.Supplier);
+                Assert.IsNotNull(rule.CompSet);
+                Assert.IsTrue(rule.CompSet.Components.Count > 0);
+            }
 
             FileOp.AppQuit();
         }
