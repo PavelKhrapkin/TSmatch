@@ -1,7 +1,7 @@
 ﻿/*-------------------------------------------------------------------------------------------------------
  * Document -- works with all Documents in the system basing on TOC - Table Of Content
  * 
- * 31.07.2017  Pavel Khrapkin, Alex Pass, Alex Bobtsov
+ * 2.08.2017  Pavel Khrapkin, Alex Pass, Alex Bobtsov
  *
  *--------- History ----------------  
  * 2013-2015 заложена система управления документами на основе TOC и Штампов
@@ -29,7 +29,8 @@
  * 17.04.17 - getDoc() il = doc.Body.iEOL();
  *  7.05.17 - bug fix -- fatal с FileOp
  * 19.07.17 - add wrDoc diagnostics
- * 31.07.17 - read XML file into doc.Body
+ * 31.07.17 - read XML file into doc.Body -- не работает!
+ *  2.08.17 - bug fix on Start; toc is private static reference now;
  * -------------------------------------------
  *      METHODS:
  * Start()              - Load from directory TOCdir of TOC all known Document attributes, prepare everithing
@@ -71,6 +72,7 @@ namespace TSmatch.Document
     {
         private static Dictionary<string, Document> Documents = new Dictionary<string, Document>();   //коллекция Документов
         static Dictionary<string, string> Templates = new Dictionary<string, string>();
+        static Document toc;
 
         #region Document Declaration area
         public string name;
@@ -139,7 +141,8 @@ namespace TSmatch.Document
         {
             Log.set("Document.Start(#Templates)");
             Templates = _Templates;
-            Document toc = tocStart(Templates["#TOC"]);
+            //2/8            Document toc = tocStart(Templates["#TOC"]);
+            toc = tocStart(Templates["#TOC"]);
             Mtr mtr = toc.Body;
             for (int i = toc.i0; i <= toc.il; i++)
             {
@@ -187,7 +190,7 @@ namespace TSmatch.Document
         public static Document tocStart(string TOCdir)
         {
             Log.set("tocStart");
-            Document toc = new Document(Decl.DOC_TOC);
+            toc = new Document(Decl.DOC_TOC);
             toc.Wb = FileOp.fileOpen(TOCdir, Decl.F_MATCH);
             toc.Sheet = toc.Wb.Worksheets[Decl.DOC_TOC];
             toc.Body = FileOp.getSheetValue(toc.Sheet);
@@ -209,8 +212,8 @@ namespace TSmatch.Document
             int x = 0;
             if (!Int32.TryParse(str, out x))
             {
-                if (this.type == "TSmatch") x = this.Sheet.UsedRange.Rows.Count;
-                else if (str == "EOL") x = this.EOLinTOC;
+                if (type == "TSmatch") x = Sheet.UsedRange.Rows.Count;
+                else if (str == "EOL") x = EOLinTOC;
             }
             Log.exit();
             return x;
@@ -219,14 +222,37 @@ namespace TSmatch.Document
         /// EOL(int tocRow) - setup this Document int numbers EndEOLinTOC, i0, and il - main table borders
         /// </summary>
         /// <param name="tocRow">line number of this Document in TOC</param>
-        /// <history>19.3.2016</history>
+        /// <history>19.3.2016
+        /// 2017.8.2 - bug fix; it works for TSmatch Document type only
+        /// </history>
         void EOL(int tocRow)
         {
-            Document toc = (name == Decl.DOC_TOC) ? this : getDoc();
-            EOLinTOC = EOLstr(toc.Body.Strng(tocRow, Decl.DOC_EOL));
-            this.i0 = EOLstr(toc.Body.Strng(tocRow, Decl.DOC_I0));
-            this.il = EOLstr(toc.Body.Strng(tocRow, Decl.DOC_IL));
+            i0 = EOLstr(toc.Body.Strng(tocRow, Decl.DOC_I0));
+            if (type == Decl.TSMATCH)
+            {
+                string shN = toc.Body.Strng(tocRow, Decl.DOC_SHEET);
+                Mtr m = FileOp.getSheetValue(toc.Wb.Sheets[shN]);
+                il = m.iEOL();
+                int ic = m.iEOC(); 
+                while (il > i0)
+                {
+                    for(int i = 1; i <=  ic; i++ )
+                        if (m[il, i] != null) goto foundEOL;
+                    --il;
+                }
+                foundEOL:;      
+            }
+            else
+            {
+                il = EOLstr(toc.Body.Strng(tocRow, Decl.DOC_IL));
+            }
+            EOLinTOC = il;
         }
+
+#if DEBUG //for UT_Document.UT_Start only
+        public static Dictionary<string, Document> __Documents() { return Documents; }
+        public void __EOL(int iTocLine) { EOL(iTocLine); }
+#endif    //for UT_Document.UT_Start only
         #endregion
 
         public static bool IsDocExists(string name)
@@ -261,7 +287,8 @@ namespace TSmatch.Document
         ///  9.4.17 - optional create_if_not_exist argument
         /// 17.4.17 - doc.il = doc.Body.iEOL();
         /// 27.4.17 - move Reset() later in code, error logic changed
-        /// 31.7.17 - read XML file in doc.Body
+        /// 31.7.17 - read XML file in doc.Body -- does't works yet!!
+        ///  2.8.18 - bug fix doc.il set re-written
         /// </history>
         public static Document getDoc(string name = Decl.DOC_TOC
             , bool fatal = true, bool load = true, bool create_if_notexist = false, bool reset = false)
@@ -297,9 +324,9 @@ namespace TSmatch.Document
             if (doc != null)
             {
                 doc.isOpen = true;
-                doc.il = (doc.Body == null) ? 0 : doc.Body.iEOL();
+                if (doc.type != Decl.TSMATCH) doc.il = doc.Body.iEOL();
             }
-            else if(fatal) Msg.F(err, ex, name);
+            else if (fatal) Msg.F(err, ex, name);
             Log.exit();
             return doc;
         }

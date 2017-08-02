@@ -355,8 +355,6 @@ namespace TSmatch.SaveReport
                 for (int i = ir.i0; i < ir.il; i++)
                     model.Rules.Add(new Rule.Rule(ir, i));
                 foreach (var rule in model.Rules) rule.Init();
-                //////////////string file = Path.Combine(model, Decl.RAWXML);
-                //31/7////////model.Rules = rwXML.XML.ReadFromXmlFile<List<Rule>>(file);
             }
             else
             {

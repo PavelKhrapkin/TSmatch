@@ -40,6 +40,14 @@ namespace TSmatch.Document.Tests
             Assert.AreEqual(4, ir.i0);
             Assert.AreEqual(15, ir.il);
 
+
+            //test 4: getDoc("ГК Монолит")
+            string docName = "ГК Монолит";
+            Document d = Document.getDoc(docName);
+            Assert.AreEqual(docName, d.name);
+            Assert.AreEqual(8, d.i0);
+            Assert.AreEqual(15, d.il);
+
             //-- реализация Get без static - еще не работает 20/4/17
             ////Document doc = doc.Get();           // возвращает TOC
             ////Assert.AreEqual(doc.name, "TOC");
@@ -58,7 +66,12 @@ namespace TSmatch.Document.Tests
         public void UT_Reset()
         {
             Boot boot = new Boot();
-            Document doc = Document.getDoc("ModelINFO", reset: true);
+            Document doc = Document.getDoc("ModelINFO", reset: true, create_if_notexist: true);
+
+            Assert.IsNotNull(doc);
+            Assert.IsTrue(doc.il > doc.i0);
+
+            FileOp.AppQuit();
         }
 
         [TestMethod()]
@@ -67,12 +80,12 @@ namespace TSmatch.Document.Tests
             Assert.IsFalse(Document.IsDocExists("TOC"));    // до вызова Boot документ ТОС не существует
             Boot boot = new Boot();
             Assert.IsTrue(Document.IsDocExists("TOC"));     // поле Boot - OK
-//31/7            Assert.IsTrue(Document.IsDocExists());
+                                                            //31/7            Assert.IsTrue(Document.IsDocExists());
             Assert.IsFalse(Document.IsDocExists("bla-bla")); // заведомо не существующий документ
 
             string name = "ModelINFO";
             bool ok = Document.IsDocExists(name);
-            if(ok)
+            if (ok)
             {
                 throw new NotFiniteNumberException();
             }
@@ -82,9 +95,44 @@ namespace TSmatch.Document.Tests
                 Document doc = Document.getDoc(name, create_if_notexist: true, fatal: false, reset: true);
                 Assert.IsTrue(Document.IsDocExists(name));
                 doc.Close();
-//31/7                FileOp.Delete(doc.FileDirectory, name + ".xlsx");
+                //31/7                FileOp.Delete(doc.FileDirectory, name + ".xlsx");
                 Assert.IsFalse(Document.IsDocExists(name));
             }
+
+            FileOp.AppQuit();
+        }
+
+        [TestMethod()]
+        public void UT_Start()
+        {
+            Boot boot = new Boot();
+
+            var Documents = Document.__Documents();
+            Assert.IsTrue(Documents.Count > 50);
+
+            // test InitialRules
+            string sIR = "InitialRules";
+            Document ir = Documents[sIR];
+            //            ir.
+            Assert.AreEqual(4, ir.i0);
+            Assert.AreEqual(15, ir.il);
+
+            Assert.IsTrue(true);
+
+            FileOp.AppQuit();
+        }
+
+        [TestMethod()]
+        public void UT_EOL()
+        {
+            Boot boot = new Boot();
+            string sIR = "InitialRules";
+
+            var doc = Document.getDoc(sIR);
+
+            Assert.AreEqual(sIR, doc.name);
+            Assert.AreEqual(4, doc.i0);
+            Assert.AreEqual(15, doc.il);
 
             FileOp.AppQuit();
         }
