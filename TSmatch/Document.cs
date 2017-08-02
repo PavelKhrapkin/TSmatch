@@ -30,7 +30,7 @@
  *  7.05.17 - bug fix -- fatal с FileOp
  * 19.07.17 - add wrDoc diagnostics
  * 31.07.17 - read XML file into doc.Body -- не работает!
- *  2.08.17 - bug fix on Start; toc is private static reference now;
+ *  2.08.17 - bug fix on Start; toc is private static reference now; EOLinTOC field removed
  * -------------------------------------------
  *      METHODS:
  * Start()              - Load from directory TOCdir of TOC all known Document attributes, prepare everithing
@@ -80,7 +80,6 @@ namespace TSmatch.Document
         public bool isChanged = false;
         public bool isNewDoc = false;   // признак вновь создаваемого Документа
         public string type;
-        private int EOLinTOC;
         public int i0, il;              // номера началной и конечной строк основной таблицы Документа
         public Excel.Workbook Wb;
         public Excel.Worksheet Sheet;
@@ -201,52 +200,29 @@ namespace TSmatch.Document
             Log.exit();
             return toc;
         }
-        /// <summary>
-        /// EOLstr(str) - return parsed string str into Int32, or return EOLinTOC, when str is EOL
-        /// </summary>
-        /// <returns>Int32 or EOLinTOC</returns>
-        /// <history>20.3.2016</history>
-        int EOLstr(string str)
-        {
-            Log.set("Document.Int(" + str + ")");
-            int x = 0;
-            if (!Int32.TryParse(str, out x))
-            {
-                if (type == "TSmatch") x = Sheet.UsedRange.Rows.Count;
-                else if (str == "EOL") x = EOLinTOC;
-            }
-            Log.exit();
-            return x;
-        }
+
         /// <summary>
         /// EOL(int tocRow) - setup this Document int numbers EndEOLinTOC, i0, and il - main table borders
+        /// <para>when TSmatch.xlsx document handled, 'EOL' could be in il TOC column</para>
         /// </summary>
         /// <param name="tocRow">line number of this Document in TOC</param>
         /// <history>19.3.2016
-        /// 2017.8.2 - bug fix; it works for TSmatch Document type only
+        /// 2017.8.2 - bug fix; EOL works for TSmatch Document type only
         /// </history>
         void EOL(int tocRow)
         {
-            i0 = EOLstr(toc.Body.Strng(tocRow, Decl.DOC_I0));
-            if (type == Decl.TSMATCH)
+            i0 = Lib.ToInt(toc.Body.Strng(tocRow, Decl.DOC_I0));
+            string str = toc.Body.Strng(tocRow, Decl.DOC_IL);
+            if (str == "EOL")
             {
+                if (type != Decl.TSMATCH) Msg.F("Shouldn't be 'EOL' here in TSmatch/TOC", tocRow);
                 string shN = toc.Body.Strng(tocRow, Decl.DOC_SHEET);
-                Mtr m = FileOp.getSheetValue(toc.Wb.Sheets[shN]);
+                Mtr m;
+                if (shN == Decl.DOC_TOC) m = toc.Body;
+                else m = FileOp.getSheetValue(toc.Wb.Worksheets[shN]);
                 il = m.iEOL();
-                int ic = m.iEOC(); 
-                while (il > i0)
-                {
-                    for(int i = 1; i <=  ic; i++ )
-                        if (m[il, i] != null) goto foundEOL;
-                    --il;
-                }
-                foundEOL:;      
             }
-            else
-            {
-                il = EOLstr(toc.Body.Strng(tocRow, Decl.DOC_IL));
-            }
-            EOLinTOC = il;
+            else il = Lib.ToInt(str);
         }
 
 #if DEBUG //for UT_Document.UT_Start only
@@ -576,14 +552,16 @@ namespace TSmatch.Document
                         FileOp.setRange(doc.Sheet);
                         FileOp.saveRngValue(doc.Body);
 //24/4/17                        doc.chkSum = doc.Body.ComputeMD5();
-                        doc.EOLinTOC = doc.Body.iEOL();
+//2/8/17 removed EOLinTOC                       doc.EOLinTOC = doc.Body.iEOL();
+                        doc.il = doc.Body.iEOL();
                         FileOp.fileSave(doc.Wb);
                         doc.isChanged = false;
                     }
                     else
                     {
                         if (MD5.Length < 20 || EOL == 0) Msg.F("ERR_05.8_saveDoc_NOMD5");
-                        else { doc.chkSum = MD5; doc.EOLinTOC = EOLinTOC; }
+//2/8/17 removed EOLinTOC                        else { doc.chkSum = MD5; doc.EOLinTOC = EOLinTOC; }
+                        else { doc.chkSum = MD5; doc.il = EOLinTOC; }
                     }
                     Mtr tmp = FileOp.getSheetValue(toc.Sheet);
                     for (int n = toc.i0; n <= toc.il; n++)
@@ -593,7 +571,8 @@ namespace TSmatch.Document
                         tmp[n, Decl.DOC_TIME] = Lib.timeStr();
                         tmp[n, Decl.DOC_MD5] = doc.chkSum;
                         if (doc.type == "N") tmp[n, Decl.DOC_CREATED] = Lib.timeStr();
-                        if (doc.type != Decl.TSMATCH_TYPE) tmp[n, Decl.DOC_EOL] = doc.EOLinTOC;
+//2/8/17 removed EOLinTOC                        if (doc.type != Decl.TSMATCH_TYPE) tmp[n, Decl.DOC_EOL] = doc.EOLinTOC;
+                        if (doc.type != Decl.TSMATCH_TYPE) tmp[n, Decl.DOC_EOL] = doc.il;
                         FileOp.setRange(toc.Sheet);
                         FileOp.saveRngValue(tmp, AutoFit: false);  //======= save TОC in TSmatch.xlsx
                         break;
