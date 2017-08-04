@@ -53,7 +53,7 @@ namespace TSmatch.Model.Tests
         [TestMethod()]
         public void UT_SetModDir()
         {
-            boot = new Bootstrap.Bootstrap();
+            boot = new Boot();
             model = new Mod();
 
             model.SetModDir(boot);
@@ -86,6 +86,22 @@ namespace TSmatch.Model.Tests
             // test empty list of elements MD5
             string md5 = model.getMD5(model.elements);
             Assert.AreEqual("4F76940A4522CE97A52FFEE1FBE74DA2", md5);
+
+            // test getMD5 with Raw()
+            boot = new Boot();
+            model.SetModDir(boot);
+            var sr = new SR();
+            model.elements = sr.Raw(model);
+            Assert.IsTrue(model.elements.Count > 0);
+            string MD5 = model.getMD5(model.elements);
+            Assert.AreEqual(32, MD5.Length);
+            Assert.IsTrue(MD5 != md5);
+
+            // test -- проверка повторного вычисления MD5
+            string MD5_1 = model.getMD5(model.elements);
+            Assert.AreEqual(MD5_1, MD5);
+
+            FileOp.AppQuit();
         }
 
 

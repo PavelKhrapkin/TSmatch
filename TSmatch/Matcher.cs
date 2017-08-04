@@ -67,6 +67,9 @@ namespace TSmatch.Matcher
         public Component.Component component;   //used Component in Match the Rule and Group
         public Rule.Rule rule;                  //the rule, which manage the matching
 
+        private static Mod model;
+
+        public Mtch(Mod mod) { model = mod; }
         /// <summary>
         /// Mtch(gr, _rule) - check if Group gr is in match with rule
         ///    if Mtch.ok.Match - return Mtch.Component chousen from CompSet.Component
@@ -87,26 +90,56 @@ namespace TSmatch.Matcher
                 catch { }
                 if (!found) continue;
                 //-- Component is found - fill Price for all Guids elemets
+
+                if (!OK_MD5()) break; 
+
                 ok = OK.Match;
                 string priceStr;
                 try { priceStr = comp.Str(SType.Price); }
                 catch { Msg.F("Match: Bad Price descriptor", _rule.sSupl, _rule.sCS); }
+
+                if (!OK_MD5()) break;
+
                 component = comp;
                 gr.match = this;    //27/3!!
                 rule = _rule;
-                gr.totalPrice = 0;
-                foreach (var id in gr.guids)
-                {
-                    Elm elm = gr.Elements[id];
-                    priceStr = comp.Str(SType.Price);
-                    double price = getPrice(elm, rule.CompSet.csDP, priceStr);
-                    gr.Elements[id].price = price;
-                    gr.totalPrice += price;
-                }
-                break;
+
+                if (!OK_MD5()) break;
+
+                gr.totalPrice = getPrice(gr, rule.CompSet.csDP, comp.Str(SType.Price));
+
+                if (!OK_MD5()) break;
             }
         }
 
+        public bool OK_MD5()
+        {
+            string newMD5 = model.getMD5(model.elements);
+            return model.MD5 == newMD5;
+        }
+
+        private double getPrice(ElmAttSet.Group group, DPar.DPar csDP, string priceStr)
+        {
+            double price = Lib.ToDouble(priceStr);
+            foreach (var sec in csDP.dpar)
+            {
+                if (!sec.Key.ToString().Contains("UNIT_")) continue;
+                switch (sec.Key)
+                {
+                    case SType.UNIT_Weight: // kg -> tonn
+                        if (group.totalWeight == 0) return group.totalVolume * 7850;
+                        return group.totalWeight / 1000 * price;
+                    case SType.UNIT_Vol:    // mm3 -> m3
+                        return group.totalVolume / 1000 / 1000 / 1000 * price;
+                    case SType.UNIT_Length:
+                        return group.totalLength * price;
+                    case SType.UNIT_Qty:
+                        return price;
+                }
+            }
+            return 0;
+        }
+#if OLD //4/8/2017
         private double getPrice(Elm elm, DPar.DPar csDP, string priceStr)
         {
             double price = Lib.ToDouble(priceStr);
@@ -128,7 +161,7 @@ namespace TSmatch.Matcher
             }
             return 0;
         }
-#if OLD //8/5/2017
+
         /// <summary>
         /// проверка, соответствует ли строка str набору синонимов и параметров
         /// !допустимы str без параметров; при этом pars == null

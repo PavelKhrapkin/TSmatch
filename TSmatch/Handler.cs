@@ -1,7 +1,7 @@
 ﻿/*---------------------------------------------------------------------------------
  * Handler -- Handle Model for Report preparation
  * 
- *  23.07.2017 Pavel Khrapkin
+ *  4.08.2017 Pavel Khrapkin
  *  
  *--- History ---
  *  8.05.2017 taken from Model code
@@ -11,8 +11,10 @@
  *  3.07.2017 ProfileUpdate module add instead of PrfUdate in Handler
  * 21.07.2017 Audit GetGrps and Hndl
  * 23.07.2017 No heritage with Model we-engineering; rename ModHandler -> Handler
+ *  4.08.2017 Handle() elmGroupc.Count and Rule.Count check; Rules Init
  *--- Unit Tests --- 
- * 2017.06.19 UT_ModHandler.UT_Hndl, UT_Pricing OK
+ * 2017.08.4 UT_Handler.UT_Hndl OK -- 20,4 sec модель "Навес над трибунами" 7128 э-тов
+ *           UT_Pricing OK
  * -------------------------------------------------------------------------------
  *      Methods:
  * getGroups()      - groupping of elements of Model by Material and Profile
@@ -70,6 +72,9 @@ namespace TSmatch.Handler
         {
             Log.set("MH.Hndl");
             mod.elmGroups = getGrps(mod.elements);
+            if (mod.elmGroups.Count < 1 || mod.Rules.Count < 1) Msg.F("No Rules or element Groups");
+            foreach (var rules in mod.Rules)
+                if(rules.CompSet == null) rules.Init();
             // find matching Components with Rules by module Mtch 
             foreach (var gr in mod.elmGroups)
             {
@@ -78,6 +83,7 @@ namespace TSmatch.Handler
                 {
                     log.Info("==>Hndl.MD5=" + mod.MD5 + " =?= " + mod.getMD5(mod.elements));
                     Mtch _match = new Mtch(gr, rule);
+                    log.Info("==>Hndl.MD5=" + mod.MD5 + " =?= " + mod.getMD5(mod.elements));
                     if (_match.ok == Mtch.OK.Match)
                     {
                         log.Info("=match.ok=>Hndl.MD5=" + mod.MD5 + " =?= " + mod.getMD5(mod.elements));
@@ -143,7 +149,7 @@ namespace TSmatch.Handler
                 sr.getSavedRules(m);
                 //23/7                m.Rules = sr.Rules;
             }
-            foreach (var rule in m.Rules) rule.Init();
+//2/8            foreach (var rule in m.Rules) rule.Init();
             log.Info(">m.MD5=" + m.MD5 + " =?= " + m.getMD5(m.elements));
             Hndl(ref m);
             log.Info(">m.MD5=" + m.MD5 + " =?= " + m.getMD5(m.elements));

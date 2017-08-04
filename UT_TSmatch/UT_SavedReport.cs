@@ -41,7 +41,7 @@ namespace TSmatch.SaveReport.Tests
             ////////////////mh = new MH();
             ////////////////model.elmGroups = mh.getGrps(model.elements);
 
-            model = sr.GetSavedReport();
+            model = sr.GetPricingOrSavedReport();
             
 
             Assert.IsTrue(model.elmGroups.Count > 0);
@@ -192,7 +192,7 @@ namespace TSmatch.SaveReport.Tests
 
             // SetFrSavedMoodel работает только если нет Tekla
             //..вызывается из Model.SetModel
-            if (boot.isTeklaActive) { Assert.IsTrue(true); return; }
+            if (boot.isTeklaActive) { Assert.IsTrue(true); goto quit; }
 
             Mod m = sr.SetFrSavedModelINFO(model);
             model.name = m.name;
@@ -202,8 +202,8 @@ namespace TSmatch.SaveReport.Tests
             Assert.IsTrue(model.phase.Length > 0);
             Assert.IsTrue(FileOp.isDirExist(model.dir));
 
+            quit:
             FileOp.AppQuit();
-
         }
 
         [TestMethod()]

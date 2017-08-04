@@ -1,24 +1,19 @@
 ﻿/*=================================
- * Handler Unit Test 23.6.2017
+ * Handler Unit Test 3.8.2017
  *=================================
  */
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using TSmatch.Handler;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using FileOp = match.FileOp.FileOp;
 using Boot = TSmatch.Bootstrap.Bootstrap;
 using Mod = TSmatch.Model.Model;
-using ElmGr = TSmatch.ElmAttSet.Group;
-using Msg = TSmatch.Message.Message;
 using TS = TSmatch.Tekla.Tekla;
 using MH = TSmatch.Handler.Handler;
 using SR = TSmatch.SaveReport.SavedReport;
-using TSmatch.ElmAttSet;
+using Elm = TSmatch.ElmAttSet.ElmAttSet;
 
 namespace TSmatch.Handler.Tests
 {
@@ -247,22 +242,48 @@ namespace TSmatch.Handler.Tests
         {
             var boot = new Boot();
             var model = new Mod();
-            model.SetModel(boot);
-
+            model.SetModDir(boot);
+            var sr = new SR();
+            model.elements = sr.Raw(model);
+            List<Elm> elmCopy = new List<Elm>();
+            foreach (Elm elm in model.elements) elmCopy.Add(elm);
+            for (int i = 0; i < elmCopy.Count; i++) Assert.AreEqual(elmCopy[i], model.elements[i]);
+            int cnt = model.elements.Count;
+            string MD5 = model.getMD5(model.elements);
+            Assert.IsTrue(cnt > 0);
+            string cMD5 = model.getMD5(elmCopy);
+            Assert.AreEqual(cMD5, MD5);
+            if (model.Rules == null || model.Rules.Count == 0)
+            {
+                sr.getSavedRules(model, init:true);
+            }
             var mh = new MH();
-            mh.Hndl(ref model);
-            int cnt = 0;
-            foreach (var gr in model.elmGroups) cnt += gr.guids.Count();
-            Assert.AreEqual(model.elements.Count(), cnt);
 
-            //Hndl performance test -- 180 sec for 100 cycles
+            mh.Hndl(ref model);
+
+            // проверка, что elements не испортились
+            foreach (var gr in model.elmGroups) cnt -= gr.guids.Count();
+            Assert.AreEqual(0, cnt);
+            Assert.AreEqual(model.elements.Count, elmCopy.Count);
+            for (int i = 0; i < elmCopy.Count; i++) Assert.AreEqual(elmCopy[i], model.elements[i]);
+            string newMD5 = model.getMD5(model.elements);
+            string copyMD5 = model.getMD5(elmCopy);
+            Assert.AreEqual(model.getMD5(model.elements), MD5);
+
+
+            //Hndl performance test -- 180 sec for 100 cycles ОНХП модель 1124 элемента
+            //                      -- 20,4 sec 1 cycle модель "Навес над трибунами" 7128 э-тов
+            int nLoops = 1;                    
             DateTime t0 = DateTime.Now;
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < nLoops; i++)
             {
                 mh.Hndl(ref model);
             }
             TimeSpan ts = DateTime.Now - t0;
-            Assert.IsTrue(ts.TotalSeconds > 0.0);
+            var secHndl = ts.TotalSeconds / nLoops;
+            Assert.IsTrue(secHndl > 0.0);
+
+            // 
 
             FileOp.AppQuit();
         }
