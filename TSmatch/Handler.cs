@@ -143,6 +143,9 @@ namespace TSmatch.Handler
         public void Pricing(ref Mod m)
         {
             Log.set("mh.Pricing");
+#if DEBUG
+            var x = new Mtch(m);
+#endif
             if (m.Rules == null || m.Rules.Count == 0)
             {
                 if (sr == null) sr = new SaveReport.SavedReport();

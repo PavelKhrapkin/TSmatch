@@ -91,24 +91,24 @@ namespace TSmatch.Matcher
                 if (!found) continue;
                 //-- Component is found - fill Price for all Guids elemets
 
-                if (!OK_MD5()) break; 
+                if (!OK_MD5()) Msg.AskFOK("corrupted MD5"); 
 
                 ok = OK.Match;
                 string priceStr;
                 try { priceStr = comp.Str(SType.Price); }
                 catch { Msg.F("Match: Bad Price descriptor", _rule.sSupl, _rule.sCS); }
 
-                if (!OK_MD5()) break;
+                if (!OK_MD5()) Msg.AskFOK("corrupted MD5");
 
                 component = comp;
                 gr.match = this;    //27/3!!
                 rule = _rule;
 
-                if (!OK_MD5()) break;
+                if (!OK_MD5()) Msg.AskFOK("corrupted MD5");
 
                 gr.totalPrice = getPrice(gr, rule.CompSet.csDP, comp.Str(SType.Price));
 
-                if (!OK_MD5()) break;
+                if (!OK_MD5()) Msg.AskFOK("corrupted MD5");
             }
         }
 
