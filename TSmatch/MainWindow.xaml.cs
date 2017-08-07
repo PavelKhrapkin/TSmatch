@@ -1,8 +1,9 @@
 ﻿/*-------------------------------------------
- * WPF Main Windows 3.6.2017 Pavel.Khrapkin
+ * WPF Main Windows 7.8.2017 Pavel.Khrapkin
  * --- History ---
  * 2017.05.15 - restored as TSmatch 1.0.1 after Source Control excident
  * 2017.05.23 - Menu OnPriceCheck
+ * 2017.08.07 - modified SetModel initialization
  * --- Known Issue & ToDos ---
  * - It is good re-design XAML idea to have two column on MainWindow with the Width = "*".
  * Than with Window size changed, Group<Mat,Prf,Price> part would become wider.
@@ -23,6 +24,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Diagnostics;
 
 using log4net;
 using Log = match.Lib.Log;
@@ -42,7 +44,7 @@ namespace TSmatch
     {
         public static readonly ILog log = LogManager.GetLogger("MainWindow");
 
-        const string ABOUT = "TSmatch v1.0.2 27.6.2017";
+        const string ABOUT = "TSmatch v1.0.2 27.7.2017";
         public static Boot boot;
         public static string MyCity = "Санкт-Петербург";
         public delegate void NextPrimeDelegate();
@@ -50,7 +52,6 @@ namespace TSmatch
         public static Mod model;
         public static ElmGr currentGroup;
         public static string SuplName;
-        private static bool ModelIsChanged = false, isRawChanged = false, isRuleChanged = false;
         public static string message;
 
         public MainWindow()
@@ -67,24 +68,49 @@ namespace TSmatch
             //20/5            message.Text = "..Load MainWindow..";
             boot = new Boot();
             var sr = new SaveReport.SavedReport();
-//23/7            model = sr;
-            model.SetModel(boot);
+            model = sr.SetModel(boot);
+
+            // 7/8 /////////model = new Mod();
+            ////////////////model.SetModel(boot);
             WrModelInfoPanel();
             WrReportPanel();
             //30/5            model.HighLightElements(Mod.HighLightMODE.NoPrice);
-            message = "вначале группы без цен...";
+            //25/7 message = "вначале группы без цен...";
             msg.Text = message;
         }
 
         private void WrModelInfoPanel()
         {
-            ModelINFO.Text = "Модель:\t\"" + model.name + "\""
-                    + "\nДата сохранения " + model.date.ToLongDateString()
-                        + " " + model.date.ToShortTimeString()
-                    + "\nДата расценки     " + model.pricingDate.ToLongDateString()
-                        + " " + model.pricingDate.ToShortTimeString()
-                + "\nВсего " + model.elements.Count + " элементов"
-                        + ", " + model.elmGroups.Count + " групп";
+            ModelName.Text = model.name;
+            City.Text = model.adrCity;
+            if (model.adrStreet != string.Empty)
+                City.Text = model.adrCity + ", " + model.adrStreet;
+            DateCAD.Text = model.date.ToLongDateString()
+                + " " + model.date.ToShortTimeString();
+            DatePricing.Text = model.pricingDate.ToLongDateString()
+                + " " + model.pricingDate.ToShortTimeString();
+            elm_count.Text = model.elements.Count.ToString();
+            gr_count.Text = model.elmGroups.Count.ToString();
+        }
+
+        private bool adrIsChanged = false;
+        private void OnKeyDownHandler(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Return)
+            {
+                string[] str = City.Text.Split(',');
+                string _city = str[0].Trim();
+                string _street = City.Text.Substring(str[0].Length + 1).Trim();
+                if (_city != model.adrCity || _street != model.adrStreet)
+                {
+                    //27/7                    ModelIsChanged = true;
+                    model.isChanged = true;
+                    DataContext = this;
+                    adrIsChanged = true;
+                    model.adrCity = _city;
+                    model.adrStreet = _street;
+                }
+            }
         }
 
         private void WrReportPanel()
@@ -92,8 +118,22 @@ namespace TSmatch
             List<gr> items = new List<gr>();
             foreach (var gr in model.elmGroups)
             {
-                string sPrice = String.Format("{0, 20:N2}", gr.totalPrice);
-                var g = new gr() { mat = gr.Mat, prf = gr.Prf, price = sPrice };
+                string sPrice = String.Format("{0, 14:N2}", gr.totalPrice);
+                string sWgt = String.Format("{0, 10:N1}", gr.totalWeight);
+                string sVol = String.Format("{0, 10:N3}", gr.totalVolume);
+                string sLng = String.Format("{0, 10:N1}", gr.totalLength / 1000);
+                string sSupl = string.IsNullOrEmpty(gr.SupplierName) ? "---" : gr.SupplierName;
+                var g = new gr()
+                {
+                    mat = gr.Mat,
+                    prf = gr.Prf,
+                    price = sPrice,
+                    wgt = sWgt,
+                    vol = sVol,
+                    lng = sLng,
+                    //27/7                                   supl = gr.SupplierName};
+                    supl = sSupl
+                };
                 items.Add(g);
             }
             elm_groups.ItemsSource = items;
@@ -108,30 +148,53 @@ namespace TSmatch
         {
             public string mat { get; set; }
             public string prf { get; set; }
-            //3/5           public double price { get; set; }
             public string price { get; set; }
+            public string wgt { get; set; }
+            public string vol { get; set; }
+            public string lng { get; set; }
+            public string supl { get; set; }
         }
         private void elmGroups_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            gr v = (gr)elm_groups.SelectedValue;
-            if (v == null) return;
-            currentGroup = model.elmGroups.Find(x => x.Mat == v.mat && x.Prf == v.prf);
+            gr g = (gr)elm_groups.SelectedValue;
+            if (g == null) return;
+            currentGroup = model.elmGroups.Find(x => x.Mat == g.mat && x.Prf == g.prf);
             SuplName = currentGroup.SupplierName;
             Supl supl = new Supl(currentGroup.SupplierName);
             Supl_CS_Mat_Prf.Text = SuplName + "\t" + currentGroup.CompSetName;
-            Supl_CS.Text = supl.getSupplierStr();
-            double p = 0;
+            string str = "Адрес: ";
+            if (!string.IsNullOrEmpty(supl.index)) str += supl.index + ", ";
+            str += supl.City + ", ";
+            if (str.Length > 20) str += "\n";
+            str += supl.street + "\nтел." + supl.telephone;
+            Supl_CS.Text = str;
+            //--2017.07.26 не вполне работает Hyperlink- нет вызова сайта при клике. Пока оставил так..
+            Supl_URL.Inlines.Clear();
+            Run myURL = new Run(supl.Url);
+            Hyperlink hyperl = new Hyperlink(myURL);
+            Supl_URL.Inlines.Add(hyperl);
+            //--
+            double p = 0, w = 0, v = 0;
             foreach (var gr in model.elmGroups)
             {
                 if (gr.SupplierName != currentGroup.SupplierName) continue;
+                w += gr.totalWeight;
+                v += gr.totalVolume;
                 p += gr.totalPrice;
             }
+            TotalSupl_weight_volume.Text = String.Format("Общий вес= {0:N1} кг, объем = {1:N1} м3", w, v);
             string sP = string.Format("{0:N2}", p);
-            TotalSupl_price.Text = "Всего по этому поставщику " + sP + " руб";
+            TotalSupl_price.Text = "Цена по этому поставщику " + sP + " руб";
 
             message = "выделяю группу..";
             elm_groups.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal
                 , new NextPrimeDelegate(HighLighting));
+        }
+
+        private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
+        {
+            Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri));
+            e.Handled = true;
         }
 
         private void HighLighting()
@@ -198,7 +261,8 @@ namespace TSmatch
         {
             MessageBox.Show("Читать?", "TSmatch", MessageBoxButton.OK);
             model.Read();
-            isRawChanged = true;
+            //27/7            isRawChanged = true;
+            model.isChanged = true;
         }
 
         private void RePrice_button_Click(object sender, RoutedEventArgs e)
@@ -214,7 +278,8 @@ namespace TSmatch
         internal static void RePricing()
         {
             model.mh.Pricing(ref model);
-            ModelIsChanged = true;
+            //27/7            ModelIsChanged = true;
+            model.isChanged = true;
         }
 
         private void OnHelp(object sender, RoutedEventArgs e)
@@ -222,6 +287,7 @@ namespace TSmatch
             string helpPath = boot.TOCdir + @"\TSmatchHelp.mht";
             System.Diagnostics.Process.Start(helpPath);
         }
+
         private void OnAbout(object sender, RoutedEventArgs e)
         {
             Msg.AskFOK(ABOUT);
@@ -229,14 +295,7 @@ namespace TSmatch
 
         private void OK_button_Click(object sender, RoutedEventArgs e)
         {
-            //21/5            isRuleChanged = true; // для отладки
-            if (ModelIsChanged && Msg.AskYN("Модель или цены изменились. Запишем изменения в файл?"))
-            {
-                var sr = new SaveReport.SavedReport();
-                sr.Save(model, isRuleChanged);
-            }
-            model.HighLightClear();
-            FileOp.AppQuit();
+            model.Exit();
             Application.Current.Shutdown();
         }
         #endregion --- [Read], [RePrice], and [OK] buttons ---
