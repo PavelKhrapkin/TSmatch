@@ -30,11 +30,8 @@ namespace TSmatch.Model.Tests
         {
             boot = new Bootstrap.Bootstrap();
             model = new Mod();
-            //7/8            model.SetModel(boot);
-            model.SetModDir(boot);
-            var sr = new SR();
-            model.elements = sr.Raw(model);
-            throw new NotImplementedException();
+
+            model.SetModel(boot);
 
             Assert.IsTrue(model.name.Length > 0);
             Assert.IsTrue(model.dir.Length > 0);

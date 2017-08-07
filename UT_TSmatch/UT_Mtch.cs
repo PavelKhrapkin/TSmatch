@@ -38,7 +38,7 @@ namespace TSmatch.Matcher.Tests
             model.elmGroups = mh.getGrps(model.elements);
             Assert.IsTrue(model.elmGroups.Count > 0);
 
-            model = sr.getSavedRules(model, init:true);
+            model = sr.GetSavedRules(model, init:true);
             Assert.IsTrue(model.Rules.Count > 0);
 
             foreach (var gr in model.elmGroups)

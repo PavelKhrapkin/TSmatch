@@ -40,7 +40,7 @@ namespace TSmatch.Handler.Tests
             Assert.AreEqual(cMD5, MD5);
             if (model.Rules == null || model.Rules.Count == 0)
             {
-                sr.getSavedRules(model, init:true);
+                sr.GetSavedRules(model, init:true);
             }
             var mh = new MH();
             Mtch mtsh = new Mtch(model);

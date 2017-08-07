@@ -52,13 +52,37 @@ namespace TSmatch.SaveReport
     {
         public static readonly ILog log = LogManager.GetLogger("SavedReport");
 
+        #region -- field definitions
+        /// <summary>
+        /// Model class reference
+        /// </summary>
         Mod model;
+        /// <summary>
+        /// Handler class reference
+        /// </summary>
         MH mh;      //ref to class Model Handler
+                    /// <summary>
+                    /// ModelINFO Document.Name - string
+                    /// </summary>
         string sINFO = Decl.TSMATCHINFO_MODELINFO;
+        /// <summary>
+        /// Report Document.Name - string
+        /// </summary>
         string sRep = Decl.TSMATCHINFO_REPORT;
+        /// <summary>
+        /// Rules Document.Name - string
+        /// </summary>
         string sRul = Decl.TSMATCHINFO_RULES;
+        /// <summary>
+        /// Rules Document
+        /// </summary>
         Docs dINFO, dRep, dRul;
+        #endregion -- field definitions
 
+        /// <summary>
+        /// GetTSmatchINFO(Model) - Main SaveReport method. Read TSmatchINFO.xlsx and Raw.xml
+        /// </summary>
+        /// <remarks>When no TSmatchINFO.xlsx or Raw.xml files exists, create (or mark to create) them, and chech model integrity</remarks>
         public void GetTSmatchINFO(Mod mod)
         {
             Log.set("SR.GetTSmatchINFO(\"" + mod.name + "\")");
@@ -169,6 +193,9 @@ namespace TSmatch.SaveReport
             return _date;
         }
 
+        /// <summary>
+        /// error() - SavedReport error handler method
+        /// </summary>
         private void error(bool errRep = false)
         {
             Log.set("SR.errer()");
@@ -229,6 +256,9 @@ namespace TSmatch.SaveReport
             ChangedPricing
         }
 
+        /// <summary>
+        /// when TRUE - Reset dialog allowed
+        /// </summary>
         public bool resetDialog = true;
         public void Recover(string repNm, RecoverToDo to_do)
         {
@@ -263,6 +293,9 @@ namespace TSmatch.SaveReport
             Log.exit();
         }
 
+        /// <summary>
+        /// CheckModelIntegrity(model) - Check if model data are consistant
+        /// </summary>
         public bool CheckModelIntegrity(Mod mod)
         {
             Log.set("SR.CheckModelIntegrity()");
@@ -275,7 +308,7 @@ namespace TSmatch.SaveReport
             if (string.IsNullOrWhiteSpace(mod.name)) ok = false;
             if (string.IsNullOrWhiteSpace(mod.dir)) ok = false;
 
-            if(FileOp.isFileExist(Path.Combine(mod.dir, Decl.F_TSMATCHINFO)))
+            if (FileOp.isFileExist(Path.Combine(mod.dir, Decl.F_TSMATCHINFO)))
             {
                 throw new NotImplementedException();
             }
@@ -318,6 +351,10 @@ namespace TSmatch.SaveReport
         }
         #endregion ------ Raw - read/write Raw.xml area ------
 
+        /// <summary>
+        /// GetSavedReport() - read Report from TSmatchINFO.xlsx; pick-up Pricing from there, if available
+        /// </summary>
+        /// <returns></returns>
         public Mod GetSavedReport()
         {
             Log.set("SR.GetSavedReport");
@@ -350,7 +387,13 @@ namespace TSmatch.SaveReport
             return model;
         }
 
-        public Mod getSavedRules(Mod mod, bool init = false)
+        /// <summary>
+        /// GetSavedRules(Mod mod, [init] - read Rules from Rules Sheet in TSmatchINFO.xlsx; Initiate them if init=true
+        /// </summary>
+        /// <param name="mod"></param>
+        /// <param name="init"></param>
+        /// <returns></returns>
+        public Mod GetSavedRules(Mod mod, bool init = false)
         {
             Log.set("SR.getSavedRules()");
             model = mod;
@@ -372,10 +415,21 @@ namespace TSmatch.SaveReport
             }
             if (init) foreach (var rule in model.Rules) rule.Init();
             log.Info("- getSavedRules() Rules.Count = " + model.Rules.Count);
-            return model;
             Log.exit();
+            return model;
         }
 
+        /// <summary>
+        /// Save(model) - save means write model in file TSmatchINFO.xlsx
+        /// </summary>
+        /// <remarks>
+        /// Write Documents
+        /// - ModelINFO
+        /// - Report
+        /// - Rules
+        /// as the Sheets in Excel file TSmatchINFO.xlsx
+        /// </remarks>
+        /// <param name="model"></param>
         internal void Save(Mod model)
         {
             var w = new WrMod();

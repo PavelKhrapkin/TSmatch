@@ -149,7 +149,7 @@ namespace TSmatch.Handler
             if (m.Rules == null || m.Rules.Count == 0)
             {
                 if (sr == null) sr = new SR();
-                sr.getSavedRules(m, init:true);
+                sr.GetSavedRules(m, init:true);
             }
             log.Info(">m.MD5=" + m.MD5 + " =?= " + m.getMD5(m.elements));
             Hndl(ref m);

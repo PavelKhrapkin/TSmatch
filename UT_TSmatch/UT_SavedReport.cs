@@ -250,7 +250,7 @@ namespace TSmatch.SaveReport.Tests
             model.SetModDir(boot);
 
             // test no Rules Init
-            model = sr.getSavedRules(model);
+            model = sr.GetSavedRules(model);
 
             Assert.IsTrue(model.Rules.Count > 0);
             foreach(var rule in model.Rules)
@@ -260,7 +260,7 @@ namespace TSmatch.SaveReport.Tests
             }
 
             // test with Rules Init = true
-            model = sr.getSavedRules(model, init: true);
+            model = sr.GetSavedRules(model, init: true);
 
             Assert.IsTrue(model.Rules.Count > 0);
             foreach(var rule in model.Rules)
