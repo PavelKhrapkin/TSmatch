@@ -1,8 +1,9 @@
 ﻿/*-------------------------------------------
- * WPF Main Windows 24.6.2017 Pavel.Khrapkin
+ * WPF Main Windows 7.8.2017 Pavel.Khrapkin
  * --- History ---
  * 2017.05.15 - restored as TSmatch 1.0.1 after Source Control excident
  * 2017.05.23 - Menu OnPriceCheck
+ * 2017.08.07 - modified SetModel initialization
  * --- Known Issue & ToDos ---
  * - It is good re-design XAML idea to have two column on MainWindow with the Width = "*".
  * Than with Window size changed, Group<Mat,Prf,Price> part would become wider.
@@ -67,8 +68,10 @@ namespace TSmatch
             //20/5            message.Text = "..Load MainWindow..";
             boot = new Boot();
             var sr = new SaveReport.SavedReport();
-            model = new Mod();
-            model.SetModel(boot);
+            model = sr.SetModel(boot);
+
+            // 7/8 /////////model = new Mod();
+            ////////////////model.SetModel(boot);
             WrModelInfoPanel();
             WrReportPanel();
             //30/5            model.HighLightElements(Mod.HighLightMODE.NoPrice);

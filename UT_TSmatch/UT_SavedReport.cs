@@ -23,7 +23,7 @@ using TSmatch.Model;
 
 namespace TSmatch.SaveReport.Tests
 {
-     [TestClass()]
+    [TestClass()]
     public class UT_SavedReportTests
     {
         Boot boot;
@@ -32,10 +32,24 @@ namespace TSmatch.SaveReport.Tests
         Mod model;
 
         [TestMethod()]
+        public void UT_SetModel()
+        {
+            boot = new Boot();
+            sr = new SR();
+
+            model = sr.SetModel(boot);
+
+            Assert.IsTrue(sr.CheckModelIntegrity(model));
+
+            FileOp.AppQuit();
+        }
+
+
+        [TestMethod()]
         public void UT_GetSavedReport()
         {
             var sr = init();
-            model.SetModDir(boot);
+//7/8            model.SetModDir(boot);
             sr.GetTSmatchINFO(model);
 
             model = sr.GetSavedReport();
@@ -155,7 +169,7 @@ namespace TSmatch.SaveReport.Tests
         public void UT_Recover()
         {
             var sr = init();
-            model.SetModDir(boot);
+//7/8            model.SetModDir(boot);
             model.date = new DateTime(2015, 6, 12, 14, 15, 16);
             model.MD5 = "-- моя имитация MD5 --";
             model.pricingMD5 = "-- моя имитация MD5 --";
@@ -247,7 +261,7 @@ namespace TSmatch.SaveReport.Tests
         public void UT_getSavedRules()
         {
             var sr = init();
-            model.SetModDir(boot);
+//7/8            model.SetModDir(boot);
 
             // test no Rules Init
             model = sr.GetSavedRules(model);

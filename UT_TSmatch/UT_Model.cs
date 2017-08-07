@@ -31,7 +31,7 @@ namespace TSmatch.Model.Tests
             boot = new Bootstrap.Bootstrap();
             model = new Mod();
 
-            model.SetModel(boot);
+//7/8            model.SetModel(boot);
 
             Assert.IsTrue(model.name.Length > 0);
             Assert.IsTrue(model.dir.Length > 0);
@@ -57,7 +57,7 @@ namespace TSmatch.Model.Tests
             boot = new Boot();
             model = new Mod();
 
-            model.SetModDir(boot);
+//7/8            model.SetModDir(boot);
 
             Assert.IsNotNull(model.dir);
             Assert.IsTrue(FileOp.isDirExist(model.dir));
@@ -90,7 +90,7 @@ namespace TSmatch.Model.Tests
 
             // test getMD5 with Raw()
             boot = new Boot();
-            model.SetModDir(boot);
+//7/8            model.SetModDir(boot);
             var sr = new SR();
             model.elements = sr.Raw(model);
             Assert.IsTrue(model.elements.Count > 0);
@@ -121,7 +121,7 @@ namespace TSmatch.Model.Tests
             // test real model and TSmatchINFO.xlsx
             var boot = new Boot();
             model.sr = new SR();
-            model.SetModDir(boot);
+//7/8            model.SetModDir(boot);
             model.elements = model.sr.Raw(model);
             var mh = new MH();
             var grp = mh.getGrps(model.elements);

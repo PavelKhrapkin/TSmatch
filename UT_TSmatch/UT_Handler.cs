@@ -1,5 +1,5 @@
 ﻿/*=================================
- * Handler Unit Test 3.8.2017
+ * Handler Unit Test 7.8.2017
  *=================================
  */
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -21,14 +21,15 @@ namespace TSmatch.Handler.Tests
     [TestClass()]
     public class UT_Handler
     {
+        Mod model;
 
         [TestMethod()]
         public void UT_Hndl()
         {
             var boot = new Boot();
-            var model = new Mod();
-            model.SetModDir(boot);
             var sr = new SR();
+            model = sr.SetModel(boot);
+            
             model.elements = sr.Raw(model);
             List<Elm> elmCopy = new List<Elm>();
             foreach (Elm elm in model.elements) elmCopy.Add(elm);
@@ -79,7 +80,7 @@ namespace TSmatch.Handler.Tests
         {
             var boot = new Boot();
             var model = new Mod();
-            model.SetModel(boot);
+ //7/8           model.SetModel(boot);
 
             var mh = new MH();
             mh.Pricing(ref model);

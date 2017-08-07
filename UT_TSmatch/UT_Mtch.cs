@@ -23,7 +23,7 @@ namespace TSmatch.Matcher.Tests
             var boot = new Boot();
             var model = new Mod();
 //4/8.2017            model.SetModel(boot);
-            model.SetModDir(boot);
+//7/8            model.SetModDir(boot);
             var sr = new SR();
             model.elements = sr.Raw(model);
             List<Elm> elmCopy = new List<Elm>();

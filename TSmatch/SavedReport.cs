@@ -42,9 +42,11 @@ using WrMod = TSmatch.Model.WrModelInfo.ModelWrFile;
 using WrM = TSmatch.Model.WrModelInfo.ModelWrFile.WrMod;
 using TS = TSmatch.Tekla.Tekla;
 using MH = TSmatch.Handler.Handler;
+using Boot = TSmatch.Bootstrap.Bootstrap;
 using TSmatch.Document;
 using TSmatch.Model;
 using static TSmatch.Model.WrModelInfo.ModelWrFile;
+using TSmatch.Bootstrap;
 
 namespace TSmatch.SaveReport
 {
@@ -78,6 +80,55 @@ namespace TSmatch.SaveReport
         /// </summary>
         Docs dINFO, dRep, dRul;
         #endregion -- field definitions
+
+        #region --- SetModel ---
+        /// <summary>
+        /// SetModel(boot) - initialize model by reading from TSmatchINFO.xlsx ans Raw.xml or from scratch
+        /// </summary>
+        /// <param name="boot"></param>
+        /// <returns>initialized Model</returns>
+        public Mod SetModel(Boot boot)
+        {
+            Log.set("SR.Model(boot)");
+            model = new Mod();
+            SetModDir(boot);
+            GetTSmatchINFO(model);
+            Log.exit();
+            return model;
+        }
+
+        public void SetModDir(Boot boot)
+        {
+            if (boot.isTeklaActive)
+            {   // if Tekla is active - get Path of TSmatch
+                model.name = Path.GetFileNameWithoutExtension(TS.ModInfo.ModelName);
+                model.dir = TS.GetTeklaDir(TS.ModelDir.model);
+                model.phase = TS.ModInfo.CurrentPhase.ToString();
+                //6/4/17                        macroDir = TS.GetTeklaDir(TS.ModelDir.macro);
+                model.HighLightClear();
+            }
+            else
+            {   // if Tekla not active - get model attributes from TSmatchINFO.xlsx in ModelDir
+                model.dir = boot.ModelDir;
+                if (!FileOp.isDirExist(model.dir)) Msg.F("No Model Directory", model.dir);
+                if (!Docs.IsDocExists(Decl.TSMATCHINFO_MODELINFO)) Msg.F("No TSmatchINFO.xlsx file");
+//7/8                Model m = SetFrSavedModelINFO(this);
+//7/8                name = m.name;
+//7/8                phase = m.phase;
+
+                //////////                adrCity = m.adrCity; adrStreet = m.adrStreet;
+                ////////////23/7                elementsCount = m.elementsCount;
+                ////////////23/7                if (elementsCount == 0)
+                ////////////23/7                    Msg.F("SavedReport doc not exists and no CAD");
+                //////////                date = m.date;
+                //////////                MD5 = m.MD5;
+                //////////                pricingMD5 = m.pricingMD5;
+                //////////                pricingDate = m.pricingDate;
+                //////////                //24/4                classCAD = ifc;
+            }
+        }
+
+        #endregion --- SetModel ---
 
         /// <summary>
         /// GetTSmatchINFO(Model) - Main SaveReport method. Read TSmatchINFO.xlsx and Raw.xml
