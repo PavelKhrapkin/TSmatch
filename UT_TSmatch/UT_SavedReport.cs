@@ -1,5 +1,5 @@
 ﻿/*=================================
- * Saved Report Unit Test 23.7.2017
+ * Saved Report Unit Test 7.08.2017
  *=================================
  */
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -64,7 +64,8 @@ namespace TSmatch.SaveReport.Tests
             model.dir = boot.ModelDir;
             if (string.IsNullOrEmpty(model.dir)) model.dir = boot.DebugDir;
             Assert.IsTrue(model.dir.Length > 0);
-            if (!FileOp.isFileExist(model.dir, "TSmatchINFO.xlsx"))
+            bool isModelINFOexists = FileOp.isFileExist(model.dir, "TSmatchINFO.xlsx");
+            if (!isModelINFOexists)
             {
                 model.name = defaultModName;
                 model.adrCity = "Санкт-Петербург";
@@ -75,23 +76,48 @@ namespace TSmatch.SaveReport.Tests
 
             model = sr.GetModelINFO(model);
 
-            Docs dINFO = Docs.getDoc(Decl.TSMATCHINFO_MODELINFO);
-            Assert.IsNotNull(dINFO);
-            Assert.AreEqual(2, dINFO.i0);
-            Assert.IsTrue(dINFO.il > 9);
-            var b = dINFO.Body;
-            string b_name = b.Strng(Decl.MODINFO_NAME_R, 2);
-            Assert.AreEqual("Название модели =", b.Strng(Decl.MODINFO_NAME_R, 1));
-            Assert.IsTrue(b_name.Length >= 1);
-            Assert.AreEqual("Адрес проекта:", b.Strng(Decl.MODINFO_ADDRESS_R, 1));
-            Assert.IsTrue(b.Strng(Decl.MODINFO_ADDRESS_R, 2).Length >= 1);
-            sr.CheckModelIntegrity();
-            Assert.IsTrue(model.elements.Count > 0);
-            Assert.AreEqual(model.MD5, dINFO.Body.Strng(Decl.MODINFO_MD5_R, 2));
-            Assert.IsTrue(model.elmGroups.Count > 0);
-//24/7            Assert.AreEqual(model.pricingMD5, dINFO.Body.Strng(Decl.MODINFO_PRCMD5_R, 2));
+            Docs dINFO = Docs.getDoc(Decl.TSMATCHINFO_MODELINFO, fatal:false);
 
-            if (b_name == defaultModName) FileOp.Delete(model.dir, b_name);
+            if (isModelINFOexists)
+            {
+                throw new NotImplementedException();
+            }
+            else
+            {
+                Assert.IsTrue(model.isChanged);
+                model.isChanged = false;
+                bool ok = sr.CheckModelIntegrity(model);
+                Assert.IsTrue(ok);
+            }
+//////////////////////            Assert.IsTrue(model.elements.Count > 0);
+//////////////////////            Assert.IsTrue(model.elmGroups.Count > 0);
+//////////////////////            Assert.IsTrue(model.dir.Length > 0);
+//////////////////////            Assert.IsTrue(model.name.Length > 0);
+//////////////////////            Assert.IsTrue(model.Rules.Count > 0);
+
+//////////////////////            if(dINFO == null)
+//////////////////////            {
+
+//////////////////////            }
+//////////////////////            else
+//////////////////////            {
+// 7/8 ///////////////                Assert.AreEqual(2, dINFO.i0);
+//////////////////////                Assert.IsTrue(dINFO.il > 9);
+//////////////////////                var b = dINFO.Body;
+//////////////////////                string b_name = b.Strng(Decl.MODINFO_NAME_R, 2);
+//////////////////////                Assert.AreEqual("Название модели =", b.Strng(Decl.MODINFO_NAME_R, 1));
+//////////////////////                Assert.IsTrue(b_name.Length >= 1);
+//////////////////////                Assert.AreEqual("Адрес проекта:", b.Strng(Decl.MODINFO_ADDRESS_R, 1));
+//////////////////////                Assert.IsTrue(b.Strng(Decl.MODINFO_ADDRESS_R, 2).Length >= 1);
+//////////////////////                sr.CheckModelIntegrity();
+//////////////////////                Assert.IsTrue(model.elements.Count > 0);
+//////////////////////                Assert.AreEqual(model.MD5, dINFO.Body.Strng(Decl.MODINFO_MD5_R, 2));
+//////////////////////            }
+
+//////////////////////            Assert.IsTrue(model.elmGroups.Count > 0);
+////////////////////////24/7            Assert.AreEqual(model.pricingMD5, dINFO.Body.Strng(Decl.MODINFO_PRCMD5_R, 2));
+
+//7/8            if (b_name == defaultModName) FileOp.Delete(model.dir, b_name);
 
             FileOp.AppQuit();
         }

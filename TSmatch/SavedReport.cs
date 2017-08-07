@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------------------
  * SavedReport -- class for handle saved reports in TSmatchINFO.xlsx
  * 
- *  3.08.2017 П.Л. Храпкин
+ *  7.08.2017 П.Л. Храпкин
  *  
  *--- Unit Tests ---
  * UT_GetModelInfo  2-17.7.14 
@@ -17,6 +17,7 @@
  * 28.07.2017 - getSavedInit() init flag handle
  * 31.07.2017 - remove local ref mh - it is in Model; fix FATAL "No TSmatchINFO.xlsx"
  *  3.07.2017 - corrections in GetSavedRules -- if(init)
+ *  7.08.2017 - GetModelINFO audit
  *--- Methods: -------------------      
  * bool GetTSmatchINFO()    - read TSmatchINFO.xlsx, set it as a current Model
  *                            return true if name, dir, quantity of elements is
@@ -64,7 +65,7 @@ namespace TSmatch.SaveReport
             Log.set("SR.GetSavedReport(\"" + mod.name + "\")");
             GetModelINFO(mod);
             GetPricingOrSavedReport();
-            CheckModelIntegrity();
+            if(!CheckModelIntegrity(model)) error();
             SetSavedMod(mod);
             Log.exit();
         }
@@ -89,19 +90,10 @@ namespace TSmatch.SaveReport
                 model.setCity(dINFO.Body.Strng(Decl.MODINFO_ADDRESS_R, 2));
                 model.dir = dINFO.Body.Strng(Decl.MODINFO_DIR_R, 2).Trim();
                 model.date = getModINFOdate(Decl.MODINFO_DATE_R);
-            }
-        
-//31/7            model.MD5 = getModINFOstr(Decl.MODINFO_MD5_R, model.MD5);
-            model.pricingMD5 = model.get_pricingMD5(model.elmGroups);
-            if (model.isChanged)
-            {
-                model.pricingDate = DateTime.Now;
-            }
-            else
-            {
+                model.pricingMD5 = model.get_pricingMD5(model.elmGroups);
                 model.pricingDate = getModINFOdate(Decl.MODINFO_PRCDAT_R);
                 model.pricingMD5 = getModINFOstr(Decl.MODINFO_PRCMD5_R, model.pricingMD5);
-                CheckModelIntegrity();
+//7/8                model.CheckModelIntegrity();
             }
             return model;
         }
@@ -248,6 +240,7 @@ namespace TSmatch.SaveReport
         public void Recover(string repNm, RecoverToDo to_do)
         {
             Log.set(@"SR.Recover(" + repNm + "\")");
+            if(!CheckModelIntegrity(model)) Msg.AskFOK("Recovery impossible");
             switch (to_do)
             {
                 case RecoverToDo.CreateRep:
@@ -263,14 +256,12 @@ namespace TSmatch.SaveReport
                     switch (repNm)
                     {
                         case Decl.TSMATCHINFO_MODELINFO:
-                            CheckModelIntegrity();
                             w.wrModel(WrM.ModelINFO, model);
                             break;
                         case Decl.TSMATCHINFO_REPORT:
                             log.Info(">>mod.MD5=" + model.MD5 + " =?= " + model.getMD5(model.elements));
                             mh.Pricing(ref model);
                             log.Info(">>mod.MD5=" + model.MD5 + " =?= " + model.getMD5(model.elements));
-                            CheckModelIntegrity();
                             w.wrModel(WrM.Report, model);
                             break;
                     }
@@ -279,18 +270,24 @@ namespace TSmatch.SaveReport
             Log.exit();
         }
 
-        public void CheckModelIntegrity()
+        public bool CheckModelIntegrity(Mod mod)
         {
-            Log.set("SR.error");
-            //23/7            Log.Trace("mod.elmentsCount=" + mod.elementsCount + " =?= " + mod.elements.Count);
-            //23/7            if (mod.elementsCount != mod.elements.Count) error(mod);
-            Log.Trace("Mod.MD5=" + model.MD5 + " =?= " + model.getMD5(model.elements));
+            Log.set("SR.CheckModelIntegrity()");
+            bool ok = true;
+            if (mod.date < Decl.OLD || mod.date > DateTime.Now) ok = false;
+            if (mod.pricingDate < Decl.OLD || model.pricingDate > DateTime.Now) ok = false;
+            if (mod.MD5 == null || model.MD5.Length != 32) ok = false;
+            if (mod.pricingMD5 == null || model.pricingMD5.Length != 32) ok = false;
+            if (mod.elements.Count <= 0 || model.elmGroups.Count <= 0) ok = false;
+            if (string.IsNullOrWhiteSpace(mod.name)) ok = false;
+            if (string.IsNullOrWhiteSpace(mod.dir)) ok = false;
 
-            if (model.date < Decl.OLD || model.date > DateTime.Now) error();
-            if (model.pricingDate < Decl.OLD || model.pricingDate > DateTime.Now) error();
-            if (model.MD5 == null || model.MD5.Length != 32) error();
-            if (model.pricingMD5 == null || model.pricingMD5.Length != 32) error();
+            if(FileOp.isFileExist(Path.Combine(mod.dir, Decl.F_TSMATCHINFO)))
+            {
+                throw new NotImplementedException();
+            }
             Log.exit();
+            return ok;
         }
         #endregion ------ Reset & Recovery area ------
 
@@ -335,28 +332,30 @@ namespace TSmatch.SaveReport
             { //-- no information available from TSmatchINFO.xlsx -- doing re-Pricing
                 mh.Pricing(ref model);
             }
-
-            bool errRep = true;
-            if (mh == null) mh = new MH();
-            Docs dRep = Docs.getDoc(sRep, fatal: false, create_if_notexist: true);
-            if (dRep == null || dRep.i0 < 2) error(errRep);
-            //21/7            if (dRep.il != (mod.elmGroups.Count + dRep.i0))
-            //21/7            {
-            //21/7                Msg.AskFOK("Saved Report should be recovered, OK?");
-            //21/7                Recover(mod, sRep, RecoverToDo.ResetRep);
-            //21/7            }
-            model.total_price = 0;
-            for (int iGr = 1, i = dRep.i0; i < dRep.il; i++, iGr++)
+            else
             {
-                if (iGr > model.elmGroups.Count) break;   // group.Count decreased from saved Report
-                var gr = model.elmGroups[iGr - 1];
-                if (iGr != dRep.Body.Int(i, Decl.REPORT_N)) error(errRep);
-                gr.SupplierName = dRep.Body.Strng(i, Decl.REPORT_SUPPLIER);
-                gr.CompSetName = dRep.Body.Strng(i, Decl.REPORT_COMPSET);
-                gr.totalPrice = dRep.Body.Double(i, Decl.REPORT_SUPL_PRICE);
-                model.total_price += gr.totalPrice;
+                bool errRep = true;
+                if (mh == null) mh = new MH();
+                Docs dRep = Docs.getDoc(sRep, fatal: false, create_if_notexist: true);
+                if (dRep == null || dRep.i0 < 2) error(errRep);
+                //21/7            if (dRep.il != (mod.elmGroups.Count + dRep.i0))
+                //21/7            {
+                //21/7                Msg.AskFOK("Saved Report should be recovered, OK?");
+                //21/7                Recover(mod, sRep, RecoverToDo.ResetRep);
+                //21/7            }
+                model.total_price = 0;
+                for (int iGr = 1, i = dRep.i0; i < dRep.il; i++, iGr++)
+                {
+                    if (iGr > model.elmGroups.Count) break;   // group.Count decreased from saved Report
+                    var gr = model.elmGroups[iGr - 1];
+                    if (iGr != dRep.Body.Int(i, Decl.REPORT_N)) error(errRep);
+                    gr.SupplierName = dRep.Body.Strng(i, Decl.REPORT_SUPPLIER);
+                    gr.CompSetName = dRep.Body.Strng(i, Decl.REPORT_COMPSET);
+                    gr.totalPrice = dRep.Body.Double(i, Decl.REPORT_SUPL_PRICE);
+                    model.total_price += gr.totalPrice;
+                }
+                model.pricingMD5 = model.get_pricingMD5(model.elmGroups);
             }
-            model.pricingMD5 = model.get_pricingMD5(model.elmGroups);
             Log.exit();
             return model;
         }

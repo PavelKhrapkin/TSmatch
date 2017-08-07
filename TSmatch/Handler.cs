@@ -148,11 +148,9 @@ namespace TSmatch.Handler
 #endif
             if (m.Rules == null || m.Rules.Count == 0)
             {
-                if (sr == null) sr = new SaveReport.SavedReport();
-                sr.getSavedRules(m);
-                //23/7                m.Rules = sr.Rules;
+                if (sr == null) sr = new SR();
+                sr.getSavedRules(m, init:true);
             }
-//2/8            foreach (var rule in m.Rules) rule.Init();
             log.Info(">m.MD5=" + m.MD5 + " =?= " + m.getMD5(m.elements));
             Hndl(ref m);
             log.Info(">m.MD5=" + m.MD5 + " =?= " + m.getMD5(m.elements));
