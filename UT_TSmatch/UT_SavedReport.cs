@@ -48,8 +48,7 @@ namespace TSmatch.SaveReport.Tests
         [TestMethod()]
         public void UT_GetSavedReport()
         {
-            var sr = init();
-//7/8            model.SetModDir(boot);
+            init();
             sr.GetTSmatchINFO(model);
 
             model = sr.GetSavedReport();
@@ -168,8 +167,8 @@ namespace TSmatch.SaveReport.Tests
         [TestMethod()]
         public void UT_Recover()
         {
-            var sr = init();
-//7/8            model.SetModDir(boot);
+            init();
+
             model.date = new DateTime(2015, 6, 12, 14, 15, 16);
             model.MD5 = "-- моя имитация MD5 --";
             model.pricingMD5 = "-- моя имитация MD5 --";
@@ -225,8 +224,7 @@ namespace TSmatch.SaveReport.Tests
         [TestMethod()]
         public void UT_SR_SetFrSavedModelINFO()
         {
-            var sr = init();
-            model.dir = boot.ModelDir;
+            init();
 
             // SetFrSavedMoodel работает только если нет Tekla
             //..вызывается из Model.SetModel
@@ -247,8 +245,7 @@ namespace TSmatch.SaveReport.Tests
         [TestMethod()]
         public void UT_SR_Raw()
         {
-            var sr = init();
-            model.dir = boot.ModelDir;
+            init();
 
             model.elements = sr.Raw(model);
 
@@ -262,8 +259,7 @@ namespace TSmatch.SaveReport.Tests
         [TestMethod()]
         public void UT_getSavedRules()
         {
-            var sr = init();
-//7/8            model.SetModDir(boot);
+            init();
 
             // test no Rules Init
             model = sr.GetSavedRules(model);
@@ -288,15 +284,15 @@ namespace TSmatch.SaveReport.Tests
 
             FileOp.AppQuit();
         }
-
+#if OLD //23/7
         // проверяем как дополняются eleGroups из листа TSmatchINFO.xlsx/Report
         // 2017.06.28 переписан sr.getSavedGroups() -- getGrps + читаю из файла Report
         [TestMethod()]
         public void UT_SavedReport_getSavedGroup()
         {
-            var sr = init();
+            init();
             model.dir = boot.ModelDir;
-#if OLD //23/7
+
             sr.elements = sr.Raw(model);
 
             sr.GetSavedReport(model);
@@ -307,7 +303,7 @@ namespace TSmatch.SaveReport.Tests
             // в Report <Заголовок> + строки по числу elmGroups.Count + <Summary>
             int cnt = sr.elmGroups.Count + dRep.i0;
             Assert.AreEqual(dRep.il, cnt);
-#endif //OLD //23/7
+
             FileOp.AppQuit();
         }
 
@@ -333,15 +329,15 @@ namespace TSmatch.SaveReport.Tests
             Assert.IsTrue(date < DateTime.Now);
             return true;
         }
+#endif //OLD //23/7
 
         // эта инициализация класса SavedReport общая для всех тестов этого класса
-        // sr.SetModel() здесь использовать нельзя, т.к. SetModel dspsdftn SetReport
-        private SR init()
+        // здесь используется sr.SetModel в сокращенном режиме, т.е. без обращения к тестируемым методам
+        private void init()
         {
             boot = new Boot();
             sr = new SR();
-            model = new Mod();
-            return sr;
+            model = sr.SetModel(boot, unit_test_mode: true);
         }
     }
 }

@@ -85,14 +85,18 @@ namespace TSmatch.SaveReport
         /// <summary>
         /// SetModel(boot) - initialize model by reading from TSmatchINFO.xlsx ans Raw.xml or from scratch
         /// </summary>
+        /// <remarks>
+        /// With unit_test_mode = true not full model initializing happened.
+        /// It is used for testing methods are used on initialization stade.
+        /// </remarks>
         /// <param name="boot"></param>
         /// <returns>initialized Model</returns>
-        public Mod SetModel(Boot boot)
+        public Mod SetModel(Boot boot, bool unit_test_mode = false)
         {
             Log.set("SR.Model(boot)");
             model = new Mod();
             SetModDir(boot);
-            GetTSmatchINFO(model);
+            if (!unit_test_mode) GetTSmatchINFO(model);
             Log.exit();
             return model;
         }
