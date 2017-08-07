@@ -36,23 +36,21 @@ namespace TSmatch.SaveReport.Tests
         {
             var sr = init();
             model.SetModDir(boot);
-            model = sr.GetModelINFO(model);
-            ////////////////model.elements = sr.Raw(model);
-            ////////////////mh = new MH();
-            ////////////////model.elmGroups = mh.getGrps(model.elements);
+            sr.GetTSmatchINFO(model);
 
-            model = sr.GetPricingOrSavedReport();
-            
+            model = sr.GetSavedReport();
 
-            Assert.IsTrue(model.elmGroups.Count > 0);
+            bool ok = sr.CheckModelIntegrity(model);
+            Assert.IsTrue(ok);
+
             var total_price = model.elmGroups.Sum(x => x.totalPrice);
-            //           Assert.IsTrue(model.elmGroups.Sum(x => x.totalPrice) > 0);
+            Assert.IsTrue(model.elmGroups.Sum(x => x.totalPrice) > 0);
 
             FileOp.AppQuit();
         }
 
         [TestMethod()]
-        public void UT_GetModelINFO()
+        public void UT_GetTSmatchINFO()
         {
             // GetModelINFO() - базовый метод, вызываемый в SetModel.
             //..поэтому пользоваться обычным init() для этого UT_ нельзя 
@@ -74,7 +72,7 @@ namespace TSmatch.SaveReport.Tests
                 model.MD5 = "sample-MD5";
             }
 
-            model = sr.GetModelINFO(model);
+            sr.GetTSmatchINFO(model);
 
             Docs dINFO = Docs.getDoc(Decl.TSMATCHINFO_MODELINFO, fatal:false);
 

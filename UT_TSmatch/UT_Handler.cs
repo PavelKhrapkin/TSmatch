@@ -14,6 +14,7 @@ using TS = TSmatch.Tekla.Tekla;
 using MH = TSmatch.Handler.Handler;
 using SR = TSmatch.SaveReport.SavedReport;
 using Elm = TSmatch.ElmAttSet.ElmAttSet;
+using Mtch = TSmatch.Matcher.Mtch;
 
 namespace TSmatch.Handler.Tests
 {
@@ -42,6 +43,7 @@ namespace TSmatch.Handler.Tests
                 sr.getSavedRules(model, init:true);
             }
             var mh = new MH();
+            Mtch mtsh = new Mtch(model);
 
             mh.Hndl(ref model);
 

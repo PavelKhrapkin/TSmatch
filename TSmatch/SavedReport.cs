@@ -17,11 +17,10 @@
  * 28.07.2017 - getSavedInit() init flag handle
  * 31.07.2017 - remove local ref mh - it is in Model; fix FATAL "No TSmatchINFO.xlsx"
  *  3.07.2017 - corrections in GetSavedRules -- if(init)
- *  7.08.2017 - GetModelINFO audit
+ *  7.08.2017 - GetModelINFO audit; getRaw(model.dat = File.GetLastWriteTime(file);
  *--- Methods: -------------------      
- * bool GetTSmatchINFO()    - read TSmatchINFO.xlsx, set it as a current Model
- *                            return true if name, dir, quantity of elements is
- *                            suit to the current model
+ * GetTSmatchINFO()     - read TSmatchINFO.xlsx, check, set it as a current Model
+
  * IsModelCahanged - проверяет, изменилась ли Модель относительно сохраненного MD5
  ! lngGroup(atr)   - группирует элементы модели по парам <Материал, Профиль> возвращая массивы длинны 
  * Save(Model mod) - Save model mod in file TSmatchINFO.xlsx
@@ -62,22 +61,12 @@ namespace TSmatch.SaveReport
 
         public void GetTSmatchINFO(Mod mod)
         {
-            Log.set("SR.GetSavedReport(\"" + mod.name + "\")");
-            GetModelINFO(mod);
-            GetPricingOrSavedReport();
-            if(!CheckModelIntegrity(model)) error();
-            SetSavedMod(mod);
-            Log.exit();
-        }
-
-        #region ------ ModelINFO region ------
-        public Mod GetModelINFO(Mod _mod)
-        {
-            model = _mod;
+            Log.set("SR.GetTSmatchINFO(\"" + mod.name + "\")");
+            model = mod;
             if (mh == null) mh = new MH();
             dINFO = Docs.getDoc(sINFO, fatal: false);
             if (dINFO == null) error();
- 
+
             model.elements = Raw(model);
 
             if (model.isChanged)
@@ -93,10 +82,14 @@ namespace TSmatch.SaveReport
                 model.pricingMD5 = model.get_pricingMD5(model.elmGroups);
                 model.pricingDate = getModINFOdate(Decl.MODINFO_PRCDAT_R);
                 model.pricingMD5 = getModINFOstr(Decl.MODINFO_PRCMD5_R, model.pricingMD5);
-//7/8                model.CheckModelIntegrity();
+                GetSavedReport();
             }
-            return model;
+            if (!CheckModelIntegrity(model)) error();
+            SetSavedMod(mod);
+            Log.exit();
         }
+
+        #region ------ ModelINFO region ------
 #if OLD // 14/7/17
             bool check = true;
             while (check)
@@ -186,7 +179,7 @@ namespace TSmatch.SaveReport
                 model.elements = Raw(model);
                 dRep = Docs.getDoc(sRep);
                 if (dRep == null || errRep) Msg.F("SavedReport recover impossible");
-                GetPricingOrSavedReport();
+                GetSavedReport();
                 Recover(sINFO, RecoverToDo.ResetRep);
                 //21/7           Recover(mod, sRep,  RecoverToDo.ResetRep);
             }
@@ -309,6 +302,7 @@ namespace TSmatch.SaveReport
             if (!write && FileOp.isFileExist(file))
             {                               // Read Raw.xml
                 elms = rwXML.XML.ReadFromXmlFile<List<Elm>>(file);
+                model.date = File.GetLastWriteTime(file);
             }
             else
             {                               // get from CAD and Write or re-Write Raw.xml 
@@ -324,15 +318,11 @@ namespace TSmatch.SaveReport
         }
         #endregion ------ Raw - read/write Raw.xml area ------
 
-        public Mod GetPricingOrSavedReport()
+        public Mod GetSavedReport()
         {
             Log.set("SR.GetSavedReport");
 
-            if (model.isChanged)
-            { //-- no information available from TSmatchINFO.xlsx -- doing re-Pricing
-                mh.Pricing(ref model);
-            }
-            else
+            if (model.docReport != null)
             {
                 bool errRep = true;
                 if (mh == null) mh = new MH();

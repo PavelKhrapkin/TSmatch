@@ -1,6 +1,6 @@
 ﻿using TSmatch.Model;
 /*=================================
-* Model Unit Test 23.07.2017
+* Model Unit Test 7.08.2017
 *=================================
 */
 using System;
@@ -30,7 +30,11 @@ namespace TSmatch.Model.Tests
         {
             boot = new Bootstrap.Bootstrap();
             model = new Mod();
-            model.SetModel(boot);
+            //7/8            model.SetModel(boot);
+            model.SetModDir(boot);
+            var sr = new SR();
+            model.elements = sr.Raw(model);
+            throw new NotImplementedException();
 
             Assert.IsTrue(model.name.Length > 0);
             Assert.IsTrue(model.dir.Length > 0);
