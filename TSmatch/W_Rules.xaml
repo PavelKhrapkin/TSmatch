@@ -22,6 +22,7 @@
 
             <ListView.View>
                 <GridView>
+                    <GridViewColumn Header="nElms" Width="5" DisplayMemberBinding="{Binding nElms}" />
                     <GridViewColumn Header="Дата и время" Width="90" DisplayMemberBinding="{Binding Date}" />
                     <GridViewColumn Header="Поставщик" Width="130" DisplayMemberBinding="{Binding Supplier}" />
                     <GridViewColumn Header="Сортамент" Width="110" DisplayMemberBinding="{Binding CompSet}" />
