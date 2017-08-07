@@ -84,7 +84,7 @@ namespace TSmatch.Bootstrap
         public object classCAD;
         public Mod model;
 
-        public Bootstrap() 
+        public Bootstrap()
         {
             desktop_path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
             debug_path = desktop_path;
@@ -130,7 +130,7 @@ namespace TSmatch.Bootstrap
             {ResType.File, "Fil" },
             {ResType.Doc , "Doc" }
         };
-        enum ResType { Date, File, Doc, Err}
+        enum ResType { Date, File, Doc, Err }
         private void CheckResx(string rName, string rValue)
         {
             ResType type = ResType.Err;
@@ -152,7 +152,7 @@ namespace TSmatch.Bootstrap
                     break;
                 case ResType.Date:
                     DateTime d = Lib.getDateTime(v);
-                    Docs doc = Docs.getDoc(rName, fatal:false);
+                    Docs doc = Docs.getDoc(rName, fatal: false);
                     if (doc == null) resError(ResErr.NoDoc, rName);
                     string sdd = doc.Body.Strng(1, 1);
                     DateTime dd = Lib.getDateTime(sdd);
@@ -175,7 +175,8 @@ namespace TSmatch.Bootstrap
                 case ResErr.Obsolete:
                     Msg.F("TSmatch Resource Obsolete", rName);
                     break;
-                default: Msg.F("TSmatch internal Resource error", rName);
+                default:
+                    Msg.F("TSmatch internal Resource error", rName);
                     break;
             }
         }
