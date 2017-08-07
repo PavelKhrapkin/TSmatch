@@ -1,7 +1,7 @@
 ﻿/*---------------------------------------------------------------------------------
  * Handler -- Handle Model for Report preparation
  * 
- *  4.08.2017 Pavel Khrapkin
+ *  8.08.2017 Pavel Khrapkin
  *  
  *--- History ---
  *  8.05.2017 taken from Model code
@@ -40,6 +40,7 @@ namespace TSmatch.Handler
         public static readonly ILog log = LogManager.GetLogger("Handler");
 
         SR sr;
+        bool testMode;
 
         /// <summary>
         /// getGroups() - groupping of elements of Model by Material and Profile
@@ -73,6 +74,8 @@ namespace TSmatch.Handler
             Log.set("MH.Hndl");
             mod.elmGroups = getGrps(mod.elements);
             if (mod.elmGroups.Count < 1 || mod.Rules.Count < 1) Msg.F("No Rules or element Groups");
+            if(testMode) { Log.exit(); return; }
+
             foreach (var rules in mod.Rules)
                 if (rules.CompSet == null) rules.Init();
             // find matching Components with Rules by module Mtch 
@@ -140,10 +143,11 @@ namespace TSmatch.Handler
             Log.exit();
         }
 #endif //OLD 27/6/17
-        public void Pricing(ref Mod m)
+        public void Pricing(ref Mod m, bool unit_test_mode = false)
         {
             Log.set("mh.Pricing");
 #if DEBUG
+            testMode = unit_test_mode;
             var x = new Mtch(m);
 #endif
             if (m.Rules == null || m.Rules.Count == 0)
