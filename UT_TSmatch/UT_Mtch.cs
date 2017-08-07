@@ -1,5 +1,5 @@
 ﻿/*=================================
-* Match Unit Test 4.8.2017
+* Match Unit Test 7.8.2017
 *=================================
 */
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -21,10 +21,8 @@ namespace TSmatch.Matcher.Tests
         public void UT_Mtch()
         {
             var boot = new Boot();
-            var model = new Mod();
-            //4/8.2017            model.SetModel(boot);
-            //7/8            model.SetModDir(boot);
             var sr = new SR();
+            var model = sr.SetModel(boot, unit_test_mode: true);
             model.elements = sr.Raw(model);
             List<Elm> elmCopy = new List<Elm>();
             foreach (Elm elm in model.elements) elmCopy.Add(elm);
