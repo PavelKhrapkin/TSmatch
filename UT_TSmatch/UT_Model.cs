@@ -25,47 +25,6 @@ namespace TSmatch.Model.Tests
         Boot boot;
         Mod model;
 
-        [TestMethod]
-        public void UT_SetModel()
-        {
-            boot = new Bootstrap.Bootstrap();
-            model = new Mod();
-
-//7/8            model.SetModel(boot);
-
-            Assert.IsTrue(model.name.Length > 0);
-            Assert.IsTrue(model.dir.Length > 0);
-            Assert.IsTrue(FileOp.isDirExist(model.dir));
-            Assert.IsTrue(model.dir.Contains(@"\"));
-            Assert.IsTrue(model.dir.Contains(":"));
-            Assert.IsTrue(model.date > Decl.OLD);
-            Assert.IsTrue(model.date < DateTime.Now);
-            Assert.IsTrue(model.pricingDate > Decl.OLD);
-            Assert.IsTrue(model.pricingDate < DateTime.Now);
-            Assert.IsNotNull(Docs.getDoc(Decl.TSMATCHINFO_MODELINFO));
-            Assert.IsTrue(model.elements.Count > 0);
-            Assert.IsTrue(model.elmGroups.Count > 0);
-            Assert.AreEqual(model.getMD5(model.elements), model.MD5);
-            Assert.AreEqual(model.get_pricingMD5(model.elmGroups), model.pricingMD5);
-
-            FileOp.AppQuit();
-        }
-
-        [TestMethod()]
-        public void UT_SetModDir()
-        {
-            boot = new Boot();
-            model = new Mod();
-
-//7/8            model.SetModDir(boot);
-
-            Assert.IsNotNull(model.dir);
-            Assert.IsTrue(FileOp.isDirExist(model.dir));
-            Assert.IsTrue(model.name.Length > 0);
-            Assert.IsTrue(model.phase.Length > 0);
-            FileOp.AppQuit();
-        }
-
         [TestMethod()]
         public void UT_setCity()
         {
@@ -90,8 +49,8 @@ namespace TSmatch.Model.Tests
 
             // test getMD5 with Raw()
             boot = new Boot();
-//7/8            model.SetModDir(boot);
             var sr = new SR();
+            model = sr.SetModel(boot);
             model.elements = sr.Raw(model);
             Assert.IsTrue(model.elements.Count > 0);
             string MD5 = model.getMD5(model.elements);
@@ -120,8 +79,9 @@ namespace TSmatch.Model.Tests
 
             // test real model and TSmatchINFO.xlsx
             var boot = new Boot();
+            var sr = new SR();
+            model = sr.SetModel(boot);
             model.sr = new SR();
-//7/8            model.SetModDir(boot);
             model.elements = model.sr.Raw(model);
             var mh = new MH();
             var grp = mh.getGrps(model.elements);

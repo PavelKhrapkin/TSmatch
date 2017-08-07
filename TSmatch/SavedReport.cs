@@ -112,9 +112,7 @@ namespace TSmatch.SaveReport
                 model.dir = boot.ModelDir;
                 if (!FileOp.isDirExist(model.dir)) Msg.F("No Model Directory", model.dir);
                 if (!Docs.IsDocExists(Decl.TSMATCHINFO_MODELINFO)) Msg.F("No TSmatchINFO.xlsx file");
-//7/8                Model m = SetFrSavedModelINFO(this);
-//7/8                name = m.name;
-//7/8                phase = m.phase;
+                model = SetFrSavedModelINFO(model);
 
                 //////////                adrCity = m.adrCity; adrStreet = m.adrStreet;
                 ////////////23/7                elementsCount = m.elementsCount;

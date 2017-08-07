@@ -253,6 +253,8 @@ namespace TSmatch.SaveReport.Tests
             model.elements = sr.Raw(model);
 
             Assert.IsTrue(model.elements.Count > 0);
+            Assert.IsTrue(model.date > Decl.OLD & model.date < DateTime.Now);
+            Assert.AreEqual(32, model.MD5.Length);
 
             FileOp.AppQuit();
         }
@@ -333,7 +335,7 @@ namespace TSmatch.SaveReport.Tests
         }
 
         // эта инициализация класса SavedReport общая для всех тестов этого класса
-        // Model.SetModel() здесь использовать нельзя, т.к. SetModel dspsdftn SetReport
+        // sr.SetModel() здесь использовать нельзя, т.к. SetModel dspsdftn SetReport
         private SR init()
         {
             boot = new Boot();
