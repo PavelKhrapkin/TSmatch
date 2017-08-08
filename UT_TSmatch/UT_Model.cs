@@ -1,8 +1,8 @@
-﻿using TSmatch.Model;
-/*=================================
+﻿/*=================================
 * Model Unit Test 7.08.2017
 *=================================
 */
+using TSmatch.Model;
 using System;
 using System.Linq;
 using System.Collections.Generic;

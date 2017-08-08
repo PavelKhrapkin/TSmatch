@@ -70,6 +70,7 @@
     <Compile Include="UT_ProfileUpdate.cs" />
     <Compile Include="UT_Rule.cs" />
     <Compile Include="UT_SavedReport.cs" />
+    <Compile Include="UT_Section.cs" />
     <Compile Include="UT_Tekla.cs" />
   </ItemGroup>
   <ItemGroup>
