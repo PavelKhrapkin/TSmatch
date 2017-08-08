@@ -87,7 +87,7 @@ namespace TSmatch.SaveReport.Tests
 
             sr.GetTSmatchINFO(model);
 
-            Docs dINFO = Docs.getDoc(Decl.TSMATCHINFO_MODELINFO, fatal:false);
+            Docs dINFO = Docs.getDoc(Decl.TSMATCHINFO_MODELINFO, fatal: false);
 
             if (isModelINFOexists)
             {
@@ -100,35 +100,35 @@ namespace TSmatch.SaveReport.Tests
                 bool ok = sr.CheckModelIntegrity(model);
                 Assert.IsTrue(ok);
             }
-//////////////////////            Assert.IsTrue(model.elements.Count > 0);
-//////////////////////            Assert.IsTrue(model.elmGroups.Count > 0);
-//////////////////////            Assert.IsTrue(model.dir.Length > 0);
-//////////////////////            Assert.IsTrue(model.name.Length > 0);
-//////////////////////            Assert.IsTrue(model.Rules.Count > 0);
+            //////////////////////            Assert.IsTrue(model.elements.Count > 0);
+            //////////////////////            Assert.IsTrue(model.elmGroups.Count > 0);
+            //////////////////////            Assert.IsTrue(model.dir.Length > 0);
+            //////////////////////            Assert.IsTrue(model.name.Length > 0);
+            //////////////////////            Assert.IsTrue(model.Rules.Count > 0);
 
-//////////////////////            if(dINFO == null)
-//////////////////////            {
+            //////////////////////            if(dINFO == null)
+            //////////////////////            {
 
-//////////////////////            }
-//////////////////////            else
-//////////////////////            {
-// 7/8 ///////////////                Assert.AreEqual(2, dINFO.i0);
-//////////////////////                Assert.IsTrue(dINFO.il > 9);
-//////////////////////                var b = dINFO.Body;
-//////////////////////                string b_name = b.Strng(Decl.MODINFO_NAME_R, 2);
-//////////////////////                Assert.AreEqual("Название модели =", b.Strng(Decl.MODINFO_NAME_R, 1));
-//////////////////////                Assert.IsTrue(b_name.Length >= 1);
-//////////////////////                Assert.AreEqual("Адрес проекта:", b.Strng(Decl.MODINFO_ADDRESS_R, 1));
-//////////////////////                Assert.IsTrue(b.Strng(Decl.MODINFO_ADDRESS_R, 2).Length >= 1);
-//////////////////////                sr.CheckModelIntegrity();
-//////////////////////                Assert.IsTrue(model.elements.Count > 0);
-//////////////////////                Assert.AreEqual(model.MD5, dINFO.Body.Strng(Decl.MODINFO_MD5_R, 2));
-//////////////////////            }
+            //////////////////////            }
+            //////////////////////            else
+            //////////////////////            {
+            // 7/8 ///////////////                Assert.AreEqual(2, dINFO.i0);
+            //////////////////////                Assert.IsTrue(dINFO.il > 9);
+            //////////////////////                var b = dINFO.Body;
+            //////////////////////                string b_name = b.Strng(Decl.MODINFO_NAME_R, 2);
+            //////////////////////                Assert.AreEqual("Название модели =", b.Strng(Decl.MODINFO_NAME_R, 1));
+            //////////////////////                Assert.IsTrue(b_name.Length >= 1);
+            //////////////////////                Assert.AreEqual("Адрес проекта:", b.Strng(Decl.MODINFO_ADDRESS_R, 1));
+            //////////////////////                Assert.IsTrue(b.Strng(Decl.MODINFO_ADDRESS_R, 2).Length >= 1);
+            //////////////////////                sr.CheckModelIntegrity();
+            //////////////////////                Assert.IsTrue(model.elements.Count > 0);
+            //////////////////////                Assert.AreEqual(model.MD5, dINFO.Body.Strng(Decl.MODINFO_MD5_R, 2));
+            //////////////////////            }
 
-//////////////////////            Assert.IsTrue(model.elmGroups.Count > 0);
-////////////////////////24/7            Assert.AreEqual(model.pricingMD5, dINFO.Body.Strng(Decl.MODINFO_PRCMD5_R, 2));
+            //////////////////////            Assert.IsTrue(model.elmGroups.Count > 0);
+            ////////////////////////24/7            Assert.AreEqual(model.pricingMD5, dINFO.Body.Strng(Decl.MODINFO_PRCMD5_R, 2));
 
-//7/8            if (b_name == defaultModName) FileOp.Delete(model.dir, b_name);
+            //7/8            if (b_name == defaultModName) FileOp.Delete(model.dir, b_name);
 
             FileOp.AppQuit();
         }
@@ -265,7 +265,7 @@ namespace TSmatch.SaveReport.Tests
             model = sr.GetSavedRules(model);
 
             Assert.IsTrue(model.Rules.Count > 0);
-            foreach(var rule in model.Rules)
+            foreach (var rule in model.Rules)
             {
                 Assert.IsNull(rule.Supplier);
                 Assert.IsNull(rule.CompSet);
@@ -275,7 +275,7 @@ namespace TSmatch.SaveReport.Tests
             model = sr.GetSavedRules(model, init: true);
 
             Assert.IsTrue(model.Rules.Count > 0);
-            foreach(var rule in model.Rules)
+            foreach (var rule in model.Rules)
             {
                 Assert.IsNotNull(rule.Supplier);
                 Assert.IsNotNull(rule.CompSet);

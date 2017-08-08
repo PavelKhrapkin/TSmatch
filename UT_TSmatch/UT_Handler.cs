@@ -29,7 +29,7 @@ namespace TSmatch.Handler.Tests
             var boot = new Boot();
             var sr = new SR();
             model = sr.SetModel(boot);
-            
+
             model.elements = sr.Raw(model);
             List<Elm> elmCopy = new List<Elm>();
             foreach (Elm elm in model.elements) elmCopy.Add(elm);
@@ -41,7 +41,7 @@ namespace TSmatch.Handler.Tests
             Assert.AreEqual(cMD5, MD5);
             if (model.Rules == null || model.Rules.Count == 0)
             {
-                sr.GetSavedRules(model, init:true);
+                sr.GetSavedRules(model, init: true);
             }
             var mh = new MH();
             Mtch mtsh = new Mtch(model);
@@ -60,7 +60,7 @@ namespace TSmatch.Handler.Tests
 
             //Hndl performance test -- 180 sec for 100 cycles ОНХП модель 1124 элемента
             //                      -- 20,4 sec 1 cycle модель "Навес над трибунами" 7128 э-тов
-            int nLoops = 1;                    
+            int nLoops = 1;
             DateTime t0 = DateTime.Now;
             for (int i = 0; i < nLoops; i++)
             {
@@ -80,7 +80,7 @@ namespace TSmatch.Handler.Tests
         {
             var boot = new Boot();
             var model = new Mod();
- //7/8           model.SetModel(boot);
+            //7/8           model.SetModel(boot);
 
             var mh = new MH();
             mh.Pricing(ref model);

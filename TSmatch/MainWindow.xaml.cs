@@ -69,9 +69,6 @@ namespace TSmatch
             boot = new Boot();
             var sr = new SaveReport.SavedReport();
             model = sr.SetModel(boot);
-
-            // 7/8 /////////model = new Mod();
-            ////////////////model.SetModel(boot);
             WrModelInfoPanel();
             WrReportPanel();
             //30/5            model.HighLightElements(Mod.HighLightMODE.NoPrice);
