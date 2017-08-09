@@ -1,8 +1,9 @@
 ﻿/*-----------------------------------------------
- * WPF Window W_Rules 25.5.2017 Pavel Khrapkin
+ * WPF Window W_Rules 9.8.2017 Pavel Khrapkin
  * ----------------------------------------------
  * --- History ---
  * 2017.05.25 - written
+ * 2017.08.9  - nElms column output
  * --- Known Issue & ToDos ---
  * - еще нет диалога по допустимости CompSet для выбранного поставщика
  * - не написан метод ChekIfChanges()
@@ -13,8 +14,10 @@ using System.Windows;
 using log4net;
 
 using Lib = match.Lib.MatchLib;
+using Msg = TSmatch.Message.Message;
 using Decl = TSmatch.Declaration.Declaration;
 using Docs = TSmatch.Document.Document;
+using Mod = TSmatch.Model.Model;
 using System.Linq;
 
 namespace TSmatch
@@ -33,23 +36,21 @@ namespace TSmatch
             InitializeComponent();
             Title = "TSmatch: работа с правилами";
             List<Rl> items = new List<Rl>();
-            Docs doc = Docs.getDoc(Decl.TSMATCHINFO_RULES);
-
-            for (int i = doc.i0; i <= doc.il; i++)
+            if (MainWindow.model.Rules.Count == 0) Msg.AskFOK("No Rules in Model");
+    
+            foreach(var rule in MainWindow.model.Rules)
             {
-                string csName = doc.Body.Strng(i, Decl.RULE_COMPSETNAME);
-                Rule.Rule rule = new Rule.Rule(i);
-                if (rule == null || string.IsNullOrWhiteSpace(rule.sSupl)
-                    || string.IsNullOrWhiteSpace(rule.text)) continue;
-                int nElms = 0;
-                foreach(var mtch in MainWindow.model.matches)
+                int nGr = 0, nElms = 0;
+                double price = 0;
+                foreach (var match in MainWindow.model.matches)
                 {
-                    if (mtch.rule.sSupl != rule.sSupl || mtch.rule.sCS != rule.sCS) continue;
-                    var gr = mtch.group;
-                    nElms += gr.guids.Count;
+                    if (match.rule.sSupl != rule.sSupl || match.rule.sCS != rule.sCS) continue;
+                    nGr++;
+                    nElms += match.group.guids.Count;
+                    price += match.group.totalPrice;
                 }
-                items.Add(new Rl(nElms, rule.date, rule.sSupl, csName, rule.text));
-                rules.Add(rule);
+                string gr_price = string.Format("{0}/{1}:{2,12:N2}р", nGr, nElms, price);
+                items.Add(new Rl(gr_price, rule.date, rule.sSupl, rule.sCS, rule.text));
             }
             WRules.ItemsSource = items;
         }
@@ -71,16 +72,16 @@ namespace TSmatch
 
         private class Rl : IComparable<Rl>
         {
-            public string nElms { get; set; }
+            public string gr_price { get; set; }
             public string Date { get; set; }
             public string Supplier { get; set; }
             public string CompSet { get; set; }
             public string RuleText { get; set; }
             public bool Flag { get; set; }
 
-            public Rl(int _nElms, DateTime date, string supl, string cs, string ruletxt)
+            public Rl(string _gr_price, DateTime date, string supl, string cs, string ruletxt)
             {
-                nElms = _nElms.ToString();
+                gr_price = _gr_price;
                 Date = date.ToString("d.MM.yy H:mm");
                 Supplier = supl;
                 CompSet = cs;

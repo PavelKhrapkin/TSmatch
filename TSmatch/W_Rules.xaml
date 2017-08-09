@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TSmatch"
         mc:Ignorable="d"
-        Title="W_Rules" Height="300" Width="600">
+        Title="W_Rules" Height="300" Width="800">
     <Grid Background="Ivory">
         <!-- Display WRules ListView -->
         <ListView Margin="10" Name="WRules">
@@ -22,11 +22,11 @@
 
             <ListView.View>
                 <GridView>
-                    <GridViewColumn Header="nElms" Width="5" DisplayMemberBinding="{Binding nElms}" />
+                    <GridViewColumn Header="#:цена" Width="Auto" DisplayMemberBinding="{Binding gr_price}" />
                     <GridViewColumn Header="Дата и время" Width="90" DisplayMemberBinding="{Binding Date}" />
                     <GridViewColumn Header="Поставщик" Width="130" DisplayMemberBinding="{Binding Supplier}" />
                     <GridViewColumn Header="Сортамент" Width="110" DisplayMemberBinding="{Binding CompSet}" />
-                    <GridViewColumn Header="Правило" Width="220" DisplayMemberBinding="{Binding RuleText}" />
+                    <GridViewColumn Header="Правило" Width="320" DisplayMemberBinding="{Binding RuleText}" />
                 </GridView>
             </ListView.View>
         </ListView>
