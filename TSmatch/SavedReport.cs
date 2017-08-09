@@ -343,33 +343,6 @@ namespace TSmatch.SaveReport
             }
             return true;
         }
-#if OLD // 14/7/17
-        bool check = true;
-            while (check)
-            {
-
-                //                if(!IsModINFO_OK()) { Reset(Decl.TSMATCHINFO_MODELINFO); continue; }
-                if (dINFO == null || dINFO.il< 11) { Reset(Decl.TSMATCHINFO_MODELINFO); continue; }
-                SetSavedMod(mod);
-                if (isChangedStr(ref mod.name, dINFO, 2, 2)) { ChangedModel(); continue; }
-                if (isChangedStr(ref mod.dir, dINFO, 3, 2)) { Reset(sINFO); continue; }
-                if (isChangedStr(ref mod.MD5, dINFO, 6, 2)) { ChangedModel(); continue; }
-                if (isChangedStr(ref mod.pricingMD5, dINFO, 9, 2)) { ChangedPricing(); continue; }
-                pricingDate = Lib.getDateTime(dINFO.Body.Strng(8, 2));
-                elements = Raw(mod);
-                if (elements == null && !TS.isTeklaActive()) Msg.F("No Saved elements in TSmatchINFO.xlsx");
-                ////////////////elmGroups = mh.getGrps(elements);
-                // 27/6 ////////total_price = 0;
-                ////////////////foreach (var gr in elmGroups) total_price += gr.totalPrice;  
-
-            Log.Trace("*SR.elements=", elements.Count, " gr=", elmGroups.Count, " total price=", total_price);
-                if (!Docs.IsDocExists(sRep)) { Reset(sRep); continue; }
-                getSavedGroups();
-                if (!Docs.IsDocExists(sRul)) { Reset(sRul); continue; }
-//27/6                if (total_price <= 0) { Recover(sRep, RecoverToDo.ResetRep); continue; }
-                check = false;
-            }
-#endif //OLD //11/7/17
         #endregion ------ Reset & Recovery area ------
 
         #region ------ Raw - read/write Raw.xml area ------
