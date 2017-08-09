@@ -1,13 +1,14 @@
 ﻿/*--------------------------------------------------------------------------------------------
  * ModelWrFile : Model -- Write ModelINFO, Report and other documents in file TSmatchINFO.xlsx
  *
- *  23.07.2017 Pavel Khrapkin
+ *  9.08.2017 Pavel Khrapkin
  *
  *--- History ---
  *  13.07.2017 taken from Model code
  *  19.07.2017 Lib.timeStr(date) instead of DateTime format- it is strange behavior of Excel fix
+ *   9.08.2017 Docs.getDoc(reset:true)
  *--- Unit Tests --- 
- * 2017.06.19 UT_ModHandler.UT_Hndl, UT_Pricing OK
+ * 2017.08.9 UT_ModelWrFile: UT_sInt, UT_iDbl, UT_sDat OK
  * -------------------------------------------------------------------------------------------
  * Methods:
  * wrModel(mode, model) - write model in ModelINFO, Report, and other tabs of TSmatchINFO.xlsx
@@ -39,6 +40,7 @@ namespace TSmatch.Model.WrModelInfo
         ///  1.4.2016 - re-written
         /// 21.8.2016 - case constants defined here from Decl, changed TSmatchINFO Document list, restructured
         /// 10.4.2017 - enum WrMod
+        ///  9.8.2017 - use sInt, sDbl, sDat
         /// </history>
         public enum WrMod { ModelINFO, Materials, Suppliers, Rules, Report }
         public void wrModel(WrMod mode, Mod mod)
@@ -46,7 +48,7 @@ namespace TSmatch.Model.WrModelInfo
             string doc_name = mode.ToString();
             Log.set("Model.wrModel(" + doc_name + ")");
             DateTime t0 = DateTime.Now;
-            Docs doc = Docs.getDoc(doc_name, create_if_notexist: true);
+            Docs doc = Docs.getDoc(doc_name, create_if_notexist: true, reset: true);
             doc.Reset();
             switch (mode)
             {
@@ -55,8 +57,8 @@ namespace TSmatch.Model.WrModelInfo
                     string adr = mod.adrCity;
                     if (mod.adrStreet != string.Empty) adr += ", " + mod.adrStreet;
                     doc.wrDocForm(mod.name, adr, mod.dir, mod.phase
-                        , Lib.timeStr(mod.date), mod.MD5
-                        , mod.elements.Count, Lib.timeStr(mod.pricingDate), mod.pricingMD5);
+                        , sDat(mod.date), mod.MD5
+                        , sInt(mod.elements.Count), sDat(mod.pricingDate), mod.pricingMD5);
                     break;
                 case WrMod.Materials:   // сводка по материалам, их типам (бетон, сталь и др)
                     doc.wrDocSetForm("FORM_Materials", 3, AutoFit: true);
@@ -76,7 +78,7 @@ namespace TSmatch.Model.WrModelInfo
                     doc.wrDocSetForm("FORM_RuleLine");
                     foreach (var rule in mod.Rules)
                     {
-                        doc.wrDocForm(rule.date, rule.Supplier.name, rule.CompSet.name, rule.text);
+                        doc.wrDocForm(sDat(rule.date), rule.Supplier.name, rule.CompSet.name, rule.text);
                     }
                     break;
                 case WrMod.Report:      // отчет по сопоставлению групп <материал, профиль> c прайс-листами поставщиков
@@ -104,9 +106,9 @@ namespace TSmatch.Model.WrModelInfo
                             csName = gr.match.rule.CompSet.name;
                         }
                         doc.wrDocForm(n++, gr.Mat, gr.Prf
-                            , gr.totalLength, gr.totalWeight, gr.totalVolume
+                            , sDbl00(gr.totalLength), sDbl(gr.totalWeight), sDbl(gr.totalVolume)
                             , compDescription, suplName, csName
-                            , gr.totalWeight, gr.totalPrice);
+                            , sDbl(gr.totalWeight), sDbl(gr.totalPrice));
                     }
                     doc.isChanged = true;
                     doc.saveDoc();
@@ -129,5 +131,10 @@ namespace TSmatch.Model.WrModelInfo
             log.Info("Время записи в файл \"" + doc_name + "\"\t t= " + (DateTime.Now - t0).ToString() + " сек");
             Log.exit();
         }
+
+        public string sDbl(double v) { return string.Format("{0 :N2}", v); }
+        public string sInt(int i)    { return string.Format("{0 :N0}", i); }
+        public string sDbl00(double v) { return string.Format("{0 :N0}", v); }
+        public string sDat(DateTime d) { return Lib.timeStr(d, "d.MM.yyyy H:mm"); }
     } // end class
 } // end namespace
