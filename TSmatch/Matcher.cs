@@ -90,34 +90,35 @@ namespace TSmatch.Matcher
                 catch { }
                 if (!found) continue;
                 //-- Component is found - fill Price for all Guids elemets
-
+#if CHECK_MD5
                 if (!OK_MD5()) Msg.AskFOK("corrupted MD5"); 
-
+#endif
                 ok = OK.Match;
                 string priceStr;
                 try { priceStr = comp.Str(SType.Price); }
                 catch { Msg.F("Match: Bad Price descriptor", _rule.sSupl, _rule.sCS); }
-
+#if CHECK_MD5
                 if (!OK_MD5()) Msg.AskFOK("corrupted MD5");
-
+#endif
                 component = comp;
                 gr.match = this;    //27/3!!
                 rule = _rule;
-
+#if CHECK_MD5
                 if (!OK_MD5()) Msg.AskFOK("corrupted MD5");
-
+#endif
                 gr.totalPrice = getPrice(gr, rule.CompSet.csDP, comp.Str(SType.Price));
-
+#if CHECK_MD5
                 if (!OK_MD5()) Msg.AskFOK("corrupted MD5");
+#endif
             }
         }
-
+#if CHECK_MD5
         public bool OK_MD5()
         {
             string newMD5 = model.getMD5(model.elements);
             return model.MD5 == newMD5;
         }
-
+#endif
         private double getPrice(ElmAttSet.Group group, DPar.DPar csDP, string priceStr)
         {
             double price = Lib.ToDouble(priceStr);

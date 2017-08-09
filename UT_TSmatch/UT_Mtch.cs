@@ -50,13 +50,13 @@ namespace TSmatch.Matcher.Tests
                 {
                     Assert.IsNotNull(rule.CompSet.Supplier);
                     Assert.IsTrue(rule.CompSet.Components.Count > 0);
-
+#if CHECK_MD5
                     Assert.IsTrue(mtch.OK_MD5());
-
+#endif
                     Mtch _match = new Mtch(gr, rule);
-
+#if CHECK_MD5
                     Assert.IsTrue(mtch.OK_MD5());
-
+#endif
                     string new_md5 = model.getMD5(model.elements);
                     Assert.AreEqual(new_md5, MD5);
                 }

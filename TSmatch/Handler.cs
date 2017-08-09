@@ -84,12 +84,9 @@ namespace TSmatch.Handler
                 bool b = false;
                 foreach (var rule in mod.Rules)
                 {
-                    log.Info("==>Hndl.MD5=" + mod.MD5 + " =?= " + mod.getMD5(mod.elements));
                     Mtch _match = new Mtch(gr, rule);
-                    log.Info("==>Hndl.MD5=" + mod.MD5 + " =?= " + mod.getMD5(mod.elements));
                     if (_match.ok == Mtch.OK.Match)
                     {
-                        log.Info("=match.ok=>Hndl.MD5=" + mod.MD5 + " =?= " + mod.getMD5(mod.elements));
                         mod.matches.Add(_match);
                         gr.SupplierName = _match.rule.Supplier.name;
                         b = true; break;
