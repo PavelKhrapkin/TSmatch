@@ -93,7 +93,7 @@ namespace TSmatch.Model
 
         public int CompareTo(Model mod) { return mod.date.CompareTo(date); }    //to Sort Models by time
 
-        public Model() { }
+        public Model() { ts = new TS(); mh = new Handler.Handler(); sr = new SR(); }
 
         #region --- Setup and Read CAD methods
          public void setCity(string adr)

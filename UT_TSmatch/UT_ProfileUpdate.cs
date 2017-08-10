@@ -1,5 +1,5 @@
 ﻿/*=================================
- * ProfileUpdate Unit Test 23.07.2017
+ * ProfileUpdate Unit Test 10.08.2017
  *=================================
  */
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -226,7 +226,7 @@ namespace TSmatch.ProfileUpdate.Tests
 
             // test 2: "PL6*100" => "—6x100"
             initGr("PL6*100");
-            xx = new ProfileUpdate(ref elmGroups); ;
+            xx = new ProfileUpdate(ref elmGroups); 
             Assert.AreEqual("—6x100", elmGroups[0].Prf);
         }
 
@@ -252,6 +252,25 @@ namespace TSmatch.ProfileUpdate.Tests
             initGr("Гн.120x120x7");
             xx = new ProfileUpdate(ref elmGroups);
             Assert.AreEqual("Гн.120x7", elmGroups[0].Prf);
+        }
+
+        [TestMethod()]
+        public void UT_ProfileUpdate_TK_TP()
+        {
+            // test 0TP: "TР 480X32" -> "TP480x32"
+            initGr("TР 480X32");
+            var xx = new ProfileUpdate(ref elmGroups);
+            Assert.AreEqual("TP480x32", elmGroups[0].Prf);
+
+            // test 1TP: "Тр. 50X25X3" -> "TP480x32"
+            initGr("Тр. 50X25X3");
+            xx = new ProfileUpdate(ref elmGroups);
+            Assert.AreEqual("TP50x25x3", elmGroups[0].Prf);
+
+            // test 2TK: "TK 133X6" -> "TK133x6"
+            initGr("TK 133X6");
+            xx = new ProfileUpdate(ref elmGroups);
+            Assert.AreEqual("TK133x6", elmGroups[0].Prf);
         }
 
         private void initGr(string v)
