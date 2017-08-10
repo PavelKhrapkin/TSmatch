@@ -97,5 +97,10 @@ namespace TSmatch
                 return result;
             }
         }
+
+        private void OnRule_changed(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+
+        }
     }
 } // end namespace
