@@ -284,6 +284,21 @@ namespace TSmatch.SaveReport.Tests
 
             FileOp.AppQuit();
         }
+
+        [TestMethod()]
+        public void UT_Save()
+        {
+            init();
+            model = sr.SetModel(boot, unit_test_mode: false);   // with Rule Initialization
+
+            sr.Save(model);
+
+            bool ok = sr.CheckModelIntegrity(model);
+            Assert.IsTrue(ok);
+
+            FileOp.AppQuit();
+        }
+
 #if OLD //23/7
         // проверяем как дополняются eleGroups из листа TSmatchINFO.xlsx/Report
         // 2017.06.28 переписан sr.getSavedGroups() -- getGrps + читаю из файла Report

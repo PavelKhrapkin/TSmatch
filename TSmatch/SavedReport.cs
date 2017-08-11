@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------------------
  * SavedReport -- class for handle saved reports in TSmatchINFO.xlsx
  * 
- *  8.08.2017 П.Л. Храпкин
+ *  11.08.2017 П.Л. Храпкин
  *  
  *--- Unit Tests ---
  * UT_GetModelInfo  2-17.7.14 
@@ -18,6 +18,7 @@
  * 31.07.2017 - remove local ref mh - it is in Model; fix FATAL "No TSmatchINFO.xlsx"
  *  3.07.2017 - corrections in GetSavedRules -- if(init)
  *  7.08.2017 - GetModelINFO audit; getRaw(model.dat = File.GetLastWriteTime(file);
+ * 11.08.2017 - more tests in CeckIntegrityModel, and GetSavedRules updated
  *--- Methods: -------------------      
  * GetTSmatchINFO()     - read TSmatchINFO.xlsx, check, set it as a current Model
 
@@ -147,7 +148,7 @@ namespace TSmatch.SaveReport
             model.elements = Raw(model);
 
             if (model.isChanged)
-            { //-- no information available from TSmatchINFO.xlsx -- doing re-Pricing
+            { //-- no information available from TSmatchINFO.xlsx or it was changed -- doing re-Pricing
                 mh.Pricing(ref model, unit_test_mode);
             }
             else
@@ -324,10 +325,10 @@ namespace TSmatch.SaveReport
         public bool CheckModelIntegrity(Mod mod)
         {
             if (mod.date < Decl.OLD || mod.date > DateTime.Now) return false;
-            if (mod.pricingDate < Decl.OLD || model.pricingDate > DateTime.Now) return false;
-            if (mod.MD5 == null || model.MD5.Length != 32) return false;
-            if (mod.pricingMD5 == null || model.pricingMD5.Length != 32) return false;
-            if (mod.elements.Count <= 0 || model.elmGroups.Count <= 0) return false;
+            if (mod.pricingDate < Decl.OLD || mod.pricingDate > DateTime.Now) return false;
+            if (mod.MD5 == null || mod.MD5.Length != 32) return false;
+            if (mod.pricingMD5 == null || mod.pricingMD5.Length != 32) return false;
+            if (mod.elements.Count <= 0 || mod.elmGroups.Count <= 0) return false;
             if (string.IsNullOrWhiteSpace(mod.name)) return false;
             if (string.IsNullOrWhiteSpace(mod.dir)) return false;
 
@@ -340,6 +341,11 @@ namespace TSmatch.SaveReport
                 if (isChangedStr(ref mod.MD5, dINFO, Decl.MODINFO_MD5_R, 2)) return false;
                 if (isChangedStr(ref mod.pricingMD5, dINFO, Decl.MODINFO_PRCMD5_R, 2)) return false;
                 if (mod.elements.Count != dINFO.Body.Int(Decl.MODINFO_ELMCNT_R, 2)) return false;
+                dRul = Docs.getDoc(sRul, create_if_notexist: false, fatal: false);
+                if (dRul == null || dRul.il < dRul.i0 || dRul.il <= 2) return false;
+                dRep = Docs.getDoc(sRep, create_if_notexist: false, fatal: false);
+                if (dRep == null || dRep.il < dRep.i0 || dRul.il <= 2) return false;
+                if (dRep.il - dRep.i0 != mod.elmGroups.Count) return false;
             }
             return true;
         }
@@ -430,16 +436,21 @@ namespace TSmatch.SaveReport
             }
             else
             {
-                model.Rules.Clear();
-                Docs doc = Docs.getDoc("Rules");
-                for (int i = doc.i0; i <= doc.il; i++)
+                if (dRul == null || model.Rules.Count == 0)
                 {
-                    try { model.Rules.Add(new Rule.Rule(i)); }
-                    catch { continue; }
+                    dRul = Docs.getDoc("Rules");
+                    model.Rules.Clear();
+                    for (int i = dRul.i0; i <= dRul.il; i++)
+                    {
+                        try { model.Rules.Add(new Rule.Rule(i)); }
+                        catch { continue; }
+                    }
                 }
             }
             if (init) foreach (var rule in model.Rules) rule.Init();
-            log.Info("- getSavedRules() Rules.Count = " + model.Rules.Count);
+            log.Info("GetSavedRules: Rules.Count = " + model.Rules.Count 
+                + (init? "": " NOT") + "Initialized");
+            if(!CheckModelIntegrity(model)) error();
             Log.exit();
             return model;
         }
@@ -455,8 +466,9 @@ namespace TSmatch.SaveReport
         /// as the Sheets in Excel file TSmatchINFO.xlsx
         /// </remarks>
         /// <param name="model"></param>
-        internal void Save(Mod model)
+        public void Save(Mod model)
         {
+            if (!CheckModelIntegrity(model)) model.mh.Pricing(ref model);
             var w = new WrMod();
             w.wrModel(WrM.ModelINFO, model);
             w.wrModel(WrM.Report, model);

@@ -21,7 +21,7 @@ namespace TSmatch.Handler.Tests
     [TestClass()]
     public class UT_Handler
     {
-        Mod model;
+        public Mod model;
 
         [TestMethod()]
         public void UT_Hndl()
@@ -79,11 +79,10 @@ namespace TSmatch.Handler.Tests
         public void UT_Pricing()
         {
             var boot = new Boot();
-            var model = new Mod();
-            //7/8           model.SetModel(boot);
+            Mod model = new Mod();
+            model = model.sr.SetModel(boot);
 
-            var mh = new MH();
-            mh.Pricing(ref model);
+            model.mh.Pricing(ref model);
             Assert.IsTrue(model.matches.Count > 0);
 
             FileOp.AppQuit();

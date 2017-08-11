@@ -36,7 +36,9 @@ namespace TSmatch
             InitializeComponent();
             Title = "TSmatch: работа с правилами";
             List<Rl> items = new List<Rl>();
-            if (MainWindow.model.Rules.Count == 0) Msg.AskFOK("No Rules in Model");
+
+            if (MainWindow.model.Rules.Count == 0)
+                MainWindow.model = MainWindow.model.sr.GetSavedRules(MainWindow.model);
     
             foreach(var rule in MainWindow.model.Rules)
             {
@@ -100,6 +102,7 @@ namespace TSmatch
 
         private void OnRule_changed(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
+            if (!Msg.AskYN("Delete this Rule?")) return;
 
         }
     }
