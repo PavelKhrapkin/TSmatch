@@ -2,13 +2,16 @@
  * Section -- class dealing with the fragment of string related to
  *            some section - f.e. Material, or Price
  *
- * 3.04.2017 Pavel Khrapkin
+ * 8.08.2017 Pavel Khrapkin
  *
+ * --- Unit Tests ---
+ * 2017.08.8  - UT_Section OK
  *--- History ---
  *  7.03.2017 made from other module fragments
  * 19.03.2017 re-written with SectionTab as a argument of Constructor
  * 21.03.2017 call Bootstrap.initSection() for SectionTab
  * 28.03.2017 munli-header Section like "M: Def: body"
+ *  8.08.2017 static constructor as a singleton initializator of SectionTab
  * ------ Fields ------
  * type section - recognized enum Section type, f.e. Material, Price etc
  * string body  - text string, contained in Section between ':' and ';' or end
@@ -46,11 +49,43 @@ namespace TSmatch.Section
         public string body;     // text after ':', but before first ';'
         public SType refSection; // reference to the Section with data
 
-        Dictionary<string, List<string>> SectionTab;
+        static Dictionary<string, List<string>> SectionTab = new Dictionary<string, List<string>>();
+
+        /// <summary>
+        /// Singleton static SectionTab initialization
+        /// </summary>
+        static Section()
+        {
+            sub(SType.Material, "MAT", "m", "м");
+            sub(SType.Profile, "PRF", "pro", "пр");
+            sub(SType.Price, "CST", "cost", "pric", "цен", "сто");
+            sub(SType.Description, "DES", "оп", "знач");
+            sub(SType.LengthPerUnit, "LNG", "leng", "длин");
+            sub(SType.VolPerUnit, "VOL", "об", "v");
+            sub(SType.WeightPerUnit, "WGT", "вес", "w");
+            // применение SType.Unit: заголовок для распознавания
+            //.. "составных" секций, например, "ед: руб/т" 
+            sub(SType.Unit, "UNT", "ед", "un");
+            sub(SType.UNIT_Vol, "UNT_Vo", "руб*м3", "ст.куб");
+            sub(SType.UNIT_Weight, "UNT_W", "руб*т", "ст*т");
+            sub(SType.UNIT_Length, "UNT_L", "п*метр", "за*м");
+            sub(SType.UNIT_Qty, "UNT_Q", "шт", "1");
+        }
+
+        private static void sub(SType t, params string[] str)
+        {
+            List<string> lst = new List<string>();
+            foreach (string s in str)
+            {
+                string x = "^" + s + ".*? ";
+                lst.Add(Lib.ToLat(x).ToLower().Replace(" ", ""));
+            }
+            SectionTab.Add(t.ToString(), lst);
+        }
 
         public Section(string _text, SType stype = SType.NOT_DEFINED)
         {
-            if (SectionTab == null) SectionTab = new Boot.initSection().SectionTab;
+//8/8            if (SectionTab == null) SectionTab = new Boot.initSection().SectionTab;
             string[] sections = Lib.ToLat(_text).ToLower().Replace(" ", "").Split(';');
             if (stype == SType.NOT_DEFINED)
             {
@@ -145,6 +180,10 @@ namespace TSmatch.Section
             for (int i = 1; i < m.Groups.Count; i++)
                 result.Add(new Par(m.Groups[i].Value));
             return result;
+        }
+
+        private class Syn : List<string>
+        {
         }
     } // end class Section
 } // end namespace TSmatch.Section

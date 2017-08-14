@@ -405,52 +405,6 @@ namespace TSmatch.Bootstrap
                 return ok;
             }
         } // end class Resource
-#endif // OLD  7/4/17 
-        /// <summary>
-        /// class Section initialization - fill SectionTab Dictionary
-        /// </summary>
-        /// 2017.03.17 as advised Oleg Turetsky
-        /// 2017.03.25 add Material synonym
-        public class initSection
-        {
-            public readonly Dictionary<string, List<string>> SectionTab = new Dictionary<string, List<string>>();
-
-            public initSection()
-            {
-                sub(SType.Material, "MAT", "m", "м");
-                sub(SType.Profile, "PRF", "pro", "пр");
-                sub(SType.Price, "CST", "cost", "pric", "цен", "сто");
-                sub(SType.Description, "DES", "оп", "знач");
-                sub(SType.LengthPerUnit, "LNG", "leng", "длин");
-                sub(SType.VolPerUnit, "VOL", "об", "v");
-                sub(SType.WeightPerUnit, "WGT", "вес", "w");
-                // применение SType.Unit: заголовок для распознавания
-                //.. "составных" секций, например, "ед: руб/т" 
-                sub(SType.Unit, "UNT", "ед", "un");
-                sub(SType.UNIT_Vol, "UNT_Vo", "руб*м3", "ст.куб");
-                sub(SType.UNIT_Weight, "UNT_W", "руб*т", "ст*т");
-                sub(SType.UNIT_Length, "UNT_L", "п*метр", "за*м");
-                sub(SType.UNIT_Qty, "UNT_Q", "шт", "1");
-            }
-
-            void sub(SType t, params string[] str)
-            {
-                List<string> lst = new List<string>();
-                foreach (string s in str)
-                    lst.Add(Lib.ToLat(s).ToLower().Replace(" ", ""));
-                SectionTab.Add(t.ToString(), lst);
-            }
-        } // end class initSection
-#if OLD
-        void initModJournal()
-        {
-            models = new List<Mod>();
-//24/5            Docs doc = Docs.getDoc(Decl.MODELS);
-            for (int i = doc.i0; i <= doc.il; i++)
-            {
-                models.Add(new Mod(i, doInit: false));
-            }
-        }
 #endif // OLD
     } // end class Bootsrap
 } // end namespace

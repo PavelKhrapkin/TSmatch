@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------
  * MatchLib -- библиотека общих подпрограмм проекта match 3.0
  * 
- *  21.07.17 П.Храпкин, А.Пасс
+ *  8.08.2017 П.Храпкин, А.Пасс
  *  
  * - 20.11.13 переписано с VBA на С#
  * - 1.12.13 добавлен метод ToIntList
@@ -23,6 +23,7 @@
  * - 24.05.17 Regex const for GetPar are local - not in Declaration anymore
  * -  2.07.17 GetPersStr(str) - get numberic parameters as a List<string>
  * - 21.07.17 Log Trace cosmeics
+ * -  8.08.17 ToLat updated -- accelerated two times
  *      ---- Unit Tests ----
  * 2017.07.15 UT_ToLat, UT_IContains, UT MatchLib_GetPars, UT_MatchLib_GetParsStr   OK
  * ----------- методы Mtch.Lib ---------------------------------------------------------
@@ -270,7 +271,7 @@ namespace match.Lib
         ///           по написалию знаками латинского алфавита       
         /// </summary>
         /// <returns>преобразованная текстовая строка</returns>
-        /// <history> 21.2.2016 </history>
+        /// <history> 21.2.2016 updated 8.8.2017</history>
         ////// не получилось сделать вызов str.ToLat()
         //////public string ToLat(this string str, bool up = false)
         //////{
@@ -282,16 +283,15 @@ namespace match.Lib
             const string cyr = "АВЕКМНОРСТХаеорсух";
             const string lat = "ABEKMHOPCTXaeopcyx";
             if (string.IsNullOrEmpty(str)) return str;
-            string lt = "";
+            string lt = string.Empty;
             foreach (var s in str)
             {
-                char? st = null;
-                for (int i = 0; i < cyr.Length; i++)
-                    if (s == cyr[i]) { st = lat[i]; break; }
-                if (st == null) lt += s; else lt += st;
+                int ind = cyr.IndexOf(s);
+                lt += ind < 0 ? s : lat[ind];
             }
             return lt;
         }
+
         /// <summary>
         /// GetPars(str) разбирает строку раздела компонента или Правила, выделяя числовые параметры.
         ///         Названия материалов, профилей и другие нечисловые подстроки игнорируются.

@@ -1,7 +1,7 @@
 ﻿/*---------------------------------------------------------------
  * Declaration - common constatnt and readonly declaranion module
  *
- * 11.07.2017 Pavel Khrapkin
+ * 7.08.2017 Pavel Khrapkin
  *
  *--- History ---
  * 2013-2016 - initial history: use DataTable, adapt from match to TSmach,
@@ -28,6 +28,7 @@ namespace TSmatch.Declaration
         public const string TSMATCH = "TSmatch";                // general Application Name
         public const string WIN_TSMATCH_DIR = TSMATCH + "_Dir"; // Windows Path Paramentr
         public const string F_MATCH = TSMATCH + ".xlsx";        // central dispatch file
+        public const string F_TSMATCHINFO = "TSmatchINFO.xlsx"; // main information file in model directory
         public const string TSMATCH_EXE = TSMATCH + ".exe";     // Application exe file       
         public const string BUTTON_CS = "TSmatch.cs";
         public const string BUTTON_BMP = "TSmatch.BMP";

@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------------------------------
  * Model -- Manage major class operaions together with the child modules Handler and SavedMdel
  * 
- * 27.07.2017 Pavel Khrapkin
+ * 7.08.2017 Pavel Khrapkin
  *  
  *--- History ---
  * Jan-16 - May-17 pre-history P.Khrapkin, A.Pass, A.Bobtsov
@@ -17,13 +17,13 @@
  * 14.07.2017 - SetModDir setarated from SetModet for UT_
  * 23.07.2017 - exclude elementsCound from Model propertties; now account elements.Count
  * 27.07.2017 - remove isRuleChanged. Always write Rules, when modelIsChanged
+ * 31.07.2017 - no SR.Save is necessary after Model.Read - Save will made later on exit
+ *  7.08.2017 - move code SetModel from Model to SavedModel
  * --- Unit Tests ---
  * 2017.07.6  UT_Model.UT_SetModel   OK
  * 2017.07.14 UT_SetModDir, setCity  OK 
  * ---- METHODS: -----------------
  * Read(modelName) - получение модели (списка элементов с атрибутами) из Tekla или IFC
- * getModel(name)  - ищет модель по имени name в журнале моделей
- * setModel(name)  - подготавливает обработку модели name; читает все файлы компонентов
  * setCity(adr)    - parse string adr; set model.adrCity and model.adrStreet
  * saveModel(name) - сохраняет модель с именем name
  * UpdateFrTekla() - обновление модели из данных в C# в файловую систему (ЕЩЕ НЕ ОТЛАЖЕНО!!)
@@ -78,9 +78,8 @@ namespace TSmatch.Model
         public string pricingMD5;   // контр.сумма цен и правил при расчете Report
         public DateTime pricingDate;
         public List<ElmMGr> elmMgroups = new List<ElmMGr>();
-        public List<ElmGr> elmGroups = new List<ElmGr>();   // will be used in Matcher
+        public List<ElmGr> elmGroups = new List<ElmGr>(); 
         public HashSet<Rule.Rule> Rules = new HashSet<Rule.Rule>();
-        public string strListRules;                        // список Правил в виде текста вида "5,6,8"   
         public readonly HashSet<Supplier> Suppliers = new HashSet<Supplier>();
         public List<CmpSet> CompSets = new List<CmpSet>();
         public List<Matcher.Mtch> matches = new List<Matcher.Mtch>();
@@ -93,58 +92,10 @@ namespace TSmatch.Model
 
         public int CompareTo(Model mod) { return mod.date.CompareTo(date); }    //to Sort Models by time
 
-        public Model() { }
+        public Model() { ts = new TS(); mh = new Handler.Handler(); sr = new SR(); }
 
         #region --- Setup and Read CAD methods
-        public void SetModel(Boot boot)
-        {
-            Log.set("SetModel");
-            //create child class references mh, sr
-            mh = new Handler.Handler();
-            sr = new SR();
-            SetModDir(boot);
-            sr.GetTSmatchINFO(this);
-
-            //23/7            date = sr.date;
-            //23/7            elements = sr.elements;
-            //23/7            elmGroups = sr.elmGroups;
-            //23/7            pricingDate = sr.pricingDate;
-            Log.exit();
-        }
-
-        public void SetModDir(Boot boot)
-        {
-            if (boot.isTeklaActive)
-            {   // if Tekla is active - get Path of TSmatch
-                name = Path.GetFileNameWithoutExtension(TS.ModInfo.ModelName);
-                dir = TS.GetTeklaDir(TS.ModelDir.model);
-                phase = TS.ModInfo.CurrentPhase.ToString();
-                //6/4/17                        macroDir = TS.GetTeklaDir(TS.ModelDir.macro);
-                HighLightClear();
-            }
-            else
-            {   // if Tekla not active - get model attributes from TSmatchINFO.xlsx in ModelDir
-                dir = boot.ModelDir;
-                if (!FileOp.isDirExist(dir)) Msg.F("No Model Directory", dir);
-                if (!Docs.IsDocExists(Decl.TSMATCHINFO_MODELINFO)) Msg.F("No TSmatchINFO.xlsx file");
-                if (sr == null) sr = new SR();
-                Model m = sr.SetFrSavedModelINFO(this);
-                name = m.name;
-                phase = m.phase;
-
-                //////////                adrCity = m.adrCity; adrStreet = m.adrStreet;
-                ////////////23/7                elementsCount = m.elementsCount;
-                ////////////23/7                if (elementsCount == 0)
-                ////////////23/7                    Msg.F("SavedReport doc not exists and no CAD");
-                //////////                date = m.date;
-                //////////                MD5 = m.MD5;
-                //////////                pricingMD5 = m.pricingMD5;
-                //////////                pricingDate = m.pricingDate;
-                //////////                //24/4                classCAD = ifc;
-            }
-        }
-
-        public void setCity(string adr)
+         public void setCity(string adr)
         {
             string[] adrs = adr.Split(',');
             adrCity = adrs[0].Trim();
@@ -162,15 +113,12 @@ namespace TSmatch.Model
             elements.Clear();
             if (TS.isTeklaActive()) elements = ts.Read();
             else elements = Ifc.Read(ifcPath);
-            //23/7            elementsCount = elements.Count;
             string newMD5 = getMD5(elements);
             if (newMD5 != MD5)
             {
                 isChanged = true;
                 MD5 = newMD5;
                 date = DateTime.Now;
-                if (sr == null) sr = new SR();
-                sr.Save(this);
             }
             return this;
         }
@@ -666,7 +614,6 @@ namespace TSmatch.Model
         {
             if (isChanged && Msg.AskYN("Модель или цены изменились. Запишем изменения в файл?"))
             {
-                var sr = new SaveReport.SavedReport();
                 sr.Save(this);
             }
             HighLightClear();

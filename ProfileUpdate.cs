@@ -1,14 +1,15 @@
 ﻿/*--------------------------------------------------------------------------------------------
  * ProfileUpdate -- Update Group Profiles in accouding Russian GOST
- *  16.07.2017 Pavel Khrapkin
+ *  10.078.2017 Pavel Khrapkin
  *  
  *--- History ---
  *  2.07.2017 code taken from ModHandled code, separated into this class
  *  4.07.2017 multiple PrfTab values separated with '|', f.e "PL|-"
- * 16.07.2017 vjht logic for ghjabkt "Гн." recognition
+ * 16.07.2017 changed logic for profile "Гн." recognition
+ * 10.08.2017 TP and TK recognition with new PrfTab filling and logic
  *--- Unit Tests --- .
- * 2017.07.15 UT_ProfileUpdate_I, UT_ProfileUpdate_U, UT ProfileUpdate_L, 
- *            UT_ProfileUpdate_PL, UT_ProfileUpdate_PK_PP                    OK
+ * 2017.08.10 UT_ProfileUpdate_I, UT_ProfileUpdate_U, UT ProfileUpdate_L, 
+ *            UT_ProfileUpdate_PL, UT_ProfileUpdate_PK_PP, UT_ProfileUpdate_TP_TK   OK
  * -------------------------------------------------------------------------------------------
  *      Methods:
  * ProfileUpdate()      - Modify group profiles in according with Russian Gost
@@ -45,13 +46,19 @@ namespace TSmatch.ProfileUpdate
 
         static ProfileUpdate()
         {
-            PrfTab.Add("—", "PL|—");      //полоса
-            PrfTab.Add("L", "L|Уголок");  //уголок
-            PrfTab.Add("I", "I|ДВУТАВР"); //балка двутавровая
-            PrfTab.Add("[", "U|Швеллер"); //швеллер
-            PrfTab.Add("Гн.", "PK|Профиль|Гн.");    //замкнутый профиль - квадрат
-            PrfTab.Add("Гн.[]", "PP");  //замкнутый прямоугольный профиль, труба профильная
+            PrfTabAd("—", "PL|—");      //полоса
+            PrfTabAd("L", "L|Уголок");  //уголок
+            PrfTabAd("I", "I|ДВУТАВР"); //балка двутавровая
+            PrfTabAd("[", "U|Швеллер"); //швеллер
+            PrfTabAd("Гн.", "PK|Профиль|Гн.");  //замкнутый профиль - квадрат
+            PrfTabAd("Гн.[]", "PP");    //замкнутый прямоугольный профиль, труба профильная
+            PrfTabAd("TP", "TP|Тр.");       //труба бесшовная ГОСТ 8732-78
+            PrfTabAd("TK", "TK");       //труба бесшовная ГОСТ 8732-78
+        }
 
+        private static void PrfTabAd(string key, string templs)
+        {
+            PrfTab.Add(key, Lib.ToLat(templs.ToLower()));
         }
 
         public ProfileUpdate(ref List<ElmGr> elmGroups)
@@ -65,10 +72,7 @@ namespace TSmatch.ProfileUpdate
                     string[] marks = Mark.Value.Split('|');
                     foreach (string mark in marks)
                     {
-                        if (mark.Length > 0 && mark[0] != gr.Prf[0]) continue; // for -, L, I, U
-                        if (mark.Length > 1 && mark[1] != gr.Prf[1]) continue; // for PP and PK check
-                        if (mark.Length > 2 && mark[2] != gr.Prf[2]) continue; // Уголок, Швеллер и тп
-
+                        if (gr.prf.Length < mark.Length || gr.prf.Substring(0, mark.Length) != mark) continue;
                         Profile = gr.Prf; profile = gr.prf;
                         gr.Prf = PrfNormStr(Mark.Key);
                         gr.prf = Lib.ToLat(gr.Prf.ToLower().Replace(" ", ""));
@@ -136,6 +140,12 @@ namespace TSmatch.ProfileUpdate
                         if(pars[0] == pars[1]) mark = "Гн." + pars[0] + "x" + pars[2].Replace(".0", "");
                         else mark = "Гн.[]" + pars[0] + "x" + pars[1] + "x" + pars[2].Replace(".0", "");
                     }
+                    if (pars.Count != 2 && pars.Count != 3) error(pars);
+                    break;
+                case "TK":
+                case "TP":
+                    if(pars.Count >= 2) mark += pars[0] + "x" + pars[1];
+                    if (pars.Count == 3) mark += "x" + pars[2];
                     if (pars.Count != 2 && pars.Count != 3) error(pars);
                     break;
                 default: error(pars); break;
