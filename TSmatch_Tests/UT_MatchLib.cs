@@ -79,10 +79,14 @@ namespace match.Lib.Tests
             Assert.AreEqual("мoй тeкcт", lat);
 
             //speed test
+            DateTime t0 = DateTime.Now;
             for (int i = 0; i < 1000000; i++)
             {
                 lat = MatchLib.ToLat(str + " " + i);
             }
+            DateTime t1 = DateTime.Now;
+
+            TimeSpan mlnCycles = t1 - t0;
         }
     }
 }

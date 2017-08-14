@@ -1,8 +1,8 @@
-﻿using TSmatch.Model;
-/*=================================
-* Model Unit Test 23.07.2017
+﻿/*=================================
+* Model Unit Test 7.08.2017
 *=================================
 */
+using TSmatch.Model;
 using System;
 using System.Linq;
 using System.Collections.Generic;
@@ -25,46 +25,6 @@ namespace TSmatch.Model.Tests
         Boot boot;
         Mod model;
 
-        [TestMethod]
-        public void UT_SetModel()
-        {
-            boot = new Bootstrap.Bootstrap();
-            model = new Mod();
-            model.SetModel(boot);
-
-            Assert.IsTrue(model.name.Length > 0);
-            Assert.IsTrue(model.dir.Length > 0);
-            Assert.IsTrue(FileOp.isDirExist(model.dir));
-            Assert.IsTrue(model.dir.Contains(@"\"));
-            Assert.IsTrue(model.dir.Contains(":"));
-            Assert.IsTrue(model.date > Decl.OLD);
-            Assert.IsTrue(model.date < DateTime.Now);
-            Assert.IsTrue(model.pricingDate > Decl.OLD);
-            Assert.IsTrue(model.pricingDate < DateTime.Now);
-            Assert.IsNotNull(Docs.getDoc(Decl.TSMATCHINFO_MODELINFO));
-            Assert.IsTrue(model.elements.Count > 0);
-            Assert.IsTrue(model.elmGroups.Count > 0);
-            Assert.AreEqual(model.getMD5(model.elements), model.MD5);
-            Assert.AreEqual(model.get_pricingMD5(model.elmGroups), model.pricingMD5);
-
-            FileOp.AppQuit();
-        }
-
-        [TestMethod()]
-        public void UT_SetModDir()
-        {
-            boot = new Bootstrap.Bootstrap();
-            model = new Mod();
-
-            model.SetModDir(boot);
-
-            Assert.IsNotNull(model.dir);
-            Assert.IsTrue(FileOp.isDirExist(model.dir));
-            Assert.IsTrue(model.name.Length > 0);
-            Assert.IsTrue(model.phase.Length > 0);
-            FileOp.AppQuit();
-        }
-
         [TestMethod()]
         public void UT_setCity()
         {
@@ -86,6 +46,22 @@ namespace TSmatch.Model.Tests
             // test empty list of elements MD5
             string md5 = model.getMD5(model.elements);
             Assert.AreEqual("4F76940A4522CE97A52FFEE1FBE74DA2", md5);
+
+            // test getMD5 with Raw()
+            boot = new Boot();
+            var sr = new SR();
+            model = sr.SetModel(boot, unit_test_mode: true);
+            model.elements = sr.Raw(model);
+            Assert.IsTrue(model.elements.Count > 0);
+            string MD5 = model.getMD5(model.elements);
+            Assert.AreEqual(32, MD5.Length);
+            Assert.IsTrue(MD5 != md5);
+
+            // test -- проверка повторного вычисления MD5
+            string MD5_1 = model.getMD5(model.elements);
+            Assert.AreEqual(MD5_1, MD5);
+
+            FileOp.AppQuit();
         }
 
 
@@ -103,8 +79,9 @@ namespace TSmatch.Model.Tests
 
             // test real model and TSmatchINFO.xlsx
             var boot = new Boot();
+            var sr = new SR();
+            model = sr.SetModel(boot, unit_test_mode: true);
             model.sr = new SR();
-            model.SetModDir(boot);
             model.elements = model.sr.Raw(model);
             var mh = new MH();
             var grp = mh.getGrps(model.elements);

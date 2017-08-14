@@ -1,5 +1,5 @@
 ﻿/*=================================
- * Saved Report Unit Test 23.7.2017
+ * Saved Report Unit Test 14.08.2017
  *=================================
  */
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -23,7 +23,7 @@ using TSmatch.Model;
 
 namespace TSmatch.SaveReport.Tests
 {
-     [TestClass()]
+    [TestClass()]
     public class UT_SavedReportTests
     {
         Boot boot;
@@ -32,68 +32,131 @@ namespace TSmatch.SaveReport.Tests
         Mod model;
 
         [TestMethod()]
-        public void UT_GetSavedReport()
+        public void UT_SetModel()
         {
-            var sr = init();
-            model.SetModDir(boot);
-            model = sr.GetModelINFO(model);
-            ////////////////model.elements = sr.Raw(model);
-            ////////////////mh = new MH();
-            ////////////////model.elmGroups = mh.getGrps(model.elements);
+            boot = new Boot();
+            sr = new SR();
 
-            model = sr.GetSavedReport();
-            
+            model = sr.SetModel(boot);
 
-            Assert.IsTrue(model.elmGroups.Count > 0);
-            var total_price = model.elmGroups.Sum(x => x.totalPrice);
-            //           Assert.IsTrue(model.elmGroups.Sum(x => x.totalPrice) > 0);
+            Assert.IsTrue(sr.CheckModelIntegrity(model));
 
             FileOp.AppQuit();
         }
 
         [TestMethod()]
-        public void UT_GetModelINFO()
+        public void UT_CheckModelIntegrity()
+        {
+            boot = new Boot();
+            model = new Mod();
+            model = model.sr.SetModel(boot);
+
+            bool ok = model.sr.CheckModelIntegrity(model);
+
+            Assert.IsTrue(ok);
+            Assert.IsTrue(model.dir.Length > 0);
+            Assert.IsTrue(FileOp.isDirExist(model.dir));
+            Assert.IsTrue(model.date > Decl.OLD && model.date <= DateTime.Now);
+            Assert.IsTrue(model.pricingDate > Decl.OLD && model.pricingDate <= DateTime.Now);
+            Assert.AreEqual(32, model.MD5.Length);
+            Assert.AreEqual(32, model.pricingMD5.Length);
+            Assert.IsTrue(model.elements.Count > 0);
+            Assert.IsTrue(model.elmGroups.Count > 0);
+
+            FileOp.AppQuit();
+        }
+
+        [TestMethod()]
+        public void UT_GetSavedReport()
+        {
+            init();
+            model.sr.GetTSmatchINFO(model);
+
+            model = model.sr.GetSavedReport();
+
+            bool ok = model.sr.CheckModelIntegrity(model);
+            Assert.IsTrue(ok);
+
+            var total_price = model.elmGroups.Sum(x => x.totalPrice);
+            Assert.IsTrue(model.elmGroups.Sum(x => x.totalPrice) > 0);
+
+            FileOp.AppQuit();
+        }
+
+        [TestMethod()]
+        public void UT_GetTSmatchINFO_FiliExists()
+        {
+            // GetModelINFO() - базовый метод, вызываемый в SetModel.
+            //..поэтому пользоваться обычным init() для этого UT_ нельзя 
+            boot = new Boot();
+            model = new Mod();
+            model.dir = boot.ModelDir;
+            if (string.IsNullOrEmpty(model.dir)) model.dir = boot.DebugDir;
+            Assert.IsTrue(model.dir.Length > 0);
+            bool isModelINFOexists = FileOp.isFileExist(model.dir, "TSmatchINFO.xlsx");
+            if (!isModelINFOexists) goto exit;
+
+            model.sr.GetTSmatchINFO(model);
+
+            bool ok = model.sr.CheckModelIntegrity(model);
+            Assert.IsTrue(ok);
+
+            exit:
+            FileOp.AppQuit();
+        }
+
+        [TestMethod()]
+        public void UT_GetTSmatchINFO_NoFile()
         {
             // GetModelINFO() - базовый метод, вызываемый в SetModel.
             //..поэтому пользоваться обычным init() для этого UT_ нельзя 
             const string defaultModName = "MyTestName";
             boot = new Boot();
-            var sr = new SR();
             model = new Mod();
-
             model.dir = boot.ModelDir;
             if (string.IsNullOrEmpty(model.dir)) model.dir = boot.DebugDir;
             Assert.IsTrue(model.dir.Length > 0);
-            if (!FileOp.isFileExist(model.dir, "TSmatchINFO.xlsx"))
-            {
-                model.name = defaultModName;
-                model.adrCity = "Санкт-Петербург";
-                model.adrStreet = "Кудрово";
-                model.date = DateTime.Now;
-                model.MD5 = "sample-MD5";
-            }
+            bool isModelINFOexists = FileOp.isFileExist(model.dir, "TSmatchINFO.xlsx");
+            if (isModelINFOexists) goto exit;
 
-            model = sr.GetModelINFO(model);
+            model.sr.GetTSmatchINFO(model);
 
-            Docs dINFO = Docs.getDoc(Decl.TSMATCHINFO_MODELINFO);
-            Assert.IsNotNull(dINFO);
-            Assert.AreEqual(2, dINFO.i0);
-            Assert.IsTrue(dINFO.il > 9);
-            var b = dINFO.Body;
-            string b_name = b.Strng(Decl.MODINFO_NAME_R, 2);
-            Assert.AreEqual("Название модели =", b.Strng(Decl.MODINFO_NAME_R, 1));
-            Assert.IsTrue(b_name.Length >= 1);
-            Assert.AreEqual("Адрес проекта:", b.Strng(Decl.MODINFO_ADDRESS_R, 1));
-            Assert.IsTrue(b.Strng(Decl.MODINFO_ADDRESS_R, 2).Length >= 1);
-            sr.CheckModelIntegrity();
-            Assert.IsTrue(model.elements.Count > 0);
-            Assert.AreEqual(model.MD5, dINFO.Body.Strng(Decl.MODINFO_MD5_R, 2));
-            Assert.IsTrue(model.elmGroups.Count > 0);
-//24/7            Assert.AreEqual(model.pricingMD5, dINFO.Body.Strng(Decl.MODINFO_PRCMD5_R, 2));
+            bool ok = model.sr.CheckModelIntegrity(model);
+            if (isModelINFOexists)
 
-            if (b_name == defaultModName) FileOp.Delete(model.dir, b_name);
+            Assert.IsTrue(model.isChanged);
+            Assert.IsTrue(ok);
 
-            FileOp.AppQuit();
+            //////////////////////            Assert.IsTrue(model.elements.Count > 0);
+            //////////////////////            Assert.IsTrue(model.elmGroups.Count > 0);
+            //////////////////////            Assert.IsTrue(model.dir.Length > 0);
+            //////////////////////            Assert.IsTrue(model.name.Length > 0);
+            //////////////////////            Assert.IsTrue(model.Rules.Count > 0);
+
+            //////////////////////            if(dINFO == null)
+            //////////////////////            {
+
+            //////////////////////            }
+            //////////////////////            else
+            //////////////////////            {
+            // 7/8 ///////////////                Assert.AreEqual(2, dINFO.i0);
+            //////////////////////                Assert.IsTrue(dINFO.il > 9);
+            //////////////////////                var b = dINFO.Body;
+            //////////////////////                string b_name = b.Strng(Decl.MODINFO_NAME_R, 2);
+            //////////////////////                Assert.AreEqual("Название модели =", b.Strng(Decl.MODINFO_NAME_R, 1));
+            //////////////////////                Assert.IsTrue(b_name.Length >= 1);
+            //////////////////////                Assert.AreEqual("Адрес проекта:", b.Strng(Decl.MODINFO_ADDRESS_R, 1));
+            //////////////////////                Assert.IsTrue(b.Strng(Decl.MODINFO_ADDRESS_R, 2).Length >= 1);
+            //////////////////////                sr.CheckModelIntegrity();
+            //////////////////////                Assert.IsTrue(model.elements.Count > 0);
+            //////////////////////                Assert.AreEqual(model.MD5, dINFO.Body.Strng(Decl.MODINFO_MD5_R, 2));
+            //////////////////////            }
+
+            //////////////////////            Assert.IsTrue(model.elmGroups.Count > 0);
+            ////////////////////////24/7            Assert.AreEqual(model.pricingMD5, dINFO.Body.Strng(Decl.MODINFO_PRCMD5_R, 2));
+
+            //7/8            if (b_name == defaultModName) FileOp.Delete(model.dir, b_name);
+            exit: FileOp.AppQuit();
         }
         //////////////[TestMethod()]
         //////////////public void UT_SR_ChechModel()
@@ -130,8 +193,8 @@ namespace TSmatch.SaveReport.Tests
         [TestMethod()]
         public void UT_Recover()
         {
-            var sr = init();
-            model.SetModDir(boot);
+            init();
+
             model.date = new DateTime(2015, 6, 12, 14, 15, 16);
             model.MD5 = "-- моя имитация MD5 --";
             model.pricingMD5 = "-- моя имитация MD5 --";
@@ -187,12 +250,11 @@ namespace TSmatch.SaveReport.Tests
         [TestMethod()]
         public void UT_SR_SetFrSavedModelINFO()
         {
-            var sr = init();
-            model.dir = boot.ModelDir;
+            init();
 
             // SetFrSavedMoodel работает только если нет Tekla
             //..вызывается из Model.SetModel
-            if (boot.isTeklaActive) { Assert.IsTrue(true); return; }
+            if (boot.isTeklaActive) { Assert.IsTrue(true); goto quit; }
 
             Mod m = sr.SetFrSavedModelINFO(model);
             model.name = m.name;
@@ -202,19 +264,20 @@ namespace TSmatch.SaveReport.Tests
             Assert.IsTrue(model.phase.Length > 0);
             Assert.IsTrue(FileOp.isDirExist(model.dir));
 
+            quit:
             FileOp.AppQuit();
-
         }
 
         [TestMethod()]
         public void UT_SR_Raw()
         {
-            var sr = init();
-            model.dir = boot.ModelDir;
+            init();
 
             model.elements = sr.Raw(model);
 
             Assert.IsTrue(model.elements.Count > 0);
+            Assert.IsTrue(model.date > Decl.OLD & model.date < DateTime.Now);
+            Assert.AreEqual(32, model.MD5.Length);
 
             FileOp.AppQuit();
         }
@@ -222,24 +285,55 @@ namespace TSmatch.SaveReport.Tests
         [TestMethod()]
         public void UT_getSavedRules()
         {
-            var sr = init();
-            model.SetModDir(boot);
+            init();
 
-            sr.getSavedRules(model);
+            // test no Rules Init
+            model = sr.GetSavedRules(model);
 
             Assert.IsTrue(model.Rules.Count > 0);
+            foreach (var rule in model.Rules)
+            {
+                Assert.IsNull(rule.Supplier);
+                Assert.IsNull(rule.CompSet);
+            }
+
+            // test with Rules Init = true
+            model = sr.GetSavedRules(model, init: true);
+
+            Assert.IsTrue(model.Rules.Count > 0);
+            foreach (var rule in model.Rules)
+            {
+                Assert.IsNotNull(rule.Supplier);
+                Assert.IsNotNull(rule.CompSet);
+                Assert.IsTrue(rule.CompSet.Components.Count > 0);
+            }
 
             FileOp.AppQuit();
         }
 
+        [TestMethod()]
+        public void UT_Save()
+        {
+            init();
+            model = sr.SetModel(boot, unit_test_mode: false);   // with Rule Initialization
+
+            sr.Save(model);
+
+            bool ok = sr.CheckModelIntegrity(model);
+            Assert.IsTrue(ok);
+
+            FileOp.AppQuit();
+        }
+
+#if OLD //23/7
         // проверяем как дополняются eleGroups из листа TSmatchINFO.xlsx/Report
         // 2017.06.28 переписан sr.getSavedGroups() -- getGrps + читаю из файла Report
         [TestMethod()]
         public void UT_SavedReport_getSavedGroup()
         {
-            var sr = init();
+            init();
             model.dir = boot.ModelDir;
-#if OLD //23/7
+
             sr.elements = sr.Raw(model);
 
             sr.GetSavedReport(model);
@@ -250,7 +344,7 @@ namespace TSmatch.SaveReport.Tests
             // в Report <Заголовок> + строки по числу elmGroups.Count + <Summary>
             int cnt = sr.elmGroups.Count + dRep.i0;
             Assert.AreEqual(dRep.il, cnt);
-#endif //OLD //23/7
+
             FileOp.AppQuit();
         }
 
@@ -276,15 +370,15 @@ namespace TSmatch.SaveReport.Tests
             Assert.IsTrue(date < DateTime.Now);
             return true;
         }
+#endif //OLD //23/7
 
         // эта инициализация класса SavedReport общая для всех тестов этого класса
-        // Model.SetModel() здесь использовать нельзя, т.к. SetModel dspsdftn SetReport
-        private SR init()
+        // здесь используется sr.SetModel в сокращенном режиме, т.е. без обращения к тестируемым методам
+        private void init()
         {
             boot = new Boot();
-            sr = new SR();
             model = new Mod();
-            return sr;
+            model = model.sr.SetModel(boot, unit_test_mode: true);
         }
     }
 }
