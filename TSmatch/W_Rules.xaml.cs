@@ -1,5 +1,5 @@
 ﻿/*-----------------------------------------------
- * WPF Window W_Rules 9.8.2017 Pavel Khrapkin
+ * WPF Window W_Rules 11.8.2017 Pavel Khrapkin
  * ----------------------------------------------
  * --- History ---
  * 2017.05.25 - written
@@ -38,7 +38,11 @@ namespace TSmatch
             List<Rl> items = new List<Rl>();
 
             if (MainWindow.model.Rules.Count == 0)
-                MainWindow.model = MainWindow.model.sr.GetSavedRules(MainWindow.model);
+            {
+                var mod = MainWindow.model;
+                mod.mh.Pricing(ref MainWindow.model);
+                if (!mod.sr.CheckModelIntegrity(mod)) Msg.AskFOK("Model is changed");
+            }
     
             foreach(var rule in MainWindow.model.Rules)
             {
@@ -79,7 +83,7 @@ namespace TSmatch
             public string Supplier { get; set; }
             public string CompSet { get; set; }
             public string RuleText { get; set; }
-            public bool Flag { get; set; }
+            public string keyRule { get; set; }
 
             public Rl(string _gr_price, DateTime date, string supl, string cs, string ruletxt)
             {
@@ -92,10 +96,11 @@ namespace TSmatch
 
             int IComparable<Rl>.CompareTo(Rl other)
             {
-                if (Flag && !other.Flag) return -1;
-                if (!Flag && other.Flag) return 1;
+//11/8                if (Flag && !other.Flag) return -1;
+//11/8                if (!Flag && other.Flag) return 1;
                 int result = -CompSet.CompareTo(other.CompSet);
                 if (result == 0) result = Supplier.CompareTo(other.Supplier);
+                if (result == 0) result = RuleText.CompareTo(other.RuleText);
                 return result;
             }
         }
@@ -103,7 +108,17 @@ namespace TSmatch
         private void OnRule_changed(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
             if (!Msg.AskYN("Delete this Rule?")) return;
+            Rl sel = (Rl)WRules.SelectedValue;
+            foreach(var r in MainWindow.model.Rules)
+            {
+                if (r.sSupl != sel.Supplier || r.sCS != sel.CompSet || r.text != sel.RuleText) continue;
+                MainWindow.model.Rules.Remove(r);
+                WRules.Items.Refresh();
+                InvalidateArrange();
 
+                break;
+            }
+            MainWindow.model.isChanged = true;
         }
     }
 } // end namespace

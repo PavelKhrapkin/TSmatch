@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------------------
  * SavedReport -- class for handle saved reports in TSmatchINFO.xlsx
  * 
- *  11.08.2017 П.Л. Храпкин
+ *  14.08.2017 П.Л. Храпкин
  *  
  *--- Unit Tests ---
  * UT_GetModelInfo  2-17.7.14 
@@ -19,6 +19,7 @@
  *  3.07.2017 - corrections in GetSavedRules -- if(init)
  *  7.08.2017 - GetModelINFO audit; getRaw(model.dat = File.GetLastWriteTime(file);
  * 11.08.2017 - more tests in CeckIntegrityModel, and GetSavedRules updated
+ * 14.08.2017 - CheckModelIntegrity: no model.name is tested in without file; check IfDirExist()
  *--- Methods: -------------------      
  * GetTSmatchINFO()     - read TSmatchINFO.xlsx, check, set it as a current Model
 
@@ -133,6 +134,7 @@ namespace TSmatch.SaveReport
 
         #endregion --- SetModel ---
 
+        #region ------ ModelINFO region ------
         /// <summary>
         /// GetTSmatchINFO(Model) - Main SaveReport method. Read TSmatchINFO.xlsx and Raw.xml
         /// </summary>
@@ -141,7 +143,6 @@ namespace TSmatch.SaveReport
         {
             Log.set("SR.GetTSmatchINFO(\"" + mod.name + "\")");
             model = mod;
-            if (mh == null) mh = new MH();
             dINFO = Docs.getDoc(sINFO, fatal: false);
             if (dINFO == null) error();
 
@@ -149,38 +150,21 @@ namespace TSmatch.SaveReport
 
             if (model.isChanged)
             { //-- no information available from TSmatchINFO.xlsx or it was changed -- doing re-Pricing
-                mh.Pricing(ref model, unit_test_mode);
+                model.mh.Pricing(ref model, unit_test_mode);
             }
             else
             { //- get ModelINFO and pricing from TSmatchINFO.xlsx
-                model.name = getModINFOstr(Decl.MODINFO_NAME_R);
+                model.name = dINFO.Body.Strng(Decl.MODINFO_NAME_R, 2);
                 model.setCity(dINFO.Body.Strng(Decl.MODINFO_ADDRESS_R, 2));
                 model.dir = dINFO.Body.Strng(Decl.MODINFO_DIR_R, 2).Trim();
-                model.date = getModINFOdate(Decl.MODINFO_DATE_R);
-                model.pricingMD5 = model.get_pricingMD5(model.elmGroups);
-                model.pricingDate = getModINFOdate(Decl.MODINFO_PRCDAT_R);
-                model.pricingMD5 = getModINFOstr(Decl.MODINFO_PRCMD5_R, model.pricingMD5);
+                model.date = Lib.getDateTime(dINFO.Body.Strng(Decl.MODINFO_DATE_R, 2));
+                model.pricingDate = Lib.getDateTime(dINFO.Body.Strng(Decl.MODINFO_PRCDAT_R, 2));
+                model.pricingMD5 = dINFO.Body.Strng(Decl.MODINFO_PRCMD5_R, 2);
                 GetSavedReport();
             }
             if (!CheckModelIntegrity(model)) error();
             SetSavedMod(mod);
             Log.exit();
-        }
-
-        #region ------ ModelINFO region ------
-        private string getModINFOstr(int iRow, string str = "")
-        {
-            string strINFO = dINFO.Body.Strng(iRow, 2);
-            if (string.IsNullOrEmpty(strINFO)) strINFO = str;   //when value is calculated;
-            if (string.IsNullOrEmpty(str)) str = strINFO;   //when value get from ModelINFO
-            if (str != strINFO) error();
-            return str;
-        }
-        private DateTime getModINFOdate(int iRow)
-        {
-            DateTime d = Lib.getDateTime(dINFO.Body.Strng(iRow, 2));
-            if (d < Decl.OLD || d > DateTime.Now) Recover(sINFO, RecoverToDo.ResetRep);
-            return d;
         }
 
         private bool isChangedStr(ref string str, Docs doc, int row, int col)
@@ -324,18 +308,18 @@ namespace TSmatch.SaveReport
         /// </summary>
         public bool CheckModelIntegrity(Mod mod)
         {
+            if (!FileOp.isDirExist(mod.dir)) return false;
             if (mod.date < Decl.OLD || mod.date > DateTime.Now) return false;
             if (mod.pricingDate < Decl.OLD || mod.pricingDate > DateTime.Now) return false;
             if (mod.MD5 == null || mod.MD5.Length != 32) return false;
             if (mod.pricingMD5 == null || mod.pricingMD5.Length != 32) return false;
             if (mod.elements.Count <= 0 || mod.elmGroups.Count <= 0) return false;
-            if (string.IsNullOrWhiteSpace(mod.name)) return false;
-            if (string.IsNullOrWhiteSpace(mod.dir)) return false;
 
             if (FileOp.isFileExist(Path.Combine(mod.dir, Decl.F_TSMATCHINFO)))
             {
                 dINFO = Docs.getDoc(sINFO, create_if_notexist: false, fatal: false);
                 if (dINFO == null || dINFO.il < 10) return false;
+                if (string.IsNullOrWhiteSpace(mod.name)) return false;
                 if (isChangedStr(ref mod.name, dINFO, Decl.MODINFO_NAME_R, 2)) return false;
                 if (isChangedStr(ref mod.dir, dINFO, Decl.MODINFO_DIR_R, 2)) return false;
                 if (isChangedStr(ref mod.MD5, dINFO, Decl.MODINFO_MD5_R, 2)) return false;
@@ -393,15 +377,9 @@ namespace TSmatch.SaveReport
         {
             Log.set("SR.GetSavedReport");
             bool errRep = true;
-            if (mh == null) mh = new MH();
-            model.elmGroups = mh.getGrps(model.elements);
+            model.elmGroups = model.mh.getGrps(model.elements);
             Docs dRep = Docs.getDoc(sRep, fatal: false, create_if_notexist: false);               
             if (dRep == null || dRep.i0 < 2) error(errRep);
-            //21/7            if (dRep.il != (mod.elmGroups.Count + dRep.i0))
-            //21/7            {
-            //21/7                Msg.AskFOK("Saved Report should be recovered, OK?");
-            //21/7                Recover(mod, sRep, RecoverToDo.ResetRep);
-            //21/7            }
             model.total_price = 0;
             for (int iGr = 1, i = dRep.i0; i < dRep.il; i++, iGr++)
             {
@@ -413,7 +391,6 @@ namespace TSmatch.SaveReport
                 gr.totalPrice = dRep.Body.Double(i, Decl.REPORT_SUPL_PRICE);
                 model.total_price += gr.totalPrice;
             }
-            model.pricingMD5 = model.get_pricingMD5(model.elmGroups);
             Log.exit();
             return model;
         }

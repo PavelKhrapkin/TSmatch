@@ -78,9 +78,8 @@ namespace TSmatch.Model
         public string pricingMD5;   // контр.сумма цен и правил при расчете Report
         public DateTime pricingDate;
         public List<ElmMGr> elmMgroups = new List<ElmMGr>();
-        public List<ElmGr> elmGroups = new List<ElmGr>();   // will be used in Matcher
+        public List<ElmGr> elmGroups = new List<ElmGr>(); 
         public HashSet<Rule.Rule> Rules = new HashSet<Rule.Rule>();
-        public string strListRules;                        // список Правил в виде текста вида "5,6,8"   
         public readonly HashSet<Supplier> Suppliers = new HashSet<Supplier>();
         public List<CmpSet> CompSets = new List<CmpSet>();
         public List<Matcher.Mtch> matches = new List<Matcher.Mtch>();
@@ -615,7 +614,6 @@ namespace TSmatch.Model
         {
             if (isChanged && Msg.AskYN("Модель или цены изменились. Запишем изменения в файл?"))
             {
-                var sr = new SaveReport.SavedReport();
                 sr.Save(this);
             }
             HighLightClear();

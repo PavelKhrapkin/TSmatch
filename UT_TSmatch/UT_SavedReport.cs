@@ -1,5 +1,5 @@
 ﻿/*=================================
- * Saved Report Unit Test 7.08.2017
+ * Saved Report Unit Test 14.08.2017
  *=================================
  */
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -44,6 +44,27 @@ namespace TSmatch.SaveReport.Tests
             FileOp.AppQuit();
         }
 
+        [TestMethod()]
+        public void UT_CheckModelIntegrity()
+        {
+            boot = new Boot();
+            model = new Mod();
+            model = model.sr.SetModel(boot);
+
+            bool ok = model.sr.CheckModelIntegrity(model);
+
+            Assert.IsTrue(ok);
+            Assert.IsTrue(model.dir.Length > 0);
+            Assert.IsTrue(FileOp.isDirExist(model.dir));
+            Assert.IsTrue(model.date > Decl.OLD && model.date <= DateTime.Now);
+            Assert.IsTrue(model.pricingDate > Decl.OLD && model.pricingDate <= DateTime.Now);
+            Assert.AreEqual(32, model.MD5.Length);
+            Assert.AreEqual(32, model.pricingMD5.Length);
+            Assert.IsTrue(model.elements.Count > 0);
+            Assert.IsTrue(model.elmGroups.Count > 0);
+
+            FileOp.AppQuit();
+        }
 
         [TestMethod()]
         public void UT_GetSavedReport()
@@ -63,43 +84,49 @@ namespace TSmatch.SaveReport.Tests
         }
 
         [TestMethod()]
-        public void UT_GetTSmatchINFO()
+        public void UT_GetTSmatchINFO_FiliExists()
+        {
+            // GetModelINFO() - базовый метод, вызываемый в SetModel.
+            //..поэтому пользоваться обычным init() для этого UT_ нельзя 
+            boot = new Boot();
+            model = new Mod();
+            model.dir = boot.ModelDir;
+            if (string.IsNullOrEmpty(model.dir)) model.dir = boot.DebugDir;
+            Assert.IsTrue(model.dir.Length > 0);
+            bool isModelINFOexists = FileOp.isFileExist(model.dir, "TSmatchINFO.xlsx");
+            if (!isModelINFOexists) goto exit;
+
+            model.sr.GetTSmatchINFO(model);
+
+            bool ok = model.sr.CheckModelIntegrity(model);
+            Assert.IsTrue(ok);
+
+            exit:
+            FileOp.AppQuit();
+        }
+
+        [TestMethod()]
+        public void UT_GetTSmatchINFO_NoFile()
         {
             // GetModelINFO() - базовый метод, вызываемый в SetModel.
             //..поэтому пользоваться обычным init() для этого UT_ нельзя 
             const string defaultModName = "MyTestName";
             boot = new Boot();
-            var sr = new SR();
             model = new Mod();
-
             model.dir = boot.ModelDir;
             if (string.IsNullOrEmpty(model.dir)) model.dir = boot.DebugDir;
             Assert.IsTrue(model.dir.Length > 0);
             bool isModelINFOexists = FileOp.isFileExist(model.dir, "TSmatchINFO.xlsx");
-            if (!isModelINFOexists)
-            {
-                model.name = defaultModName;
-                model.adrCity = "Санкт-Петербург";
-                model.adrStreet = "Кудрово";
-                model.date = DateTime.Now;
-                model.MD5 = "sample-MD5";
-            }
+            if (isModelINFOexists) goto exit;
 
-            sr.GetTSmatchINFO(model);
+            model.sr.GetTSmatchINFO(model);
 
-            Docs dINFO = Docs.getDoc(Decl.TSMATCHINFO_MODELINFO, fatal: false);
-
+            bool ok = model.sr.CheckModelIntegrity(model);
             if (isModelINFOexists)
-            {
-                throw new NotImplementedException();
-            }
-            else
-            {
-                Assert.IsTrue(model.isChanged);
-                model.isChanged = false;
-                bool ok = sr.CheckModelIntegrity(model);
-                Assert.IsTrue(ok);
-            }
+
+            Assert.IsTrue(model.isChanged);
+            Assert.IsTrue(ok);
+
             //////////////////////            Assert.IsTrue(model.elements.Count > 0);
             //////////////////////            Assert.IsTrue(model.elmGroups.Count > 0);
             //////////////////////            Assert.IsTrue(model.dir.Length > 0);
@@ -129,8 +156,7 @@ namespace TSmatch.SaveReport.Tests
             ////////////////////////24/7            Assert.AreEqual(model.pricingMD5, dINFO.Body.Strng(Decl.MODINFO_PRCMD5_R, 2));
 
             //7/8            if (b_name == defaultModName) FileOp.Delete(model.dir, b_name);
-
-            FileOp.AppQuit();
+            exit: FileOp.AppQuit();
         }
         //////////////[TestMethod()]
         //////////////public void UT_SR_ChechModel()
@@ -351,8 +377,8 @@ namespace TSmatch.SaveReport.Tests
         private void init()
         {
             boot = new Boot();
-            sr = new SR();
-            model = sr.SetModel(boot, unit_test_mode: true);
+            model = new Mod();
+            model = model.sr.SetModel(boot, unit_test_mode: true);
         }
     }
 }
