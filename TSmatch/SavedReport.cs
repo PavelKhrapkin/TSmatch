@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------------------
  * SavedReport -- class for handle saved reports in TSmatchINFO.xlsx
  * 
- *  14.08.2017 П.Л. Храпкин
+ *  15.08.2017 П.Л. Храпкин
  *  
  *--- Unit Tests ---
  * UT_GetModelInfo  2-17.7.14 
@@ -20,8 +20,13 @@
  *  7.08.2017 - GetModelINFO audit; getRaw(model.dat = File.GetLastWriteTime(file);
  * 11.08.2017 - more tests in CeckIntegrityModel, and GetSavedRules updated
  * 14.08.2017 - CheckModelIntegrity: no model.name is tested in without file; check IfDirExist()
+ * 15.08.2017 - SetSavedMod method removed; Recovery audit
  *--- Methods: -------------------      
- * GetTSmatchINFO()     - read TSmatchINFO.xlsx, check, set it as a current Model
+ * SetModel(boot)   - initialize model by reading from TSmatchINFO.xlsx ans Raw.xml or from scratch
+ *      private SetModDir(boot) - subset of SetModel(), setup model.dir, name and phase
+ *      protected GetTSmatchINFO(Model) - Main SaveReport method. Read TSmatchINFO.xlsx and Raw.xml
+ * CheckModelIntegrity(model) - Check if model data are consistant
+ *      private GetTSmatchINFO() - read TSmatchINFO.xlsx, check, set it as a current Model
 
  * IsModelCahanged - проверяет, изменилась ли Модель относительно сохраненного MD5
  ! lngGroup(atr)   - группирует элементы модели по парам <Материал, Профиль> возвращая массивы длинны 
@@ -45,10 +50,6 @@ using WrM = TSmatch.Model.WrModelInfo.ModelWrFile.WrMod;
 using TS = TSmatch.Tekla.Tekla;
 using MH = TSmatch.Handler.Handler;
 using Boot = TSmatch.Bootstrap.Bootstrap;
-using TSmatch.Document;
-using TSmatch.Model;
-using static TSmatch.Model.WrModelInfo.ModelWrFile;
-using TSmatch.Bootstrap;
 
 namespace TSmatch.SaveReport
 {
@@ -57,28 +58,18 @@ namespace TSmatch.SaveReport
         public static readonly ILog log = LogManager.GetLogger("SavedReport");
 
         #region -- field definitions
-        /// <summary>
-        /// Model class reference
-        /// </summary>
+        /// <summary> Model class reference</summary>
         Mod model;
+        /// <summary> Handler class reference</summary>
+        MH mh;
+        /// <summary> ModelINFO Document.Name - string</summary>
+        const string sINFO = Decl.TSMATCHINFO_MODELINFO;
+        /// <summary> Report Document.Name - string</summary>
+        const string sRep = Decl.TSMATCHINFO_REPORT;
+        /// <summary> Rules Document.Name - string</summary>
+        const string sRul = Decl.TSMATCHINFO_RULES;
         /// <summary>
-        /// Handler class reference
-        /// </summary>
-        MH mh;      //ref to class Model Handler
-                    /// <summary>
-                    /// ModelINFO Document.Name - string
-                    /// </summary>
-        string sINFO = Decl.TSMATCHINFO_MODELINFO;
-        /// <summary>
-        /// Report Document.Name - string
-        /// </summary>
-        string sRep = Decl.TSMATCHINFO_REPORT;
-        /// <summary>
-        /// Rules Document.Name - string
-        /// </summary>
-        string sRul = Decl.TSMATCHINFO_RULES;
-        /// <summary>
-        /// Rules Document
+        /// TSMatchINFO.xlsx Documents: ModelINFO, Repoer, Rules
         /// </summary>
         Docs dINFO, dRep, dRul;
         #endregion -- field definitions
@@ -103,7 +94,7 @@ namespace TSmatch.SaveReport
             return model;
         }
 
-        public void SetModDir(Boot boot)
+        private void SetModDir(Boot boot)
         {
             if (boot.isTeklaActive)
             {   // if Tekla is active - get Path of TSmatch
@@ -118,18 +109,18 @@ namespace TSmatch.SaveReport
                 model.dir = boot.ModelDir;
                 if (!FileOp.isDirExist(model.dir)) Msg.F("No Model Directory", model.dir);
                 if (!Docs.IsDocExists(Decl.TSMATCHINFO_MODELINFO)) Msg.F("No TSmatchINFO.xlsx file");
-                model = SetFrSavedModelINFO(model);
+                dINFO = Docs.getDoc(sINFO, fatal: false);
+                if (dINFO == null || dINFO.il < 10 || !FileOp.isDirExist(model.dir)) error();
+                model.name = dINFO.Body.Strng(Decl.MODINFO_NAME_R, 2);
+                model.phase = dINFO.Body.Strng(Decl.MODINFO_PHASE_R, 2);
             }
         }
 
-        #endregion --- SetModel ---
-
-        #region ------ ModelINFO region ------
         /// <summary>
         /// GetTSmatchINFO(Model) - Main SaveReport method. Read TSmatchINFO.xlsx and Raw.xml
         /// </summary>
-        /// <remarks>When no TSmatchINFO.xlsx or Raw.xml files exists, create (or mark to create) them, and chech model integrity</remarks>
-        public void GetTSmatchINFO(Mod mod, bool unit_test_mode = false)
+        /// <remarks>When no TSmatchINFO.xlsx or Raw.xml files exists, create (or mark to create) them, and check model integrity</remarks>
+        protected void GetTSmatchINFO(Mod mod, bool unit_test_mode = false)
         {
             Log.set("SR.GetTSmatchINFO(\"" + mod.name + "\")");
             model = mod;
@@ -153,178 +144,8 @@ namespace TSmatch.SaveReport
                 GetSavedReport();
             }
             if (!CheckModelIntegrity(model)) error();
-//15/8            SetSavedMod(mod);
             Log.exit();
         }
-
-        private bool isChangedStr(ref string str, Docs doc, int row, int col)
-        {
-            string strINFO = doc.Body.Strng(row, col);
-            if (string.IsNullOrEmpty(str)) str = strINFO;
-            return str != strINFO;
-        }
-
-        /// <summary>
-        /// SetFrSavedModelINFO(ref model) - set model attributes from 
-        /// TSmatchINFO.xlsx/ModuleINFO. When this documents corrupred -
-        /// fatal error. This method call only when Tekla not available
-        /// </summary>
-        /// <param name="dir">directory, where TSmatchINFO.xlsx stored</param>
-        public Mod SetFrSavedModelINFO(Mod model)
-        {
-            dINFO = Docs.getDoc(sINFO, fatal: false);
-            if (dINFO == null || dINFO.il < 10 || !FileOp.isDirExist(model.dir)) error();
-            model.name = strSub(Decl.MODINFO_NAME_R);
-            model.phase = strSub(Decl.MODINFO_PHASE_R, "1");
-            return model;
-        }
-
-        private string strSub(int iRow, string def = "")
-        {
-            string str = dINFO.Body.Strng(iRow, 2);
-            if (str.Length <= 0) error();
-            return str;
-        }
-        private DateTime dateSub(int iRow)
-        {
-            string str = strSub(iRow);
-            DateTime _date = Lib.getDateTime(str);
-            if (_date > DateTime.Now || _date < Decl.OLD) error();
-            return _date;
-        }
-
-        /// <summary>
-        /// error() - SavedReport error handler method
-        /// </summary>
-        private void error(bool errRep = false)
-        {
-            Log.set("SR.errer()");
-            log.Info("error() model.errRecover = " + model.errRecover.ToString());
-            if (model.errRecover)
-            {
-                Msg.AskFOK("Corrupted saved report TSmatchINFO.xlsx");
-                model.elements = Raw(model);
-                dRep = Docs.getDoc(sRep);
-                if (dRep == null || errRep) Msg.F("SavedReport recover impossible");
-                GetSavedReport();
-                Recover(sINFO, RecoverToDo.ResetRep);
-                //21/7           Recover(mod, sRep,  RecoverToDo.ResetRep);
-            }
-            else model.isChanged = true;  // say, that TSmatchINFO.xlsx should be re-written
-            Log.exit();
-        }
-        #endregion ------ ModelINFO region ------
-
-        #region ------ Reset & Recovery area ------
-        public enum RecoverToDo
-        {
-            CreateRep, ResetRep, NewMod,
-            ChangedDir,
-            ChangedPricing
-        }
-
-        /// <summary>
-        /// when TRUE - Reset dialog allowed
-        /// </summary>
-        public bool resetDialog = true;
-        public void Recover(string repNm, RecoverToDo to_do)
-        {
-            Log.set(@"SR.Recover(" + repNm + "\")");
-            if (!CheckModelIntegrity(model)) Msg.AskFOK("Recovery impossible");
-            switch (to_do)
-            {
-                case RecoverToDo.CreateRep:
-                    Msg.AskFOK("В каталоге модели нет TSmatchINFO.xlsx/" + repNm + ". Создать?");
-                    resetDialog = false;
-                    Docs.getDoc(repNm, reset: true, create_if_notexist: true);
-                    if (!Docs.IsDocExists(repNm)) Msg.F("SaveDoc.Recover cannot create ", repNm);
-                    Recover(repNm, RecoverToDo.ResetRep);
-                    break;
-                case RecoverToDo.ResetRep:
-                    if (resetDialog) Msg.AskFOK("Вы действительно намерены переписать TSmatchINFO.xlsx/" + repNm + "?");
-                    var w = new WrMod();
-                    switch (repNm)
-                    {
-                        case Decl.TSMATCHINFO_MODELINFO:
-                            w.wrModel(WrM.ModelINFO, model);
-                            break;
-                        case Decl.TSMATCHINFO_REPORT:
-                            log.Info(">>mod.MD5=" + model.MD5 + " =?= " + model.getMD5(model.elements));
-                            mh.Pricing(ref model);
-                            log.Info(">>mod.MD5=" + model.MD5 + " =?= " + model.getMD5(model.elements));
-                            w.wrModel(WrM.Report, model);
-                            break;
-                    }
-                    break;
-            }
-            Log.exit();
-        }
-
-        /// <summary>
-        /// CheckModelIntegrity(model) - Check if model data are consistant
-        /// </summary>
-        public bool CheckModelIntegrity(Mod mod)
-        {
-            if (!FileOp.isDirExist(mod.dir)) return false;
-            if (mod.date < Decl.OLD || mod.date > DateTime.Now) return false;
-            if (mod.pricingDate < Decl.OLD || mod.pricingDate > DateTime.Now) return false;
-            if (mod.MD5 == null || mod.MD5.Length != 32) return false;
-            if (mod.pricingMD5 == null || mod.pricingMD5.Length != 32) return false;
-            if (mod.elements.Count <= 0 || mod.elmGroups.Count <= 0) return false;
-
-            if (FileOp.isFileExist(Path.Combine(mod.dir, Decl.F_TSMATCHINFO)))
-            {
-                dINFO = Docs.getDoc(sINFO, create_if_notexist: false, fatal: false);
-                if (dINFO == null || dINFO.il < 10) return false;
-                if (string.IsNullOrWhiteSpace(mod.name)) return false;
-                if (isChangedStr(ref mod.name, dINFO, Decl.MODINFO_NAME_R, 2)) return false;
-                if (isChangedStr(ref mod.dir, dINFO, Decl.MODINFO_DIR_R, 2)) return false;
-                if (isChangedStr(ref mod.MD5, dINFO, Decl.MODINFO_MD5_R, 2)) return false;
-                if (isChangedStr(ref mod.pricingMD5, dINFO, Decl.MODINFO_PRCMD5_R, 2)) return false;
-                if (mod.elements.Count != dINFO.Body.Int(Decl.MODINFO_ELMCNT_R, 2)) return false;
-                dRul = Docs.getDoc(sRul, create_if_notexist: false, fatal: false);
-                if (dRul == null || dRul.il < dRul.i0 || dRul.il <= 2) return false;
-                dRep = Docs.getDoc(sRep, create_if_notexist: false, fatal: false);
-                if (dRep == null || dRep.il < dRep.i0 || dRul.il <= 2) return false;
-                if (dRep.il - dRep.i0 != mod.elmGroups.Count) return false;
-            }
-            return true;
-        }
-        #endregion ------ Reset & Recovery area ------
-
-        #region ------ Raw - read/write Raw.xml area ------
-        /// <summary>
-        /// Raw() - read elements from Raw.xml or re-write it, if necessary 
-        ///<para>
-        ///re-write reasons could be: Raw.xml not exists, or error found in ModelINFO
-        ///</para>
-        /// </summary>
-        /// <returns>updated list of elements in file and in memory</returns>
-        public List<Elm> Raw(Mod mod, bool write = false)
-        {
-            Log.set("SR.Raw(" + mod.name + ")");
-            model = mod;
-            List<Elm> elms = new List<Elm>();
-            if (string.IsNullOrEmpty(model.dir)) Msg.F("SR.Raw: No model.dir");
-            string file = Path.Combine(model.dir, Decl.RAWXML);
-            if (!write && FileOp.isFileExist(file))
-            {                               // Read Raw.xml
-                elms = rwXML.XML.ReadFromXmlFile<List<Elm>>(file);
-                model.date = File.GetLastWriteTime(file);
-            }
-            else
-            {                               // get from CAD and Write or re-Write Raw.xml 
-                Msg.AskFOK("SR.Raw: CAD Read");
-                model.Read();
-                rwXML.XML.WriteToXmlFile(file, model.elements);
-                elms = model.elements;
-            }
-            model.MD5 = model.getMD5(elms);
-            log.Info("Raw.xml: { elmCount, MD5} ==" + elms.Count + ", " + model.MD5);
-            Log.exit();
-            return elms;
-        }
-        #endregion ------ Raw - read/write Raw.xml area ------
 
         /// <summary>
         /// GetSavedReport() - read Report from TSmatchINFO.xlsx; pick-up Pricing from there, if available
@@ -335,7 +156,7 @@ namespace TSmatch.SaveReport
             Log.set("SR.GetSavedReport");
             bool errRep = true;
             model.elmGroups = model.mh.getGrps(model.elements);
-            Docs dRep = Docs.getDoc(sRep, fatal: false, create_if_notexist: false);               
+            Docs dRep = Docs.getDoc(sRep, fatal: false, create_if_notexist: false);
             if (dRep == null || dRep.i0 < 2) error(errRep);
             model.total_price = 0;
             for (int iGr = 1, i = dRep.i0; i < dRep.il; i++, iGr++)
@@ -382,12 +203,152 @@ namespace TSmatch.SaveReport
                 }
             }
             if (init) foreach (var rule in model.Rules) rule.Init();
-            log.Info("GetSavedRules: Rules.Count = " + model.Rules.Count 
-                + (init? "": " NOT") + "Initialized");
-            if(!CheckModelIntegrity(model)) error();
+            log.Info("GetSavedRules: Rules.Count = " + model.Rules.Count
+                + (init ? "" : " NOT") + "Initialized");
+            if (!CheckModelIntegrity(model)) error();
             Log.exit();
             return model;
         }
+
+        /// <summary>
+        /// CheckModelIntegrity(model) - Check if model data are consistant
+        /// </summary>
+        public bool CheckModelIntegrity(Mod mod)
+        {
+            if (!FileOp.isDirExist(mod.dir)) return false;
+            if (mod.date < Decl.OLD || mod.date > DateTime.Now) return false;
+            if (mod.pricingDate < Decl.OLD || mod.pricingDate > DateTime.Now) return false;
+            if (mod.MD5 == null || mod.MD5.Length != 32) return false;
+            if (mod.pricingMD5 == null || mod.pricingMD5.Length != 32) return false;
+            if (mod.elements.Count <= 0 || mod.elmGroups.Count <= 0) return false;
+
+            if (FileOp.isFileExist(Path.Combine(mod.dir, Decl.F_TSMATCHINFO)))
+            {
+                dINFO = Docs.getDoc(sINFO, create_if_notexist: false, fatal: false);
+                if (dINFO == null || dINFO.il < 10) return false;
+                if (string.IsNullOrWhiteSpace(mod.name)) return false;
+                if (isChangedStr(ref mod.name, dINFO, Decl.MODINFO_NAME_R, 2)) return false;
+                if (isChangedStr(ref mod.dir, dINFO, Decl.MODINFO_DIR_R, 2)) return false;
+                if (isChangedStr(ref mod.MD5, dINFO, Decl.MODINFO_MD5_R, 2)) return false;
+                if (isChangedStr(ref mod.pricingMD5, dINFO, Decl.MODINFO_PRCMD5_R, 2)) return false;
+                if (mod.elements.Count != dINFO.Body.Int(Decl.MODINFO_ELMCNT_R, 2)) return false;
+                dRul = Docs.getDoc(sRul, create_if_notexist: false, fatal: false);
+                if (dRul == null || dRul.il < dRul.i0 || dRul.il <= 2) return false;
+                dRep = Docs.getDoc(sRep, create_if_notexist: false, fatal: false);
+                if (dRep == null || dRep.il < dRep.i0 || dRul.il <= 2) return false;
+                if (dRep.il - dRep.i0 != mod.elmGroups.Count) return false;
+            }
+            return true;
+        }
+
+        private bool isChangedStr(ref string str, Docs doc, int row, int col)
+        {
+            string strINFO = doc.Body.Strng(row, col);
+            if (string.IsNullOrEmpty(str)) str = strINFO;
+            return str != strINFO;
+        }
+
+        /// <summary>
+        /// error() - SavedReport error handler method
+        /// </summary>
+        private void error(bool errRep = false)
+        {
+            Log.set("SR.errer()");
+            log.Info("error() model.errRecover = " + model.errRecover.ToString());
+            if (model.errRecover)
+            {
+                Msg.AskFOK("Corrupted saved report TSmatchINFO.xlsx");
+                model.elements = Raw(model);
+                dRep = Docs.getDoc(sRep);
+                if (dRep == null || errRep) Msg.F("SavedReport recover impossible");
+                GetSavedReport();
+                Recover(sINFO, RecoverToDo.ResetRep);
+                //21/7           Recover(mod, sRep,  RecoverToDo.ResetRep);
+            }
+            else model.isChanged = true;  // say, that TSmatchINFO.xlsx should be re-written
+            Log.exit();
+        }
+        #endregion --- SetModel ---
+
+        #region --- Reset & Recovery area ---
+        public enum RecoverToDo
+        {
+            CreateRep, ResetRep, NewMod,
+            ChangedDir,
+            ChangedPricing
+        }
+
+        /// <summary>
+        /// when TRUE - Reset dialog allowed
+        /// </summary>
+        public bool resetDialog = true;
+        public void Recover(string repNm, RecoverToDo to_do)
+        {
+            Log.set(@"SR.Recover(" + repNm + "\")");
+            if (!CheckModelIntegrity(model)) Msg.AskFOK("Recovery impossible");
+            switch (to_do)
+            {
+                case RecoverToDo.CreateRep:
+                    Msg.AskFOK("В каталоге модели нет TSmatchINFO.xlsx/" + repNm + ". Создать?");
+                    resetDialog = false;
+                    Docs.getDoc(repNm, reset: true, create_if_notexist: true);
+                    if (!Docs.IsDocExists(repNm)) Msg.F("SaveDoc.Recover cannot create ", repNm);
+                    Recover(repNm, RecoverToDo.ResetRep);
+                    break;
+                case RecoverToDo.ResetRep:
+                    if (resetDialog) Msg.AskFOK("Вы действительно намерены переписать TSmatchINFO.xlsx/" + repNm + "?");
+                    var w = new WrMod();
+                    switch (repNm)
+                    {
+                        case Decl.TSMATCHINFO_MODELINFO:
+                            w.wrModel(WrM.ModelINFO, model);
+                            break;
+                        case Decl.TSMATCHINFO_REPORT:
+                            log.Info(">>mod.MD5=" + model.MD5 + " =?= " + model.getMD5(model.elements));
+                            mh.Pricing(ref model);
+                            log.Info(">>mod.MD5=" + model.MD5 + " =?= " + model.getMD5(model.elements));
+                            w.wrModel(WrM.Report, model);
+                            break;
+                    }
+                    break;
+            }
+            Log.exit();
+        }
+        #endregion --- Reset & Recovery area ---
+
+        #region --- Raw - read/write Raw.xml area ---
+        /// <summary>
+        /// Raw() - read elements from Raw.xml or re-write it, if necessary 
+        ///<para>
+        ///re-write reasons could be: Raw.xml not exists, or error found in ModelINFO
+        ///</para>
+        /// </summary>
+        /// <returns>updated list of elements in file and in memory</returns>
+        public List<Elm> Raw(Mod mod, bool write = false)
+        {
+            Log.set("SR.Raw(" + mod.name + ")");
+            model = mod;
+            List<Elm> elms = new List<Elm>();
+            if (string.IsNullOrEmpty(model.dir)) Msg.F("SR.Raw: No model.dir");
+            string file = Path.Combine(model.dir, Decl.RAWXML);
+            if (!write && FileOp.isFileExist(file))
+            {                               // Read Raw.xml
+                elms = rwXML.XML.ReadFromXmlFile<List<Elm>>(file);
+                model.date = File.GetLastWriteTime(file);
+            }
+            else
+            {                               // get from CAD and Write or re-Write Raw.xml 
+                Msg.AskFOK("SR.Raw: CAD Read");
+                model.Read();
+                rwXML.XML.WriteToXmlFile(file, model.elements);
+                elms = model.elements;
+            }
+            model.MD5 = model.getMD5(elms);
+            log.Info("Raw.xml: { elmCount, MD5} ==" + elms.Count + ", " + model.MD5);
+            Log.exit();
+            return elms;
+        }
+        #endregion --- Raw - read/write Raw.xml area ---
 
         /// <summary>
         /// Save(model) - save means write model in file TSmatchINFO.xlsx
