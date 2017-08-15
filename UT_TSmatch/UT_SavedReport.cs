@@ -70,11 +70,11 @@ namespace TSmatch.SaveReport.Tests
         public void UT_GetSavedReport()
         {
             init();
-            sr.GetTSmatchINFO(model);
+            model.sr.GetTSmatchINFO(model);
 
-            model = sr.GetSavedReport();
+            model = model.sr.GetSavedReport();
 
-            bool ok = sr.CheckModelIntegrity(model);
+            bool ok = model.sr.CheckModelIntegrity(model);
             Assert.IsTrue(ok);
 
             var total_price = model.elmGroups.Sum(x => x.totalPrice);

@@ -119,16 +119,6 @@ namespace TSmatch.SaveReport
                 if (!FileOp.isDirExist(model.dir)) Msg.F("No Model Directory", model.dir);
                 if (!Docs.IsDocExists(Decl.TSMATCHINFO_MODELINFO)) Msg.F("No TSmatchINFO.xlsx file");
                 model = SetFrSavedModelINFO(model);
-
-                //////////                adrCity = m.adrCity; adrStreet = m.adrStreet;
-                ////////////23/7                elementsCount = m.elementsCount;
-                ////////////23/7                if (elementsCount == 0)
-                ////////////23/7                    Msg.F("SavedReport doc not exists and no CAD");
-                //////////                date = m.date;
-                //////////                MD5 = m.MD5;
-                //////////                pricingMD5 = m.pricingMD5;
-                //////////                pricingDate = m.pricingDate;
-                //////////                //24/4                classCAD = ifc;
             }
         }
 
@@ -163,7 +153,7 @@ namespace TSmatch.SaveReport
                 GetSavedReport();
             }
             if (!CheckModelIntegrity(model)) error();
-            SetSavedMod(mod);
+//15/8            SetSavedMod(mod);
             Log.exit();
         }
 
@@ -224,39 +214,6 @@ namespace TSmatch.SaveReport
             Log.exit();
         }
         #endregion ------ ModelINFO region ------
-
-        private void SetSavedMod(Mod mod)
-        {
-            Log.set("SetSavedReport");
-            model = mod;
-
-            dINFO = Docs.getDoc(Decl.TSMATCHINFO_MODELINFO, fatal: false);
-            dRep = Docs.getDoc(Decl.TSMATCHINFO_REPORT, fatal: false);
-#if OLD //23/7
-            name = mod.name;
-            dir = mod.dir;
-            phase = mod.phase;
-            date = Lib.getDateTime(dINFO.Body.Strng(Decl.MODINFO_DATE_R, 2));
-            made = mod.made; MD5 = mod.MD5;
-//23/7            elementsCount = mod.elementsCount;
-            pricingDate = mod.pricingDate;
-            pricingMD5 = mod.pricingMD5;
-            mh = mod.mh;
-
-            if (TS.isTeklaActive()) Log.Trace("Tekla active");
-            else Log.Trace("No Tekla");
-            Log.Trace("name =", name);
-            Log.Trace("dir  =", dir);
-            Log.Trace("phase=", phase);
-            Log.Trace("made =", made);
-            Log.Trace("date =", date);
-            Log.Trace("prcDT=", pricingDate);
-            Log.Trace("elCnt=", elements.Count);
-            Log.Trace("strRl=", strListRules);
-            Log.TraceOff();
-#endif //OLD //23/7
-            Log.exit();
-        }
 
         #region ------ Reset & Recovery area ------
         public enum RecoverToDo
