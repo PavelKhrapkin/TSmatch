@@ -181,27 +181,6 @@ namespace TSmatch.SaveReport.Tests
             FileOp.AppQuit();
         }
 
-        //////////////////[TestMethod()]
-        //////////////////public void UT_SR_SetFrSavedModelINFO()
-        //////////////////{
-        //////////////////    init();
-
-        //////////////////    // SetFrSavedMoodel работает только если нет Tekla
-        // 15/8 //////////    //..вызывается из Model.SetModel
-        //////////////////    if (boot.isTeklaActive) { Assert.IsTrue(true); goto quit; }
-
-        //////////////////    Mod m = sr.SetFrSavedModelINFO(model);
-        //////////////////    model.name = m.name;
-        //////////////////    model.phase = m.phase;
-
-        //////////////////    Assert.IsTrue(model.name.Length > 0);
-        //////////////////    Assert.IsTrue(model.phase.Length > 0);
-        //////////////////    Assert.IsTrue(FileOp.isDirExist(model.dir));
-
-        //////////////////    quit:
-        //////////////////    FileOp.AppQuit();
-        //////////////////}
-
         [TestMethod()]
         public void UT_SR_Raw()
         {
@@ -222,7 +201,7 @@ namespace TSmatch.SaveReport.Tests
             init();
 
             // test no Rules Init
-            model = sr.GetSavedRules(model);
+            model = model.sr.GetSavedRules(model);
 
             Assert.IsTrue(model.Rules.Count > 0);
             foreach (var rule in model.Rules)
@@ -232,7 +211,7 @@ namespace TSmatch.SaveReport.Tests
             }
 
             // test with Rules Init = true
-            model = sr.GetSavedRules(model, init: true);
+            model = model.sr.GetSavedRules(model, init: true);
 
             Assert.IsTrue(model.Rules.Count > 0);
             foreach (var rule in model.Rules)
