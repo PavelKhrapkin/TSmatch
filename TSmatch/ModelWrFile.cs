@@ -23,6 +23,7 @@ using Docs = TSmatch.Document.Document;
 using Mtch = TSmatch.Matcher.Mtch;
 using SType = TSmatch.Section.Section.SType;
 using Mod = TSmatch.Model.Model;
+using Msg = TSmatch.Message.Message;
 
 namespace TSmatch.Model.WrModelInfo
 {
@@ -75,6 +76,7 @@ namespace TSmatch.Model.WrModelInfo
                     }
                     break;
                 case WrMod.Rules:       // перечень Правил, используемых для обработки модели
+                    if (mod.Rules.Count == 0) Msg.F("Can't write TSmatchINFO.xlsx/Rules");
                     doc.wrDocSetForm("FORM_RuleLine");
                     foreach (var rule in mod.Rules)
                     {
@@ -82,18 +84,7 @@ namespace TSmatch.Model.WrModelInfo
                     }
                     break;
                 case WrMod.Report:      // отчет по сопоставлению групп <материал, профиль> c прайс-листами поставщиков
-                    bool noMatchFlag = true;
-                    foreach(var gr in mod.elmGroups)
-                    {
-                        if (gr.match == null || gr.match.ok != Mtch.OK.Match) continue;
-                        noMatchFlag = false;
-                        break;
-                    }
-                    if (noMatchFlag)
-                    {
-                        if (mod.mh == null) mod.mh = new Handler.Handler();
-                        mod.mh.Pricing(ref mod);
-                    }               
+                    if (!isMatches(mod)) mod.mh.Pricing(ref mod);
                     doc.wrDocSetForm("FORM_Report", AutoFit: true);
                     int n = 1;
                     foreach (var gr in mod.elmGroups)
@@ -130,6 +121,25 @@ namespace TSmatch.Model.WrModelInfo
             doc.saveDoc();
             log.Info("Время записи в файл \"" + doc_name + "\"\t t= " + (DateTime.Now - t0).ToString() + " сек");
             Log.exit();
+        }
+
+        bool isMatches(Mod mod)
+        {
+            {
+                bool noMatchFlag = true;    // check if at least one group has been matched
+                foreach (var gr in mod.elmGroups)
+                {
+                    if (gr.match == null || gr.match.ok != Mtch.OK.Match) continue;
+                    noMatchFlag = false;
+                    break;
+                }
+                if (noMatchFlag)
+                {
+                    if (mod.mh == null) mod.mh = new Handler.Handler();
+                    mod.mh.Pricing(ref mod);
+                }
+            }
+            return true;
         }
 
         public string sDbl(double v) { return string.Format("{0 :N2}", v); }

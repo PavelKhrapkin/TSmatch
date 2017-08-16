@@ -1,5 +1,5 @@
 ﻿/*=================================
-* Match Unit Test 7.8.2017
+* Match Unit Test 16.8.2017
 *=================================
 */
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -21,7 +21,7 @@ namespace TSmatch.Matcher.Tests
         public void UT_Mtch()
         {
             var boot = new Boot();
-            var sr = new SR();
+            var sr = new _SR();
             var model = sr.SetModel(boot, unit_test_mode: true);
             model.elements = sr.Raw(model);
             List<Elm> elmCopy = new List<Elm>();
@@ -36,7 +36,7 @@ namespace TSmatch.Matcher.Tests
             model.elmGroups = mh.getGrps(model.elements);
             Assert.IsTrue(model.elmGroups.Count > 0);
 
-            model = sr.GetSavedRules(model, init: true);
+            model = sr._GetSavedRules(model);
             Assert.IsTrue(model.Rules.Count > 0);
 
             foreach (var gr in model.elmGroups)
@@ -61,8 +61,14 @@ namespace TSmatch.Matcher.Tests
                     Assert.AreEqual(new_md5, MD5);
                 }
             }
-
             FileOp.AppQuit();
         }
     }
+    class _SR : SR
+    {
+        internal Mod _GetSavedRules(Mod model)
+        {
+            return GetSavedRules(model, init: true);
+        }
+    } // end interface class _SR for access to SavedReport method
 }

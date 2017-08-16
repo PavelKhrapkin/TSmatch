@@ -1,5 +1,5 @@
 ﻿/*=================================
- * Handler Unit Test 7.8.2017
+ * Handler Unit Test 16.8.2017
  *=================================
  */
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -27,7 +27,7 @@ namespace TSmatch.Handler.Tests
         public void UT_Hndl()
         {
             var boot = new Boot();
-            var sr = new SR();
+            var sr = new _SR();
             model = sr.SetModel(boot);
 
             model.elements = sr.Raw(model);
@@ -41,7 +41,7 @@ namespace TSmatch.Handler.Tests
             Assert.AreEqual(cMD5, MD5);
             if (model.Rules == null || model.Rules.Count == 0)
             {
-                sr.GetSavedRules(model, init: true);
+                sr._GetSavedRules(model);
             }
             var mh = new MH();
             Mtch mtsh = new Mtch(model);
@@ -145,4 +145,11 @@ namespace TSmatch.Handler.Tests
         }
 #endif // 24/5 moveto UT_ModelHandle
     }
+    class _SR : SR
+    {
+        internal Mod _GetSavedRules(Mod model)
+        {
+            return GetSavedRules(model, init: true);
+        }
+    } // end interface class _SR for access to SavedReport method
 }

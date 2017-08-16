@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------------------
  * SavedReport -- class for handle saved reports in TSmatchINFO.xlsx
  * 
- *  15.08.2017 П.Л. Храпкин
+ *  16.08.2017 П.Л. Храпкин
  *  
  *--- Unit Tests ---
  * UT_GetModelInfo  2-17.7.14 
@@ -20,7 +20,7 @@
  *  7.08.2017 - GetModelINFO audit; getRaw(model.dat = File.GetLastWriteTime(file);
  * 11.08.2017 - more tests in CeckIntegrityModel, and GetSavedRules updated
  * 14.08.2017 - CheckModelIntegrity: no model.name is tested in without file; check IfDirExist()
- * 15.08.2017 - SetSavedMod method removed; Recovery audit
+ * 16.08.2017 - SetSavedMod method removed; protected instead of public methods; Recovery audit
  *--- Methods: -------------------      
  * SetModel(boot)   - initialize model by reading from TSmatchINFO.xlsx ans Raw.xml or from scratch
  *      private SetModDir(boot) - subset of SetModel(), setup model.dir, name and phase
@@ -151,7 +151,7 @@ namespace TSmatch.SaveReport
         /// GetSavedReport() - read Report from TSmatchINFO.xlsx; pick-up Pricing from there, if available
         /// </summary>
         /// <returns></returns>
-        public Mod GetSavedReport()
+        protected Mod GetSavedReport()
         {
             Log.set("SR.GetSavedReport");
             bool errRep = true;
@@ -179,7 +179,7 @@ namespace TSmatch.SaveReport
         /// <param name="mod"></param>
         /// <param name="init"></param>
         /// <returns></returns>
-        public Mod GetSavedRules(Mod mod, bool init = false)
+        protected Mod GetSavedRules(Mod mod, bool init = false)
         {
             Log.set("SR.getSavedRules()");
             model = mod;
@@ -367,6 +367,7 @@ namespace TSmatch.SaveReport
             var w = new WrMod();
             w.wrModel(WrM.ModelINFO, model);
             w.wrModel(WrM.Report, model);
+            if (model.Rules.Count == 0) GetSavedRules(model, init: false);
             w.wrModel(WrM.Rules, model);
         }
     } // end class SavedReport

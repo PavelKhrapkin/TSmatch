@@ -14,6 +14,7 @@ using Mod = TSmatch.Model.Model;
 using SR = TSmatch.SaveReport.SavedReport;
 using MH = TSmatch.Handler.Handler;
 using Boot = TSmatch.Bootstrap.Bootstrap;
+using TSmatch.Model;
 
 namespace TSmatch.SaveReport.Tests
 {
@@ -67,7 +68,7 @@ namespace TSmatch.SaveReport.Tests
             init();
             U._GetTSmatchINFO(model);
 
-            model = model.sr.GetSavedReport();
+            model =U._GetSavedReport();
 
             bool ok = model.sr.CheckModelIntegrity(model);
             Assert.IsTrue(ok);
@@ -201,7 +202,7 @@ namespace TSmatch.SaveReport.Tests
             init();
 
             // test no Rules Init
-            model = model.sr.GetSavedRules(model);
+            model = U._GetSavedRules(model, init_mode:false);
 
             Assert.IsTrue(model.Rules.Count > 0);
             foreach (var rule in model.Rules)
@@ -211,7 +212,7 @@ namespace TSmatch.SaveReport.Tests
             }
 
             // test with Rules Init = true
-            model = model.sr.GetSavedRules(model, init: true);
+            model = U._GetSavedRules(model, init_mode: true);
 
             Assert.IsTrue(model.Rules.Count > 0);
             foreach (var rule in model.Rules)
@@ -253,6 +254,16 @@ namespace TSmatch.SaveReport.Tests
         public void _GetTSmatchINFO(Mod mod, bool ut_mode = false)
         {
             GetTSmatchINFO(mod, ut_mode);
+        }
+
+        internal Mod _GetSavedReport()
+        {
+            return GetSavedReport();
+        }
+
+        internal Mod _GetSavedRules(Mod model, bool init_mode)
+        {
+            return GetSavedRules(model, init_mode);
         }
     }
 }

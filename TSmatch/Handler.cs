@@ -1,7 +1,7 @@
 ﻿/*---------------------------------------------------------------------------------
  * Handler -- Handle Model for Report preparation
  * 
- *  8.08.2017 Pavel Khrapkin
+ *  16.08.2017 Pavel Khrapkin
  *  
  *--- History ---
  *  8.05.2017 taken from Model code
@@ -12,6 +12,7 @@
  * 21.07.2017 Audit GetGrps and Hndl
  * 23.07.2017 No heritage with Model we-engineering; rename ModHandler -> Handler
  *  4.08.2017 Handle() elmGroupc.Count and Rule.Count check; Rules Init
+ * 16.08.2017 protected GetSavedRules used
  *--- Unit Tests --- 
  * 2017.08.4 UT_Handler.UT_Hndl OK -- 20,4 sec модель "Навес над трибунами" 7128 э-тов
  *           UT_Pricing OK
@@ -39,7 +40,7 @@ namespace TSmatch.Handler
     {
         public static readonly ILog log = LogManager.GetLogger("Handler");
 
-        SR sr;
+        _SR sr = new _SR();
         bool testMode;
 
         /// <summary>
@@ -149,7 +150,7 @@ namespace TSmatch.Handler
 #endif
             if (m.Rules == null || m.Rules.Count == 0)
             {
-                m.sr.GetSavedRules(m, init: true);
+                sr._GetSavedRules(m);
             }
             log.Info(">m.MD5=" + m.MD5 + " =?= " + m.getMD5(m.elements));
             Hndl(ref m);
@@ -319,4 +320,11 @@ namespace TSmatch.Handler
         }
 #endif //OLD 3.7.17
     } // end class Handler : Model
+    class _SR : SR
+    {
+        internal Mod _GetSavedRules(Mod model)
+        {
+            return GetSavedRules(model, init: true);
+        }
+    } // end interface class _SR for access to SavedReport method
 } // end namespace Model.Handler
