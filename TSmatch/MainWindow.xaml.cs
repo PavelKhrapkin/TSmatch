@@ -67,8 +67,8 @@ namespace TSmatch
             Title = "TSmatch - согласование поставщиков в проекте";
             //20/5            message.Text = "..Load MainWindow..";
             boot = new Boot();
-            var sr = new SaveReport.SavedReport();
-            model = sr.SetModel(boot);
+            model = new Mod();
+            model = model.sr.SetModel(boot);
             WrModelInfoPanel();
             WrReportPanel();
             //30/5            model.HighLightElements(Mod.HighLightMODE.NoPrice);

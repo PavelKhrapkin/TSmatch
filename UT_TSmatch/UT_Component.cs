@@ -1,5 +1,5 @@
 ﻿/*=================================
- * Components Unit Test 23.6.2017
+ * Components Unit Test 17.8.2017
  *=================================
  */
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -22,7 +22,7 @@ namespace TSmatch.Component.Tests
         Component comp = new Component();
 
         [TestMethod()]
-        public void UT_Component_checkComp()
+        public void UT_Component_checkComp_PL()
         {
             //test 1: gr="PL10*100" rule="Prf: PL=—*x*" comp="PL10x100" => TRUE
             gr.prf = "PL10*100";
@@ -42,8 +42,24 @@ namespace TSmatch.Component.Tests
             Assert.AreEqual(comp.compDP.dpar.Count, 1);
             Assert.AreEqual(comp.compDP.dpar[Section.Section.SType.Profile], "pl10x300");
             b = comp.isMatch(gr, rule);
+            Assert.IsTrue(b);
 
-            //test 3: gr="L75x5" rule="Профиль: Уголок=L *x*;" => TRUE
+            //test 3: gr="—8" rule="М: C245=C255 ; Профиль: Полоса горячекатаная = PL = — *x*;" comp="PL8x100" => TRUE
+            gr.prf = "—8";
+            rule.text = "М: C245=C255 ; Профиль: Полоса горячекатаная = PL = — *x*;";
+            rule.ruleDP = new DPar.DPar(rule.text);
+            rule.synonyms = rule.RuleSynParse(rule.text);
+            comp.compDP = new DPar.DPar("Prf:PL8x100");
+            Assert.AreEqual(comp.compDP.dpar.Count, 1);
+            Assert.AreEqual(comp.compDP.dpar[Section.Section.SType.Profile], "pl8x100");
+            b = comp.isMatch(gr, rule);
+            Assert.IsTrue(b);
+        }
+
+        [TestMethod()]
+        public void UT_Component_checkComp_L()
+        {
+            //test 1: gr="L75x5" rule="Профиль: Уголок=L *x*;" => TRUE
             gr.prf = "l75x5";
             rule.text = Lib.ToLat("Профиль: Уголок=L *x*;");
             rule.ruleDP = new DPar.DPar(rule.text);
@@ -55,7 +71,7 @@ namespace TSmatch.Component.Tests
             Assert.AreEqual(comp.compDP.dpar.Count, 1);
             var v = comp.compDP.dpar[Section.Section.SType.Profile];
             Assert.AreEqual(v, "угoлoк75x5");
-            b = comp.isMatch(gr, rule);
+            bool b = comp.isMatch(gr, rule);
             Assert.IsTrue(b);
 
             //test 4: gr="I20" rule="Профиль: Балка =I* дл;" comp="Балка 20 дл. 9м Ст3пс5" => TRUE
@@ -74,6 +90,46 @@ namespace TSmatch.Component.Tests
             Assert.IsTrue(b);
 
             //test 4-1: gr="I30Ш2" rule="Профиль: Двутавр=I*Ш*" => TRUE
+            initGr("I30Ш2");
+            initRule("М: C245=C255 ; Профиль: Двутавр=I*Ш*");
+            initComp("двутавр 30Ш2");
+            b = comp.isMatch(gr, rule);
+            Assert.IsTrue(b);
+
+            //test 5: gr="Гн.100x4" rule="Профиль: Швеллер = U*П_;" => TRUE
+            initGr("Гн.100x4");
+            initRule("Профиль: Гн.*х*");
+            initComp("Гн. 100х4");
+            b = comp.isMatch(gr, rule);
+            Assert.IsTrue(b);
+
+            //test 6: gr="Гн.100x4" rule="Профиль: Швеллер = U*П_;" Comp=M:C345 => FALSE
+            initGr("Гн.100x46");
+            initRule("Профиль: Уголок=L *x*x*");
+            initComp("Гн. 100х4", "C345");
+            b = comp.isMatch(gr, rule);
+            Assert.IsTrue(!b);
+        }
+
+        [TestMethod()]
+        public void UT_Component_checkComp_I()
+        {
+            //test 1: gr="I20" rule="Профиль: Балка =I* дл;" comp="Балка 20 дл. 9м Ст3пс5" => TRUE
+            gr.Prf = "I20"; gr.prf = "i20";
+            rule.text = "Профиль: Балка =I*";
+            string comp_txt = "Балка 20";   // <==!!
+            rule.ruleDP = new DPar.DPar(rule.text);
+            rule.synonyms = rule.RuleSynParse(rule.text);
+            var syns = rule.synonyms[Section.Section.SType.Profile].ToList();
+            Assert.AreEqual(syns[0], "бaлкa");
+            Assert.AreEqual(syns[1], "i");
+            comp.compDP = new DPar.DPar("Prf:" + comp_txt);
+            Assert.AreEqual(comp.compDP.dpar.Count, 1);
+            Assert.AreEqual(comp.compDP.dpStr[Section.Section.SType.Profile], comp_txt);
+            bool b = comp.isMatch(gr, rule);
+            Assert.IsTrue(b);
+
+            //test 2: gr="I30Ш2" rule="Профиль: Двутавр=I*Ш*" => TRUE
             initGr("I30Ш2");
             initRule("М: C245=C255 ; Профиль: Двутавр=I*Ш*");
             initComp("двутавр 30Ш2");
