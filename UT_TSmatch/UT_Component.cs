@@ -36,7 +36,7 @@ namespace TSmatch.Component.Tests
             gr = model.elmGroups[23];
             Assert.AreEqual("—8", gr.prf);
             rule = new Rule.Rule(6);
-            Assert.AreEqual(63, rule.text.Length);
+            Assert.AreEqual(58, rule.text.Length);
             rule.Init();
             Assert.AreEqual(93, rule.CompSet.Components.Count);
             comp = rule.CompSet.Components[60];

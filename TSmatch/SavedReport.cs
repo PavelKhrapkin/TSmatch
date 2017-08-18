@@ -4,8 +4,12 @@
  *  18.08.2017 П.Л. Храпкин
  *  
  *--- Unit Tests ---
- * UT_GetModelInfo  2-17.7.14 
- * UT_SavedReport_Raw 2017.07.23 OK 2 sec
+ * UT_GetModelInfo, UT-GetSavedReport, UT_GetSavedRules 18.8.2017 OK 
+ * UT_TSmatchINFO_FileExists, UT_TSmatchINFO_NoFiles    18.8.2017 OK
+ * UT_SR_Raw    2017.07.23 OK 2 sec
+ * UT_CheckModelIntegrity 2017.07.16 OK
+ * UT_Save      2017.07.17 OK
+ * UT_SetModel  2017.08.17 OK
  *--- History  ---
  * 17.04.2017 выделен из модуля Model
  *  1.05.2017 with Document Reset and ReSave
@@ -167,6 +171,7 @@ namespace TSmatch.SaveReport
                 if (iGr != dRep.Body.Int(i, Decl.REPORT_N)) error(errRep);
                 gr.SupplierName = dRep.Body.Strng(i, Decl.REPORT_SUPPLIER);
                 gr.CompSetName = dRep.Body.Strng(i, Decl.REPORT_COMPSET);
+                gr.compDescription = dRep.Body.Strng(i, Decl.REPORT_SUPL_DESCR).Trim();
                 gr.totalPrice = dRep.Body.Double(i, Decl.REPORT_SUPL_PRICE);
                 model.total_price += gr.totalPrice;
             }

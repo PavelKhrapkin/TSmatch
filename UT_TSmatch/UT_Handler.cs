@@ -57,6 +57,14 @@ namespace TSmatch.Handler.Tests
             string copyMD5 = model.getMD5(elmCopy);
             Assert.AreEqual(model.getMD5(model.elements), MD5);
 
+            // проверка наличия compDescription, sCS? sSupl и totalPrice в группах
+            foreach(var gr in model.elmGroups)
+            {
+                if (gr.totalPrice == 0) continue;
+                Assert.IsTrue(gr.compDescription.Length > 0);
+                Assert.IsTrue(gr.SupplierName.Length > 0);
+                Assert.IsTrue(gr.CompSetName.Length > 0);
+            }
 
             //Hndl performance test -- 180 sec for 100 cycles ОНХП модель 1124 элемента
             //                      -- 20,4 sec 1 cycle модель "Навес над трибунами" 7128 э-тов
