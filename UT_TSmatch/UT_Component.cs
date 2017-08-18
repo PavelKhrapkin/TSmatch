@@ -6,20 +6,113 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.Linq;
 
+using FileOp = match.FileOp.FileOp;
+using Boot = TSmatch.Bootstrap.Bootstrap;
+using Mod = TSmatch.Model.Model;
 using Lib = match.Lib.MatchLib;
-using MH = TSmatch.Handler.Handler;
+using Mtch = TSmatch.Matcher.Mtch;
 using ElmGr = TSmatch.ElmAttSet.Group;
+using SType = TSmatch.Section.Section.SType;
 
 namespace TSmatch.Component.Tests
 {
     [TestClass()]
     public class UT_Component
     {
-        MH mod = new MH();
+        Boot boot = new Boot();
+        Mod model = new Mod();
+
         ElmAttSet.Group gr = new ElmAttSet.Group();
         List<ElmGr> inp = new List<ElmGr>();
         Rule.Rule rule = new Rule.Rule();
         Component comp = new Component();
+
+        [TestMethod()]
+        public void UT_comp_PL_Native()
+        {
+            // test 1 Native: берем группу, правила и компонент - пластину PL8 из модели
+            model = model.sr.SetModel(boot);
+            if (model.name != "Chasovnya+lepestok") goto exit;
+            gr = model.elmGroups[23];
+            Assert.AreEqual("—8", gr.prf);
+            rule = new Rule.Rule(6);
+            Assert.AreEqual(63, rule.text.Length);
+            rule.Init();
+            Assert.AreEqual(93, rule.CompSet.Components.Count);
+            comp = rule.CompSet.Components[60];
+            Assert.AreEqual("С245", comp.Str(SType.Material));
+            Assert.AreEqual("PL8x100", comp.Str(SType.Profile));
+
+            bool b = comp.isMatch(gr, rule);
+            Assert.IsTrue(b);
+
+            //test 2 Native: обрабатываем все группы, но проверяем только нужную - PL8
+            Mtch _mtch = null;
+            foreach (var g in model.elmGroups)
+            {
+                _mtch = new Mtch(g, rule);
+                if (g.prf != "—8") continue;
+                Assert.AreEqual(Mtch.OK.Match, _mtch.ok);
+            }
+
+            //test 3 Native: загружаем несколько Правил
+            model.Rules.Add(rule);
+            rule = new Rule.Rule(5);
+            rule.Init();
+            model.Rules.Add(rule);
+            _mtch = null;
+            Mtch found_mtch = null;
+            foreach (var g in model.elmGroups)
+            {
+                foreach(var r in model.Rules)
+                {
+                    _mtch = new Mtch(g, r);
+                    if (g.prf != "—8") continue;
+                    Assert.AreEqual(Mtch.OK.Match, _mtch.ok);
+                    found_mtch = _mtch;
+                    break;
+                }
+            }
+            Assert.AreEqual("Полоса", found_mtch.rule.sCS);
+
+            //test 4 Native with Handle
+            model.Rules.Clear(); model.matches.Clear();
+            for(int i = 4; i < 15; i++)
+            {
+                rule = new Rule.Rule(i);
+                rule.Init();
+                model.Rules.Add(rule);
+            }
+            model.mh.Hndl(ref model);
+            foreach(var m in model.matches)
+            {
+                if(m.group.prf != "—8") continue;
+                Assert.AreEqual(Mtch.OK.Match, m.ok);
+                Assert.AreEqual("Полоса", m.rule.sCS);
+                Assert.AreEqual("СтальХолдинг", m.rule.sSupl);
+            }
+
+            //test 5 Native with Pricing
+            model.Rules.Clear(); model.matches.Clear();
+            model.mh.Pricing(ref model);
+            if (model.name != "Chasovnya+lepestok") goto exit;           
+            bool c235found = false;
+            //проверим, что это в самом деле правила из TSmatchINFO/Rules - есть С235
+            foreach (var r in model.Rules)
+            {
+                if (!r.text.Contains("235")) continue;
+                c235found = true;
+                break;
+            }
+            Assert.IsTrue(c235found);
+            //полоса PL8 находится в matches[23]
+            Mtch found_match = model.matches[23];
+            Assert.AreEqual(Mtch.OK.Match, found_match.ok);
+            Assert.AreEqual("Полоса", found_match.rule.sCS);
+            Assert.AreEqual("СтальХолдинг", found_match.rule.sSupl);
+
+            exit: FileOp.AppQuit();
+        }
 
         [TestMethod()]
         public void UT_Component_checkComp_PL()

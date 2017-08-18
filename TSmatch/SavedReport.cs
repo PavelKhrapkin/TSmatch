@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------------------
  * SavedReport -- class for handle saved reports in TSmatchINFO.xlsx
  * 
- *  16.08.2017 П.Л. Храпкин
+ *  18.08.2017 П.Л. Храпкин
  *  
  *--- Unit Tests ---
  * UT_GetModelInfo  2-17.7.14 
@@ -21,6 +21,7 @@
  * 11.08.2017 - more tests in CeckIntegrityModel, and GetSavedRules updated
  * 14.08.2017 - CheckModelIntegrity: no model.name is tested in without file; check IfDirExist()
  * 16.08.2017 - SetSavedMod method removed; protected instead of public methods; Recovery audit
+ * 18.08.2017 - audit GetSavedRules
  *--- Methods: -------------------      
  * SetModel(boot)   - initialize model by reading from TSmatchINFO.xlsx ans Raw.xml or from scratch
  *      private SetModDir(boot) - subset of SetModel(), setup model.dir, name and phase
@@ -183,23 +184,19 @@ namespace TSmatch.SaveReport
         {
             Log.set("SR.getSavedRules()");
             model = mod;
-            if (dINFO == null)
-            {
+            dRul = Docs.getDoc(Decl.TSMATCHINFO_RULES, create_if_notexist: false, fatal: false);
+            if(dRul == null)
+            { // when TXmatchINFO.xlsx/Rules unavailable - initialise them from TSmatch/InitialRules
                 Docs ir = Docs.getDoc("InitialRules");
                 for (int i = ir.i0; i < ir.il; i++)
                     model.Rules.Add(new Rule.Rule(ir, i));
-            }
-            else
-            {
-                if (dRul == null || model.Rules.Count == 0)
+            } else
+            { // Rules available, read them
+                model.Rules.Clear();
+                for (int i = dRul.i0; i <= dRul.il; i++)
                 {
-                    dRul = Docs.getDoc("Rules");
-                    model.Rules.Clear();
-                    for (int i = dRul.i0; i <= dRul.il; i++)
-                    {
-                        try { model.Rules.Add(new Rule.Rule(i)); }
-                        catch { continue; }
-                    }
+                    try { model.Rules.Add(new Rule.Rule(i)); }
+                    catch { continue; }
                 }
             }
             if (init) foreach (var rule in model.Rules) rule.Init();

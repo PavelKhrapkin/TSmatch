@@ -53,14 +53,15 @@ namespace TSmatch.Rule.Tests
             var model = new Mod();
             model.sr.SetModel(boot);
 
-            Rule rule = new Rule(5);
+            Rule rule = new Rule(6);
             var Syns = rule.synonyms;
-            Assert.AreEqual(2, Syns[SType.Material].Count);
+            Assert.AreEqual(3, Syns[SType.Material].Count);
             Assert.AreEqual("c235", Syns[SType.Material][0]);
             Assert.AreEqual("c245", Syns[SType.Material][1]);
-            Assert.AreEqual(2, Syns[SType.Profile].Count);
-            Assert.AreEqual("yгoлoк", Syns[SType.Profile][0]);
-            Assert.AreEqual("l", Syns[SType.Profile][1]);
+            Assert.AreEqual("c255", Syns[SType.Material][2]);
+            Assert.AreEqual(3, Syns[SType.Profile].Count);
+            Assert.AreEqual("пoлocaгopячeкaтaнaя", Syns[SType.Profile][0]);
+            Assert.AreEqual("pl", Syns[SType.Profile][1]);
 
             FileOp.AppQuit();
         }

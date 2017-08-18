@@ -84,6 +84,17 @@ namespace TSmatch.Handler.Tests
 
             model.mh.Pricing(ref model);
             Assert.IsTrue(model.matches.Count > 0);
+            if (model.name == "Chasovnya+lepestok")
+            {
+                bool c235found = false;
+                foreach (var r in model.Rules)
+                {
+                    if (!r.text.Contains("235")) continue;
+                    c235found = true;
+                    break;
+                }
+                Assert.IsTrue(c235found);
+            }
 
             FileOp.AppQuit();
         }

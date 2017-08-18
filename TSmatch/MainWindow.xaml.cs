@@ -258,7 +258,6 @@ namespace TSmatch
         {
             MessageBox.Show("Читать?", "TSmatch", MessageBoxButton.OK);
             model.Read();
-            //27/7            isRawChanged = true;
             model.isChanged = true;
         }
 
@@ -275,7 +274,6 @@ namespace TSmatch
         internal static void RePricing()
         {
             model.mh.Pricing(ref model);
-            //27/7            ModelIsChanged = true;
             model.isChanged = true;
         }
 
