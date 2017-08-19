@@ -67,11 +67,8 @@ namespace TSmatch
             Title = "TSmatch - согласование поставщиков в проекте";
             //20/5            message.Text = "..Load MainWindow..";
             boot = new Boot();
-            var sr = new SaveReport.SavedReport();
-            model = sr.SetModel(boot);
-
-            // 7/8 /////////model = new Mod();
-            ////////////////model.SetModel(boot);
+            model = new Mod();
+            model = model.sr.SetModel(boot);
             WrModelInfoPanel();
             WrReportPanel();
             //30/5            model.HighLightElements(Mod.HighLightMODE.NoPrice);
@@ -261,7 +258,6 @@ namespace TSmatch
         {
             MessageBox.Show("Читать?", "TSmatch", MessageBoxButton.OK);
             model.Read();
-            //27/7            isRawChanged = true;
             model.isChanged = true;
         }
 
@@ -278,7 +274,6 @@ namespace TSmatch
         internal static void RePricing()
         {
             model.mh.Pricing(ref model);
-            //27/7            ModelIsChanged = true;
             model.isChanged = true;
         }
 
