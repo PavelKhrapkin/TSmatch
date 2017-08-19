@@ -1,5 +1,5 @@
 ﻿/*=================================
- * Handler Unit Test 7.8.2017
+ * Handler Unit Test 16.8.2017
  *=================================
  */
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -21,13 +21,13 @@ namespace TSmatch.Handler.Tests
     [TestClass()]
     public class UT_Handler
     {
-        Mod model;
+        public Mod model;
 
         [TestMethod()]
         public void UT_Hndl()
         {
             var boot = new Boot();
-            var sr = new SR();
+            var sr = new _SR();
             model = sr.SetModel(boot);
 
             model.elements = sr.Raw(model);
@@ -41,7 +41,7 @@ namespace TSmatch.Handler.Tests
             Assert.AreEqual(cMD5, MD5);
             if (model.Rules == null || model.Rules.Count == 0)
             {
-                sr.GetSavedRules(model, init: true);
+                sr._GetSavedRules(model);
             }
             var mh = new MH();
             Mtch mtsh = new Mtch(model);
@@ -57,6 +57,14 @@ namespace TSmatch.Handler.Tests
             string copyMD5 = model.getMD5(elmCopy);
             Assert.AreEqual(model.getMD5(model.elements), MD5);
 
+            // проверка наличия compDescription, sCS? sSupl и totalPrice в группах
+            foreach (var gr in model.elmGroups)
+            {
+                if (gr.totalPrice == 0) continue;
+                Assert.IsTrue(gr.compDescription.Length > 0);
+                Assert.IsTrue(gr.SupplierName.Length > 0);
+                Assert.IsTrue(gr.CompSetName.Length > 0);
+            }
 
             //Hndl performance test -- 180 sec for 100 cycles ОНХП модель 1124 элемента
             //                      -- 20,4 sec 1 cycle модель "Навес над трибунами" 7128 э-тов
@@ -79,12 +87,22 @@ namespace TSmatch.Handler.Tests
         public void UT_Pricing()
         {
             var boot = new Boot();
-            var model = new Mod();
-            //7/8           model.SetModel(boot);
+            Mod model = new Mod();
+            model = model.sr.SetModel(boot);
 
-            var mh = new MH();
-            mh.Pricing(ref model);
+            model.mh.Pricing(ref model);
             Assert.IsTrue(model.matches.Count > 0);
+            if (model.name == "Chasovnya+lepestok")
+            {
+                bool c235found = false;
+                foreach (var r in model.Rules)
+                {
+                    if (!r.text.Contains("235")) continue;
+                    c235found = true;
+                    break;
+                }
+                Assert.IsTrue(c235found);
+            }
 
             FileOp.AppQuit();
         }
@@ -146,4 +164,11 @@ namespace TSmatch.Handler.Tests
         }
 #endif // 24/5 moveto UT_ModelHandle
     }
+    class _SR : SR
+    {
+        internal Mod _GetSavedRules(Mod model)
+        {
+            return GetSavedRules(model, init: true);
+        }
+    } // end interface class _SR for access to SavedReport method
 }
