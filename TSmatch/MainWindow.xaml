@@ -1,4 +1,4 @@
-﻿<!-- MainWindow xaml design Pavel Khrapkin 2017.7.26 -->
+﻿<!-- MainWindow xaml design Pavel Khrapkin 2017.8.19 -->
 <Window x:Class="TSmatch.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
