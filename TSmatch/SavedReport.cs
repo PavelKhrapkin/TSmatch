@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------------------
  * SavedReport -- class for handle saved reports in TSmatchINFO.xlsx
  * 
- *  18.08.2017 П.Л. Храпкин
+ *  19.08.2017 П.Л. Храпкин
  *  
  *--- Unit Tests ---
  * UT_GetModelInfo, UT-GetSavedReport, UT_GetSavedRules 18.8.2017 OK 
@@ -25,7 +25,7 @@
  * 11.08.2017 - more tests in CeckIntegrityModel, and GetSavedRules updated
  * 14.08.2017 - CheckModelIntegrity: no model.name is tested in without file; check IfDirExist()
  * 16.08.2017 - SetSavedMod method removed; protected instead of public methods; Recovery audit
- * 18.08.2017 - audit GetSavedRules
+ * 19.08.2017 - audit GetSavedRules
  *--- Methods: -------------------      
  * SetModel(boot)   - initialize model by reading from TSmatchINFO.xlsx ans Raw.xml or from scratch
  *      private SetModDir(boot) - subset of SetModel(), setup model.dir, name and phase
@@ -89,12 +89,12 @@ namespace TSmatch.SaveReport
         /// </remarks>
         /// <param name="boot"></param>
         /// <returns>initialized Model</returns>
-        public Mod SetModel(Boot boot, bool unit_test_mode = false)
+        public Mod SetModel(Boot boot, bool initSupl = false)
         {
             Log.set("SR.Model(boot)");
             model = new Mod();
             SetModDir(boot);
-            GetTSmatchINFO(model, unit_test_mode);
+            GetTSmatchINFO(model, initSupl);
             Log.exit();
             return model;
         }
@@ -125,7 +125,7 @@ namespace TSmatch.SaveReport
         /// GetTSmatchINFO(Model) - Main SaveReport method. Read TSmatchINFO.xlsx and Raw.xml
         /// </summary>
         /// <remarks>When no TSmatchINFO.xlsx or Raw.xml files exists, create (or mark to create) them, and check model integrity</remarks>
-        protected void GetTSmatchINFO(Mod mod, bool unit_test_mode = false)
+        protected void GetTSmatchINFO(Mod mod, bool initRules = false)
         {
             Log.set("SR.GetTSmatchINFO(\"" + mod.name + "\")");
             model = mod;
@@ -136,7 +136,7 @@ namespace TSmatch.SaveReport
 
             if (model.isChanged)
             { //-- no information available from TSmatchINFO.xlsx or it was changed -- doing re-Pricing
-                model.mh.Pricing(ref model, unit_test_mode);
+                model.mh.Pricing(ref model, initRules);
             }
             else
             { //- get ModelINFO and pricing from TSmatchINFO.xlsx
@@ -147,6 +147,7 @@ namespace TSmatch.SaveReport
                 model.pricingDate = Lib.getDateTime(dINFO.Body.Strng(Decl.MODINFO_PRCDAT_R, 2));
                 model.pricingMD5 = dINFO.Body.Strng(Decl.MODINFO_PRCMD5_R, 2);
                 GetSavedReport();
+                GetSavedRules(model, initRules);
             }
             if (!CheckModelIntegrity(model)) error();
             Log.exit();

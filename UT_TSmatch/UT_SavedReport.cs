@@ -229,7 +229,7 @@ namespace TSmatch.SaveReport.Tests
         public void UT_Save()
         {
             init();
-            model = model.sr.SetModel(boot, unit_test_mode: false);   // with Rule Initialization
+            model = model.sr.SetModel(boot, initSupl: false);   // with Rule Initialization
 
             model.sr.Save(model);
 
@@ -245,7 +245,7 @@ namespace TSmatch.SaveReport.Tests
         {
             boot = new Boot();
             model = new Mod();
-            model = model.sr.SetModel(boot, unit_test_mode: true);
+            model = model.sr.SetModel(boot, initSupl: true);
         }
     }
 
