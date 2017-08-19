@@ -22,21 +22,20 @@ namespace TSmatch.Matcher.Tests
         {
             var boot = new Boot();
             var sr = new _SR();
-            var model = sr.SetModel(boot, unit_test_mode: true);
-            model.elements = sr.Raw(model);
-            List<Elm> elmCopy = new List<Elm>();
-            foreach (Elm elm in model.elements) elmCopy.Add(elm);
-            for (int i = 0; i < elmCopy.Count; i++) Assert.AreEqual(elmCopy[i], model.elements[i]);
-            int cnt = model.elements.Count;
-            string MD5 = model.getMD5(model.elements);
-            Assert.IsTrue(cnt > 0);
-            string cMD5 = model.getMD5(elmCopy);
-            Assert.AreEqual(cMD5, MD5);
-            var mh = new MH();
-            model.elmGroups = mh.getGrps(model.elements);
-            Assert.IsTrue(model.elmGroups.Count > 0);
+            var model = sr.SetModel(boot, initSupl: true);
+            ////////////model.elements = sr.Raw(model);
+            ////////////List<Elm> elmCopy = new List<Elm>();
+            ////////////foreach (Elm elm in model.elements) elmCopy.Add(elm);
+            ////////////for (int i = 0; i < elmCopy.Count; i++) Assert.AreEqual(elmCopy[i], model.elements[i]);
+            ////////////int cnt = model.elements.Count;
+            ////////////string MD5 = model.getMD5(model.elements);
+            // 19/8 ////Assert.IsTrue(cnt > 0);
+            ////////////string cMD5 = model.getMD5(elmCopy);
+            ////////////Assert.AreEqual(cMD5, MD5);
+            ////////////var mh = new MH();
+            ////////////model.elmGroups = mh.getGrps(model.elements);
 
-            model = sr._GetSavedRules(model);
+            Assert.IsTrue(model.elmGroups.Count > 0);
             Assert.IsTrue(model.Rules.Count > 0);
 
             foreach (var gr in model.elmGroups)
@@ -58,7 +57,7 @@ namespace TSmatch.Matcher.Tests
                     Assert.IsTrue(mtch.OK_MD5());
 #endif
                     string new_md5 = model.getMD5(model.elements);
-                    Assert.AreEqual(new_md5, MD5);
+                    Assert.AreEqual(new_md5, model.MD5);
                 }
             }
             FileOp.AppQuit();
