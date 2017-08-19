@@ -1,28 +1,121 @@
 ﻿/*=================================
- * Components Unit Test 23.6.2017
+ * Components Unit Test 17.8.2017
  *=================================
  */
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.Linq;
 
+using FileOp = match.FileOp.FileOp;
+using Boot = TSmatch.Bootstrap.Bootstrap;
+using Mod = TSmatch.Model.Model;
 using Lib = match.Lib.MatchLib;
-using MH = TSmatch.Handler.Handler;
+using Mtch = TSmatch.Matcher.Mtch;
 using ElmGr = TSmatch.ElmAttSet.Group;
+using SType = TSmatch.Section.Section.SType;
 
 namespace TSmatch.Component.Tests
 {
     [TestClass()]
     public class UT_Component
     {
-        MH mod = new MH();
+        Boot boot = new Boot();
+        Mod model = new Mod();
+
         ElmAttSet.Group gr = new ElmAttSet.Group();
         List<ElmGr> inp = new List<ElmGr>();
         Rule.Rule rule = new Rule.Rule();
         Component comp = new Component();
 
         [TestMethod()]
-        public void UT_Component_checkComp()
+        public void UT_comp_PL_Native()
+        {
+            // test 1 Native: берем группу, правила и компонент - пластину PL8 из модели
+            model = model.sr.SetModel(boot);
+            if (model.name != "Chasovnya+lepestok") goto exit;
+            gr = model.elmGroups[23];
+            Assert.AreEqual("—8", gr.prf);
+            rule = new Rule.Rule(6);
+            Assert.AreEqual(58, rule.text.Length);
+            rule.Init();
+            Assert.AreEqual(93, rule.CompSet.Components.Count);
+            comp = rule.CompSet.Components[60];
+            Assert.AreEqual("С245", comp.Str(SType.Material));
+            Assert.AreEqual("PL8x100", comp.Str(SType.Profile));
+
+            bool b = comp.isMatch(gr, rule);
+            Assert.IsTrue(b);
+
+            //test 2 Native: обрабатываем все группы, но проверяем только нужную - PL8
+            Mtch _mtch = null;
+            foreach (var g in model.elmGroups)
+            {
+                _mtch = new Mtch(g, rule);
+                if (g.prf != "—8") continue;
+                Assert.AreEqual(Mtch.OK.Match, _mtch.ok);
+            }
+
+            //test 3 Native: загружаем несколько Правил
+            model.Rules.Add(rule);
+            rule = new Rule.Rule(5);
+            rule.Init();
+            model.Rules.Add(rule);
+            _mtch = null;
+            Mtch found_mtch = null;
+            foreach (var g in model.elmGroups)
+            {
+                foreach (var r in model.Rules)
+                {
+                    _mtch = new Mtch(g, r);
+                    if (g.prf != "—8") continue;
+                    Assert.AreEqual(Mtch.OK.Match, _mtch.ok);
+                    found_mtch = _mtch;
+                    break;
+                }
+            }
+            Assert.AreEqual("Полоса", found_mtch.rule.sCS);
+
+            //test 4 Native with Handle
+            model.Rules.Clear(); model.matches.Clear();
+            for (int i = 4; i < 15; i++)
+            {
+                rule = new Rule.Rule(i);
+                rule.Init();
+                model.Rules.Add(rule);
+            }
+            model.mh.Hndl(ref model);
+            foreach (var m in model.matches)
+            {
+                if (m.group.prf != "—8") continue;
+                Assert.AreEqual(Mtch.OK.Match, m.ok);
+                Assert.AreEqual("Полоса", m.rule.sCS);
+                Assert.AreEqual("СтальХолдинг", m.rule.sSupl);
+            }
+
+            //test 5 Native with Pricing
+            model.Rules.Clear(); model.matches.Clear();
+            model.mh.Pricing(ref model);
+            if (model.name != "Chasovnya+lepestok") goto exit;
+            bool c235found = false;
+            //проверим, что это в самом деле правила из TSmatchINFO/Rules - есть С235
+            foreach (var r in model.Rules)
+            {
+                if (!r.text.Contains("235")) continue;
+                c235found = true;
+                break;
+            }
+            Assert.IsTrue(c235found);
+            //полоса PL8 находится в matches[23]
+            Mtch found_match = model.matches[23];
+            Assert.AreEqual(Mtch.OK.Match, found_match.ok);
+            Assert.AreEqual("Полоса", found_match.rule.sCS);
+            Assert.AreEqual("СтальХолдинг", found_match.rule.sSupl);
+
+            exit: FileOp.AppQuit();
+        }
+
+        [TestMethod()]
+        public void UT_Component_checkComp_PL()
         {
             //test 1: gr="PL10*100" rule="Prf: PL=—*x*" comp="PL10x100" => TRUE
             gr.prf = "PL10*100";
@@ -42,8 +135,24 @@ namespace TSmatch.Component.Tests
             Assert.AreEqual(comp.compDP.dpar.Count, 1);
             Assert.AreEqual(comp.compDP.dpar[Section.Section.SType.Profile], "pl10x300");
             b = comp.isMatch(gr, rule);
+            Assert.IsTrue(b);
 
-            //test 3: gr="L75x5" rule="Профиль: Уголок=L *x*;" => TRUE
+            //test 3: gr="—8" rule="М: C245=C255 ; Профиль: Полоса горячекатаная = PL = — *x*;" comp="PL8x100" => TRUE
+            gr.prf = "—8";
+            rule.text = "М: C245=C255 ; Профиль: Полоса горячекатаная = PL = — *x*;";
+            rule.ruleDP = new DPar.DPar(rule.text);
+            rule.synonyms = rule.RuleSynParse(rule.text);
+            comp.compDP = new DPar.DPar("Prf:PL8x100");
+            Assert.AreEqual(comp.compDP.dpar.Count, 1);
+            Assert.AreEqual(comp.compDP.dpar[Section.Section.SType.Profile], "pl8x100");
+            b = comp.isMatch(gr, rule);
+            Assert.IsTrue(b);
+        }
+
+        [TestMethod()]
+        public void UT_Component_checkComp_L()
+        {
+            //test 1: gr="L75x5" rule="Профиль: Уголок=L *x*;" => TRUE
             gr.prf = "l75x5";
             rule.text = Lib.ToLat("Профиль: Уголок=L *x*;");
             rule.ruleDP = new DPar.DPar(rule.text);
@@ -55,7 +164,7 @@ namespace TSmatch.Component.Tests
             Assert.AreEqual(comp.compDP.dpar.Count, 1);
             var v = comp.compDP.dpar[Section.Section.SType.Profile];
             Assert.AreEqual(v, "угoлoк75x5");
-            b = comp.isMatch(gr, rule);
+            bool b = comp.isMatch(gr, rule);
             Assert.IsTrue(b);
 
             //test 4: gr="I20" rule="Профиль: Балка =I* дл;" comp="Балка 20 дл. 9м Ст3пс5" => TRUE
@@ -74,6 +183,46 @@ namespace TSmatch.Component.Tests
             Assert.IsTrue(b);
 
             //test 4-1: gr="I30Ш2" rule="Профиль: Двутавр=I*Ш*" => TRUE
+            initGr("I30Ш2");
+            initRule("М: C245=C255 ; Профиль: Двутавр=I*Ш*");
+            initComp("двутавр 30Ш2");
+            b = comp.isMatch(gr, rule);
+            Assert.IsTrue(b);
+
+            //test 5: gr="Гн.100x4" rule="Профиль: Швеллер = U*П_;" => TRUE
+            initGr("Гн.100x4");
+            initRule("Профиль: Гн.*х*");
+            initComp("Гн. 100х4");
+            b = comp.isMatch(gr, rule);
+            Assert.IsTrue(b);
+
+            //test 6: gr="Гн.100x4" rule="Профиль: Швеллер = U*П_;" Comp=M:C345 => FALSE
+            initGr("Гн.100x46");
+            initRule("Профиль: Уголок=L *x*x*");
+            initComp("Гн. 100х4", "C345");
+            b = comp.isMatch(gr, rule);
+            Assert.IsTrue(!b);
+        }
+
+        [TestMethod()]
+        public void UT_Component_checkComp_I()
+        {
+            //test 1: gr="I20" rule="Профиль: Балка =I* дл;" comp="Балка 20 дл. 9м Ст3пс5" => TRUE
+            gr.Prf = "I20"; gr.prf = "i20";
+            rule.text = "Профиль: Балка =I*";
+            string comp_txt = "Балка 20";   // <==!!
+            rule.ruleDP = new DPar.DPar(rule.text);
+            rule.synonyms = rule.RuleSynParse(rule.text);
+            var syns = rule.synonyms[Section.Section.SType.Profile].ToList();
+            Assert.AreEqual(syns[0], "бaлкa");
+            Assert.AreEqual(syns[1], "i");
+            comp.compDP = new DPar.DPar("Prf:" + comp_txt);
+            Assert.AreEqual(comp.compDP.dpar.Count, 1);
+            Assert.AreEqual(comp.compDP.dpStr[Section.Section.SType.Profile], comp_txt);
+            bool b = comp.isMatch(gr, rule);
+            Assert.IsTrue(b);
+
+            //test 2: gr="I30Ш2" rule="Профиль: Двутавр=I*Ш*" => TRUE
             initGr("I30Ш2");
             initRule("М: C245=C255 ; Профиль: Двутавр=I*Ш*");
             initComp("двутавр 30Ш2");
@@ -169,7 +318,7 @@ namespace TSmatch.Component.Tests
             gr.Mat = mat;
             gr.mat = Lib.ToLat(mat.ToLower().Replace(" ", ""));
             inp.Add(gr);
-//23/7            mod.elmGroups = inp;
+            //23/7            mod.elmGroups = inp;
         }
 
         private void initRule(string v)
