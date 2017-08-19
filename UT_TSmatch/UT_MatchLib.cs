@@ -1,5 +1,5 @@
 ﻿/*=================================
- * ProfileUpdate Unit Test 15.07.2017
+ * ProfileUpdate Unit Test 16.08.2017
  *=================================
  */
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -79,10 +79,14 @@ namespace match.Lib.Tests
             Assert.AreEqual("мoй тeкcт", lat);
 
             //speed test
-            for (int i = 0; i < 10000000; i++)
+            DateTime t0 = DateTime.Now;
+            for (int i = 0; i < 1000000; i++)
             {
                 lat = MatchLib.ToLat(str + " " + i);
             }
+            DateTime t1 = DateTime.Now;
+
+            TimeSpan mlnCycles = t1 - t0;
         }
     }
 }
