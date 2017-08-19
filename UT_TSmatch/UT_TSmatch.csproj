@@ -61,6 +61,7 @@
     <Compile Include="UT_Component.cs" />
     <Compile Include="UT_Document.cs" />
     <Compile Include="UT_MatchLib.cs" />
+    <Compile Include="UT_Matrix.cs" />
     <Compile Include="UT_Message.cs" />
     <Compile Include="UT_Model.cs" />
     <Compile Include="UT_Handler.cs" />
@@ -70,6 +71,7 @@
     <Compile Include="UT_ProfileUpdate.cs" />
     <Compile Include="UT_Rule.cs" />
     <Compile Include="UT_SavedReport.cs" />
+    <Compile Include="UT_Section.cs" />
     <Compile Include="UT_Tekla.cs" />
   </ItemGroup>
   <ItemGroup>
