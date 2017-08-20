@@ -37,28 +37,32 @@ namespace TSmatch
             Title = "TSmatch: работа с правилами";
             List<Rl> items = new List<Rl>();
 
+            // try fill ListBox<Rules> withoutRe-Pricing
+            int chkGr = 0, chkElm = 0;
+            foreach (var rule in MainWindow.model.Rules)
+            {
+                int nGr = 0, nElms = 0;
+                double price = 0;
+                foreach(var gr in MainWindow.model.elmGroups)
+                {
+                    if (gr.SupplierName != rule.sSupl || gr.CompSetName != rule.sCS) continue;
+                    nGr++;
+                    nElms += gr.guids.Count;
+                    price += gr.totalPrice;
+                }
+                string gr_price = string.Format("{0}/{1}:{2,12:N2}р", nGr, nElms, price);
+                items.Add(new Rl(gr_price, rule.date, rule.sSupl, rule.sCS, rule.text));
+                chkGr += nGr; chkElm += nElms;
+            }
+
             if (MainWindow.model.Rules.Count == 0)
             {
                 var mod = MainWindow.model;
                 mod.mh.Pricing(ref MainWindow.model);
                 if (!mod.sr.CheckModelIntegrity(mod)) Msg.AskFOK("Model is changed");
             }
-
-            foreach (var rule in MainWindow.model.Rules)
-            {
-                int nGr = 0, nElms = 0;
-                double price = 0;
-                foreach (var match in MainWindow.model.matches)
-                {
-                    if (match.rule.sSupl != rule.sSupl || match.rule.sCS != rule.sCS) continue;
-                    nGr++;
-                    nElms += match.group.guids.Count;
-                    price += match.group.totalPrice;
-                }
-                string gr_price = string.Format("{0}/{1}:{2,12:N2}р", nGr, nElms, price);
-                items.Add(new Rl(gr_price, rule.date, rule.sSupl, rule.sCS, rule.text));
-            }
             WRules.ItemsSource = items;
+            
         }
 
         //private void OnRule_changed(object sender, SelectionChangedEventHandled y) //, SelectionChangedEventArgs e)
