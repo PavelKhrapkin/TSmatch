@@ -115,11 +115,16 @@ namespace TSmatch
                 MainWindow.model.Rules.Remove(r);
                 ////WRules.Items.Refresh();
                 ////InvalidateArrange();
-                RePrice.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal
-    , new NextPrimeDelegate(WrReportPanel));
+//20/8                RePrice.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal
+//20/8    , new NextPrimeDelegate(WrReportPanel));
                 break;
             }
             MainWindow.model.isChanged = true;
+        }
+
+        private void Chng_Button_Click(object sender, RoutedEventArgs e)
+        {
+            return;
         }
     }
 } // end namespace

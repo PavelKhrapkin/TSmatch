@@ -7,10 +7,18 @@
         mc:Ignorable="d"
         Title="W_Rules" Height="300" Width="800">
     <Grid Background="Ivory">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="60"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="18"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
         <!-- Display WRules ListView -->
-        <ListView Margin="10" Name="WRules"
+        <ListView Name="WRules" Grid.Column="0" Grid.RowSpan="2"
                  SelectionChanged="OnRule_changed">
-            <ListView.Resources>
+ <!--           <ListView.Resources>
                 <Style TargetType="{x:Type ListViewItem}">
                     <Style.Triggers>
                         <DataTrigger Binding="{ Binding Flag }" Value="true">
@@ -19,7 +27,7 @@
                     </Style.Triggers>
                 </Style>
             </ListView.Resources>
-
+-->
             <ListView.View>
                 <GridView>
                     <GridViewColumn Header="#:цена" Width="Auto" DisplayMemberBinding="{Binding gr_price}" />
@@ -29,13 +37,26 @@
                     <GridViewColumn Header="Правило" Width="320" DisplayMemberBinding="{Binding RuleText}" />
                 </GridView>
             </ListView.View>
+<!--            <Button Content="Button" Height="10" Width="22"/> -->
         </ListView>
+        <!-- TMP Change Rule Button  -->
+        <Button Name="ChangeRule" HorizontalAlignment="Right"
+                Margin="00, 10, 2, 60" VerticalAlignment="Bottom" Width="55" Height="40"
+                Background="Yellow"
+                Grid.Column="2" Grid.Row="2"
+                Click="Chng_Button_Click" BorderThickness="3">
+            <StackPanel>
+                <TextBlock Text="Rule" HorizontalAlignment="Center"/>
+                <TextBlock Text="Change" HorizontalAlignment="Center"/>
+            </StackPanel>
+        </Button>    
         <!-- OK button -->
         <Button Name="OK" HorizontalAlignment="Right"
-                Margin="10,10,10,2" 
+                Margin="10,10,2,2" 
                 VerticalAlignment="Bottom" Width="50" 
                 Click="OK_button_Click" Height="50" 
-                BorderBrush="#FF707070" BorderThickness="0" >
+                BorderBrush="#FF707070" BorderThickness="0" 
+                Grid.Column="2" Grid.Row="2">
             <Button.Background>
                 <ImageBrush ImageSource="OK.jpg"/>
             </Button.Background>
