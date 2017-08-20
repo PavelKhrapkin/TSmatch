@@ -229,6 +229,13 @@ namespace TSmatch.Component.Tests
             b = comp.isMatch(gr, rule);
             Assert.IsTrue(b);
 
+            //test 3: gr="I20Б1" rule="М: C245=C255 ; Профиль: Балка =I*;" => TRUE
+            initGr("I20Б1");
+            initRule("М: C245=C255 ; Профиль: Балка =I*;");
+            initComp("Балка 20Б1");
+            b = comp.isMatch(gr, rule);
+            Assert.IsTrue(b);
+
             //test 5: gr="Гн.100x4" rule="Профиль: Швеллер = U*П_;" => TRUE
             initGr("Гн.100x4");
             initRule("Профиль: Гн.*х*");
