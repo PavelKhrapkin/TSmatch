@@ -23,28 +23,15 @@ namespace TSmatch.Matcher.Tests
             var boot = new Boot();
             var sr = new _SR();
             var model = sr.SetModel(boot, initSupl: true);
-            ////////////model.elements = sr.Raw(model);
-            ////////////List<Elm> elmCopy = new List<Elm>();
-            ////////////foreach (Elm elm in model.elements) elmCopy.Add(elm);
-            ////////////for (int i = 0; i < elmCopy.Count; i++) Assert.AreEqual(elmCopy[i], model.elements[i]);
-            ////////////int cnt = model.elements.Count;
-            ////////////string MD5 = model.getMD5(model.elements);
-            // 19/8 ////Assert.IsTrue(cnt > 0);
-            ////////////string cMD5 = model.getMD5(elmCopy);
-            ////////////Assert.AreEqual(cMD5, MD5);
-            ////////////var mh = new MH();
-            ////////////model.elmGroups = mh.getGrps(model.elements);
-
             Assert.IsTrue(model.elmGroups.Count > 0);
             Assert.IsTrue(model.Rules.Count > 0);
 
             foreach (var gr in model.elmGroups)
             {
-                //4/8                var gr = model.elmGroups[0];
                 Assert.IsTrue(model.Rules.Count > 0);
-
+#if CHECK_MD5
                 var mtch = new Mtch(model);
-
+#endif
                 foreach (var rule in model.Rules)
                 {
                     Assert.IsNotNull(rule.CompSet.Supplier);
@@ -55,9 +42,9 @@ namespace TSmatch.Matcher.Tests
                     Mtch _match = new Mtch(gr, rule);
 #if CHECK_MD5
                     Assert.IsTrue(mtch.OK_MD5());
-#endif
                     string new_md5 = model.getMD5(model.elements);
                     Assert.AreEqual(new_md5, model.MD5);
+#endif
                 }
             }
             FileOp.AppQuit();
