@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------------------
  * SavedReport -- class for handle saved reports in TSmatchINFO.xlsx
  * 
- *  19.08.2017 П.Л. Храпкин
+ *  20.08.2017 П.Л. Храпкин
  *  
  *--- Unit Tests ---
  * UT_GetModelInfo, UT-GetSavedReport, UT_GetSavedRules 18.8.2017 OK 
@@ -25,7 +25,7 @@
  * 11.08.2017 - more tests in CeckIntegrityModel, and GetSavedRules updated
  * 14.08.2017 - CheckModelIntegrity: no model.name is tested in without file; check IfDirExist()
  * 16.08.2017 - SetSavedMod method removed; protected instead of public methods; Recovery audit
- * 19.08.2017 - audit GetSavedRules
+ * 20.08.2017 - SavedReport audit: model.dir in TSMatchINFO.xlsx ignored, used one from Boot
  *--- Methods: -------------------      
  * SetModel(boot)   - initialize model by reading from TSmatchINFO.xlsx ans Raw.xml or from scratch
  *      private SetModDir(boot) - subset of SetModel(), setup model.dir, name and phase
@@ -142,7 +142,7 @@ namespace TSmatch.SaveReport
             { //- get ModelINFO and pricing from TSmatchINFO.xlsx
                 model.name = dINFO.Body.Strng(Decl.MODINFO_NAME_R, 2);
                 model.setCity(dINFO.Body.Strng(Decl.MODINFO_ADDRESS_R, 2));
-                model.dir = dINFO.Body.Strng(Decl.MODINFO_DIR_R, 2).Trim();
+//20/8/2017                model.dir = dINFO.Body.Strng(Decl.MODINFO_DIR_R, 2).Trim();
                 model.date = Lib.getDateTime(dINFO.Body.Strng(Decl.MODINFO_DATE_R, 2));
                 model.pricingDate = Lib.getDateTime(dINFO.Body.Strng(Decl.MODINFO_PRCDAT_R, 2));
                 model.pricingMD5 = dINFO.Body.Strng(Decl.MODINFO_PRCMD5_R, 2);
@@ -232,7 +232,7 @@ namespace TSmatch.SaveReport
                 if (dINFO == null || dINFO.il < 10) return false;
                 if (string.IsNullOrWhiteSpace(mod.name)) return false;
                 if (isChangedStr(ref mod.name, dINFO, Decl.MODINFO_NAME_R, 2)) return false;
-                if (isChangedStr(ref mod.dir, dINFO, Decl.MODINFO_DIR_R, 2)) return false;
+//20/8/2017                if (isChangedStr(ref mod.dir, dINFO, Decl.MODINFO_DIR_R, 2)) return false;
                 if (isChangedStr(ref mod.MD5, dINFO, Decl.MODINFO_MD5_R, 2)) return false;
                 if (isChangedStr(ref mod.pricingMD5, dINFO, Decl.MODINFO_PRCMD5_R, 2)) return false;
                 if (mod.elements.Count != dINFO.Body.Int(Decl.MODINFO_ELMCNT_R, 2)) return false;
@@ -241,6 +241,7 @@ namespace TSmatch.SaveReport
                 dRep = Docs.getDoc(sRep, create_if_notexist: false, fatal: false);
                 if (dRep == null || dRep.il < dRep.i0 || dRul.il <= 2) return false;
                 if (dRep.il - dRep.i0 != mod.elmGroups.Count) return false;
+                if (mod.Rules.Count == 0) return false;
             }
             return true;
         }
