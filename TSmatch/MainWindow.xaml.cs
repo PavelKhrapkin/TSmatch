@@ -264,17 +264,10 @@ namespace TSmatch
         private void RePrice_button_Click(object sender, RoutedEventArgs e)
         {
             Msg.AskFOK("Пересчет стоимости материалов");
-            //20/5            if (!Msg.AskYN("Правила годятся?")) { var W_Rules = new W_Rules(); W_Rules.Show(); }
-            RePricing();
-            RePrice.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal
-                , new NextPrimeDelegate(WrReportPanel));
-            //15/5            model.mh.Pricing(model);
-        }
-
-        internal static void RePricing()
-        {
             model.mh.Pricing(ref model);
             model.isChanged = true;
+            RePrice.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal
+                , new NextPrimeDelegate(WrReportPanel));
         }
 
         private void OnHelp(object sender, RoutedEventArgs e)
