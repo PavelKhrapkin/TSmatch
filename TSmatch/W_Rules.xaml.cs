@@ -113,9 +113,10 @@ namespace TSmatch
             {
                 if (r.sSupl != sel.Supplier || r.sCS != sel.CompSet || r.text != sel.RuleText) continue;
                 MainWindow.model.Rules.Remove(r);
-                WRules.Items.Refresh();
-                InvalidateArrange();
-
+                ////WRules.Items.Refresh();
+                ////InvalidateArrange();
+                RePrice.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal
+    , new NextPrimeDelegate(WrReportPanel));
                 break;
             }
             MainWindow.model.isChanged = true;
