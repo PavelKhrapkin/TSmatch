@@ -1,5 +1,5 @@
 ﻿/*=================================
- * Components Unit Test 17.8.2017
+ * Components Unit Test 20.8.2017
  *=================================
  */
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -64,7 +64,7 @@ namespace TSmatch.Component.Tests
             Mtch found_mtch = null;
             foreach (var g in model.elmGroups)
             {
-                foreach(var r in model.Rules)
+                foreach (var r in model.Rules)
                 {
                     _mtch = new Mtch(g, r);
                     if (g.prf != "—8") continue;
@@ -77,16 +77,16 @@ namespace TSmatch.Component.Tests
 
             //test 4 Native with Handle
             model.Rules.Clear(); model.matches.Clear();
-            for(int i = 4; i < 15; i++)
+            for (int i = 4; i < 15; i++)
             {
                 rule = new Rule.Rule(i);
                 rule.Init();
                 model.Rules.Add(rule);
             }
             model.mh.Hndl(ref model);
-            foreach(var m in model.matches)
+            foreach (var m in model.matches)
             {
-                if(m.group.prf != "—8") continue;
+                if (m.group.prf != "—8") continue;
                 Assert.AreEqual(Mtch.OK.Match, m.ok);
                 Assert.AreEqual("Полоса", m.rule.sCS);
                 Assert.AreEqual("СтальХолдинг", m.rule.sSupl);
@@ -95,7 +95,7 @@ namespace TSmatch.Component.Tests
             //test 5 Native with Pricing
             model.Rules.Clear(); model.matches.Clear();
             model.mh.Pricing(ref model);
-            if (model.name != "Chasovnya+lepestok") goto exit;           
+            if (model.name != "Chasovnya+lepestok") goto exit;
             bool c235found = false;
             //проверим, что это в самом деле правила из TSmatchINFO/Rules - есть С235
             foreach (var r in model.Rules)
@@ -226,6 +226,13 @@ namespace TSmatch.Component.Tests
             initGr("I30Ш2");
             initRule("М: C245=C255 ; Профиль: Двутавр=I*Ш*");
             initComp("двутавр 30Ш2");
+            b = comp.isMatch(gr, rule);
+            Assert.IsTrue(b);
+
+            //test 3: gr="I20Б1" rule="М: C245=C255 ; Профиль: Балка =I*;" => TRUE
+            initGr("I20Б1");
+            initRule("М: C245=C255 ; Профиль: Балка =I*;");
+            initComp("Балка 20Б1");
             b = comp.isMatch(gr, rule);
             Assert.IsTrue(b);
 
