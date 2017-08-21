@@ -23,8 +23,8 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <!-- Display WRules ListView -->
-        <ListView Name="WRules" Grid.Column="0" Grid.RowSpan="2"
-                 SelectionChanged="OnRule_changed">
+        <ListView Name="WRules" Grid.Column="0" Grid.RowSpan="2">
+           <!-- SelectionChanged="OnRule_changed"> -->
             <!--           <ListView.Resources>
                 <Style TargetType="{x:Type ListViewItem}">
                     <Style.Triggers>
@@ -38,10 +38,8 @@
             <ListView.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="_Delete" Click="RuleDel_click"/>
-                    <MenuItem Header="_Bold" IsCheckable="True"
-                        Checked="Bold_Checked" Unchecked="Bold_Unchecked"/>
-                    <MenuItem Header="_Italic" IsCheckable="True"
-                        Checked="Italic_Checked" Unchecked="Italic_Unchecked"/>
+                    <MenuItem Header="_NewRule" Click="RuleNew_click"/>
+                    <MenuItem Header="_Rule Text Edit" Click="RuleTextEdit_click"/>
                 </ContextMenu>
             </ListView.ContextMenu>
             <ListView.View>
@@ -55,7 +53,7 @@
             </ListView.View>
             <!--            <Button Content="Button" Height="10" Width="22"/> -->
         </ListView>
-        <!-- TMP Change Rule Button  -->
+        <!-- TMP Change Rule Button 
         <Button Name="ChangeRule" HorizontalAlignment="Right"
                 Margin="00, 10, 2, 60" VerticalAlignment="Bottom" Width="55" Height="40"
                 Background="Yellow"
@@ -75,6 +73,7 @@
                 </ContextMenu>
             </Button.ContextMenu>
         </Button>
+-->        
         <!-- OK button -->
         <Button Name="OK" HorizontalAlignment="Right"
                 Margin="10,10,2,2" 

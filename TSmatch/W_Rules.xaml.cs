@@ -50,28 +50,6 @@ namespace TSmatch
             WRules.ItemsSource = items;
         }
 
-        //--------- 21/8/17 -----------
-        private void Bold_Checked(object sender, RoutedEventArgs e)
-        {
-            ChangeRule.FontWeight = FontWeights.Bold;
-        }
-
-        private void Bold_Unchecked(object sender, RoutedEventArgs e)
-        {
-            ChangeRule.FontWeight = FontWeights.Normal;
-        }
-
-        private void Italic_Checked(object sender, RoutedEventArgs e)
-        {
-            ChangeRule.FontStyle = FontStyles.Italic;
-        }
-
-        private void Italic_Unchecked(object sender, RoutedEventArgs e)
-        {
-            ChangeRule.FontStyle = FontStyles.Normal;
-        }
-        //--------- 21/8/17 -----------
-
         private int nGr, nElms;
         private double price;
 
@@ -163,26 +141,13 @@ namespace TSmatch
             WRules.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal
                 , new NextPrimeDelegate(DisplayRules));
         }
-        private void OnRule_changed(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+
+        private void RuleNew_click(object sender, RoutedEventArgs e)
         {
-            if (!Msg.AskYN("Delete this Rule?")) return;
-            Rl sel = (Rl)WRules.SelectedValue;
-            foreach (var r in MainWindow.model.Rules)
-            {
-                if (r.sSupl != sel.Supplier || r.sCS != sel.CompSet || r.text != sel.RuleText) continue;
-                MainWindow.model.Rules.Remove(r);
-                ////WRules.Items.Refresh();
-                ////InvalidateArrange();
-                //20/8                RePrice.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal
-                //20/8    , new NextPrimeDelegate(WrReportPanel));
-                break;
-            }
-            MainWindow.model.isChanged = true;
         }
 
-        private void Chng_Button_Click(object sender, RoutedEventArgs e)
+        private void RuleTextEdit_click(object sender, RoutedEventArgs e)
         {
-            return;
         }
     }
 } // end namespace
