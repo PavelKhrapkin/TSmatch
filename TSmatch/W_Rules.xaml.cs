@@ -142,6 +142,11 @@ namespace TSmatch
             }
         }
 
+        private void RuleDel_click(object sender, RoutedEventArgs e)
+        {
+            if (!Msg.AskYN("Really delete rule?")) return;
+            MainWindow.model.isChanged = true;
+        }
         private void OnRule_changed(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
             if (!Msg.AskYN("Delete this Rule?")) return;

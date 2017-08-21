@@ -58,6 +58,7 @@
             </StackPanel>
             <Button.ContextMenu>
                 <ContextMenu>
+                    <MenuItem Header="_Delete" Click="RuleDel_click"/>
                     <MenuItem Header="_Bold" IsCheckable="True"
                         Checked="Bold_Checked" Unchecked="Bold_Unchecked"/>
                     <MenuItem Header="_Italic" IsCheckable="True"
