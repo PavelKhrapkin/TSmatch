@@ -1,9 +1,10 @@
 ﻿/*-----------------------------------------------
- * WPF Window W_Rules 11.8.2017 Pavel Khrapkin
+ * WPF Window W_Rules 20.8.2017 Pavel Khrapkin
  * ----------------------------------------------
  * --- History ---
  * 2017.05.25 - written
  * 2017.08.9  - nElms column output
+ * 2017.08.20 - ListBox<Rules> calculation
  * --- Known Issue & ToDos ---
  * - еще нет диалога по допустимости CompSet для выбранного поставщика
  * - не написан метод ChekIfChanges()
@@ -12,13 +13,8 @@ using System;
 using System.Collections.Generic;
 using System.Windows;
 using log4net;
-
-using Lib = match.Lib.MatchLib;
+using TSmatch.ElmAttSet;
 using Msg = TSmatch.Message.Message;
-using Decl = TSmatch.Declaration.Declaration;
-using Docs = TSmatch.Document.Document;
-using Mod = TSmatch.Model.Model;
-using System.Linq;
 
 namespace TSmatch
 {
@@ -29,36 +25,54 @@ namespace TSmatch
     {
         public static readonly ILog log = LogManager.GetLogger("W_Rules");
 
-        List<Rule.Rule> rules = new List<Rule.Rule>();
+        private bool chkGroups, chkElements;
 
         public W_Rules()
         {
             InitializeComponent();
             Title = "TSmatch: работа с правилами";
-            List<Rl> items = new List<Rl>();
-
-            if (MainWindow.model.Rules.Count == 0)
+            List<Rl> items = getRuleItems(MainWindow.model, rePrice: false);
+            if (!chkGroups || !chkElements)
             {
                 var mod = MainWindow.model;
                 mod.mh.Pricing(ref MainWindow.model);
                 if (!mod.sr.CheckModelIntegrity(mod)) Msg.AskFOK("Model is changed");
-            }
-    
-            foreach(var rule in MainWindow.model.Rules)
-            {
-                int nGr = 0, nElms = 0;
-                double price = 0;
-                foreach (var match in MainWindow.model.matches)
-                {
-                    if (match.rule.sSupl != rule.sSupl || match.rule.sCS != rule.sCS) continue;
-                    nGr++;
-                    nElms += match.group.guids.Count;
-                    price += match.group.totalPrice;
-                }
-                string gr_price = string.Format("{0}/{1}:{2,12:N2}р", nGr, nElms, price);
-                items.Add(new Rl(gr_price, rule.date, rule.sSupl, rule.sCS, rule.text));
+                items = getRuleItems(MainWindow.model, rePrice: true);
             }
             WRules.ItemsSource = items;
+
+        }
+        private int nGr, nElms;
+        private double price;
+
+        private List<Rl> getRuleItems(Model.Model model, bool rePrice)
+        {
+            List<Rl> items = new List<Rl>();
+            int chkGr = 0, chkElm = 0;
+            foreach (var rule in MainWindow.model.Rules)
+            {
+                nGr = nElms = 0; price = 0;
+                if (rePrice)
+                    foreach (var match in model.matches)
+                        calcGr(match.group, rule, match.rule.text);
+                else
+                    foreach (Group gr in model.elmGroups) calcGr(gr, rule);
+                string gr_price = string.Format("{0}/{1}:{2,12:N2}р", nGr, nElms, price);
+                items.Add(new Rl(gr_price, rule.date, rule.sSupl, rule.sCS, rule.text));
+                chkGr += nGr; chkElm += nElms;
+            }
+            chkGroups = model.elmGroups.Count == chkGr;
+            chkElements = model.elements.Count == chkElm;
+            return items;
+        }
+
+        private void calcGr(Group gr, Rule.Rule rule, string mtchRuleTxt = "")
+        {
+            if (gr.SupplierName != rule.sSupl || gr.CompSetName != rule.sCS) return;
+            if (mtchRuleTxt != "" && mtchRuleTxt != rule.text) return;
+            nGr++;
+            nElms += gr.guids.Count;
+            price += gr.totalPrice;
         }
 
         //private void OnRule_changed(object sender, SelectionChangedEventHandled y) //, SelectionChangedEventArgs e)
@@ -96,8 +110,8 @@ namespace TSmatch
 
             int IComparable<Rl>.CompareTo(Rl other)
             {
-//11/8                if (Flag && !other.Flag) return -1;
-//11/8                if (!Flag && other.Flag) return 1;
+                //11/8                if (Flag && !other.Flag) return -1;
+                //11/8                if (!Flag && other.Flag) return 1;
                 int result = -CompSet.CompareTo(other.CompSet);
                 if (result == 0) result = Supplier.CompareTo(other.Supplier);
                 if (result == 0) result = RuleText.CompareTo(other.RuleText);
@@ -109,16 +123,22 @@ namespace TSmatch
         {
             if (!Msg.AskYN("Delete this Rule?")) return;
             Rl sel = (Rl)WRules.SelectedValue;
-            foreach(var r in MainWindow.model.Rules)
+            foreach (var r in MainWindow.model.Rules)
             {
                 if (r.sSupl != sel.Supplier || r.sCS != sel.CompSet || r.text != sel.RuleText) continue;
                 MainWindow.model.Rules.Remove(r);
-                WRules.Items.Refresh();
-                InvalidateArrange();
-
+                ////WRules.Items.Refresh();
+                ////InvalidateArrange();
+                //20/8                RePrice.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal
+                //20/8    , new NextPrimeDelegate(WrReportPanel));
                 break;
             }
             MainWindow.model.isChanged = true;
+        }
+
+        private void Chng_Button_Click(object sender, RoutedEventArgs e)
+        {
+            return;
         }
     }
 } // end namespace
