@@ -1,5 +1,5 @@
 ﻿/*-------------------------------------------
- * WPF Main Windows 7.8.2017 Pavel.Khrapkin
+ * WPF Main Windows 21.8.2017 Pavel.Khrapkin
  * --- History ---
  * 2017.05.15 - restored as TSmatch 1.0.1 after Source Control excident
  * 2017.05.23 - Menu OnPriceCheck
@@ -118,7 +118,7 @@ namespace TSmatch
                 string sPrice = String.Format("{0, 14:N2}", gr.totalPrice);
                 string sWgt = String.Format("{0, 10:N1}", gr.totalWeight);
                 string sVol = String.Format("{0, 10:N3}", gr.totalVolume);
-                string sLng = String.Format("{0, 10:N1}", gr.totalLength/1000);
+                string sLng = String.Format("{0, 10:N1}", gr.totalLength / 1000);
                 string sSupl = string.IsNullOrEmpty(gr.SupplierName) ? "---" : gr.SupplierName;
                 var g = new gr()
                 {
@@ -166,12 +166,12 @@ namespace TSmatch
             str += supl.street + "\nтел." + supl.telephone;
             Supl_CS.Text = str;
             //--2017.07.26 не вполне работает Hyperlink- нет вызова сайта при клике. Пока оставил так..
-                        Supl_URL.Inlines.Clear();
-                        Run myURL = new Run(supl.Url);
-                        Hyperlink hyperl = new Hyperlink(myURL);
-                        Supl_URL.Inlines.Add(hyperl);           
+            Supl_URL.Inlines.Clear();
+            Run myURL = new Run(supl.Url);
+            Hyperlink hyperl = new Hyperlink(myURL);
+            Supl_URL.Inlines.Add(hyperl);
             //--
-            double p = 0, w=0, v=0;
+            double p = 0, w = 0, v = 0;
             foreach (var gr in model.elmGroups)
             {
                 if (gr.SupplierName != currentGroup.SupplierName) continue;
@@ -264,17 +264,10 @@ namespace TSmatch
         private void RePrice_button_Click(object sender, RoutedEventArgs e)
         {
             Msg.AskFOK("Пересчет стоимости материалов");
-            //20/5            if (!Msg.AskYN("Правила годятся?")) { var W_Rules = new W_Rules(); W_Rules.Show(); }
-            RePricing();
-            RePrice.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal
-                , new NextPrimeDelegate(WrReportPanel));
-            //15/5            model.mh.Pricing(model);
-        }
-
-        internal static void RePricing()
-        {
             model.mh.Pricing(ref model);
             model.isChanged = true;
+            RePrice.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal
+                , new NextPrimeDelegate(WrReportPanel));
         }
 
         private void OnHelp(object sender, RoutedEventArgs e)
