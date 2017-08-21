@@ -35,6 +35,15 @@
                 </Style>
             </ListView.Resources>
 -->
+            <ListView.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="_Delete" Click="RuleDel_click"/>
+                    <MenuItem Header="_Bold" IsCheckable="True"
+                        Checked="Bold_Checked" Unchecked="Bold_Unchecked"/>
+                    <MenuItem Header="_Italic" IsCheckable="True"
+                        Checked="Italic_Checked" Unchecked="Italic_Unchecked"/>
+                </ContextMenu>
+            </ListView.ContextMenu>
             <ListView.View>
                 <GridView>
                     <GridViewColumn Header="#:цена" Width="Auto" DisplayMemberBinding="{Binding gr_price}" />

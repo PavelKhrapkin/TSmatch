@@ -26,12 +26,19 @@ namespace TSmatch
     {
         public static readonly ILog log = LogManager.GetLogger("W_Rules");
 
+        public delegate void NextPrimeDelegate();
+
         private bool chkGroups, chkElements;
 
         public W_Rules()
         {
             InitializeComponent();
             Title = "TSmatch: работа с правилами";
+            DisplayRules();
+        }
+
+        private void DisplayRules()
+        {
             List<Rl> items = getRuleItems(MainWindow.model, rePrice: false);
             if (!chkGroups || !chkElements)
             {
@@ -145,7 +152,16 @@ namespace TSmatch
         private void RuleDel_click(object sender, RoutedEventArgs e)
         {
             if (!Msg.AskYN("Really delete rule?")) return;
+            Rl sel = (Rl)WRules.SelectedValue;
+            foreach (var r in MainWindow.model.Rules)
+            {
+                if (r.sSupl != sel.Supplier || r.sCS != sel.CompSet || r.text != sel.RuleText) continue;
+                MainWindow.model.Rules.Remove(r);
+                break;
+            }
             MainWindow.model.isChanged = true;
+            WRules.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal
+                , new NextPrimeDelegate(DisplayRules));
         }
         private void OnRule_changed(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
