@@ -1,12 +1,13 @@
 ﻿/*--------------------------------------------------------------------------------------------
  * ProfileUpdate -- Update Group Profiles in accouding Russian GOST
- *  10.078.2017 Pavel Khrapkin
+ *  15.08.2017 Pavel Khrapkin
  *  
  *--- History ---
  *  2.07.2017 code taken from ModHandled code, separated into this class
  *  4.07.2017 multiple PrfTab values separated with '|', f.e "PL|-"
  * 16.07.2017 changed logic for profile "Гн." recognition
  * 10.08.2017 TP and TK recognition with new PrfTab filling and logic
+ * 15.08.2017 Shape profile IFC_BREP parse written
  *--- Unit Tests --- .
  * 2017.08.10 UT_ProfileUpdate_I, UT_ProfileUpdate_U, UT ProfileUpdate_L, 
  *            UT_ProfileUpdate_PL, UT_ProfileUpdate_PK_PP, UT_ProfileUpdate_TP_TK   OK
@@ -46,13 +47,14 @@ namespace TSmatch.ProfileUpdate
 
         static ProfileUpdate()
         {
+            PrfTabAd("IFC_BREP", "IFC BREP");   //Shape elements
             PrfTabAd("—", "PL|—");      //полоса
             PrfTabAd("L", "L|Уголок");  //уголок
             PrfTabAd("I", "I|ДВУТАВР"); //балка двутавровая
             PrfTabAd("[", "U|Швеллер"); //швеллер
             PrfTabAd("Гн.", "PK|Профиль|Гн.");  //замкнутый профиль - квадрат
             PrfTabAd("Гн.[]", "PP");    //замкнутый прямоугольный профиль, труба профильная
-            PrfTabAd("TP", "TP|Тр.");       //труба бесшовная ГОСТ 8732-78
+            PrfTabAd("TP", "TP|Тр.");   //труба бесшовная ГОСТ 8732-78
             PrfTabAd("TK", "TK");       //труба бесшовная ГОСТ 8732-78
         }
 
@@ -147,6 +149,10 @@ namespace TSmatch.ProfileUpdate
                     if(pars.Count >= 2) mark += pars[0] + "x" + pars[1];
                     if (pars.Count == 3) mark += "x" + pars[2];
                     if (pars.Count != 2 && pars.Count != 3) error(pars);
+                    break;
+                case "IFC_BREP":
+                    if(pars.Count == 1) mark += "-" + pars[0];
+                    if (pars.Count > 1) error(pars);
                     break;
                 default: error(pars); break;
             }

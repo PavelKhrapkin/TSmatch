@@ -1,7 +1,7 @@
 ﻿/*---------------------------------------------------------------------------------
  * Handler -- Handle Model for Report preparation
  * 
- *  8.08.2017 Pavel Khrapkin
+ *  18.08.2017 Pavel Khrapkin
  *  
  *--- History ---
  *  8.05.2017 taken from Model code
@@ -12,6 +12,8 @@
  * 21.07.2017 Audit GetGrps and Hndl
  * 23.07.2017 No heritage with Model we-engineering; rename ModHandler -> Handler
  *  4.08.2017 Handle() elmGroupc.Count and Rule.Count check; Rules Init
+ * 16.08.2017 protected GetSavedRules used
+ * 18.08.2017 fill elmGroup.compDescription when match found
  *--- Unit Tests --- 
  * 2017.08.4 UT_Handler.UT_Hndl OK -- 20,4 sec модель "Навес над трибунами" 7128 э-тов
  *           UT_Pricing OK
@@ -39,7 +41,7 @@ namespace TSmatch.Handler
     {
         public static readonly ILog log = LogManager.GetLogger("Handler");
 
-        SR sr;
+        _SR sr = new _SR();
         bool testMode;
 
         /// <summary>
@@ -88,7 +90,9 @@ namespace TSmatch.Handler
                     if (_match.ok == Mtch.OK.Match)
                     {
                         mod.matches.Add(_match);
-                        gr.SupplierName = _match.rule.Supplier.name;
+                        gr.CompSetName = _match.rule.sCS;
+                        gr.SupplierName = _match.rule.sSupl;
+                        gr.compDescription = _match.component.Str(Section.Section.SType.Description);
                         b = true; break;
                     }
                 }
@@ -102,44 +106,7 @@ namespace TSmatch.Handler
             log.Info("Model.Hndl set " + mod.matches.Count + " groups. Total price=" + mod.total_price + " rub");
             Log.exit();
         }
-#if OLD //27/6/17
-        public void Handler(Mod mod)
-        {
-            Log.set("MH.Handler(\"" + mod.name + "\")");
-            getGroups(mod.elements);
-            log.Info("- total elements = " + mod.elements.Count + " in " + mod.elmGroups.Count + "groups");
-            foreach (var gr in mod.elmGroups)
-            {
-                bool b = false;
-                foreach (var rule in mod.Rules)
-                {
-                    Mtch _match = new Mtch(gr, rule);
-                    if (_match.ok == Mtch.OK.Match) { mod.matches.Add(_match); b = true; break; }
-                }
-                if (!b) log.Info("No Match Group. mat= " + gr.mat + "\tprf=" + gr.prf);
-            }
-            int cnt = 0;
-            var elms = new Dictionary<string, Elm>();
-            elms = mod.elements.ToDictionary(elm => elm.guid);
-            foreach (var match in mod.matches)
-            {
-                match.group.SupplierName = match.rule.Supplier.name;
-                double price_per_t = match.group.totalPrice / match.group.totalVolume;
-                foreach (var guid in match.group.guids)
-                {
-                    elms[guid].price = price_per_t * elms[guid].volume;
-                    cnt++;
-                }
-            }
 
-            log.Info("- found " + mod.matches.Count + " price matches for " + cnt + " elements");
-            elements = elms.Values.ToList();
-
-            Log.Trace("<MH>Rules.Count=", mod.Rules.Count);
-            Log.Trace("<MH>Price match for ", mod.matches.Count, " / ", mod.elmGroups.Count);
-            Log.exit();
-        }
-#endif //OLD 27/6/17
         public void Pricing(ref Mod m, bool unit_test_mode = false)
         {
             Log.set("mh.Pricing");
@@ -149,7 +116,7 @@ namespace TSmatch.Handler
 #endif
             if (m.Rules == null || m.Rules.Count == 0)
             {
-                m.sr.GetSavedRules(m, init: true);
+                m = sr._GetSavedRules(m);
             }
             log.Info(">m.MD5=" + m.MD5 + " =?= " + m.getMD5(m.elements));
             Hndl(ref m);
@@ -158,165 +125,12 @@ namespace TSmatch.Handler
             Log.Trace("price date=\t" + m.pricingDate + "\tMD5=" + m.pricingMD5 + "\ttotal price" + m.total_price);
             Log.exit();
         }
-#if OLD //23.7.17
-        public List<Elm> getPricingFrGroups()
-        {
-            Log.set("Models.getPricing()");
-            var elms = new Dictionary<string, Elm>();
-            foreach (var elm in elements) elms.Add(elm.guid, elm);
-            foreach (var gr in elmGroups)
-            {
-                double price_per_t = gr.totalPrice / gr.totalVolume;
-                foreach (string guid in gr.guids)
-                    elms[guid].price = price_per_t * elms[guid].volume;
-            }
-            foreach (var mgr in elmMgroups)
-            {
-                foreach (string guid in mgr.guids)
-                    mgr.totalPrice += elms[guid].price;
-            }
-            Log.exit();
-            return elms.Values.ToList();
-        }
-        /// <summary>
-        ///  PrfUpdate() - Profile code corrections for some groups
-        /// </summary>
-        /// <Description>
-        /// Этот модуль преобразует строку - профиль группы в соответствие российским ГОСТ,
-        /// так, как это делается в среде Russia для Tekla. По сути, это hardcode, он не 
-        /// должен работать вне России.
-        /// Здесь текст строки, получаемой из Tekla API заменяется, на первое значение
-        /// аргумента в перечне PrfNormalyze. Если моды Mark- меняется только марка, если
-        /// Full - помимо марки, остальная часть строки и параметры могут быть переставлены.
-        /// Полнота преобразования кодов проверялась по ГОСТ и среде Tekla Russia.
-        /// </Description>
-        public List<ElmGr> PrfUpdate(List<ElmGr> grp)
-        {
-            PrfNormalize(ref grp, "—", "PL", "Полоса");
-            PrfNormalize(ref grp, "L", "Уголок");
-            PrfNormalize(ref grp, "I", "Балка");
-            PrfNormalize(ref grp, "[", "U", "Швеллер");
-            PrfNormalize(ref grp, "Гн.[]", "PP", "Тр.", "Труба пр");
-            PrfNormalize(ref grp, "Гн.", "PK", "Тр.");
-            return grp;
-        }
-        /// <summary>
-        /// PrfNormalize operate in <Full>, or in <Mark> mode:
-        /// <para>  - Mark: only setup Mark (i.e. Profile type) as pointed in first argument, or</para>
-        /// <para>  - Full: setup Mark, and sort digital parameter values the profile template list;</para> 
-        /// </summary>
-        private void PrfNormalize(ref List<ElmGr> grp, params string[] prfMark)
-        {
-            foreach (var gr in grp)
-            {
-                foreach (string s in prfMark)
-                {
-                    if (!gr.Prf.Contains(s) && !gr.prf.Contains(s)) continue;
-                    string initialPrf = gr.Prf;
-                    gr.Prf = PrfNormStr(gr.prf, prfMark[0], Lib.GetPars(gr.Prf));
-                    gr.prf = Lib.ToLat(gr.Prf.ToLower());
-                    log.Info("--- " + initialPrf + " -> " + "Prf=" + gr.Prf + "gr.prf=" + gr.prf);
-                    break;
-                }
-            }
-        }
-
-        string PrfNormStr(string str, string mark, List<int> pars)
-        {
-            switch (mark)
-            {
-                case "I":
-                    mark += pars[0];
-                    if (str.Contains("b1")) { mark += "Б1"; break; }
-                    if (str.Contains("b2")) { mark += "Б2"; break; }
-                    if (str.Contains("b3")) { mark += "Б3"; break; }
-                    if (pars.Count != 1) Msg.F("Internal error");
-                    break;
-                case "[":
-                    mark += pars[0];
-                    if (str.Contains("ap")) { mark += "аП"; break; }
-                    if (str.Contains("p"))  { mark += "П";  break; }
-                    if (str.Contains("ay")) { mark += "аУ"; break; }
-                    if (str.Contains("y"))  { mark += "У";  break; }
-                    if (str.Contains("e"))  { mark += "Э";  break; }
-                    if (str.Contains("l"))  { mark += "Л";  break; }
-                    if (str.Contains("ca")) { mark += "Cа"; break; }
-                    if (str.Contains("cb")) { mark += "Cб"; break; }
-                    if (str.Contains("c"))  { mark += "C";  break; }
-                    if (pars.Count != 1) Msg.F("Internal error");
-                    break;
-                
-                case "Гн.[]":
-                    break;
-                case "Гн.":
-                    break;
-            }
-
-
-            //////////switch (pars.Count)
-            //////////{
-            //////////    case 1:
-            //////////        if (mark == "[")
-            //////////        {
-            //////////            mark += pars[0];
-            //////////            if (str.Contains("ap")) { mark += "аП"; break; }
-            //////////            if (str.Contains("p"))  { mark += "П";  break; }
-            //////////            if (str.Contains("ay")) { mark += "аУ"; break; }
-            //////////            if (str.Contains("y"))  { mark += "У";  break; }
-            //////////            if (str.Contains("e"))  { mark += "Э";  break; }
-            //////////            if (str.Contains("l"))  { mark += "Л";  break; }
-            //////////            if (str.Contains("ca")) { mark += "Cа"; break; }
-            //////////            if (str.Contains("cb")) { mark += "Cб"; break; }
-            //////////            if (str.Contains("c"))  { mark += "C";  break; }
-            //////////            break;
-            //////////        }
-            //////////        if (mark == "I")
-            //////////        {
-            //////////            mark += pars[0];
-            //////////            if (str.Contains("b1")) { mark += "Б1"; break; }
-            //////////            if (str.Contains("b2")) { mark += "Б2"; break; }
-            //////////            if (str.Contains("b3")) { mark += "Б3"; break; }
-            //////////            break;
-            //////////        }
-            //////////        if (mark == "—") mark += pars[0];
-            //////////        break;
-            //////////    case 2:
-            //////////        if (mark == "I")
-            //////////        {
-            //////////            mark += pars[0];
-            //////////            if (str.Contains("b")) { mark += "Б" + pars[1]; break; }
-            //////////            if (str.Contains("k"))
-            //////////            {
-            //////////                mark += "К" + pars[1];
-            //////////                if (str.Contains("a")) mark += "A";
-            //////////                break;
-            //////////            }
-            //////////        }
-            //////////        if (mark == "Гн.") { mark += pars[0] + "x" + pars[1]; break; }
-            //////////        mark += pars.Min() + "x" + pars.Max();
-            //////////        break;
-            //////////    case 3:
-            //////////        if (md == PrfOpMode.Mark)
-            //////////        {
-            //////////            mark += pars[0] + 'x' + pars[1] + 'x' + pars[2];
-            //////////            break;
-            //////////        }
-            //////////        if (mark == "Гн.[]")
-            //////////        {
-            //////////            if (pars[0] == pars[1]) return "Гн." + pars.Max() + "x" + pars.Min();
-            //////////            mark += pars[0] + "x" + pars[1] + "x" + pars[2];
-            //////////            break;
-            //////////        }
-            //////////        int p1 = pars.Min();
-            //////////        pars.Remove(p1);
-            //////////        int p3 = pars.Max();
-            //////////        pars.Remove(p3);
-            //////////        mark += p1 + "x" + pars[0] + "x" + p3;
-            //////////        break;
-            //////////    default: Msg.F("ModHandler.grPrfPars not recognized Profile"); break;
-            //////////}
-            return mark;
-        }
-#endif //OLD 3.7.17
     } // end class Handler : Model
+    class _SR : SR
+    {
+        internal Mod _GetSavedRules(Mod model)
+        {
+            return GetSavedRules(model, init: true);
+        }
+    } // end interface class _SR for access to SavedReport method
 } // end namespace Model.Handler

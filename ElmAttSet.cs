@@ -1,14 +1,15 @@
 ﻿/*--------------------------------------------------------------------------------------
  * ElmAttSet -- Definitions of Properties, and their Names of the Elements in the Model 
  * 
- *  20.07.2017  Pavel Khrapkin
+ *  18.08.2017  Pavel Khrapkin
  * 
- * ----- TODO 30.9.2016, 20.07.2017 ------
+ * ----- TODO 30.9.2016, 20.07.2017, 18.08.2017 ------
  * - закомментировать неиспользуемые методы группировки (Ctrl/F12 empty)
  * - разобраться в MatTypeGroup: задействовать те же коды, что в Group, если не получится - совсем закомментировать
  * - заменить Dictionary Elements на поле в Model
  * - убрать все static
- * - выделить Mgroup и Group в отдельные классы 
+ * - выделить Mgroup и Group в отдельные классы
+ * - убрать поле ElmAttSet.prf_rus
  *----- History ------------------------------------------
  * 01.06.2016 - created from structure AttSet in Tekla.Open_API module
  * 19.06.2016 - move Group and Mgroup classes from module Model
@@ -18,28 +19,22 @@
  * 30.09.2016 - clean up, Group class audited
  * 27.05.2017 - preparation to XML serialized save - parameterless constructors
  * 20.07.2017 - error message "different meterials in group"  supress, group cleanup
+ * 18.08.2017 - add Group.compDescription field
  * -------------------------------------------
  * public class ElmAttSet - set of model component attribuyes, extracted from Tekla or IFC by method Read
  * public class Group     - Group elements by Materials and Profile
  * public class Mgroup    - group elements by Materials
  */
 using System;
-using System.Reflection;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using log4net;
-
-using Decl = TSmatch.Declaration.Declaration;
 using Msg = TSmatch.Message.Message;
-using Log = match.Lib.Log;
 using Lib = match.Lib.MatchLib;
 using Ifc = TSmatch.IFC.IfcManager.Core.IfcManager.IfcElement;
 using Mtch = TSmatch.Matcher.Mtch;
 using CmpSet = TSmatch.CompSet.CompSet;
 using Supl = TSmatch.Suppliers.Supplier;
-using TS = TSmatch.Tekla.Tekla;
 
 
 namespace TSmatch.ElmAttSet
@@ -288,6 +283,7 @@ namespace TSmatch.ElmAttSet
         //---- references to other classes - price-list conteiners
         public string CompSetName;  //список компонентов, с которыми работает правило
         public string SupplierName; //Поставщик
+        public string compDescription;  //Description of supplied Component, when found
         private IGrouping<string, ElmAttSet> g;
         private bool errDialog;
 
