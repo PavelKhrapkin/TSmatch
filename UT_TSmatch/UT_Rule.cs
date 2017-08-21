@@ -1,21 +1,13 @@
 ﻿/*=================================
- * Rule Unit Test 17.8.2017
+ * Rule Unit Test 21.8.2017
  *=================================
  *-- ToDo 2017.6.7 пересмотреть старые тесты (OLD 6/6/17) и либо выбросить их совсем, либо обновить
  */
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-using Lib = match.Lib.MatchLib;
 using Mod = TSmatch.Model.Model;
-using Docs = TSmatch.Document.Document;
 using FileOp = match.FileOp.FileOp;
-
-using TSmatch.Rule;
 using SType = TSmatch.Section.Section.SType;
 
 //7/6 using IMIT = TSmatch.Unit_Tests.Imitation._UT_Imitation;
@@ -56,8 +48,11 @@ namespace TSmatch.Rule.Tests
             Rule rule = new Rule(6);
             var Syns = rule.synonyms;
             Assert.AreEqual(2, Syns[SType.Material].Count);
-            Assert.AreEqual("c235", Syns[SType.Material][0]);
-            Assert.AreEqual("c245", Syns[SType.Material][1]);
+            if (model.name == "")
+            {
+                Assert.AreEqual("c235", Syns[SType.Material][0]);
+                Assert.AreEqual("c245", Syns[SType.Material][1]);
+            }
             Assert.AreEqual(3, Syns[SType.Profile].Count);
             Assert.AreEqual("пoлocaгopячeкaтaнaя", Syns[SType.Profile][0]);
             Assert.AreEqual("pl", Syns[SType.Profile][1]);
