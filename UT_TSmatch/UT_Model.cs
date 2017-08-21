@@ -1,5 +1,5 @@
 ﻿/*=================================
-* Model Unit Test 7.08.2017
+* Model Unit Test 21.08.2017
 *=================================
 */
 using TSmatch.Model;
@@ -50,7 +50,7 @@ namespace TSmatch.Model.Tests
             // test getMD5 with Raw()
             boot = new Boot();
             var sr = new SR();
-            model = sr.SetModel(boot, unit_test_mode: true);
+            model = sr.SetModel(boot, initSupl: true);
             model.elements = sr.Raw(model);
             Assert.IsTrue(model.elements.Count > 0);
             string MD5 = model.getMD5(model.elements);
@@ -80,7 +80,7 @@ namespace TSmatch.Model.Tests
             // test real model and TSmatchINFO.xlsx
             var boot = new Boot();
             var sr = new SR();
-            model = sr.SetModel(boot, unit_test_mode: true);
+            model = sr.SetModel(boot, initSupl: true);
             model.sr = new SR();
             model.elements = model.sr.Raw(model);
             var mh = new MH();
