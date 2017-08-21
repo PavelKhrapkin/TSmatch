@@ -1,6 +1,6 @@
-﻿/*=================================
- *  Saved Report Unit Test 31.7.2017
- *=================================
+﻿/*===================================
+ *  Saved Report Unit Test 16.08.2017
+ *===================================
  */
  using Microsoft.VisualStudio.TestTools.UnitTesting;
 using TSmatch.Document;
@@ -87,7 +87,8 @@ namespace TSmatch.Document.Tests
             bool ok = Document.IsDocExists(name);
             if (ok)
             {
-                throw new NotFiniteNumberException();
+                Document rep = Document.getDoc("Report", create_if_notexist: false, fatal: false);
+                Assert.IsNotNull(rep);
             }
             else
             {

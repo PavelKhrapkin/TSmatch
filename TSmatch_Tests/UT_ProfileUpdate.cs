@@ -116,6 +116,20 @@ namespace TSmatch.ProfileUpdate.Tests
             #endregion --- серия Р40-93 Д и У ---
         }
 
+        // 2017.08.15 тест IFC??
+        [TestMethod()]
+        public void UT_ProfleUpdate_IFC()
+        {
+            // test 0: "IFC BREP-26" => "IFC_BREP26"
+            initGr("IFC BREP-26");
+
+            var xx = new ProfileUpdate(ref elmGroups);
+            Assert.AreEqual("ifc_brep-26", elmGroups[0].prf);
+            Assert.AreEqual("IFC_BREP-26", elmGroups[0].Prf);
+
+            //test 1: 
+        }
+
         // 2017.07.23 тест швеллеров
         [TestMethod()]
         public void UT_ProfileUpdate_U()
@@ -277,7 +291,7 @@ namespace TSmatch.ProfileUpdate.Tests
         {
             elmGroups.Clear();
             gr.Prf = v;
-            gr.prf = Lib.ToLat(v.ToLower().Replace(" ", ""));
+            gr.prf = Lib.ToLat(v.ToLower());
             elmGroups.Add(gr);
         }
     } // end class UT_ProfileUpdate
