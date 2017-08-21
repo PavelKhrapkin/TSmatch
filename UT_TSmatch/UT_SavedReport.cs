@@ -124,7 +124,7 @@ namespace TSmatch.SaveReport.Tests
             Assert.IsTrue(ok);
             exit: FileOp.AppQuit();
         }
-
+#if OLD // 21.8.17
         [TestMethod()]
         public void UT_Recover()
         {
@@ -181,7 +181,7 @@ namespace TSmatch.SaveReport.Tests
 
             FileOp.AppQuit();
         }
-
+#endif
         [TestMethod()]
         public void UT_SR_Raw()
         {
@@ -192,6 +192,11 @@ namespace TSmatch.SaveReport.Tests
             Assert.IsTrue(model.elements.Count > 0);
             Assert.IsTrue(model.date > Decl.OLD & model.date < DateTime.Now);
             Assert.AreEqual(32, model.MD5.Length);
+
+            foreach(var elm in model.elements)
+            {
+                Assert.AreEqual(38, elm.guid.Length);
+            }
 
             FileOp.AppQuit();
         }

@@ -1,5 +1,5 @@
 ﻿/*=================================
- * Components Unit Test 20.8.2017
+ * Components Unit Test 21.8.2017
  *=================================
  */
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -8,6 +8,7 @@ using System.Linq;
 
 using FileOp = match.FileOp.FileOp;
 using Boot = TSmatch.Bootstrap.Bootstrap;
+using Docs = TSmatch.Document.Document;
 using Mod = TSmatch.Model.Model;
 using Lib = match.Lib.MatchLib;
 using Mtch = TSmatch.Matcher.Mtch;
@@ -56,8 +57,11 @@ namespace TSmatch.Component.Tests
             }
 
             //test 3 Native: загружаем несколько Правил
-            model.Rules.Add(rule);
+            model.Rules.Clear();
             rule = new Rule.Rule(5);
+            rule.Init();
+            model.Rules.Add(rule);
+            rule = new Rule.Rule(6);
             rule.Init();
             model.Rules.Add(rule);
             _mtch = null;
@@ -67,7 +71,7 @@ namespace TSmatch.Component.Tests
                 foreach (var r in model.Rules)
                 {
                     _mtch = new Mtch(g, r);
-                    if (g.prf != "—8") continue;
+                    if (g.prf != "—8" || !r.text.Contains("—") ) continue;
                     Assert.AreEqual(Mtch.OK.Match, _mtch.ok);
                     found_mtch = _mtch;
                     break;
@@ -75,9 +79,10 @@ namespace TSmatch.Component.Tests
             }
             Assert.AreEqual("Полоса", found_mtch.rule.sCS);
 
-            //test 4 Native with Handle
+            //test 4 Native with Handle, init all rules
             model.Rules.Clear(); model.matches.Clear();
-            for (int i = 4; i < 15; i++)
+            Docs rRule = Docs.getDoc("Rules", fatal: false, create_if_notexist: false);
+            for (int i = 4; i < rRule.il; i++)
             {
                 rule = new Rule.Rule(i);
                 rule.Init();

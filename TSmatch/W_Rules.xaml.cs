@@ -1,10 +1,11 @@
 ﻿/*-----------------------------------------------
- * WPF Window W_Rules 20.8.2017 Pavel Khrapkin
+ * WPF Window W_Rules 21.8.2017 Pavel Khrapkin
  * ----------------------------------------------
  * --- History ---
  * 2017.05.25 - written
  * 2017.08.9  - nElms column output
  * 2017.08.20 - ListBox<Rules> calculation
+ * 2017.08.21 - Contect menu with temporary button "Rule Change"
  * --- Known Issue & ToDos ---
  * - еще нет диалога по допустимости CompSet для выбранного поставщика
  * - не написан метод ChekIfChanges()
@@ -40,8 +41,30 @@ namespace TSmatch
                 items = getRuleItems(MainWindow.model, rePrice: true);
             }
             WRules.ItemsSource = items;
-
         }
+
+        //--------- 21/8/17 -----------
+        private void Bold_Checked(object sender, RoutedEventArgs e)
+        {
+            ChangeRule.FontWeight = FontWeights.Bold;
+        }
+
+        private void Bold_Unchecked(object sender, RoutedEventArgs e)
+        {
+            ChangeRule.FontWeight = FontWeights.Normal;
+        }
+
+        private void Italic_Checked(object sender, RoutedEventArgs e)
+        {
+            ChangeRule.FontStyle = FontStyles.Italic;
+        }
+
+        private void Italic_Unchecked(object sender, RoutedEventArgs e)
+        {
+            ChangeRule.FontStyle = FontStyles.Normal;
+        }
+        //--------- 21/8/17 -----------
+
         private int nGr, nElms;
         private double price;
 

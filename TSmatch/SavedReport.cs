@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------------------
  * SavedReport -- class for handle saved reports in TSmatchINFO.xlsx
  * 
- *  20.08.2017 П.Л. Храпкин
+ *  21.08.2017 П.Л. Храпкин
  *  
  *--- Unit Tests ---
  * UT_GetModelInfo, UT-GetSavedReport, UT_GetSavedRules 18.8.2017 OK 
