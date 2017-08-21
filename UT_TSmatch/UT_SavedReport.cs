@@ -1,5 +1,5 @@
 ﻿/*=================================
- * Saved Report Unit Test 14.08.2017
+ * Saved Report Unit Test 21.08.2017
  *=================================
  */
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -68,7 +68,7 @@ namespace TSmatch.SaveReport.Tests
             init();
             U._GetTSmatchINFO(model);
 
-            model =U._GetSavedReport();
+            model = U._GetSavedReport();
 
             bool ok = model.sr.CheckModelIntegrity(model);
             Assert.IsTrue(ok);
@@ -120,7 +120,7 @@ namespace TSmatch.SaveReport.Tests
             bool ok = model.sr.CheckModelIntegrity(model);
             if (isModelINFOexists)
 
-            Assert.IsTrue(model.isChanged);
+                Assert.IsTrue(model.isChanged);
             Assert.IsTrue(ok);
             exit: FileOp.AppQuit();
         }
@@ -202,7 +202,7 @@ namespace TSmatch.SaveReport.Tests
             init();
 
             // test no Rules Init
-            model = U._GetSavedRules(model, init_mode:false);
+            model = U._GetSavedRules(model, init_mode: false);
 
             Assert.IsTrue(model.Rules.Count > 0);
             foreach (var rule in model.Rules)
@@ -229,7 +229,7 @@ namespace TSmatch.SaveReport.Tests
         public void UT_Save()
         {
             init();
-            model = model.sr.SetModel(boot, unit_test_mode: false);   // with Rule Initialization
+            model = model.sr.SetModel(boot, initSupl: false);   // with Rule Initialization
 
             model.sr.Save(model);
 
@@ -245,7 +245,7 @@ namespace TSmatch.SaveReport.Tests
         {
             boot = new Boot();
             model = new Mod();
-            model = model.sr.SetModel(boot, unit_test_mode: true);
+            model = model.sr.SetModel(boot, initSupl: true);
         }
     }
 
