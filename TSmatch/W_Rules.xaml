@@ -3,7 +3,7 @@
     
     History:
     2017.06     W_Rules window created
-    2017.08.21 -Context menu with Temporary button"Rule Change"
+    2017.08.21 -Rules in ListView with Context menu for Delete, New, RuleTextEdir
 -->
     <Window x:Class="TSmatch.W_Rules"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
