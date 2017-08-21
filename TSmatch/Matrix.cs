@@ -66,10 +66,10 @@ namespace match.Matrix
         /// <param name="str">массив текстовых строк - заголовкий колонок</param>
         public Matr(string[] str)
         {
-            int[] size = { 1, str.Length};
+            int[] size = { 1, str.Length };
             int[] lbnd = { 1, 1 };
             Array m = Array.CreateInstance(typeof(Object), size, lbnd);
-            _matr = (object[,]) m;
+            _matr = (object[,])m;
             int i = 1;
             foreach (var s in str) _matr[1, i++] = s as object;
         }
@@ -190,8 +190,8 @@ namespace match.Matrix
             for (int i = 1; i < rws; i++)
                 for (int j = 1; j <= old_cls; j++)
                     m[i, j] = _matr[i, j];
-                        int col = 1;
-                        foreach (var s in obj) m[rws, col++] = s;
+            int col = 1;
+            foreach (var s in obj) m[rws, col++] = s;
             _matr = (object[,])m;
         }
         public void Init(dynamic obj)
