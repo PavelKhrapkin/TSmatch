@@ -1,7 +1,7 @@
 ﻿/*----------------------------------------------------------------------------
  * Message -- multilanguage message system
  * 
- * 18.07.2017  Pavel Khrapkin
+ * 22.08.2017  Pavel Khrapkin
  *
  *--- History ---
  * Feb-2016 Created
@@ -11,13 +11,16 @@
  * 11.5.2017 - Fatal error handling with Application.Current.Sutdown, AskFOK, and SPLAS messages
  * 22.5.2017 - AskYN, Msg.OK()
  * 18.7.2017 - remake with Dictionary as a Messages store
+ * 22.8.2017 - Msg.
  * ---------------------------------------------------------------------------------------
  *      Methods:
  * Start()    - Copy messages into the static list from TSmatch.xlsx/Messages Sheet
  * F(Code,..) - Fatal error message output
  * W(Code,..) - Warning message output
  * I(Code,..) - Information Messag
- * AskFOK(text?) - ask text OK-Cancel, with Fatal/Stop at Cancel 
+ * AskFOK(text?) - ask text OK-Cancel, with Fatal/Stop at Cancel
+ * AskYN(text?)  - ask with text as a prompt, and respont Yes or No
+ * AskS(text:)   - request string entry with text as a prompt
  */
 using System;
 using System.Collections.Generic;
@@ -42,7 +45,7 @@ namespace TSmatch.Message
 
         public Message() { }
 
-        public static Dictionary<string, string> msgs = new Dictionary<string, string>();
+        protected static Dictionary<string, string> msgs = new Dictionary<string, string>();
      
         //        static Message() singleton Meggage system initialization -- now manualy
         public static void Init()
@@ -131,6 +134,14 @@ namespace TSmatch.Message
             Stop();
         }
 
+        public static string AskS(string msgcode, params object[] p)
+        {
+            txt(Severity.INFO, msgcode, p, doMsgBox: false);
+ //           string 
+ //           string str = string.Empty;
+   //         str = MessageBox.Show(msg);
+            return null;
+        }
         public static void Stop()
         {
             FileOp.AppQuit();

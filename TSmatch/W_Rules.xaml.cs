@@ -83,16 +83,6 @@ namespace TSmatch
             price += gr.totalPrice;
         }
 
-        //private void OnRule_changed(object sender, SelectionChangedEventHandled y) //, SelectionChangedEventArgs e)
-        //{
-        //}
-
-        private void OK_button_Click(object sender, RoutedEventArgs e)
-        {
-            CheckIfChanges();
-            Close();
-        }
-
         private void CheckIfChanges()
         {
             //25/5            throw new NotImplementedException();
@@ -148,6 +138,12 @@ namespace TSmatch
 
         private void RuleTextEdit_click(object sender, RoutedEventArgs e)
         {
+        }
+
+        private void OK_button_Click(object sender, RoutedEventArgs e)
+        {
+            CheckIfChanges();
+            Close();
         }
     }
 } // end namespace
