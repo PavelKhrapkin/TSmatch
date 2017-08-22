@@ -15,13 +15,13 @@ namespace TSmatch.Tekla.Tests
         [TestMethod()]
         public void UT_WriteToReport()
         {
-            string path = @"C:\Users\khrapkin\Desktop\test.txt";
-            TS ts = new TS();
-            ts.WriteToReport(path);
-            Assert.IsTrue(FileOp.isFileExist(path));
-            var rd = ts.ReadReport(path);
+            ////string path = @"C:\Users\khrapkin\Desktop\test.txt";
+            ////TS ts = new TS();
+            ////ts.WriteToReport(path);
+            ////Assert.IsTrue(FileOp.isFileExist(path));
+            ////var rd = ts.ReadReport(path);
 
-            FileOp.AppQuit();
+            ////FileOp.AppQuit();
         }
     }
 }

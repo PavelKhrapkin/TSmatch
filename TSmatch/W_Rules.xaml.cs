@@ -5,10 +5,10 @@
  * 2017.05.25 - written
  * 2017.08.9  - nElms column output
  * 2017.08.20 - ListBox<Rules> calculation
- * 2017.08.21 - Contect menu with temporary button "Rule Change"
+ * 2017.08.21 - Contect menu in ListBox
  * --- Known Issue & ToDos ---
  * - еще нет диалога по допустимости CompSet для выбранного поставщика
- * - не написан метод ChekIfChanges()
+ * - не написан диалог по вводу и редактированию текста правила
  */
 using System;
 using System.Collections.Generic;
