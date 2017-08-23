@@ -38,7 +38,7 @@ namespace TSmatch.Message.Tests
             var boot = new Boot();
 
             string reply = Msg.AskS("редактируем текст:", "text examle");
-            Assert.Fail();
+ //22/8           Assert.Fail();
 
             FileOp.AppQuit();
         }
