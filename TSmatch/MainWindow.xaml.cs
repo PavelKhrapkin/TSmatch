@@ -1,17 +1,15 @@
 ﻿/*-------------------------------------------
- * WPF Main Windows 21.8.2017 Pavel.Khrapkin
+ * WPF Main Windows 23.8.2017 Pavel.Khrapkin
  * --- History ---
  * 2017.05.15 - restored as TSmatch 1.0.1 after Source Control excident
  * 2017.05.23 - Menu OnPriceCheck
  * 2017.08.07 - modified SetModel initialization
  * --- Known Issue & ToDos ---
- * - It is good re-design XAML idea to have two column on MainWindow with the Width = "*".
- * Than with Window size changed, Group<Mat,Prf,Price> part would become wider.
  * - ToDo some kind of progress bar moving on the MainWindow, when Tekla re-draw HighLight.
- * - Implement [RePricing] button
  */
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -44,7 +42,7 @@ namespace TSmatch
     {
         public static readonly ILog log = LogManager.GetLogger("MainWindow");
 
-        const string ABOUT = "TSmatch v1.0.2 21.8.2017";
+        const string ABOUT = "TSmatch v1.0.2 23.8.2017";
         public static Boot boot;
         public static string MyCity = "Санкт-Петербург";
         public delegate void NextPrimeDelegate();
@@ -58,6 +56,7 @@ namespace TSmatch
         {
             Log.START(ABOUT);
             InitializeComponent();
+            boot = new Boot();
             MainWindowLoad();
         }
 
@@ -66,7 +65,7 @@ namespace TSmatch
         {
             Title = "TSmatch - согласование поставщиков в проекте";
             //20/5            message.Text = "..Load MainWindow..";
-            boot = new Boot();
+            
             model = new Mod();
             model = model.sr.SetModel(boot);
             WrModelInfoPanel();
