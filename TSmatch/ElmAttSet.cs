@@ -108,45 +108,7 @@ namespace TSmatch.ElmAttSet
             }
         } // end ElmAttSetCompararer
     } // end class ElmAttSet
-      /*
-#region Groups
-          public class Groups
-          {
-              public class materialType //: IComparable<materialType>
-              {
-                  public readonly string matTypeGr;
-                  public readonly List<string> guids;
-                  public readonly double totalWeight;
-                  public readonly double totalVolume;
-                  public readonly double totalPrice;
 
-                  public materialType(string materialType)
-                  {
-                      this.matTypeGr = materialType;
-                      List<string> guids = new List<string>();
-       ///               List<ElmAttSet> mtgrElms = from elm in this by elm.
-                  }
-      //            var mgroups = from elm in elements group elm by elm.mat;
-              } // end class Groups.materialType
-
-              public class Material : IComparable<Material>
-              {
-
-              } // end class Groups.Material
-
-              public class MatPrf : IComparable<MatPrf>
-              {
-
-              } // end class Groups.MatPrf
-
-              public class Supplier : IComparable<Supplier>
-              {
-
-              } // end class Groups.Supplier
-
-          } // end class Groups
-#endregion Groups
-      */
     #region MaterialTypeGroup, MGroup, Group
 
     ///// <summary>
