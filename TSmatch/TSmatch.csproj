@@ -91,6 +91,7 @@
     <Compile Include="DPar.cs" />
     <Compile Include="ElmAttSet.cs" />
     <Compile Include="FileOp.cs" />
+    <Compile Include="Group.cs" />
     <Compile Include="IFC.cs" />
     <Compile Include="IModelWrFile.cs" />
     <Compile Include="Interface.cs" />

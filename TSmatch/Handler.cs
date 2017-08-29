@@ -1,7 +1,7 @@
 ﻿/*---------------------------------------------------------------------------------
  * Handler -- Handle Model for Report preparation
  * 
- *  18.08.2017 Pavel Khrapkin
+ *  29.08.2017 Pavel Khrapkin
  *  
  *--- History ---
  *  8.05.2017 taken from Model code
@@ -30,7 +30,7 @@ using log4net;
 using Log = match.Lib.Log;
 using Msg = TSmatch.Message.Message;
 using Elm = TSmatch.ElmAttSet.ElmAttSet;
-using ElmGr = TSmatch.ElmAttSet.Group;
+using ElmGr = TSmatch.Group.Group;
 using Mod = TSmatch.Model.Model;
 using SR = TSmatch.SaveReport.SavedReport;
 using Mtch = TSmatch.Matcher.Mtch;
@@ -53,11 +53,11 @@ namespace TSmatch.Handler
         /// 2017.06.27 переписано
         /// 2017.07.20 field bool errDialog add
         /// </history>
-        public List<ElmGr> getGrps(List<Elm> elements, bool errDialog = true)
+        public List<ElmGr> getGrps(List<Elm> elements)
         {
             Log.set("getGrps(" + elements.Count + ")");
             if (elements == null || elements.Count == 0) Msg.F("getGrps: no elements");
-            var gr = new ElmGr(errDialog);
+            var gr = new ElmGr();
             List<ElmGr> groups = new List<ElmGr>();
             var grps = elements.GroupBy(x => x.prf);
             foreach (var grp in grps) groups.Add(new ElmGr(grp));

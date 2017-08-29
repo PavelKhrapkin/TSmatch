@@ -12,7 +12,7 @@ using Docs = TSmatch.Document.Document;
 using Mod = TSmatch.Model.Model;
 using Lib = match.Lib.MatchLib;
 using Mtch = TSmatch.Matcher.Mtch;
-using ElmGr = TSmatch.ElmAttSet.Group;
+using ElmGr = TSmatch.Group.Group;
 using SType = TSmatch.Section.Section.SType;
 
 namespace TSmatch.Component.Tests
@@ -23,7 +23,7 @@ namespace TSmatch.Component.Tests
         Boot boot = new Boot();
         Mod model = new Mod();
 
-        ElmAttSet.Group gr = new ElmAttSet.Group();
+        ElmGr gr = new ElmGr();
         List<ElmGr> inp = new List<ElmGr>();
         Rule.Rule rule = new Rule.Rule();
         Component comp = new Component();

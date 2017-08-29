@@ -64,7 +64,7 @@ namespace TSmatch
                     foreach (var match in model.matches)
                         calcGr(match.group, rule, match.rule.text);
                 else
-                    foreach (Group gr in model.elmGroups) calcGr(gr, rule);
+                    foreach (Group.Group gr in model.elmGroups) calcGr(gr, rule);
                 string gr_price = string.Format("{0}/{1}:{2,12:N2}р", nGr, nElms, price);
                 items.Add(new Rl(gr_price, rule.date, rule.sSupl, rule.sCS, rule.text));
                 chkGr += nGr; chkElm += nElms;
@@ -74,7 +74,7 @@ namespace TSmatch
             return items;
         }
 
-        private void calcGr(Group gr, Rule.Rule rule, string mtchRuleTxt = "")
+        private void calcGr(Group.Group gr, Rule.Rule rule, string mtchRuleTxt = "")
         {
             if (gr.SupplierName != rule.sSupl || gr.CompSetName != rule.sCS) return;
             if (mtchRuleTxt != "" && mtchRuleTxt != rule.text) return;

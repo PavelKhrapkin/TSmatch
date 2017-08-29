@@ -1,5 +1,5 @@
 ﻿/*-------------------------------------------
- * WPF Main Windows 23.8.2017 Pavel.Khrapkin
+ * WPF Main Windows 29.8.2017 Pavel.Khrapkin
  * --- History ---
  * 2017.05.15 - restored as TSmatch 1.0.1 after Source Control excident
  * 2017.05.23 - Menu OnPriceCheck
@@ -31,7 +31,7 @@ using Boot = TSmatch.Bootstrap.Bootstrap;
 using Msg = TSmatch.Message.Message;
 using Mod = TSmatch.Model.Model;
 using Supl = TSmatch.Suppliers.Supplier;
-using ElmGr = TSmatch.ElmAttSet.Group;
+using ElmGr = TSmatch.Group.Group;
 
 namespace TSmatch
 {

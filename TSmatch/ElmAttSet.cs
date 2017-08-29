@@ -1,7 +1,7 @@
 ﻿/*--------------------------------------------------------------------------------------
  * ElmAttSet -- Definitions of Properties, and their Names of the Elements in the Model 
  * 
- *  18.08.2017  Pavel Khrapkin
+ *  29.08.2017  Pavel Khrapkin
  * 
  * ----- TODO 30.9.2016, 20.07.2017, 18.08.2017 ------
  * - закомментировать неиспользуемые методы группировки (Ctrl/F12 empty)
@@ -20,9 +20,9 @@
  * 27.05.2017 - preparation to XML serialized save - parameterless constructors
  * 20.07.2017 - error message "different meterials in group"  supress, group cleanup
  * 18.08.2017 - add Group.compDescription field
+ * 29.08.2017 - module Group separated
  * -------------------------------------------
  * public class ElmAttSet - set of model component attribuyes, extracted from Tekla or IFC by method Read
- * public class Group     - Group elements by Materials and Profile
  * public class Mgroup    - group elements by Materials
  */
 using System;
@@ -266,67 +266,6 @@ namespace TSmatch.ElmAttSet
             return mat.CompareTo(mgr.mat);
         }
     } // end class Mgroup
-
-    public class Group : IComparable<Group>
-    {
-        public string mat;
-        public string prf;
-        public string Mat;
-        public string Prf;
-        public List<string> guids;
-        public double totalLength;
-        public double totalWeight;
-        public double totalVolume;
-        public double totalPrice;
-        public Mtch match;          // Reference to the matched supply source (i.e.line in price list)   
-        public Dictionary<string, ElmAttSet> Elements = new Dictionary<string, ElmAttSet>();
-        //---- references to other classes - price-list conteiners
-        public string CompSetName;  //список компонентов, с которыми работает правило
-        public string SupplierName; //Поставщик
-        public string compDescription;  //Description of supplied Component, when found
-        private IGrouping<string, ElmAttSet> g;
-        private bool errDialog;
-
-        public Group(bool _errDialog = true) { errDialog = _errDialog;  }
-
-        public Group(IGrouping<string, ElmAttSet> group)
-        {
-            Elements = group.ToDictionary(x => x.guid);
-            Mat = Elements.First().Value.mat;
-            Prf = Elements.First().Value.prf;
-            mat = Lib.ToLat(Mat.ToLower().Replace("*", "x"));
-            prf = Lib.ToLat(Prf.ToLower().Replace("*", "x"));
-            guids = group.Select(x => x.guid).ToList();
-            totalLength = group.Select(x => x.length).Sum();
-            totalWeight = group.Select(x => x.weight).Sum();
-            totalVolume = group.Select(x => x.volume).Sum();
-            //check Materials in group -- they should be the same
-            foreach (var gr in group)
-            {
-                if (gr.mat == Mat || !errDialog) continue;
-                var mod = new Model.Model();
-                mod.HighLightElements(Elements);
-                Msg.W("ElmGr: various materials in Group", Prf, Mat, gr.mat);
-            }
-        }
-
-        public int CompareTo(Group gr)     //to Sort Groups by Materials
-        {
-            int x = mat.CompareTo(gr.mat);
-            if (x == 0) x = prf.CompareTo(gr.prf);
-            return x;
-        }
-        public List<string> getGroupGuids(Dictionary<string, ElmAttSet> elements, string mat, string prf)
-        {
-            List<string> grGuids = new List<string>();
-            foreach (var elm in elements)
-            {
-                if (elm.Value.mat == mat && elm.Value.prf == prf)
-                    grGuids.Add(elm.Key);
-            }
-            return grGuids;
-        }
-    } // end class Group
 #endregion
     /* 21/6/2016
         public class Group : IComparable<Group>

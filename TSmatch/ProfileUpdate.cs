@@ -22,7 +22,7 @@ using System.Text.RegularExpressions;
 using log4net;
 using Lib = match.Lib.MatchLib;
 using Msg = TSmatch.Message.Message;
-using ElmGr = TSmatch.ElmAttSet.Group;
+using ElmGr = TSmatch.Group.Group;
 using System;
 
 namespace TSmatch.ProfileUpdate
