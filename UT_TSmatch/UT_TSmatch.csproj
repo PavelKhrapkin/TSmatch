@@ -60,6 +60,7 @@
     <Compile Include="UT_Bootstrap.cs" />
     <Compile Include="UT_Component.cs" />
     <Compile Include="UT_Documents.cs" />
+    <Compile Include="UT_Group.cs" />
     <Compile Include="UT_MatchLib.cs" />
     <Compile Include="UT_Matr.cs" />
     <Compile Include="UT_Message.cs" />

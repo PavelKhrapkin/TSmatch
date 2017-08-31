@@ -72,7 +72,7 @@ namespace TSmatch
             WrReportPanel();
             //30/5            model.HighLightElements(Mod.HighLightMODE.NoPrice);
             //25/7 message = "вначале группы без цен...";
-            msg.Text = message;
+ //31/8           msg.Text = message;
         }
 
         private void WrModelInfoPanel()
@@ -286,5 +286,11 @@ namespace TSmatch
             Application.Current.Shutdown();
         }
         #endregion --- [Read], [RePrice], and [OK] buttons ---
+
+        private void MWmsg(string str, params object[] p)
+        {
+            string msg = Msg.S(str, p);
+//31/8            Dispatcher.Invoke(new Action(() => { msg.Content = str; }));
+        }
     }
 } //end namespace

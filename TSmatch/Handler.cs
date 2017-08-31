@@ -1,7 +1,7 @@
 ﻿/*---------------------------------------------------------------------------------
  * Handler -- Handle Model for Report preparation
  * 
- *  29.08.2017 Pavel Khrapkin
+ *  31.08.2017 Pavel Khrapkin
  *  
  *--- History ---
  *  8.05.2017 taken from Model code

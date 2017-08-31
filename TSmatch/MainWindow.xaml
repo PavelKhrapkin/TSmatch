@@ -23,7 +23,8 @@
                 Grid.Row="0" Grid.RowSpan="2"/>
 
         <!-- Menu -->
-        <DockPanel Grid.ColumnSpan="2">
+        <StackPanel Orientation="Horizontal" Grid.ColumnSpan="2">
+
             <Menu IsMainMenu="True" VerticalAlignment="Top"
                  Height="16" Margin="2,2,0,0">
                 <MenuItem Header="Файл">
@@ -50,9 +51,11 @@
                     <MenuItem Header="О программе" Click="OnAbout"/>
                 </MenuItem>
             </Menu>
-            <TextBlock x:Name="msg" Background="#FFEAEAF8" 
-                       VerticalAlignment="Top" Margin="2,2,2,0"/>
-        </DockPanel>
+            <Label x:Name="msg" Background="#FFEAEAF8" 
+                       VerticalAlignment="Top" 
+                   HorizontalAlignment="Stretch" Height="18" Width="694"/>
+
+        </StackPanel>
 
         <!-- ModelINFO Text Block -->
         <StackPanel Grid.Column="2" Grid.Row="2">

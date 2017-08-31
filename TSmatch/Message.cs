@@ -51,8 +51,9 @@ namespace TSmatch.Message
         /// </summary>
         protected static Dictionary<string, string> _messages = new Dictionary<string, string>();
 
+        /// <summary>
         /// singleton Message system initialization -- ToDo 31.8.17 make it with rsx Localization
-
+        /// </summary>
         public static void Init()
         {
             int iLanguage = 3;   //iLanguage =2 - ru-Ru; iLanguage = 3 - en-US
@@ -72,7 +73,7 @@ namespace TSmatch.Message
                     mes += "\n\r" + nextLine;
                 } while (!emptyNextLine);
                 try { _messages.Add(keyMsg, mes.Trim()); }
-                catch { F("Messages.Init fault", i-1, keyMsg, mes);  }
+                catch { F("Messages.Init fault", i - 1, keyMsg, mes); }
             }
         }
 
@@ -85,14 +86,7 @@ namespace TSmatch.Message
             CultureInfo ci = CultureInfo.InstalledUICulture;
             return ci.CompareInfo.Name;
         }
-        ////////////public static void mes(string str, int severity = 0)
-        ////////////{
-        ////////////    if (severity == (int)Severity.FATAL) Log.FATAL(str);
-        // 31/8 ////    if (severity == (int)Severity.WARNING
-        ////////////        || severity == (int)Severity.INFO) new Log(str);
-        ////////////    return;
-        ////////////}
-
+  
         public static string msg, errType;
         static void txt(Severity type, string msgcode, object[] p, bool doMsgBox=true)
         {
@@ -108,15 +102,13 @@ namespace TSmatch.Message
         public static void F(string str, params object[] p)   { txt(Severity.FATAL, str, p); }
         public static void W(string str, params object[] p)   { txt(Severity.WARNING, str, p); }
         public static void I(string str, params object[] p)   { txt(Severity.INFO, str, p); }
-
-#if NotWorkingYet
-        public static void S(string str, object p0 = null, object p1 = null, object p2 = null)
+        public static string S(string str, params object[] p)
         {
-            txt(Severity.SPLASH, str, p0, p1, p2);
-            SplashScreen splashScreen = new SplashScreen("SplashScreenImage.bmp");
-            splashScreen.Show(true);
+            txt(Severity.SPLASH, str, p, doMsgBox: false);
+            if (errType.Contains("(*)")) msg = errType + msg;
+            return msg;
         }
-#endif // Splash еще не умею...
+
         public static bool AskYN(string msgcode, params object[] p)
         {
             txt(Severity.INFO, msgcode, p, doMsgBox: false);
