@@ -3,7 +3,9 @@
  * 
  * 31.08.2017  Pavel Khrapkin
  *
- *--- History ---
+ *--- Unit Tests ---
+ * UT_Message: UT_Init, UT_AskS, UT_W, UT_S 31.8.2017 OK
+ * --- History ---
  * Feb-2016 Created
  * 20.3.2016 - Error message Code display even when Message system is not initialysed yet
  * 20.8.2016 - use log4net, bug fixes
@@ -11,7 +13,7 @@
  * 11.5.2017 - Fatal error handling with Application.Current.Sutdown, AskFOK, and SPLAS messages
  * 22.5.2017 - AskYN, Msg.OK()
  * 18.7.2017 - remake with Dictionary as a Messages store
- * 31.8.2017 - Msg.S return string 
+ * 31.8.2017 - Msg.S return string; Dialog flag
  * ---------------------------------------------------------------------------------------
  *      Methods:
  * Init()     - Singleton constructor initiate static msgs Dictionary set
@@ -32,8 +34,6 @@ using log4net;
 using FileOp = match.FileOp.FileOp;
 using Docs = TSmatch.Document.Document;
 using Decl = TSmatch.Declaration.Declaration;
-using Lib = match.Lib.MatchLib;
-using Log = match.Lib.Log;
 
 namespace TSmatch.Message
 {
@@ -43,6 +43,7 @@ namespace TSmatch.Message
 
         public enum Severity { INFO = 0, WARNING, FATAL, SPLASH };
         public static bool Trace = false;  // For TRACE mode chage to "true";
+        public static bool Dialog = true;  //for Unit Test set Dialog = false;
 
         public Message() { }
 
@@ -90,10 +91,12 @@ namespace TSmatch.Message
         public static string msg, errType;
         static void txt(Severity type, string msgcode, object[] p, bool doMsgBox=true)
         {
-            bool knownMsg = _messages.ContainsKey(msgcode);
-            msg = knownMsg? string.Format(_messages[msgcode], p): string.Format(msgcode, p);
             errType = "TSmatch " + type;
+            bool knownMsg = _messages.ContainsKey(msgcode);
+            try { msg = knownMsg ? string.Format(_messages[msgcode], p) : string.Format(msgcode, p); }
+            catch { msg = msgcode; errType = "(!)" + errType; }
             if (!knownMsg) errType = "(*)" + errType;
+            if (!Dialog) return;
             if(doMsgBox) MessageBox.Show(msg, errType);
             if (type == Severity.FATAL) Stop();
         }
@@ -105,7 +108,7 @@ namespace TSmatch.Message
         public static string S(string str, params object[] p)
         {
             txt(Severity.SPLASH, str, p, doMsgBox: false);
-            if (errType.Contains("(*)")) msg = errType + msg;
+            if (errType.Contains("(")) msg = errType + " " + msg;
             return msg;
         }
 

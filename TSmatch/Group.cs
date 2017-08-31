@@ -3,7 +3,7 @@
  * 
  *  31.08.2017  Pavel Khrapkin
  * 
- *  *--- Unit Tests ---
+ *--- Unit Tests ---
  * UT_Group: UT_CheckGroup 31.8.2017 OK
  *----- History ------------------------------------------
  * 29.08.2017 - created from ElmAttSet module

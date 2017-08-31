@@ -20,6 +20,7 @@ namespace TSmatch.Group.Tests
             var boot = new Boot();
             model = model.sr.SetModel(boot);
             var gr = new Group();
+            Message.Message.Dialog = false;
 
             gr.CheckGroups(ref model);
 

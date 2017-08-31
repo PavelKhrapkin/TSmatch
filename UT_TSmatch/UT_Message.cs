@@ -1,9 +1,8 @@
 ﻿/*=================================
- * Message Unit Test 22.8.2017
- *=================================
- */
+* Message Unit Test 22.8.2017
+*=================================
+*/
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-
 using Boot = TSmatch.Bootstrap.Bootstrap;
 using FileOp = match.FileOp.FileOp;
 using Msg = TSmatch.Message.Message;
@@ -38,9 +37,37 @@ namespace TSmatch.Message.Tests
             var boot = new Boot();
 
             string reply = Msg.AskS("редактируем текст:", "text examle");
- //22/8           Assert.Fail();
+            //22/8           Assert.Fail();
 
             FileOp.AppQuit();
+        }
+
+        [TestMethod()]
+        public void UT_S()
+        {
+            // test 0: Message не инициализирован, сообщение "незнакомое"
+            string s = Msg.S("Not Initialized Message");
+            Assert.AreEqual(s, "(*)TSmatch SPLASH Not Initialized Message");
+
+            // test 1: нормальный вывод сообщения по русски
+            var boot = new Boot();
+            s = Msg.S("No TSmatch Resource file", "нечто");
+            Assert.AreEqual(s, "Нет ресурсного файла \"нечто\"");
+
+            // test 2: вывод сообщения, которое есть, но с отсутствующим параметром
+            s = Msg.S("No TSmatch Resource file");
+            Assert.AreEqual(s, "(!)TSmatch SPLASH No TSmatch Resource file");
+
+            FileOp.AppQuit();
+        }
+
+        [TestMethod()]
+        public void UT_W()
+        {
+            // test 0: Dialog = false - работаем без остановки
+            Msg.Dialog = false;
+            Msg.W("text");
+            Assert.IsTrue(true);
         }
     }
 
