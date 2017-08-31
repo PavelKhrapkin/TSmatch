@@ -96,5 +96,10 @@ namespace TSmatch.Group
             if (x == 0) x = prf.CompareTo(gr.prf);
             return x;
         }
+
+        public void Method()
+        {
+            throw new System.NotImplementedException();
+        }
     } // end class Group
 } // end namespace 

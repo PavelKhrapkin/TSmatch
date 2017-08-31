@@ -159,6 +159,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>TSmatch.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="Group.cd" />
     <None Include="SavedReport.cd" />
     <None Include="Message.cd" />
     <None Include="PriceList.cd" />
