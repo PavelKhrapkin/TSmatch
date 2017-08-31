@@ -1,7 +1,7 @@
 ﻿/*----------------------------------------------------------------------------
  * Message -- multilanguage message system
  * 
- * 22.08.2017  Pavel Khrapkin
+ * 31.08.2017  Pavel Khrapkin
  *
  *--- History ---
  * Feb-2016 Created
@@ -11,13 +11,14 @@
  * 11.5.2017 - Fatal error handling with Application.Current.Sutdown, AskFOK, and SPLAS messages
  * 22.5.2017 - AskYN, Msg.OK()
  * 18.7.2017 - remake with Dictionary as a Messages store
- * 22.8.2017 - Msg.
+ * 31.8.2017 - Msg.S return string 
  * ---------------------------------------------------------------------------------------
  *      Methods:
- * Start()    - Copy messages into the static list from TSmatch.xlsx/Messages Sheet
+ * Init()     - Singleton constructor initiate static msgs Dictionary set
  * F(Code,..) - Fatal error message output
  * W(Code,..) - Warning message output
  * I(Code,..) - Information Messag
+ * S(Code,..) - return string made from Code and ".." arguments to output in WPF
  * AskFOK(text?) - ask text OK-Cancel, with Fatal/Stop at Cancel
  * AskYN(text?)  - ask with text as a prompt, and respont Yes or No
  * AskS(text:)   - request string entry with text as a prompt
@@ -45,9 +46,13 @@ namespace TSmatch.Message
 
         public Message() { }
 
-        protected static Dictionary<string, string> msgs = new Dictionary<string, string>();
-     
-        //        static Message() singleton Meggage system initialization -- now manualy
+        /// <summary>
+        /// _messages - set of key- Message code string and message value- string in local culture
+        /// </summary>
+        protected static Dictionary<string, string> _messages = new Dictionary<string, string>();
+
+        /// singleton Message system initialization -- ToDo 31.8.17 make it with rsx Localization
+
         public static void Init()
         {
             int iLanguage = 3;   //iLanguage =2 - ru-Ru; iLanguage = 3 - en-US
@@ -66,7 +71,7 @@ namespace TSmatch.Message
                     emptyNextLine = string.IsNullOrWhiteSpace(nextLine);
                     mes += "\n\r" + nextLine;
                 } while (!emptyNextLine);
-                try { msgs.Add(keyMsg, mes.Trim()); }
+                try { _messages.Add(keyMsg, mes.Trim()); }
                 catch { F("Messages.Init fault", i-1, keyMsg, mes);  }
             }
         }
@@ -80,19 +85,19 @@ namespace TSmatch.Message
             CultureInfo ci = CultureInfo.InstalledUICulture;
             return ci.CompareInfo.Name;
         }
-        public static void mes(string str, int severity = 0)
-        {
-            if (severity == (int)Severity.FATAL) Log.FATAL(str);
-            if (severity == (int)Severity.WARNING
-                || severity == (int)Severity.INFO) new Log(str);
-            return;
-        }
+        ////////////public static void mes(string str, int severity = 0)
+        ////////////{
+        ////////////    if (severity == (int)Severity.FATAL) Log.FATAL(str);
+        // 31/8 ////    if (severity == (int)Severity.WARNING
+        ////////////        || severity == (int)Severity.INFO) new Log(str);
+        ////////////    return;
+        ////////////}
 
         public static string msg, errType;
         static void txt(Severity type, string msgcode, object[] p, bool doMsgBox=true)
         {
-            bool knownMsg = msgs.ContainsKey(msgcode);
-            msg = knownMsg? string.Format(msgs[msgcode], p): string.Format(msgcode, p);
+            bool knownMsg = _messages.ContainsKey(msgcode);
+            msg = knownMsg? string.Format(_messages[msgcode], p): string.Format(msgcode, p);
             errType = "TSmatch " + type;
             if (!knownMsg) errType = "(*)" + errType;
             if(doMsgBox) MessageBox.Show(msg, errType);
@@ -112,7 +117,7 @@ namespace TSmatch.Message
             splashScreen.Show(true);
         }
 #endif // Splash еще не умею...
-        public static bool AskYN(string msgcode, params object[] p)   //16/5 0 = null, object p1 = null, object p2 = null)
+        public static bool AskYN(string msgcode, params object[] p)
         {
             txt(Severity.INFO, msgcode, p, doMsgBox: false);
             var X = MessageBox.Show(msg, errType, MessageBoxButton.YesNo, MessageBoxImage.Question);

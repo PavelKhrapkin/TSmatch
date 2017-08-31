@@ -46,6 +46,6 @@ namespace TSmatch.Message.Tests
 
     class UT_Msg : Msg
     {
-        public int cnt_msgs() { return Msg.msgs.Count; }
+        public int cnt_msgs() { return Msg._messages.Count; }
     }
 }

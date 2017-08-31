@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Comment CommentText="Message - module for preparation and output of the text messages on the screen and/or MessageBox + Log file">
+    <Position X="6.573" Y="0.5" Height="0.75" Width="3.419" />
+  </Comment>
+  <Comment CommentText="31.08.2017&#xD;&#xA;Pavel Khrapkin">
+    <Position X="0.5" Y="0.5" Height="0.49" Width="1.033" />
+  </Comment>
+  <Class Name="TSmatch.Message.Message">
+    <Position X="0.5" Y="1.25" Width="1.5" />
+    <Compartments>
+      <Compartment Name="Nested Types" Collapsed="false" />
+    </Compartments>
+    <NestedTypes>
+      <Enum Name="TSmatch.Message.Message.Severity">
+        <TypeIdentifier>
+          <NewMemberFileName>Message.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>BAAAIAABAAAAAAAIAAAACAAIAAAQAJCAMAQCECAIAAA=</HashCode>
+      <FileName>Message.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Field Name="_messages" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="System.String" Collapsed="true">
+    <Position X="4" Y="1.5" Width="1.5" />
+    <TypeIdentifier />
+    <Lollipop Position="0.2" />
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>
