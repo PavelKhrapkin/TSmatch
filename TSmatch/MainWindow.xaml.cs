@@ -68,7 +68,7 @@ namespace TSmatch
             model = model.sr.SetModel(boot);
             WrModelInfoPanel();
             WrReportPanel();
-            MWmsg("вначале показаны группы без цен...");
+            MWmsg("No Price Groups highlighted");
             //30/5            model.HighLightElements(Mod.HighLightMODE.NoPrice);
             //25/7 message = "вначале группы без цен...";
  //31/8           msg.Text = message;
@@ -289,7 +289,7 @@ namespace TSmatch
         private void MWmsg(string str, params object[] p)
         {
             string message = Msg.S(str, p);
-            Dispatcher.Invoke(new Action(() => { msg.Content = message; }));
+            Dispatcher.Invoke(new Action(() => { StatusMsg.Text = message; }));
         }
     }
 } //end namespace

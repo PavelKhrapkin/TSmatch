@@ -7,11 +7,12 @@
          <Style x:Key="InfoPanel" TargetType="StackPanel">
             <Setter Property="Control.Height" Value="16"/>
             <Setter Property="Control.HorizontalAlignment" Value="Stretch"/>
-            <Setter Property="Control.Margin" Value="0,0,5,0"/>
+            <Setter Property="Control.Margin" Value="5, 0"/>
             <Setter Property="Control.FontFamily" Value="Arial"/>
             <Setter Property="TextBlock.TextWrapping" Value="Wrap"/>
         </Style>
         <Style x:Key="UnderlinedTextBlock">
+            <Setter Property="Control.Margin" Value="2, 0"/>
             <Setter Property="Control.FontSize" Value="13"/>
             <Setter Property="Control.FontFamily" Value="Arial"/>
             <Setter Property="TextBlock.TextDecorations" Value="Underline" />
