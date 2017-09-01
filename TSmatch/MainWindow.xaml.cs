@@ -1,5 +1,5 @@
 ﻿/*-------------------------------------------
- * WPF Main Windows 29.8.2017 Pavel.Khrapkin
+ * WPF Main Windows 1.9.2017 Pavel.Khrapkin
  * --- History ---
  * 2017.05.15 - restored as TSmatch 1.0.1 after Source Control excident
  * 2017.05.23 - Menu OnPriceCheck
@@ -42,7 +42,7 @@ namespace TSmatch
     {
         public static readonly ILog log = LogManager.GetLogger("MainWindow");
 
-        const string ABOUT = "TSmatch v1.0.2 23.8.2017";
+        const string ABOUT = "TSmatch v1.0.2 1.9.2017";
         public static Boot boot;
         public static string MyCity = "Санкт-Петербург";
         public delegate void NextPrimeDelegate();
@@ -63,13 +63,12 @@ namespace TSmatch
         #region --- MainWindow Panels ---
         private void MainWindowLoad()
         {
-            Title = "TSmatch - согласование поставщиков в проекте";
-            //20/5            message.Text = "..Load MainWindow..";
-            
+            Title = "TSmatch - согласование поставщиков в проекте"; 
             model = new Mod();
             model = model.sr.SetModel(boot);
             WrModelInfoPanel();
             WrReportPanel();
+            MWmsg("вначале показаны группы без цен...");
             //30/5            model.HighLightElements(Mod.HighLightMODE.NoPrice);
             //25/7 message = "вначале группы без цен...";
  //31/8           msg.Text = message;
@@ -182,7 +181,7 @@ namespace TSmatch
             string sP = string.Format("{0:N2}", p);
             TotalSupl_price.Text = "Цена по этому поставщику " + sP + " руб";
 
-            message = "выделяю группу..";
+            MWmsg("выделяю группу..");
             elm_groups.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal
                 , new NextPrimeDelegate(HighLighting));
         }
@@ -289,8 +288,8 @@ namespace TSmatch
 
         private void MWmsg(string str, params object[] p)
         {
-            string msg = Msg.S(str, p);
-//31/8            Dispatcher.Invoke(new Action(() => { msg.Content = str; }));
+            string message = Msg.S(str, p);
+            Dispatcher.Invoke(new Action(() => { msg.Content = message; }));
         }
     }
 } //end namespace

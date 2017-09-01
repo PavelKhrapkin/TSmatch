@@ -22,11 +22,9 @@
                 Grid.Column="0" Grid.ColumnSpan="2"
                 Grid.Row="0" Grid.RowSpan="2"/>
 
-        <!-- Menu -->
-        <StackPanel Orientation="Horizontal" Grid.ColumnSpan="2">
-
-            <Menu IsMainMenu="True" VerticalAlignment="Top"
-                 Height="16" Margin="2,2,0,0">
+        <!-- Menu & Status Bar -->
+        <DockPanel Grid.ColumnSpan="2" Opacity="2">
+            <Menu IsMainMenu="True" Height="16">
                 <MenuItem Header="Файл">
                     <MenuItem Header="_Сохранить как" Click="OnSaveAs"/>
                     <Separator />
@@ -52,17 +50,15 @@
                 </MenuItem>
             </Menu>
             <Label x:Name="msg" Background="#FFEAEAF8" 
-                       VerticalAlignment="Top" 
-                   HorizontalAlignment="Stretch" Height="18" Width="694"/>
-
-        </StackPanel>
+                   VerticalAlignment="Top" Opacity="0"
+                   HorizontalAlignment="Stretch" Height="8" Width="694"/>
+        </DockPanel>
 
         <!-- ModelINFO Text Block -->
-        <StackPanel Grid.Column="2" Grid.Row="2">
+        <StackPanel Grid.Column="2" Grid.Row="2" Margin="2"
+                    Background="{DynamicResource {x:Static SystemColors.MenuBarBrushKey}}">
             <TextBlock x:Name="ModelINFO_header" Background="Yellow" 
                        Text="Общая информация по модели"
-                       HorizontalAlignment="Stretch" 
-                       Margin="0,5,10,0"
                        TextAlignment="Center"/>
         </StackPanel>
 
