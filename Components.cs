@@ -1,7 +1,7 @@
 ﻿/*----------------------------------------------------------------------------
  * Components -- Supplier's price-list load and handling 
  * 
- * 15.07.2017  П.Храпкин
+ * 29.08.2017  П.Храпкин
  *
  * --- Unit Testing ---
  * 2017.07.15 UT_Component_checkComp, UT_Component_rulePar, UT_isOK OK
@@ -139,14 +139,14 @@ namespace TSmatch.Component
         //////////////////    return Comps; 
         //////////////////}
 #endif
-        public bool isMatch(ElmAttSet.Group gr, Rule.Rule rule = null)
+        public bool isMatch(Group.Group gr, Rule.Rule rule = null)
         {
             if (!isMatchGrRule(SType.Material, gr, rule)) return false;
             if (!isMatchGrRule(SType.Profile, gr, rule)) return false;
             return true;
         }
 
-        bool isMatchGrRule(SType stype, ElmAttSet.Group gr, Rule.Rule rule)
+        bool isMatchGrRule(SType stype, Group.Group gr, Rule.Rule rule)
         {
             if (rule == null || !compDP.dpar.ContainsKey(stype)) return true;
             string sb = new Sec(rule.text, stype).body;

@@ -1,9 +1,11 @@
 ﻿/*----------------------------------------------------------------------------
  * Message -- multilanguage message system
  * 
- * 18.07.2017  Pavel Khrapkin
+ * 31.08.2017  Pavel Khrapkin
  *
- *--- History ---
+ *--- Unit Tests ---
+ * UT_Message: UT_Init, UT_AskS, UT_W, UT_S 31.8.2017 OK
+ * --- History ---
  * Feb-2016 Created
  * 20.3.2016 - Error message Code display even when Message system is not initialysed yet
  * 20.8.2016 - use log4net, bug fixes
@@ -11,13 +13,17 @@
  * 11.5.2017 - Fatal error handling with Application.Current.Sutdown, AskFOK, and SPLAS messages
  * 22.5.2017 - AskYN, Msg.OK()
  * 18.7.2017 - remake with Dictionary as a Messages store
+ * 31.8.2017 - Msg.S return string; Dialog flag
  * ---------------------------------------------------------------------------------------
  *      Methods:
- * Start()    - Copy messages into the static list from TSmatch.xlsx/Messages Sheet
+ * Init()     - Singleton constructor initiate static msgs Dictionary set
  * F(Code,..) - Fatal error message output
  * W(Code,..) - Warning message output
  * I(Code,..) - Information Messag
- * AskFOK(text?) - ask text OK-Cancel, with Fatal/Stop at Cancel 
+ * S(Code,..) - return string made from Code and ".." arguments to output in WPF
+ * AskFOK(text?) - ask text OK-Cancel, with Fatal/Stop at Cancel
+ * AskYN(text?)  - ask with text as a prompt, and respont Yes or No
+ * AskS(text:)   - request string entry with text as a prompt
  */
 using System;
 using System.Collections.Generic;
@@ -28,8 +34,6 @@ using log4net;
 using FileOp = match.FileOp.FileOp;
 using Docs = TSmatch.Document.Document;
 using Decl = TSmatch.Declaration.Declaration;
-using Lib = match.Lib.MatchLib;
-using Log = match.Lib.Log;
 
 namespace TSmatch.Message
 {
@@ -39,12 +43,18 @@ namespace TSmatch.Message
 
         public enum Severity { INFO = 0, WARNING, FATAL, SPLASH };
         public static bool Trace = false;  // For TRACE mode chage to "true";
+        public static bool Dialog = true;  //for Unit Test set Dialog = false;
 
         public Message() { }
 
-        public static Dictionary<string, string> msgs = new Dictionary<string, string>();
-     
-        //        static Message() singleton Meggage system initialization -- now manualy
+        /// <summary>
+        /// _messages - set of key- Message code string and message value- string in local culture
+        /// </summary>
+        protected static Dictionary<string, string> _messages = new Dictionary<string, string>();
+
+        /// <summary>
+        /// singleton Message system initialization -- ToDo 31.8.17 make it with rsx Localization
+        /// </summary>
         public static void Init()
         {
             int iLanguage = 3;   //iLanguage =2 - ru-Ru; iLanguage = 3 - en-US
@@ -63,8 +73,8 @@ namespace TSmatch.Message
                     emptyNextLine = string.IsNullOrWhiteSpace(nextLine);
                     mes += "\n\r" + nextLine;
                 } while (!emptyNextLine);
-                try { msgs.Add(keyMsg, mes.Trim()); }
-                catch { F("Messages.Init fault", i-1, keyMsg, mes);  }
+                try { _messages.Add(keyMsg, mes.Trim()); }
+                catch { F("Messages.Init fault", i - 1, keyMsg, mes); }
             }
         }
 
@@ -77,21 +87,16 @@ namespace TSmatch.Message
             CultureInfo ci = CultureInfo.InstalledUICulture;
             return ci.CompareInfo.Name;
         }
-        public static void mes(string str, int severity = 0)
-        {
-            if (severity == (int)Severity.FATAL) Log.FATAL(str);
-            if (severity == (int)Severity.WARNING
-                || severity == (int)Severity.INFO) new Log(str);
-            return;
-        }
-
+  
         public static string msg, errType;
         static void txt(Severity type, string msgcode, object[] p, bool doMsgBox=true)
         {
-            bool knownMsg = msgs.ContainsKey(msgcode);
-            msg = knownMsg? string.Format(msgs[msgcode], p): string.Format(msgcode, p);
             errType = "TSmatch " + type;
+            bool knownMsg = _messages.ContainsKey(msgcode);
+            try { msg = knownMsg ? string.Format(_messages[msgcode], p) : string.Format(msgcode, p); }
+            catch { msg = msgcode; errType = "(!)" + errType; }
             if (!knownMsg) errType = "(*)" + errType;
+            if (!Dialog) return;
             if(doMsgBox) MessageBox.Show(msg, errType);
             if (type == Severity.FATAL) Stop();
         }
@@ -100,16 +105,14 @@ namespace TSmatch.Message
         public static void F(string str, params object[] p)   { txt(Severity.FATAL, str, p); }
         public static void W(string str, params object[] p)   { txt(Severity.WARNING, str, p); }
         public static void I(string str, params object[] p)   { txt(Severity.INFO, str, p); }
-
-#if NotWorkingYet
-        public static void S(string str, object p0 = null, object p1 = null, object p2 = null)
+        public static string S(string str, params object[] p)
         {
-            txt(Severity.SPLASH, str, p0, p1, p2);
-            SplashScreen splashScreen = new SplashScreen("SplashScreenImage.bmp");
-            splashScreen.Show(true);
+            txt(Severity.SPLASH, str, p, doMsgBox: false);
+            if (errType.Contains("(")) msg = errType + " " + msg;
+            return msg;
         }
-#endif // Splash еще не умею...
-        public static bool AskYN(string msgcode, params object[] p)   //16/5 0 = null, object p1 = null, object p2 = null)
+
+        public static bool AskYN(string msgcode, params object[] p)
         {
             txt(Severity.INFO, msgcode, p, doMsgBox: false);
             var X = MessageBox.Show(msg, errType, MessageBoxButton.YesNo, MessageBoxImage.Question);
@@ -131,6 +134,14 @@ namespace TSmatch.Message
             Stop();
         }
 
+        public static string AskS(string msgcode, params object[] p)
+        {
+            txt(Severity.INFO, msgcode, p, doMsgBox: false);
+ //           string 
+ //           string str = string.Empty;
+   //         str = MessageBox.Show(msg);
+            return null;
+        }
         public static void Stop()
         {
             FileOp.AppQuit();
