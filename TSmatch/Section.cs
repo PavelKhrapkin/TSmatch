@@ -85,7 +85,7 @@ namespace TSmatch.Section
 
         public Section(string _text, SType stype = SType.NOT_DEFINED)
         {
-            //8/8            if (SectionTab == null) SectionTab = new Boot.initSection().SectionTab;
+//8/8            if (SectionTab == null) SectionTab = new Boot.initSection().SectionTab;
             string[] sections = Lib.ToLat(_text).ToLower().Replace(" ", "").Split(';');
             if (stype == SType.NOT_DEFINED)
             {
@@ -110,7 +110,7 @@ namespace TSmatch.Section
             if (string.IsNullOrEmpty(text) || !text.Contains(':'))
                 return SType.NOT_DEFINED;
             string hdr = text.Substring(0, text.IndexOf(':'));
-            foreach (SType sec in Enum.GetValues(typeof(SType)))
+            foreach(SType sec in Enum.GetValues(typeof(SType)))
             {
                 if (sec == SType.NOT_DEFINED) continue;
                 List<string> synonyms = SectionTab[sec.ToString()].ToList();
@@ -158,9 +158,9 @@ namespace TSmatch.Section
 
         public bool isSectionMatch(string template)
         {
-            if (!SectionTab.Any()) Msg.F("SectionTab is empty");
+            if(!SectionTab.Any()) Msg.F("SectionTab is empty");
             string[] sections = Lib.ToLat(template).ToLower().Replace(" ", "").Split(';');
-            foreach (string str in sections)
+            foreach(string str in sections)
             {
                 if (SecType(str) != type) continue;
                 string templ = SecBody(str).Replace("*", "(.*?)");

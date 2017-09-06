@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------------------
  * Bootstrap - provide initial start of TSmatch, when necessary - startup procedure
  * 
- *  18.07.2017  Pavel Khrapkin
+ *  23.08.2017  Pavel Khrapkin
  *
  *--- History ---
  * 25.3.2016 started 
@@ -18,7 +18,8 @@
  *  3.05.2017 - Model Journal initialization
  * 24.05/2017 - Rules and Model journal are not global resources anymore
  * 11.07.2017 - public DibugDir
- * 17.07.2017 - check Property.TSmatch resources 
+ * 17.07.2017 - check Property.TSmatch resources
+ * 23.08.2017 - IFC init add for ChechIFCguids() method
  *  * --- Unit Tests ---
  * 2017.07.15  UT_Bootstrap   OK
  * ---------------------------------------------------------------------------
@@ -73,18 +74,17 @@ namespace TSmatch.Bootstrap
         static string ComponentsDir;        // all price-lists directory
         public string ModelDir = "";        // Model Report catalog
         static string TMPdir = "";          // temporary catalog
-        static string macroDir = "";        // directory in Tekla\Environment to store button TSmatch
+        static string macroDir = "";        // directory in Tekla\Environment to store button TSmatch             
         static string IFCschema = "";       // IFC2X3.exd in Tekla Environment\common\inp as IFC schema 
-        //static string desktop_path = string.Empty;
         public string DebugDir = string.Empty;
 
         //------------ Main TSmatch classes --------------------------
         public List<Mod> models;            // CAD model list used in TSmatch, model journal
-        Ifc ifc;
+        public Ifc ifc = new Ifc();         // IFC class reference
         public object classCAD;
         public Mod model;
 
-        public Bootstrap()
+        public Bootstrap() 
         {
             desktop_path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
             debug_path = desktop_path;
@@ -120,6 +120,9 @@ namespace TSmatch.Bootstrap
             //--- initiate Messages
             Msg.Init();
             CheckResx("Messages", Resx.Messages);
+            //--- iniciate Ifc
+            IFCschema = Path.Combine(_TOCdir, @"..\inp\IFC2X3.exp");
+            ifc.init(IFCschema);        // инициируем IFC, используя файл схемы IFC - обычно из Tekla
             //--check other Resources and we're in air
             CheckResx("Forms", Resx.Forms);
         }
@@ -130,7 +133,7 @@ namespace TSmatch.Bootstrap
             {ResType.File, "Fil" },
             {ResType.Doc , "Doc" }
         };
-        enum ResType { Date, File, Doc, Err }
+        enum ResType { Date, File, Doc, Err}
         private void CheckResx(string rName, string rValue)
         {
             ResType type = ResType.Err;
@@ -152,7 +155,7 @@ namespace TSmatch.Bootstrap
                     break;
                 case ResType.Date:
                     DateTime d = Lib.getDateTime(v);
-                    Docs doc = Docs.getDoc(rName, fatal: false);
+                    Docs doc = Docs.getDoc(rName, fatal:false);
                     if (doc == null) resError(ResErr.NoDoc, rName);
                     string sdd = doc.Body.Strng(1, 1);
                     DateTime dd = Lib.getDateTime(sdd);
@@ -175,8 +178,7 @@ namespace TSmatch.Bootstrap
                 case ResErr.Obsolete:
                     Msg.F("TSmatch Resource Obsolete", rName);
                     break;
-                default:
-                    Msg.F("TSmatch internal Resource error", rName);
+                default: Msg.F("TSmatch internal Resource error", rName);
                     break;
             }
         }

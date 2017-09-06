@@ -76,7 +76,7 @@ namespace TSmatch.Model.WrModelInfo
                     foreach (var gr in mod.elmGroups)
                     {
                         string compDescription = "", suplName = "", csName = "";
-                        if (!string.IsNullOrEmpty(gr.SupplierName))
+                        if(!string.IsNullOrEmpty(gr.SupplierName))
                         {
                             suplName = gr.SupplierName;
                             csName = gr.CompSetName;
@@ -110,7 +110,7 @@ namespace TSmatch.Model.WrModelInfo
         }
 
         public string sDbl(double v) { return string.Format("{0 :N2}", v); }
-        public string sInt(int i) { return string.Format("{0 :N0}", i); }
+        public string sInt(int i)    { return string.Format("{0 :N0}", i); }
         public string sDbl00(double v) { return string.Format("{0 :N0}", v); }
         public string sDat(DateTime d) { return Lib.timeStr(d, "d.MM.yyyy H:mm"); }
     } // end class

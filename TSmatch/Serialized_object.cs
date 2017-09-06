@@ -18,7 +18,7 @@ using System;
 using System.Collections.Generic;
 
 using Elm = TSmatch.ElmAttSet.ElmAttSet;
-using ElmGr = TSmatch.ElmAttSet.Group;
+using ElmGr = TSmatch.Group.Group;
 
 namespace TSmatch.Model
 {

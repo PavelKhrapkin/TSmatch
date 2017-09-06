@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1" MembersFormat="FullSignature">
+  <Comment CommentText="Message - module for preparation and output of the text messages on the screen and/or MessageBox + Log file">
+    <Position X="5.604" Y="0.5" Height="0.75" Width="3.419" />
+  </Comment>
+  <Comment CommentText="31.08.2017&#xD;&#xA;Pavel Khrapkin">
+    <Position X="0.5" Y="0.5" Height="0.49" Width="1.033" />
+  </Comment>
+  <Comment CommentText="UT_Message:&#xD;&#xA;UT_init	- check singleton _message initialization&#xD;&#xA;UT_AskS	- not really implemented yet ">
+    <Position X="1.656" Y="0.521" Height="0.688" Width="2.981" />
+  </Comment>
+  <Comment CommentText="ToDo &#xD;&#xA;2017.08.31 - переделать с TSmatchEN.resx и TSmatchRU.resx">
+    <Position X="9.167" Y="0.5" Height="0.5" Width="3.721" />
+  </Comment>
+  <Class Name="TSmatch.Message.Message">
+    <Position X="0.5" Y="1.25" Width="4.75" />
+    <Compartments>
+      <Compartment Name="Nested Types" Collapsed="false" />
+    </Compartments>
+    <NestedTypes>
+      <Enum Name="TSmatch.Message.Message.Severity">
+        <TypeIdentifier>
+          <NewMemberFileName>Message.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>BAAAIAABAAAAAAAIAAAACAAIAAAQAJCAMAQCECCIAAA=</HashCode>
+      <FileName>Message.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Field Name="_messages" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="System.String" Collapsed="true">
+    <Position X="8" Y="4.5" Width="1.5" />
+    <TypeIdentifier />
+    <Lollipop Position="0.2" />
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

@@ -1,5 +1,5 @@
 ﻿/*=================================
- *ModWrFile Unit Test 9.8.2017
+ *ModWrFile Unit Test 23.8.2017
  *=================================
  */
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -48,10 +48,10 @@ namespace TSmatch.Model.WrModelInfo.Tests
         {
             var x = new ModelWrFile();
             var s = x.sDat(DateTime.Now);
-            string should_be = DateTime.Now.ToString("d.MM.yyyy HH:mm");
+            string should_be = DateTime.Now.ToString("d.MM.yyyy H:mm");
             Assert.AreEqual(should_be, s);
 
-            s = x.sDat(new DateTime(2016, 5, 22, 18, 45, 15));
+            s = x.sDat(new DateTime(2016,5,22,18,45,15));
             Assert.AreEqual("22.05.2016 18:45", s);
         }
     }

@@ -22,7 +22,7 @@ using System.Text.RegularExpressions;
 using log4net;
 using Lib = match.Lib.MatchLib;
 using Msg = TSmatch.Message.Message;
-using ElmGr = TSmatch.ElmAttSet.Group;
+using ElmGr = TSmatch.Group.Group;
 using System;
 
 namespace TSmatch.ProfileUpdate
@@ -139,19 +139,19 @@ namespace TSmatch.ProfileUpdate
                     if (pars.Count == 2) mark = "Гн." + pars[0] + "x" + pars[1].Replace(".0", "");
                     if (pars.Count == 3)
                     {
-                        if (pars[0] == pars[1]) mark = "Гн." + pars[0] + "x" + pars[2].Replace(".0", "");
+                        if(pars[0] == pars[1]) mark = "Гн." + pars[0] + "x" + pars[2].Replace(".0", "");
                         else mark = "Гн.[]" + pars[0] + "x" + pars[1] + "x" + pars[2].Replace(".0", "");
                     }
                     if (pars.Count != 2 && pars.Count != 3) error(pars);
                     break;
                 case "TK":
                 case "TP":
-                    if (pars.Count >= 2) mark += pars[0] + "x" + pars[1];
+                    if(pars.Count >= 2) mark += pars[0] + "x" + pars[1];
                     if (pars.Count == 3) mark += "x" + pars[2];
                     if (pars.Count != 2 && pars.Count != 3) error(pars);
                     break;
                 case "IFC_BREP":
-                    if (pars.Count == 1) mark += "-" + pars[0];
+                    if(pars.Count == 1) mark += "-" + pars[0];
                     if (pars.Count > 1) error(pars);
                     break;
                 default: error(pars); break;

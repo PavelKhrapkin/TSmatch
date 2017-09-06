@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------------------
  * SavedReport -- class for handle saved reports in TSmatchINFO.xlsx
  * 
- *  20.08.2017 П.Л. Храпкин
+ *  21.08.2017 П.Л. Храпкин
  *  
  *--- Unit Tests ---
  * UT_GetModelInfo, UT-GetSavedReport, UT_GetSavedRules 18.8.2017 OK 
@@ -142,7 +142,7 @@ namespace TSmatch.SaveReport
             { //- get ModelINFO and pricing from TSmatchINFO.xlsx
                 model.name = dINFO.Body.Strng(Decl.MODINFO_NAME_R, 2);
                 model.setCity(dINFO.Body.Strng(Decl.MODINFO_ADDRESS_R, 2));
-//20/8/2017                model.dir = dINFO.Body.Strng(Decl.MODINFO_DIR_R, 2).Trim();
+                //20/8/2017                model.dir = dINFO.Body.Strng(Decl.MODINFO_DIR_R, 2).Trim();
                 model.date = Lib.getDateTime(dINFO.Body.Strng(Decl.MODINFO_DATE_R, 2));
                 model.pricingDate = Lib.getDateTime(dINFO.Body.Strng(Decl.MODINFO_PRCDAT_R, 2));
                 model.pricingMD5 = dINFO.Body.Strng(Decl.MODINFO_PRCMD5_R, 2);
@@ -232,7 +232,7 @@ namespace TSmatch.SaveReport
                 if (dINFO == null || dINFO.il < 10) return false;
                 if (string.IsNullOrWhiteSpace(mod.name)) return false;
                 if (isChangedStr(ref mod.name, dINFO, Decl.MODINFO_NAME_R, 2)) return false;
-//20/8/2017                if (isChangedStr(ref mod.dir, dINFO, Decl.MODINFO_DIR_R, 2)) return false;
+                //20/8/2017                if (isChangedStr(ref mod.dir, dINFO, Decl.MODINFO_DIR_R, 2)) return false;
                 if (isChangedStr(ref mod.MD5, dINFO, Decl.MODINFO_MD5_R, 2)) return false;
                 if (isChangedStr(ref mod.pricingMD5, dINFO, Decl.MODINFO_PRCMD5_R, 2)) return false;
                 if (mod.elements.Count != dINFO.Body.Int(Decl.MODINFO_ELMCNT_R, 2)) return false;

@@ -1,4 +1,11 @@
-﻿<Window x:Class="TSmatch.W_Rules"
+﻿<!--
+    W_Rules xaml design Pavel Khrapkin 2017.8.21
+    
+    History:
+    2017.06     W_Rules window created
+    2017.08.21 -Rules in ListView with Context menu for Delete, New, RuleTextEdir
+-->
+    <Window x:Class="TSmatch.W_Rules"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -16,9 +23,9 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <!-- Display WRules ListView -->
-        <ListView Name="WRules" Grid.Column="0" Grid.RowSpan="2"
-                 SelectionChanged="OnRule_changed">
- <!--           <ListView.Resources>
+        <ListView Name="WRules" Grid.Column="0" Grid.RowSpan="2">
+           <!-- SelectionChanged="OnRule_changed"> -->
+            <!--           <ListView.Resources>
                 <Style TargetType="{x:Type ListViewItem}">
                     <Style.Triggers>
                         <DataTrigger Binding="{ Binding Flag }" Value="true">
@@ -28,6 +35,13 @@
                 </Style>
             </ListView.Resources>
 -->
+            <ListView.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="_Delete" Click="RuleDel_click"/>
+                    <MenuItem Header="_NewRule" Click="RuleNew_click"/>
+                    <MenuItem Header="_Rule Text Edit" Click="RuleTextEdit_click"/>
+                </ContextMenu>
+            </ListView.ContextMenu>
             <ListView.View>
                 <GridView>
                     <GridViewColumn Header="#:цена" Width="Auto" DisplayMemberBinding="{Binding gr_price}" />
@@ -37,9 +51,9 @@
                     <GridViewColumn Header="Правило" Width="320" DisplayMemberBinding="{Binding RuleText}" />
                 </GridView>
             </ListView.View>
-<!--            <Button Content="Button" Height="10" Width="22"/> -->
+            <!--            <Button Content="Button" Height="10" Width="22"/> -->
         </ListView>
-        <!-- TMP Change Rule Button  -->
+        <!-- TMP Change Rule Button 
         <Button Name="ChangeRule" HorizontalAlignment="Right"
                 Margin="00, 10, 2, 60" VerticalAlignment="Bottom" Width="55" Height="40"
                 Background="Yellow"
@@ -49,7 +63,17 @@
                 <TextBlock Text="Rule" HorizontalAlignment="Center"/>
                 <TextBlock Text="Change" HorizontalAlignment="Center"/>
             </StackPanel>
-        </Button>    
+            <Button.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="_Delete" Click="RuleDel_click"/>
+                    <MenuItem Header="_Bold" IsCheckable="True"
+                        Checked="Bold_Checked" Unchecked="Bold_Unchecked"/>
+                    <MenuItem Header="_Italic" IsCheckable="True"
+                        Checked="Italic_Checked" Unchecked="Italic_Unchecked"/>
+                </ContextMenu>
+            </Button.ContextMenu>
+        </Button>
+-->        
         <!-- OK button -->
         <Button Name="OK" HorizontalAlignment="Right"
                 Margin="10,10,2,2" 

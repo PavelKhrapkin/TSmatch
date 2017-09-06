@@ -1,17 +1,16 @@
 ﻿/*-------------------------------------------
- * WPF Main Windows 7.8.2017 Pavel.Khrapkin
+ * WPF Main Windows 6.9.2017 Pavel.Khrapkin
  * --- History ---
  * 2017.05.15 - restored as TSmatch 1.0.1 after Source Control excident
  * 2017.05.23 - Menu OnPriceCheck
  * 2017.08.07 - modified SetModel initialization
+ * 2017.09.06 - Splash screen add
  * --- Known Issue & ToDos ---
- * - It is good re-design XAML idea to have two column on MainWindow with the Width = "*".
- * Than with Window size changed, Group<Mat,Prf,Price> part would become wider.
  * - ToDo some kind of progress bar moving on the MainWindow, when Tekla re-draw HighLight.
- * - Implement [RePricing] button
  */
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -33,7 +32,7 @@ using Boot = TSmatch.Bootstrap.Bootstrap;
 using Msg = TSmatch.Message.Message;
 using Mod = TSmatch.Model.Model;
 using Supl = TSmatch.Suppliers.Supplier;
-using ElmGr = TSmatch.ElmAttSet.Group;
+using ElmGr = TSmatch.Group.Group;
 
 namespace TSmatch
 {
@@ -44,7 +43,7 @@ namespace TSmatch
     {
         public static readonly ILog log = LogManager.GetLogger("MainWindow");
 
-        const string ABOUT = "TSmatch v1.0.2 27.7.2017";
+        const string ABOUT = "TSmatch v1.0.2 6.9.2017";
         public static Boot boot;
         public static string MyCity = "Санкт-Петербург";
         public delegate void NextPrimeDelegate();
@@ -58,22 +57,23 @@ namespace TSmatch
         {
             Log.START(ABOUT);
             InitializeComponent();
+            new SplashScreen().ShowDialog();
+//6/7            boot = new Boot();
             MainWindowLoad();
         }
 
         #region --- MainWindow Panels ---
         private void MainWindowLoad()
         {
-            Title = "TSmatch - согласование поставщиков в проекте";
-            //20/5            message.Text = "..Load MainWindow..";
-            boot = new Boot();
+            Title = "TSmatch - согласование поставщиков в проекте"; 
             model = new Mod();
             model = model.sr.SetModel(boot);
             WrModelInfoPanel();
             WrReportPanel();
+            MWmsg("No Price Groups highlighted");
             //30/5            model.HighLightElements(Mod.HighLightMODE.NoPrice);
             //25/7 message = "вначале группы без цен...";
-            msg.Text = message;
+ //31/8           msg.Text = message;
         }
 
         private void WrModelInfoPanel()
@@ -183,7 +183,7 @@ namespace TSmatch
             string sP = string.Format("{0:N2}", p);
             TotalSupl_price.Text = "Цена по этому поставщику " + sP + " руб";
 
-            message = "выделяю группу..";
+            MWmsg("выделяю группу..");
             elm_groups.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal
                 , new NextPrimeDelegate(HighLighting));
         }
@@ -287,5 +287,11 @@ namespace TSmatch
             Application.Current.Shutdown();
         }
         #endregion --- [Read], [RePrice], and [OK] buttons ---
+
+        private void MWmsg(string str, params object[] p)
+        {
+            string message = Msg.S(str, p);
+            Dispatcher.Invoke(new Action(() => { StatusMsg.Text = message; }));
+        }
     }
 } //end namespace
