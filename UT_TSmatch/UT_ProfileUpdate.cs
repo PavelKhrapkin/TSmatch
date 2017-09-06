@@ -3,17 +3,11 @@
  *=================================
  */
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using TSmatch.ProfileUpdate;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using MH = TSmatch.Handler.Handler;
-using ElmGr = TSmatch.ElmAttSet.Group;
+using ElmGr = TSmatch.Group.Group;
 using Lib = match.Lib.MatchLib;
-using TSmatch.ElmAttSet;
 
 namespace TSmatch.ProfileUpdate.Tests
 {
@@ -21,7 +15,7 @@ namespace TSmatch.ProfileUpdate.Tests
     public class UT_ProfileUpdate
     {
         MH mod = new MH();
-        ElmAttSet.Group gr = new ElmAttSet.Group();
+        ElmGr gr = new ElmGr();
         List<ElmGr> elmGroups = new List<ElmGr>();
 
         [TestInitialize()]
@@ -226,7 +220,7 @@ namespace TSmatch.ProfileUpdate.Tests
         }
 
         [TestMethod()]
-        public void UT_ProfileUpdate_PL()
+        public void UT_ProfileUpdate_PD()   // Трубы
         {
             // test 0: "PL6" -> "—6"
             initGr("PL6");
@@ -241,6 +235,25 @@ namespace TSmatch.ProfileUpdate.Tests
             // test 2: "PL6*100" => "—6x100"
             initGr("PL6*100");
             xx = new ProfileUpdate(ref elmGroups);
+            Assert.AreEqual("—6x100", elmGroups[0].Prf);
+        }
+
+        [TestMethod()]
+        public void UT_ProfileUpdate_PL()   // Пластины
+        {
+            // test 0: "PL6" -> "—6"
+            initGr("PL6");
+            var xx = new ProfileUpdate(ref elmGroups);
+            Assert.AreEqual("—6", elmGroups[0].Prf);
+
+            // test 1: "PL100*6" => "—6x100"
+            initGr("PL100x6");
+            xx = new ProfileUpdate(ref elmGroups);
+            Assert.AreEqual("—6x100", elmGroups[0].Prf);
+
+            // test 2: "PL6*100" => "—6x100"
+            initGr("PL6*100");
+            xx = new ProfileUpdate(ref elmGroups); 
             Assert.AreEqual("—6x100", elmGroups[0].Prf);
         }
 

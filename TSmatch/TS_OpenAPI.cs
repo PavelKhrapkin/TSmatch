@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------
  * TS_OpenAPI -- Interaction with Tekla Structure over Open API
  * 
- * 29.05.2017  Pavel Khrapkin, Alex Bobtsov
+ * 5.09.2017  Pavel Khrapkin, Alex Bobtsov
  *
  *----- ToDo ---------------------------------------------
  * - реализовать интерфейс IAdapterCAD, при этом избавится от static
@@ -24,7 +24,8 @@
  * 21.6.2016 PKh - ElmAttSet module keep all Elements instead of AttSet
  * 30.6.2016 PKh - IsTeklaActive() modified
  * 22.8.2016 PKh - Scale method to account unit in Model
- * 29.5.2017 Pkh - Get Russian GOST profile from UDA
+ * 29.5.2017 PKh - Get Russian GOST profile from UDA
+ *  5.9.2017 PKh - Read Embed objects
  * -------------------------------------------
  * public Structure AttSet - set of model component attribuyes, extracted from Tekla by method Read
  *                           AttSet is Comparable, means Sort is applicable, and 
@@ -53,6 +54,7 @@ using Tekla.Structures.Model;
 using Tekla.Structures.Geometry3d;
 using Tekla.Structures.Model.UI;
 using Tekla.Structures.Model.Operations;
+//using Tekla.Structures.Drawing;
 
 using Log = match.Lib.Log;
 using Msg = TSmatch.Message.Message;
@@ -386,5 +388,19 @@ namespace TSmatch.Tekla
 //            if (!isTeklaModel(result)) Msg.F("TS_Open API getModInfo error");
             return result;
         }
+#if NOT_READY_YET
+        public void Example1()
+        {
+            DrawingHandler MyDrawingHandler = new DrawingHandler();
+            ViewBase _view = MyDrawingHandler.GetActiveDrawing().GetSheet().GetAllViews().Current as ViewBase;
+
+            EmbeddedObjectAttributes attributes = new EmbeddedObjectAttributes();
+            attributes.XScale = 0.5;
+            attributes.YScale = 0.5;
+            DwgObject dxf = new DwgObject(_view, new Point(100, 100),
+                                          Path.GetFullPath("my_dxf.dxf"), attributes);
+            dxf.Insert();
+        }
+#endif
     } //class Tekla
 } //namespace

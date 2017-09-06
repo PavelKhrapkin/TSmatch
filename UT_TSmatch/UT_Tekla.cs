@@ -1,7 +1,8 @@
-﻿/*=========================================
- * Model Unit Tekla = TS_OpenAPI 28.7.2017
- *=========================================
- */
+﻿using TSmatch.Tekla;
+/*=========================================
+* Model Unit Tekla = TS_OpenAPI 5.9.2017
+*=========================================
+*/
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using TS = TSmatch.Tekla.Tekla;
@@ -15,13 +16,21 @@ namespace TSmatch.Tekla.Tests
         [TestMethod()]
         public void UT_WriteToReport()
         {
-            string path = @"C:\Users\khrapkin\Desktop\test.txt";
-            TS ts = new TS();
-            ts.WriteToReport(path);
-            Assert.IsTrue(FileOp.isFileExist(path));
-            var rd = ts.ReadReport(path);
+            ////string path = @"C:\Users\khrapkin\Desktop\test.txt";
+            ////TS ts = new TS();
+            ////ts.WriteToReport(path);
+            ////Assert.IsTrue(FileOp.isFileExist(path));
+            ////var rd = ts.ReadReport(path);
 
-            FileOp.AppQuit();
+            ////FileOp.AppQuit();
+        }
+
+        [TestMethod()]
+        public void UT_Example1()
+        {
+            var ts = new TS();
+//            ts.Example1();
+
         }
     }
 }

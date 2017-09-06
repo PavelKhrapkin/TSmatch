@@ -70,6 +70,13 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\TSmatch\Tsmatch LIBRARY\Tekla.Structures.Dialog.dll</HintPath>
     </Reference>
+    <Reference Include="Tekla.Structures.Drawing, Version=2017.0.0.0, Culture=neutral, PublicKeyToken=2f04dbe497b71114, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\TSmatch\Tsmatch LIBRARY\Tekla.Structures.Drawing.dll</HintPath>
+    </Reference>
+    <Reference Include="Tekla.Structures.Geometry3d.Compatibility">
+      <HintPath>..\..\..\TSmatch\Tsmatch LIBRARY\Tekla.Structures.Geometry3d.Compatibility.dll</HintPath>
+    </Reference>
     <Reference Include="Tekla.Structures.Model, Version=2017.0.0.0, Culture=neutral, PublicKeyToken=2f04dbe497b71114, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\TSmatch\Tsmatch LIBRARY\Tekla.Structures.Model.dll</HintPath>
@@ -91,6 +98,7 @@
     <Compile Include="DPar.cs" />
     <Compile Include="ElmAttSet.cs" />
     <Compile Include="FileOp.cs" />
+    <Compile Include="Group.cs" />
     <Compile Include="IFC.cs" />
     <Compile Include="IModelWrFile.cs" />
     <Compile Include="Interface.cs" />
@@ -114,6 +122,9 @@
     <Compile Include="SavedReport.cs" />
     <Compile Include="Section.cs" />
     <Compile Include="Serialized_object.cs" />
+    <Compile Include="SplashScreen.xaml.cs">
+      <DependentUpon>SplashScreen.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Suppliers.cs" />
     <Compile Include="TS_OpenAPI.cs" />
     <Compile Include="W_Rules.xaml.cs">
@@ -136,6 +147,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="SplashScreen.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="W_Rules.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -158,6 +173,9 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>TSmatch.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="Group.cd" />
+    <None Include="SavedReport.cd" />
+    <None Include="Message.cd" />
     <None Include="PriceList.cd" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -175,6 +193,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="OK.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="TSmatchSplashScreen.jpg" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

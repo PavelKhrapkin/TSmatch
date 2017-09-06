@@ -45,7 +45,7 @@ using CmpSet = TSmatch.CompSet.CompSet;
 using Decl = TSmatch.Declaration.Declaration;
 using Docs = TSmatch.Document.Document;
 using Elm = TSmatch.ElmAttSet.ElmAttSet;
-using ElmGr = TSmatch.ElmAttSet.Group;
+using ElmGr = TSmatch.Group.Group;
 using ElmMGr = TSmatch.ElmAttSet.Mgroup;
 using FileOp = match.FileOp.FileOp;
 using Ifc = TSmatch.IFC.IFC;
@@ -78,7 +78,7 @@ namespace TSmatch.Model
         public string pricingMD5;   // контр.сумма цен и правил при расчете Report
         public DateTime pricingDate;
         public List<ElmMGr> elmMgroups = new List<ElmMGr>();
-        public List<ElmGr> elmGroups = new List<ElmGr>();
+        public List<ElmGr> elmGroups = new List<ElmGr>(); 
         public HashSet<Rule.Rule> Rules = new HashSet<Rule.Rule>();
         public readonly HashSet<Supplier> Suppliers = new HashSet<Supplier>();
         public List<CmpSet> CompSets = new List<CmpSet>();
@@ -95,7 +95,7 @@ namespace TSmatch.Model
         public Model() { ts = new TS(); mh = new Handler.Handler(); sr = new SR(); }
 
         #region --- Setup and Read CAD methods
-        public void setCity(string adr)
+         public void setCity(string adr)
         {
             string[] adrs = adr.Split(',');
             adrCity = adrs[0].Trim();

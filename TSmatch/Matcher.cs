@@ -1,7 +1,7 @@
 ﻿/*----------------------------------------------------------------------------------------------
  * Matcher -- module fulfill matching Group of the Elements with CompSet in accrding with Rule
  *
- * 4.6.2017 Pavel Khrapkin
+ * 29.8.2017 Pavel Khrapkin
  *
  *--- History ---
  * 2016 previous editions P.Khrapkin, A.Pass, A.Bobtsov
@@ -63,7 +63,7 @@ namespace TSmatch.Matcher
         public enum OK { Match, NoMatch, NoSection, NoGroup }
 
         public readonly OK ok = OK.NoGroup;
-        public ElmAttSet.Group group;           //reference to the Group<material, profile> being matched
+        public Group.Group group;           //reference to the Group<material, profile> being matched
         public Component.Component component;   //used Component in Match the Rule and Group
         public Rule.Rule rule;                  //the rule, which manage the matching
 
@@ -77,7 +77,7 @@ namespace TSmatch.Matcher
         /// </summary>
         /// <param name="gr"></param>
         /// <param name="_rule"></param>
-        public Mtch(ElmAttSet.Group gr, Rule.Rule _rule)
+        public Mtch(Group.Group gr, Rule.Rule _rule)
         {
             //28/6            gr.Elements  
             if (gr == null || gr.guids.Count < 1) return;
@@ -101,7 +101,7 @@ namespace TSmatch.Matcher
                 if (!OK_MD5()) Msg.AskFOK("corrupted MD5");
 #endif
                 component = comp;
-                gr.match = this;    //27/3!!
+//29/8                gr.match = this;    //27/3!!
                 rule = _rule;
 #if CHECK_MD5
                 if (!OK_MD5()) Msg.AskFOK("corrupted MD5");
@@ -119,7 +119,7 @@ namespace TSmatch.Matcher
             return model.MD5 == newMD5;
         }
 #endif
-        private double getPrice(ElmAttSet.Group group, DPar.DPar csDP, string priceStr)
+        private double getPrice(Group.Group group, DPar.DPar csDP, string priceStr)
         {
             double price = Lib.ToDouble(priceStr);
             foreach (var sec in csDP.dpar)
@@ -221,7 +221,7 @@ namespace TSmatch.Matcher
         /// <param name="gr"></param>
         /// <param name="rule"></param>
         /// <returns>true if could be in match</returns>
-        //////////////private bool isRuleMatch(ElmAttSet.Group gr, Rule.Rule rule)
+        //////////////private bool isRuleMatch(Group.Group gr, Rule.Rule rule)
         //////////////{
         //////////////    bool result = false;
         //////////////    throw new NotImplementedException();
@@ -268,7 +268,7 @@ namespace TSmatch.Matcher
             Dictionary<string, ElmAttSet.ElmAttSet> els = new Dictionary<string, ElmAttSet.ElmAttSet>();
             els.Add(el.guid, el);
             List<string> guids = new List<string>(); guids.Add(el.guid);
-            ElmAttSet.Group gr = new ElmAttSet.Group(els, "C245", "Уголок20X4", guids);
+            Group.Group gr = new Group.Group(els, "C245", "Уголок20X4", guids);
             Mtch match = new Mtch(gr, rule);
             //6/4/17            TST.Eq(match.ok == OK.Match, true);
             Log.exit();
@@ -327,11 +327,11 @@ namespace TSmatch.Matcher
         }
         ////////////////////            return;     //13/3 - заглушен остаток теста
 
-        ////////////////////            //-- test environment preparation: set ElmAttSet.Group and Rule
+        ////////////////////            //-- test environment preparation: set Group.Group and Rule
         ////////////////////            el = new ElmAttSet.ElmAttSet("MyGuid", "B30", "Concrete", "", 0, 0, 0, 1000);
         ////////////////////            els = new Dictionary<string, ElmAttSet.ElmAttSet>();
         ////////////////////            els.Add(el.guid, el);
-        ////////////////////            gr = new ElmAttSet.Group(els, "B30", null, guids);
+        ////////////////////            gr = new Group.Group(els, "B30", null, guids);
         ////////////////////            rule = new Rule.Rule(15);
 
         ////////////////////            //-- empty gr: guids.Count = 0 || gr == null
@@ -344,13 +344,13 @@ namespace TSmatch.Matcher
 
         ////////////////////            //-- normal Mtch with 1 element with mat = "B30"
         ////////////////////            guids.Add(el.guid);
-        ////////////////////            gr = new ElmAttSet.Group(els, "B30", null, guids);
+        ////////////////////            gr = new Group.Group(els, "B30", null, guids);
         ////////////////////            match = new Mtch(gr, rule);
         ////////////////////            TST.Eq(match.ok == OK.Match, true);
 
         ////////////////////            //-- Mtch "C235" and "B30" -- should be OK.NoMatch
         //////////////////////            guids.Clear();
-        ////////////////////            gr = new ElmAttSet.Group(els, "C235", null, guids);
+        ////////////////////            gr = new Group.Group(els, "C235", null, guids);
         ////////////////////            match = new Mtch(gr, rule);
         ////////////////////            TST.Eq(match.ok == OK.NoMatch, true);
         //////////////////////            TST.Eq(match.price, 0.0);
@@ -668,7 +668,7 @@ namespace TSmatch.Matcher
                   {
                       if (isOKexist(nstr)) break;     // если уже есть соответствие в OKs - NOP
                       // обработаем *параметры
-        ////!! 21/6/2016 в отладку с ElmAttSet Group
+        ////!! 21/6/2016 в отладку с Group.Group
         //                        double lng = Mod.Groups[nstr].lng / 1000; //приводим lng к [м]
         //                        double v = Mod.Groups[nstr].vol;        //объем в [м3]
         //                        double w = Mod.Groups[nstr].wgt;        //вес в [т]
@@ -680,7 +680,7 @@ namespace TSmatch.Matcher
         //                        w *= 1 + RuleRedundencyPerCent / 100;     // учтем запас в % из Правила
         //                        double? p = cs.Components[iComp].price * w / 1000;
         //                        OKs.Add(new OK(nstr, s, cs.doc, nComp, w, p));
-        //  //!! 21/6/2016 в отладку с ElmAttSet Group
+        //  //!! 21/6/2016 в отладку с Group.Group
                       break;
                   }
               } //end foreach Comp

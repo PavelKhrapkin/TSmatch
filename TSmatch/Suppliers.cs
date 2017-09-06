@@ -26,7 +26,7 @@ using Lib = match.Lib.MatchLib;
 using Docs = TSmatch.Document.Document;
 using CmpSet = TSmatch.CompSet.CompSet;
 using TSmatch.ElmAttSet;
-using Gr = TSmatch.ElmAttSet.Group;
+using Gr = TSmatch.Group.Group;
 
 namespace TSmatch.Suppliers
 {
@@ -193,7 +193,7 @@ namespace TSmatch.Suppliers
         /// <param name="group"></param>
         /// <param name="rule"></param>
         /// <returns></returns>
-        internal bool CheckCS(Group group)
+        internal bool CheckCS(Gr group)
         {
             string grCSname = group.CompSetName;
             var cs = CompSets.Find(x => x.name == grCSname);

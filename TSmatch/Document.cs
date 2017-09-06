@@ -237,7 +237,7 @@ namespace TSmatch.Document
             Document doc = Documents[name];
             if (doc.FileDirectory.Contains("#")) // #Template substitute with Path in Dictionary
                 doc.FileDirectory = Templates[doc.FileDirectory];
-            if (!FileOp.isFileExist(doc.FileDirectory, doc.FileName)) return false;
+            if( !FileOp.isFileExist(doc.FileDirectory, doc.FileName) ) return false;
             if (!doc.isOpen) getDoc(name, fatal: false);
             if (!FileOp.isSheetExist(doc.Wb, doc.SheetN)) return false;
             return true;
@@ -329,7 +329,7 @@ namespace TSmatch.Document
             if (str == "Now")
             {
                 Body[1, 1] = Lib.timeStr(DateTime.Now, "d.MM.yy H:mm");
-                isChanged = true;
+                isChanged = true; 
                 FileOp.setRange(Sheet);
                 FileOp.saveRngValue(Body);
             }
@@ -513,7 +513,7 @@ namespace TSmatch.Document
             }
             ////           doc.Sheet = doc.Wb.Worksheets[name];
             doc.splitBodySummary();
-            //24/5/17            doc.FetchInit();
+//24/5/17            doc.FetchInit();
 
             ////// если есть --> запускаем Handler
             ////if (doc.Loader != null) Proc.Reset(doc.Loader);
@@ -551,8 +551,8 @@ namespace TSmatch.Document
                     {
                         FileOp.setRange(doc.Sheet);
                         FileOp.saveRngValue(doc.Body);
-                        //24/4/17                        doc.chkSum = doc.Body.ComputeMD5();
-                        //2/8/17 removed EOLinTOC                       doc.EOLinTOC = doc.Body.iEOL();
+//24/4/17                        doc.chkSum = doc.Body.ComputeMD5();
+//2/8/17 removed EOLinTOC                       doc.EOLinTOC = doc.Body.iEOL();
                         doc.il = doc.Body.iEOL();
                         FileOp.fileSave(doc.Wb);
                         doc.isChanged = false;
@@ -560,7 +560,7 @@ namespace TSmatch.Document
                     else
                     {
                         if (MD5.Length < 20 || EOL == 0) Msg.F("ERR_05.8_saveDoc_NOMD5");
-                        //2/8/17 removed EOLinTOC                        else { doc.chkSum = MD5; doc.EOLinTOC = EOLinTOC; }
+//2/8/17 removed EOLinTOC                        else { doc.chkSum = MD5; doc.EOLinTOC = EOLinTOC; }
                         else { doc.chkSum = MD5; doc.il = EOLinTOC; }
                     }
                     Mtr tmp = FileOp.getSheetValue(toc.Sheet);
@@ -571,7 +571,7 @@ namespace TSmatch.Document
                         tmp[n, Decl.DOC_TIME] = Lib.timeStr();
                         tmp[n, Decl.DOC_MD5] = doc.chkSum;
                         if (doc.type == "N") tmp[n, Decl.DOC_CREATED] = Lib.timeStr();
-                        //2/8/17 removed EOLinTOC                        if (doc.type != Decl.TSMATCH_TYPE) tmp[n, Decl.DOC_EOL] = doc.EOLinTOC;
+//2/8/17 removed EOLinTOC                        if (doc.type != Decl.TSMATCH_TYPE) tmp[n, Decl.DOC_EOL] = doc.EOLinTOC;
                         if (doc.type != Decl.TSMATCH_TYPE) tmp[n, Decl.DOC_EOL] = doc.il;
                         FileOp.setRange(toc.Sheet);
                         FileOp.saveRngValue(tmp, AutoFit: false);  //======= save TОC in TSmatch.xlsx
