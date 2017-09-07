@@ -70,7 +70,7 @@ namespace TSmatch.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Date: 31.8.2017.
+        ///   Looks up a localized string similar to Date: 7.9.2017.
         /// </summary>
         internal static string Messages {
             get {

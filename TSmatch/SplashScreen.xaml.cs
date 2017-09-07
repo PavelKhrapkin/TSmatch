@@ -3,6 +3,8 @@
  * used idea from https://www.codeproject.com/Articles/116875/WPF-Loading-Splash-Screen
  * 
  * 7.07.2017 Pavel Khrapkin
+ * 
+ * Note: Hide of the messaes not in use
  */
 using System;
 using System.Windows;
@@ -11,6 +13,7 @@ using System.Threading;
 using System.Windows.Threading;
 
 using Boot = TSmatch.Bootstrap.Bootstrap;
+using Msg = TSmatch.Message.Message;
 using Mod = TSmatch.Model.Model;
 
 namespace TSmatch
@@ -44,12 +47,12 @@ namespace TSmatch
         }
         private void load()
         {
-            Dispatcher.Invoke(showDelegate, "Loading TSmatch.xlsx");
+            Dispatcher.Invoke(showDelegate, "Loading Bootstrap - TSmatch.xlsx");
             MainWindow.boot = new Boot();
 
             //load data
             //7/9            Dispatcher.Invoke(hideDelegate);
-            Dispatcher.Invoke(showDelegate, "TSmatchINFO.xlsx & Raw.xml load");
+            Dispatcher.Invoke(showDelegate, Msg.S("Loading", "TSmatchINFO.xlsx","Raw.xml"));
             MainWindow.model = new Mod();
             MainWindow.model = MainWindow.model.sr.SetModel(MainWindow.boot);
 
