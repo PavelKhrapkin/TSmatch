@@ -1,7 +1,8 @@
-﻿/*=========================================
- * Model Unit Tekla = TS_OpenAPI 28.7.2017
- *=========================================
- */
+﻿using TSmatch.Tekla;
+/*=========================================
+* Model Unit Tekla = TS_OpenAPI 5.9.2017
+*=========================================
+*/
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using TS = TSmatch.Tekla.Tekla;
@@ -22,6 +23,14 @@ namespace TSmatch.Tekla.Tests
             ////var rd = ts.ReadReport(path);
 
             ////FileOp.AppQuit();
+        }
+
+        [TestMethod()]
+        public void UT_Example1()
+        {
+            var ts = new TS();
+//            ts.Example1();
+
         }
     }
 }
