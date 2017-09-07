@@ -18,9 +18,6 @@ using Mod = TSmatch.Model.Model;
 
 namespace TSmatch
 {
-    /// <summary>
-    /// Interaction logic for splash.xaml
-    /// </summary>
     public partial class SplashScreen : Window
     {
         Thread loadingThread;

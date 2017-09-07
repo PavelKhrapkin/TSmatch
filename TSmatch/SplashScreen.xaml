@@ -16,14 +16,16 @@
         ResizeMode="NoResize" ShowInTaskbar="False" Topmost="True" Loaded="Window_Loaded">
     <Window.Resources>
         <Storyboard x:Key="showStoryBoard">
-            <ThicknessAnimationUsingKeyFrames Storyboard.TargetProperty="(FrameworkElement.Margin)" Storyboard.TargetName="txtLoading">
+            <ThicknessAnimationUsingKeyFrames Storyboard.TargetProperty="(FrameworkElement.Margin)"
+                                              Storyboard.TargetName="txtLoading">
                 <EasingThicknessKeyFrame KeyTime="0:0:0" Value="0,0,0,0"/>
                 <EasingThicknessKeyFrame KeyTime="0:0:2" Value="0,0,0,70"/>
             </ThicknessAnimationUsingKeyFrames>
         </Storyboard>
 
         <Storyboard x:Key="HideStoryBoard">
-            <ThicknessAnimationUsingKeyFrames Storyboard.TargetProperty="(FrameworkElement.Margin)" Storyboard.TargetName="txtLoading">
+            <ThicknessAnimationUsingKeyFrames Storyboard.TargetProperty="(FrameworkElement.Margin)"
+                                              Storyboard.TargetName="txtLoading">
                 <EasingThicknessKeyFrame KeyTime="0:0:0" Value="0,0,0,70"/>
                 <EasingThicknessKeyFrame KeyTime="0:0:3" Value="0,0,0,150"/>
             </ThicknessAnimationUsingKeyFrames>
@@ -38,9 +40,11 @@
                     <GradientStop Color="White" Offset="0.491"/>
                 </LinearGradientBrush>
             </Grid.OpacityMask>
-            <TextBlock x:Name="txtLoading" TextAlignment="Left" FontSize="16" FontWeight="Normal"  Foreground="#FF052045"  Text="Beta 0.9"  TextWrapping="Wrap" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="421" >
+            <TextBlock x:Name="txtLoading" TextAlignment="Left" FontSize="16" FontWeight="Normal"
+                       Foreground="#FF052045"  Text="Beta 0.9"  TextWrapping="Wrap" 
+                       VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="421" >
                 <TextBlock.Effect>
-                    <DropShadowEffect BlurRadius="6" Color="#FF797979" Direction="201" Opacity="0.68" ShadowDepth="3" />
+                    <DropShadowEffect BlurRadius="6" Color="#FF797979" Direction="201" Opacity="0.68" ShadowDepth="3"/>
                 </TextBlock.Effect>
             </TextBlock>
         </Grid>
