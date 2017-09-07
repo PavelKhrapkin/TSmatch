@@ -1,4 +1,10 @@
-﻿<!-- MainWindow xaml design Pavel Khrapkin 2017.9.1 -->
+﻿<!--
+    MainWindow xaml design Pavel Khrapkin 2017.9.7
+    
+    History:
+    2017 May - Created
+    2017.09.7 - Window Topmost attribut
+ -->
     <Window x:Class="TSmatch.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -6,7 +12,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TSmatch"
         mc:Ignorable="d"
-        Title="MainWindow" Height="380" Width="850">
+        Title="MainWindow" Height="380" Width="850" Topmost="True">
 
     <Grid ScrollViewer.HorizontalScrollBarVisibility="Disabled"> 
         <Grid.ColumnDefinitions>
