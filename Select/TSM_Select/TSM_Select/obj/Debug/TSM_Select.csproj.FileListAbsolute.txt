@@ -1,0 +1,15 @@
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\Select\TSM_Select\TSM_Select\bin\Debug\TSM_Select.exe.config
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\Select\TSM_Select\TSM_Select\obj\Debug\TSM_Select.csprojResolveAssemblyReference.cache
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\Select\TSM_Select\TSM_Select\obj\Debug\TSM_Select.Form1.resources
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\Select\TSM_Select\TSM_Select\obj\Debug\TSM_Select.Properties.Resources.resources
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\Select\TSM_Select\TSM_Select\obj\Debug\TSM_Select.csproj.GenerateResource.Cache
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\Select\TSM_Select\TSM_Select\obj\Debug\TSM_Select.csproj.TSM_Select.exe.config
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\Select\TSM_Select\TSM_Select\bin\Debug\TSM_Select.exe
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\Select\TSM_Select\TSM_Select\bin\Debug\TSM_Select.pdb
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\Select\TSM_Select\TSM_Select\bin\Debug\log4net.dll
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\Select\TSM_Select\TSM_Select\bin\Debug\Tekla.Structures.Dialog.dll
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\Select\TSM_Select\TSM_Select\bin\Debug\Tekla.Structures.dll
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\Select\TSM_Select\TSM_Select\bin\Debug\Tekla.Structures.Model.dll
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\Select\TSM_Select\TSM_Select\bin\Debug\IfcEngineCS.pdb
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\Select\TSM_Select\TSM_Select\obj\Debug\TSM_Select.exe
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\Select\TSM_Select\TSM_Select\obj\Debug\TSM_Select.pdb

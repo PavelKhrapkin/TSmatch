@@ -1,0 +1,108 @@
+﻿<Window x:Class="TSmatch.WindowSuplCSChoice"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TSmatch"
+        mc:Ignorable="d"
+        Title="Window1" Height="300" Width="350">
+    <Grid Background="Ivory">
+        <!-- Supplier and CompSet Buttons -->
+        <Grid VerticalAlignment="Top" Height="20"
+              Margin="10 10 10 50">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="2" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Button Grid.Column="0" x:Name="Supplier"
+                    Click="Supplier_Click"
+                    Content="Поставщик"
+                    Background="LightSeaGreen"/>
+            <Button Grid.Column="2" x:Name="CompSet"
+                    Click="CompSet_Click"
+                    Content="Компонент"
+                    Background="LightGreen"/>
+        </Grid>
+        <!-- Supplier and CompSet Text Block -->
+        <TextBlock x:Name="Supl_CS"
+            HorizontalAlignment="Stretch" 
+            VerticalAlignment="Top" Height="100"
+            Margin="10 30 10 50" Background="White" />
+        
+        <!-- Group Buttons: [Material], [Profile] -->
+        <Grid VerticalAlignment="Top" Height="20" Margin="10,150,10,20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="2" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Button Grid.Column="0" x:Name="GrMat" Content="Материал" 
+                    Background="LavenderBlush"
+                    Click="Material_click">
+<!--                 
+                <Button.ContextMenu>
+                   <ContextMenu>
+                        <MenuItem Header="Menu item 1" />
+                        <MenuItem Header="Menu item 2" />
+                        <Separator />
+                        <MenuItem Header="Menu item 3" />
+                    </ContextMenu>                    
+                </Button.ContextMenu>
+-->
+            </Button>
+            <Button Grid.Column="3" x:Name="GrPrf" Content="Профиль"
+                    Background="LavenderBlush"
+                    Click="Profile_click">
+<!--                
+                <Button.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="Menu item 1" />
+                        <MenuItem Header="Menu item 2" />
+                        <Separator />
+                        <MenuItem Header="Menu item 3" />
+                    </ContextMenu>
+                </Button.ContextMenu>
+-->                
+            </Button>
+        </Grid>
+
+        <!-- Group Attributs: Volume, Weight, Lenght, Price -->
+        <Grid Margin="10 180 180 20" Background="LightGray" Height="Auto">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="50"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="16"/>
+                <RowDefinition Height="16"/>
+                <RowDefinition Height="16"/>
+                <RowDefinition Height="16"/>
+            </Grid.RowDefinitions>
+            <TextBlock Name="volHdr" Grid.Row="0" Text="Объем" />
+            <TextBlock Name="GrVol"  Grid.Row="0" Grid.Column="1" />
+            <TextBlock Name="wgtHdr" Grid.Row="1" Text="Вес"/>
+            <TextBlock Name="GrWgt"  Grid.Row="1" Grid.Column="1"/>
+            <TextBlock Name="lngHdr" Grid.Row="2" Text="Длина"/>
+            <TextBlock Name="GrLng"  Grid.Row="2" Grid.Column="1"/>
+            <TextBlock Name="prHdr"  Grid.Row="3" Background="Yellow" Text="Цена" />
+            <TextBlock Name="GrPrice" Grid.Row="3" Grid.Column="1" Background="Yellow"/>
+        </Grid>
+          
+        <TextBlock x:Name="TotalSupl_price"
+            HorizontalAlignment="Stretch" 
+            VerticalAlignment="Top" Height="16"
+            Margin="10, 110,10,35" Background="LightCyan" />
+
+        <!-- OK button -->
+        <Button Name="OK" HorizontalAlignment="Right"
+                Margin="10,10,10,2" 
+                VerticalAlignment="Bottom" Width="50" 
+                Click="OK_button_Click" Height="50" 
+                BorderBrush="#FF707070" BorderThickness="0" >
+            <Button.Background>
+                <ImageBrush ImageSource="OK.jpg"/>
+            </Button.Background>
+        </Button>
+    </Grid>
+</Window>

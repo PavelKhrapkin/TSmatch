@@ -1,0 +1,9 @@
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\Select\bin\Debug\Select.exe.config
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\Select\bin\Debug\Select.exe
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\Select\bin\Debug\Select.pdb
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\Select\obj\Debug\TSmatch.Select.csprojResolveAssemblyReference.cache
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\Select\obj\Debug\TSmatch_Select.GrReport.resources
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\Select\obj\Debug\Select.Properties.Resources.resources
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\Select\obj\Debug\TSmatch.Select.csproj.GenerateResource.Cache
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\Select\obj\Debug\Select.exe
+C:\Users\khrapkin\Documents\Pavel\@TSmatch\Select\obj\Debug\Select.pdb
