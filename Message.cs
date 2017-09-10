@@ -1,7 +1,7 @@
 ﻿/*----------------------------------------------------------------------------
  * Message -- multilanguage message system
  * 
- * 31.08.2017  Pavel Khrapkin
+ * 10.09.2017  Pavel Khrapkin
  *
  *--- Unit Tests ---
  * UT_Message: UT_Init, UT_AskS, UT_W, UT_S 31.8.2017 OK
@@ -14,6 +14,7 @@
  * 22.5.2017 - AskYN, Msg.OK()
  * 18.7.2017 - remake with Dictionary as a Messages store
  * 31.8.2017 - Msg.S return string; Dialog flag
+ * 10.9.2017 - MessageBox on top of SplashScreen made in txt(..,MessageBoxOptions.ServiceNotification)
  * ---------------------------------------------------------------------------------------
  *      Methods:
  * Init()     - Singleton constructor initiate static msgs Dictionary set
@@ -97,7 +98,7 @@ namespace TSmatch.Message
             catch { msg = msgcode; errType = "(!)" + errType; }
             if (!knownMsg) errType = "(*)" + errType;
             if (!Dialog) return;
-            if(doMsgBox) MessageBox.Show(msg, errType);
+            if (doMsgBox) MessageBox.Show(msg, errType, MessageBoxButton.OK, MessageBoxImage.Asterisk, reply, MessageBoxOptions.ServiceNotification);
             if (type == Severity.FATAL) Stop();
         }
 
