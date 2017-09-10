@@ -1,5 +1,10 @@
-﻿/*------------------------------------------------------------
- * SplashWindowsDemo -- https://www.codeproject.com/Articles/116875/WPF-Loading-Splash-Screen
+﻿/*--------------------------------------------------------------------------------------
+ * SplashScreen() -- Display TSmatch splash screen and status messages on the data load
+ * used idea from https://www.codeproject.com/Articles/116875/WPF-Loading-Splash-Screen
+ * 
+ * 7.07.2017 Pavel Khrapkin
+ * 
+ * Note: Hide of the messaes not in use
  */
 using System;
 using System.Windows;
@@ -8,12 +13,11 @@ using System.Threading;
 using System.Windows.Threading;
 
 using Boot = TSmatch.Bootstrap.Bootstrap;
+using Msg = TSmatch.Message.Message;
+using Mod = TSmatch.Model.Model;
 
 namespace TSmatch
 {
-    /// <summary>
-    /// Interaction logic for splash.xaml
-    /// </summary>
     public partial class SplashScreen : Window
     {
         Thread loadingThread;
@@ -40,27 +44,17 @@ namespace TSmatch
         }
         private void load()
         {
-            Dispatcher.Invoke(showDelegate, "Loading TSmatch.xlsx");
+            Dispatcher.Invoke(showDelegate, "Loading Bootstrap - TSmatch.xlsx");
             MainWindow.boot = new Boot();
- 
-            //load data 
-            this.Dispatcher.Invoke(hideDelegate);
 
-            Thread.Sleep(1000);
-            this.Dispatcher.Invoke(showDelegate, "second data loading");
-            Thread.Sleep(1000);
             //load data
-            this.Dispatcher.Invoke(hideDelegate);
-
-            Thread.Sleep(1000);
-            this.Dispatcher.Invoke(showDelegate, "last data loading");
-            Thread.Sleep(1000);
-            //load data 
-            this.Dispatcher.Invoke(hideDelegate);
+            //7/9            Dispatcher.Invoke(hideDelegate);
+            Dispatcher.Invoke(showDelegate, Msg.S("Loading", "TSmatchINFO.xlsx","Raw.xml"));
+            MainWindow.model = new Mod();
+            MainWindow.model = MainWindow.model.sr.SetModel(MainWindow.boot);
 
             //close the window
-            Thread.Sleep(1000);
-            this.Dispatcher.Invoke(DispatcherPriority.Normal, (Action)delegate () { Close(); });
+            Dispatcher.Invoke(DispatcherPriority.Normal, (Action)delegate () { Close(); });
         }
         private void showText(string txt)
         {
@@ -71,6 +65,5 @@ namespace TSmatch
         {
             BeginStoryboard(Hideboard);
         }
-
     }
 }

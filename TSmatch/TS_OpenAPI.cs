@@ -25,7 +25,7 @@
  * 30.6.2016 PKh - IsTeklaActive() modified
  * 22.8.2016 PKh - Scale method to account unit in Model
  * 29.5.2017 PKh - Get Russian GOST profile from UDA
- *  5.9.2017 PKh - Read Embed objects
+ *  7.9.2017 PKh - Read Embed objects
  * -------------------------------------------
  * public Structure AttSet - set of model component attribuyes, extracted from Tekla by method Read
  *                           AttSet is Comparable, means Sort is applicable, and 
@@ -72,41 +72,7 @@ namespace TSmatch.Tekla
         const string MYNAME = "Tekla.Read v2.1";
 
         public enum ModelDir { exceldesign, model, macro, environment };
-        /* 21.6.2016 -- заменяем на ElmAttSet
-                public struct AttSet : IComparable<AttSet>
-                {
-                    public string guid, mat, mat_type, prf;
-                    public double lng, weight, volume;
-                    public AttSet(string g, string m, string mt, string p, double l, double w, double v)
-                    { guid = g; mat = m; mat_type = mt;  prf = p; lng = l; weight = w; volume = v; }
-
-                    public int CompareTo(AttSet att)
-                    {
-                        int result = mat.CompareTo(att.mat);
-                        if (result == 0) result = prf.CompareTo(att.prf);
-                        if (result == 0) return -lng.CompareTo(att.lng);
-                        return result;
-                    }
-                }
-                public class AttSetCompararer : IEqualityComparer<AttSet>
-                {
-                    public bool Equals(AttSet p1, AttSet p2)
-                    {
-                        if (p1.guid == p2.guid & p1.mat == p2.mat & p1.prf == p2.prf & p1.lng == p2.lng
-                            & p1.volume == p2.volume & p1.weight == p2.weight) return true;
-                        else return false;
-                    }
-                    public int GetHashCode(AttSet p)
-                    {
-                        int hCode = (p.guid + p.mat + p.prf + p.lng.ToString()
-                            + p.volume.ToString() + p.weight.ToString()).GetHashCode();
-                        return hCode.GetHashCode();
-                    }
-                } // class AttSetCompararer
-                private static List<AttSet> ModAtr = new List<AttSet>();
-        21/6/2016 заменяем на ElmAttSet */
         public static TSM.ModelInfo ModInfo;
-
         public static string MyName = MYNAME;
         ////        public static string ModelMD5;
 
@@ -121,8 +87,6 @@ namespace TSmatch.Tekla
         {
             Log.set("TS_OpenAPI.Read");
             List<Elm> elements = new List<Elm>();
-            // 6.4.17 //TSM.Model model = new TSM.Model();
-            ////////////List<Part> parts = new List<Part>();
             ModInfo = model.GetInfo();
             if (dir != "" && ModInfo.ModelPath != dir
                 || name != "" && ModInfo.ModelName != String.Concat(name, ".db1")) Msg.F("Tekla.Read: Another model loaded, not", name);
@@ -387,6 +351,27 @@ namespace TSmatch.Tekla
             result = Path.GetFileNameWithoutExtension(ModInfo.ModelName);
 //            if (!isTeklaModel(result)) Msg.F("TS_Open API getModInfo error");
             return result;
+        }
+
+        public static List<Part> ReadCustomEmbeds()
+        {
+            string vendorName = "Peikko";
+            TSM.Model model = new TSM.Model();
+            TSM.ModelObjectSelector selector = model.GetModelObjectSelector();
+            System.Type[] Types = new System.Type[1];
+            Types.SetValue(typeof(Part), 0);
+            TSM.ModelObjectEnumerator objectList = selector.GetAllObjectsWithType(Types);
+            List<Part> parts = new List<Part>();
+            while (objectList.MoveNext())
+            {
+                TSM.Part myPart = objectList.Current as TSM.Part;
+                if (myPart == null) continue;
+                if (myPart.Class != "100" && myPart.Class != "101") continue;
+                parts.Add(myPart);
+                if (myPart.Name.Contains("SBKL")) continue;
+ //               var project_code = myPart.GetUserProperty("j_fabricator_name", ref vendorName);
+            }
+            return parts;
         }
 #if NOT_READY_YET
         public void Example1()
