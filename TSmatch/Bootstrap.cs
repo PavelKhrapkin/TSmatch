@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------------------
  * Bootstrap - provide initial start of TSmatch, when necessary - startup procedure
  * 
- *  10.09.2017  Pavel Khrapkin
+ *  11.09.2017  Pavel Khrapkin
  *
  *--- History ---
  * 25.3.2016 started 
@@ -21,6 +21,7 @@
  * 17.07.2017 - check Property.TSmatch resources
  * 23.08.2017 - IFC init add for ChechIFCguids() method
  * 10.09.2017 - MessageBox on top of SplashScreen
+ * 11.09.2017 - cleanup
  *  * --- Unit Tests ---
  * 2017.07.15  UT_Bootstrap   OK
  * ---------------------------------------------------------------------------
@@ -52,7 +53,6 @@ using TS = TSmatch.Tekla.Tekla;
 using Ifc = TSmatch.IFC.IFC;
 using Msg = TSmatch.Message.Message;
 using Docs = TSmatch.Document.Document;
-using SType = TSmatch.Section.Section.SType;
 using Mod = TSmatch.Model.Model;
 
 namespace TSmatch.Bootstrap
@@ -87,6 +87,7 @@ namespace TSmatch.Bootstrap
 
         public Bootstrap() 
         {
+            Log.set("Bootstrap");
             desktop_path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
             debug_path = desktop_path;
             if (isTeklaActive)
@@ -126,6 +127,7 @@ namespace TSmatch.Bootstrap
             ifc.init(IFCschema);        // инициируем IFC, используя файл схемы IFC - обычно из Tekla
             //--check other Resources and we're in air
             CheckResx("Forms", Resx.Forms);
+            Log.exit();
         }
 
         Dictionary<ResType, string> ResTab = new Dictionary<ResType, string>()
