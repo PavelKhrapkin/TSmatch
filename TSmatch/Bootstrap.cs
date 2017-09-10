@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------------------
  * Bootstrap - provide initial start of TSmatch, when necessary - startup procedure
  * 
- *  23.08.2017  Pavel Khrapkin
+ *  10.09.2017  Pavel Khrapkin
  *
  *--- History ---
  * 25.3.2016 started 
@@ -20,6 +20,7 @@
  * 11.07.2017 - public DibugDir
  * 17.07.2017 - check Property.TSmatch resources
  * 23.08.2017 - IFC init add for ChechIFCguids() method
+ * 10.09.2017 - MessageBox on top of SplashScreen
  *  * --- Unit Tests ---
  * 2017.07.15  UT_Bootstrap   OK
  * ---------------------------------------------------------------------------

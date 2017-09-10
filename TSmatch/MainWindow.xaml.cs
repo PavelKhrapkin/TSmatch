@@ -1,10 +1,10 @@
 ﻿/*-------------------------------------------
- * WPF Main Windows 6.9.2017 Pavel.Khrapkin
+ * WPF Main Windows 7.9.2017 Pavel.Khrapkin
  * --- History ---
  * 2017.05.15 - restored as TSmatch 1.0.1 after Source Control excident
  * 2017.05.23 - Menu OnPriceCheck
  * 2017.08.07 - modified SetModel initialization
- * 2017.09.06 - Splash screen add
+ * 2017.09.07 - Splash screen add
  * --- Known Issue & ToDos ---
  * - ToDo some kind of progress bar moving on the MainWindow, when Tekla re-draw HighLight.
  */
@@ -66,8 +66,8 @@ namespace TSmatch
         private void MainWindowLoad()
         {
             Title = "TSmatch - согласование поставщиков в проекте"; 
-            model = new Mod();
-            model = model.sr.SetModel(boot);
+ //7/9           model = new Mod();
+ //7/9           model = model.sr.SetModel(boot);
             WrModelInfoPanel();
             WrReportPanel();
             MWmsg("No Price Groups highlighted");
