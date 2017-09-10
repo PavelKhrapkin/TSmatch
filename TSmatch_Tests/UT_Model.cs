@@ -1,57 +1,98 @@
-﻿using System;
+﻿/*=================================
+* Model Unit Test 21.08.2017
+*=================================
+*/
+using TSmatch.Model;
+using System;
 using System.Linq;
 using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-using IMIT = TSmatch.Unit_Tests.Imitation._UT_Imitation;
-
+using FileOp = match.FileOp.FileOp;
+using Docs = TSmatch.Document.Document;
+using Boot = TSmatch.Bootstrap.Bootstrap;
 using Elm = TSmatch.ElmAttSet.ElmAttSet;
 using Mod = TSmatch.Model.Model;
+using Decl = TSmatch.Declaration.Declaration;
+using SR = TSmatch.SaveReport.SavedReport;
+using MH = TSmatch.Handler.Handler;
 
-namespace TSmatch.Unit_Tests.UT_Model
+namespace TSmatch.Model.Tests
 {
-    [TestClass]
+    [TestClass()]
     public class UT_Model
     {
-        [TestMethod]
-        public void UT_Model_getModJournal()
+        Boot boot;
+        Mod model;
+
+        [TestMethod()]
+        public void UT_setCity()
         {
+            string str = "Cанкт-Петербург, Кудрово";
+
             Mod mod = new Mod();
-            int i = mod.getModJournal("ЗС2", @"C:\TeklaStructuresModels\2016\ЗС2");
+            mod.setCity(str);
+
+            Assert.AreEqual("Cанкт-Петербург", mod.adrCity);
+            Assert.AreEqual("Кудрово", mod.adrStreet);
         }
 
-        [TestMethod]
-        public void UT_Model_getGroup()
+        [TestMethod()]
+        public void UT_getMD5()
         {
-            var Im = new IMIT();
-            Mod model = Im.IM_Model();
-            Dictionary<string, Elm> elements = Im.IM_Elements();
-            string id1 = "MyId1", id2 = "MyId2";
-            string mat = elements[id1].mat;
-            string prf = elements[id1].prf;
-            List<string> guids = new List<string> { id1, id2 };
+            var model = new Mod();
+            Assert.AreEqual(0, model.elements.Count);
 
-            ElmAttSet.Group gr = new ElmAttSet.Group(elements, mat, prf, guids);
+            // test empty list of elements MD5
+            string md5 = model.getMD5(model.elements);
+            Assert.AreEqual("4F76940A4522CE97A52FFEE1FBE74DA2", md5);
 
-            Assert.AreEqual(gr.totalPrice, elements[id1].price + elements[id2].price);
+            // test getMD5 with Raw()
+            boot = new Boot();
+            var sr = new SR();
+            model = sr.SetModel(boot, initSupl: true);
+            model.elements = sr.Raw(model);
+            Assert.IsTrue(model.elements.Count > 0);
+            string MD5 = model.getMD5(model.elements);
+            Assert.AreEqual(32, MD5.Length);
+            Assert.IsTrue(MD5 != md5);
 
-            model.setElements(elements.Values.ToList());
-            model.getGroups();
-            Assert.AreEqual(model.elmGroups.Count, 3);
-            Assert.AreEqual(model.elmGroups[0].mat, mat);
-            Assert.AreEqual(model.elmGroups[0].prf, prf);
-            Assert.AreEqual(model.elmGroups[0].totalPrice, 0);
-            Assert.AreEqual(model.elmGroups[0].guids.Count, 2);
-            Assert.AreEqual(model.elmGroups[1].guids.Count, 1);
-            var gds0 = model.elmGroups[0].guids;
-            Assert.AreEqual(gds0[0], id1);
-            Assert.AreEqual(gds0[1], id2);
-            Assert.AreEqual(model.elmGroups[1].totalPrice, 0);
+            // test -- проверка повторного вычисления MD5
+            string MD5_1 = model.getMD5(model.elements);
+            Assert.AreEqual(MD5_1, MD5);
 
-            var grB = Im.IM_Group("B20");
-            Assert.AreEqual(grB.mat, "b20");
-            Assert.AreEqual(grB.prf, "1900x1600");
-            Assert.AreEqual(grB.guids.Count, 2);
+            FileOp.AppQuit();
+        }
+
+
+        [TestMethod()]
+        public void UT_get_pricingMD5()
+        {
+            var model = new Mod();
+            Assert.AreEqual(0, model.elements.Count);
+            Assert.AreEqual(0, model.elmGroups.Count);
+
+            // test empty list of groups pricingMD5
+            string pricingMD5 = model.get_pricingMD5(model.elmGroups);
+            const string EMPTY_GROUP_LIST_PRICINGMD5 = "5E7AD112B9369E41723DDFD797758E62";
+            Assert.AreEqual(EMPTY_GROUP_LIST_PRICINGMD5, pricingMD5);
+
+            // test real model and TSmatchINFO.xlsx
+            var boot = new Boot();
+            var sr = new SR();
+            model = sr.SetModel(boot, initSupl: true);
+            model.sr = new SR();
+            model.elements = model.sr.Raw(model);
+            var mh = new MH();
+            var grp = mh.getGrps(model.elements);
+
+            pricingMD5 = model.get_pricingMD5(grp);
+
+            Assert.IsNotNull(pricingMD5);
+            Assert.AreEqual(32, pricingMD5.Length);
+            Assert.IsTrue(EMPTY_GROUP_LIST_PRICINGMD5 != pricingMD5);
+
+            FileOp.AppQuit();
         }
     }
 }

@@ -1,12 +1,14 @@
 ﻿/*----------------------------------------------------------------------------
  * Suppliers - componets supplier organisations
  * 
- *  16.4.2017  Pavel Khrapkin
+ *  26.7.2017  Pavel Khrapkin
  *
  *--- History ---
  * 27.4.2016 - Remove List<string> doc_names from the Supplier class
  * 29.11.2016 - get Supplier directly from TSmach.xlsx/Supplier, not from Suppliers List
  * 16.04.2017 - getSupplierStr() method add for Windows Form use
+ * 10.05.2017 - Not existing Supplier Handle
+ * 26.07.2017 - move getSupplierStr to MainWindow
  * ---------------------------------------------------------------------------
  *      METHODS:
  * getSupplier(name)    - create Suplier(name), get data from TSmatch.xlsx/Supplier    
@@ -23,6 +25,8 @@ using Msg = TSmatch.Message.Message;
 using Lib = match.Lib.MatchLib;
 using Docs = TSmatch.Document.Document;
 using CmpSet = TSmatch.CompSet.CompSet;
+using TSmatch.ElmAttSet;
+using Gr = TSmatch.Group.Group;
 
 namespace TSmatch.Suppliers
 {
@@ -65,7 +69,7 @@ namespace TSmatch.Suppliers
             this.CompSets = CompSets;
         }
         public Supplier(int n) { getSupplier(n); }
- 
+
         public Supplier(string _name)
         {
             Docs docSupl = Docs.getDoc(Decl.SUPPLIERS);
@@ -74,9 +78,9 @@ namespace TSmatch.Suppliers
                 string suplName = docSupl.Body.Strng(i, Decl.SUPL_NAME);
                 if (suplName != _name) continue;
                 getSupplier(i);
-                break;
+                return;
             }
-            if (this.name == "") Msg.F("No Supplier(" + _name + ")");
+            Msg.W("No such Supplier(" + _name + ")");
         }
 
         private void getSupplier(int n)
@@ -149,15 +153,53 @@ namespace TSmatch.Suppliers
             doc.saveDoc();
             doc.Close();
         }
-        public string getSupplierStr()
+
+        /// <summary>
+        /// getNEWcs(Supplier, Group) - return CompSet could be supplied by supl, or null if not available
+        /// </summary>
+        /// <param name="selSupl"></param>
+        /// <param name="grOLD"></param>
+        /// <returns></returns>
+        internal CmpSet getNEWcs(Supplier supl, Gr group)
         {
-            string str = name + "\n";
-            if (!string.IsNullOrEmpty(index)) str += index + ", ";
-            str += City + ", ";
-            if (str.Length > 20) str += "\n";
-            str += street;
-            str += "\n Web: " + Url + "\n тел." + telephone;
-            return str;
+            string grCSname = group.CompSetName;
+            CmpSet cs;
+            try { cs = new CmpSet(grCSname, this); }
+            catch { return null; }
+
+            //////////if (CompSets.Count == 0)
+            //////////{
+
+            //////////}
+            //////////var cs = CompSets.Find(x => x.name == grCSname);
+            //////////if (cs != null) return cs; // нашел CS с тем же именем!
+            // в дальнейшем тут вставить подбор CompSet по-компонентно с учетом Rule.synonyms
+            // это означает, что, хотя у CS другое название, его разрешено использовать Правилами.
+            var mod = MainWindow.model;
+            if (mod.Rules.Count == 0) return null; // тут надо загрузить Правила из TSmatchINFO.xlsx/Rules
+            Rule.Rule rule = null;
+            if (group.match != null) rule = group.match.rule;
+            cs = CompSets.Find(x => x.name == rule.CompSet.name);
+            if (cs != null) return cs;    // true - found CompSet.name from this Suppler
+            //.. по крайней мере, имя отличается -- проверим по-компонентно все прайс-листы с Match
+            //.. еще не написано
+            return cs;
+        }
+
+        /// <summary>
+        /// CheckCS(group) return true, when this Supplier
+        /// containes same material and profule, or rule allow replacement
+        /// </summary>
+        /// <param name="group"></param>
+        /// <param name="rule"></param>
+        /// <returns></returns>
+        internal bool CheckCS(Gr group)
+        {
+            string grCSname = group.CompSetName;
+            var cs = CompSets.Find(x => x.name == grCSname);
+            if (cs != null) return true; // нашел CS с тем же именем!
+
+            return false;
         }
     } // end class Supplier
 } // end namespace Suppliers

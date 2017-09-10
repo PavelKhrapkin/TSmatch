@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------
  * MatchLib -- библиотека общих подпрограмм проекта match 3.0
  * 
- *  2.5.2017 П.Храпкин, А.Пасс
+ *  8.08.2017 П.Храпкин, А.Пасс
  *  
  * - 20.11.13 переписано с VBA на С#
  * - 1.12.13 добавлен метод ToIntList
@@ -19,29 +19,38 @@
  * - 21.2.16 убрал static class Matchlib; метод ToLat()
  * -  2.8.16 добавлен метод ToDouble
  * - 17.10.16 перенес GetPars из Matcher
- * -  2.05.17 Windows.Form and TextBox references removed, MessageBox add
- * -------------------------------------------
- *      ---- методы Mtch.Lib ----
- * fileOpen(dir, name[,OpenMode]) - открываем файл Excel по имени name в директории Dir, возвращает Workbook
- * isFileExist(name)        - возвращает true, если файл name существует
- * isSheetExist(Wb, name)  - проверяет, есть ли в Workbook Wb лист name 
+ * - 16.05.17 log4net use with WPF, TraceOn()/TraceOff()
+ * - 24.05.17 Regex const for GetPar are local - not in Declaration anymore
+ * -  2.07.17 GetPersStr(str) - get numberic parameters as a List<string>
+ * - 21.07.17 Log Trace cosmeics
+ * -  8.08.17 ToLat updated -- accelerated two times
+ *      ---- Unit Tests ----
+ * 2017.07.15 UT_ToLat, UT_IContains, UT MatchLib_GetPars, UT_MatchLib_GetParsStr   OK
+ * ----------- методы Mtch.Lib ---------------------------------------------------------
+ * isWinAppExist(nameApp)   - return True, when Application exist in Windows 
+ *      --- region ToList ---
  * ToIntList(s, separator)  - возвращает List<int>, разбирая строку s с разделителями separator
  * ToStrList(s,[separator]) - возвращает List<string> из Range или из строки s с разделителем
+ * IContains(List<string> lst, v) возвращает true, если в списке lst есть строка, содержащаяся в v
+ *      --- ToInt & ToDouble ---
  * ToInt(s, [msg])          - разбор строки Int
  * ToDouble(s)              - разбор строки double
- * IContains(List<string> lst, v) возвращает true, если в списке lst есть строка, содержащаяся в v
  * timeStr()                - возвращает строку, соответствующую текущнму времени
  * ComputeMD5(List>object> obj) - возвращает строку контрольной суммы MD5 по аргументу List<object>
  * ToLat(str) - замена в текстовой строке знаков кириллицы соотв.по написанию знаками латинского алфавита
  * ToMtch(str, reg)         - return true, if str is in match with the regular expression reg. 
+ * GetPars(str)             - return List<int> of digilat parameters in str
+ * GetParsStr(str)          - return List<string> of digital parameters in str. '.' and ',' allowed.
  */
 
 using System;
 using System.Data;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.IO;
 using System.Diagnostics;
-using System.Windows;
+using log4net;
+using log4net.Config;
 
 using System.Linq;
 using System.Text;
@@ -50,25 +59,24 @@ using Excel = Microsoft.Office.Interop.Excel;
 
 using Decl = TSmatch.Declaration.Declaration;   // модуль с константами и определениями
 
+[assembly: XmlConfigurator(Watch = true)]
+
 namespace match.Lib
 {
     public class MatchLib
     {
-        public static string dirDBs = null;             // имя каталога для Документов и базы данных
-        private static Excel.Application _app = null;   // Application Excel
-
         internal static bool isWinAppExist(string nameApp)
         {
             bool ok = false;
-            foreach(var app in Process.GetProcesses())
+            foreach (var app in Process.GetProcesses())
             {
                 if (app.ProcessName.ToUpper().Contains(nameApp)) return true;
             }
-//            throw new NotImplementedException();
+            //            throw new NotImplementedException();
             return ok;
         }
 
-        #region ToList
+        #region --- ToList ---
         /// <summary>
         /// ToStrList(Excel.Range)  - возвращает лист строк, содержащийся в ячейках
         /// </summary>
@@ -139,7 +147,6 @@ namespace match.Lib
             foreach (var item in ar) strs.Add(item);
             return strs;
         }
-        #endregion ToList
 
         /// <summary>
         /// IContains(List<string> lst, v) возвращает true, если в списке lst есть строка, содержащаяся в v
@@ -154,6 +161,9 @@ namespace match.Lib
                 if (v.Contains(s)) { flag = true; break; }
             return flag;
         }
+        #endregion --- ToList ---
+
+        #region --- ToInt & ToDouble ---
         /// <summary>
         /// если в rng null, пусто или ошибка - возвращаем 0, а иначе целое число
         /// </summary>
@@ -207,6 +217,8 @@ namespace match.Lib
             double.TryParse(s, out d);
             return d;
         }
+        #endregion --- ToInt & ToDouble ---
+
         /// <summary>
         /// isCellEmpty(sh,row,col)     - возвращает true, если ячейка листа sh[rw,col] пуста или строка с пробелами
         /// </summary>
@@ -253,46 +265,13 @@ namespace match.Lib
         public static string timeStr() { return timeStr(DateTime.Now); }
         public static string timeStr(DateTime t) { return t.ToString("d.MM.yy H:mm:ss"); }
         public static string timeStr(DateTime t, string format) { return t.ToString(format); }
-#if testComputeMD5
-        static void Main(string[] args)
-        {
-            List<object> lst = new List<object>();
-            lst.Add(25);
-            lst.Add(null);
-            lst.Add(15);
-            lst.Add(-1);
-            lst.Add("txt");
-            lst.Add(null);
-            string key = ComputeMD5(lst);
-        }
-#endif
-        /// <summary>
-        /// ComputeMD5 - возвращает строку контрольной суммы MD5 по входному списку
-        /// </summary>
-        /// <param name="obj">входной параметр - список объектов</param>
-        /// <returns></returns>
-        /// <history>12.1.2016 PKh</history>
-///TODO 21/8/2016 - сделать нестатический метод ComputeMD5(this) c Sum 
-        public static string ComputeMD5(List<object> obj)
-        {
-            string str = "";
-            foreach (var v in obj) str += v == null ? "" : v.ToString();
-            return ComputeMD5(str);
-        }
-        public static string ComputeMD5(string s)
-        {
-            string str = "";
-            MD5 md5 = new MD5CryptoServiceProvider();
-            for (int i = 0; i < s.Length; i++) str += s[i];
-            byte[] data = md5.ComputeHash(Encoding.UTF8.GetBytes(str));
-            return BitConverter.ToString(data).Replace("-", "");
-        }
+
         /// <summary>
         /// ToLat() - замена в текстовой строке знаков кириллицы аналогичными
         ///           по написалию знаками латинского алфавита       
         /// </summary>
         /// <returns>преобразованная текстовая строка</returns>
-        /// <history> 21.2.2016 </history>
+        /// <history> 21.2.2016 updated 8.8.2017</history>
         ////// не получилось сделать вызов str.ToLat()
         //////public string ToLat(this string str, bool up = false)
         //////{
@@ -304,16 +283,15 @@ namespace match.Lib
             const string cyr = "АВЕКМНОРСТХаеорсух";
             const string lat = "ABEKMHOPCTXaeopcyx";
             if (string.IsNullOrEmpty(str)) return str;
-            string lt = "";
+            string lt = string.Empty;
             foreach (var s in str)
             {
-                char? st = null;
-                for (int i = 0; i < cyr.Length; i++)
-                    if (s == cyr[i]) { st = lat[i]; break; }
-                if (st == null) lt += s; else lt += st;
+                int ind = cyr.IndexOf(s);
+                lt += ind < 0 ? s : lat[ind];
             }
             return lt;
         }
+
         /// <summary>
         /// GetPars(str) разбирает строку раздела компонента или Правила, выделяя числовые параметры.
         ///         Названия материалов, профилей и другие нечисловые подстроки игнорируются.
@@ -322,14 +300,32 @@ namespace match.Lib
         /// <returns>List<int>возвращаемый список найденых параметров</int></returns>
         public static List<int> GetPars(string str)
         {
+            const string ATT_DELIM = @"(${must}|,|=| |\t|\*|x|X|х|Х)";
             const string VAL = @"\d+";
             List<int> pars = new List<int>();
-            string[] pvals = Regex.Split(str, Decl.ATT_DELIM);
+            if (string.IsNullOrEmpty(str)) return pars;
+            string[] pvals = Regex.Split(str, ATT_DELIM);
             foreach (var v in pvals)
             {
                 if (string.IsNullOrEmpty(v)) continue;
                 if (Regex.IsMatch(v, VAL))
                     pars.Add(int.Parse(Regex.Match(v, VAL).Value));
+            }
+            return pars;
+        }
+
+        public static List<string> GetParsStr(string str)
+        {
+            const string VAL = @"(\d+\.\d.*?)|(\d+,\d.*?)|(\d+)";
+            List<string> pars = new List<string>();
+            if (string.IsNullOrEmpty(str)) return pars;
+            string[] pvals = Regex.Split(str, VAL);
+            foreach (var v in pvals)
+            {
+                if (string.IsNullOrEmpty(v)) continue;
+                if (Regex.IsMatch(v, "(_)|(;)")) break;
+                if (Regex.IsMatch(v, VAL))
+                    pars.Add(Regex.Match(v, VAL).Value);
             }
             return pars;
         }
@@ -340,13 +336,16 @@ namespace match.Lib
     /// <history> 30.12.2013 P.Khrapkin
     /// 1.1.2016 в FATAL выводим стек имен
     /// 9.9.2016 use lof4net log&trace library
+    /// 16.5.2017 log4net with WPF, TraceOn()/TraceOff()
     /// </history>
     public class Log
     {
-        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        //16/5        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        public static readonly ILog log = LogManager.GetLogger("Log");
 
         private static string _context;
         static Stack<string> _nameStack = new Stack<string>();
+        private static int _trace_level = 0;
 
         public Log(string msg)
         {
@@ -356,7 +355,7 @@ namespace match.Lib
         }
         public static void set(string sub)
         {
-//            log.Info(sub);
+            if (_trace_level > 0) log.Info("---" + sub);
             _nameStack.Push(sub);
         }
         public static void exit() { _nameStack.Pop(); }
@@ -366,20 +365,29 @@ namespace match.Lib
             log.Fatal("\n\n[FATAL] " + msg);
             _tx("\n\tв стеке имен:");
             foreach (var s in _nameStack) _tx("\t-> " + s);
-            Debugger.Break();
+            //19/5            Debugger.Break();
         }
         public static void Warning(string msg) { new Log("\n[warning] " + msg); }
+        public static void TraceOn()
+        {
+            _trace_level++;
+            log.Info("===================== TraceOn ============================");
+        }
+        public static void TraceOff() { _trace_level--; }
+        public static void Trace(string msg, params object[] arg)
+        {
+            if (_trace_level <= 0) return;
+            foreach (var a in arg) if (a != null) msg += a.ToString() + " ";
+            log.Info(msg);
+        }
+        [STAThread]
         public static void START(string msg)
         {
             log.Info(DateTime.Now.ToShortDateString() + " ---------< " + msg + " >---------");
         }
-        private static void _tx(string tx)
-        {
-            Console.WriteLine(tx);
-//2/5/2017//            MessageBox.Show(tx);
-        }
+        private static void _tx(string tx) { log.Info(tx); Console.WriteLine(tx); }
     }
-#if WindowsForm_in_Use //2.5.2017
+#if OLD
     /// <summary>
     /// TextBoxWriter - система отладки с Log в WindowsForm 
     /// из http://devnuances.com/c_sharp/kak-perenapravit-vyivod-konsoli-v-textbox-v-c-sharp/
@@ -410,5 +418,63 @@ namespace match.Lib
             get { return System.Text.Encoding.UTF8; }
         }
     } // end class
-#endif //WindowsForm_in_Use
+//#if testComputeMD5
+        static void Main(string[] args)
+        {
+            List<object> lst = new List<object>();
+            lst.Add(25);
+            lst.Add(null);
+            lst.Add(15);
+            lst.Add(-1);
+            lst.Add("txt");
+            lst.Add(null);
+            string key = ComputeMD5(lst);
+        }
+//#endif
+        /// <summary>
+        /// ComputeMD5 - возвращает строку контрольной суммы MD5 по входному списку
+        /// </summary>
+        /// <param name="obj">входной параметр - список объектов</param>
+        /// <returns></returns>
+        /// <history>12.1.2016 PKh</history>
+        ///TODO 21/8/2016 - сделать нестатический метод ComputeMD5(this) c Sum 
+        public static string ComputeMD5(List<object> obj)
+        {
+            string str = "";
+            foreach (var v in obj) str += v == null ? "" : v.ToString();
+            return ComputeMD5(str);
+        }
+        public static string ComputeMD5(string s)
+        {
+            string str = "";
+            MD5 md5 = new MD5CryptoServiceProvider();
+            for (int i = 0; i < s.Length; i++) str += s[i];
+            byte[] data = md5.ComputeHash(Encoding.UTF8.GetBytes(str));
+            return BitConverter.ToString(data).Replace("-", "");
+        }
+    
+        /// <summary>
+        /// ComputeMD5() по private матрице _matr
+        /// </summary>
+        /// <returns>строку контрольной суммы MD5 из 32 знаков</returns>
+        /// <history>12.1.2016 PKh</history>
+        public string ComputeMD5()
+        {
+            Log.set("ComputeMD5");
+            string result = "";
+            string str="";
+            try
+            {
+                int min_i = _matr.GetLowerBound(0), max_i = iEOL(),
+                    min_j = _matr.GetLowerBound(1), max_j = iEOC();
+                for (int i = min_i; i <= max_i; i++)
+                    for (int j = min_j; j <= max_j; j++)
+                        str += _matr[i, j] == null? "" : _matr[i,j].ToString();
+                result = Lib.MatchLib.ComputeMD5(str);
+            } catch (Exception e) { Log.FATAL("ошибка MD5: _matr[" + iEOL() + ", " + iEOC() + "]"); return null; }
+            Log.exit();
+            return result;
+        }
+
+#endif //OLD
 }  //end namespace

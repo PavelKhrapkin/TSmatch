@@ -1,13 +1,15 @@
 ﻿/*--------------------------------------------------------------------------------------
  * ElmAttSet -- Definitions of Properties, and their Names of the Elements in the Model 
  * 
- *  25.04.2017  Pavel Khrapkin
+ *  29.08.2017  Pavel Khrapkin
  * 
- * ----- TODO 30.9.2016 ------
+ * ----- TODO 30.9.2016, 20.07.2017, 18.08.2017 ------
  * - закомментировать неиспользуемые методы группировки (Ctrl/F12 empty)
  * - разобраться в MatTypeGroup: задействовать те же коды, что в Group, если не получится - совсем закомментировать
  * - заменить Dictionary Elements на поле в Model
  * - убрать все static
+ * - выделить Mgroup и Group в отдельные классы
+ * - убрать поле ElmAttSet.prf_rus
  *----- History ------------------------------------------
  * 01.06.2016 - created from structure AttSet in Tekla.Open_API module
  * 19.06.2016 - move Group and Mgroup classes from module Model
@@ -15,22 +17,19 @@
  * 16.08.2016 - LINQ Groupping methods - not implemented (!) почистить ElmAttSet
  * 22.08.2016 - методы Scale и SetScale
  * 30.09.2016 - clean up, Group class audited
+ * 27.05.2017 - preparation to XML serialized save - parameterless constructors
+ * 20.07.2017 - error message "different meterials in group"  supress, group cleanup
+ * 18.08.2017 - add Group.compDescription field
+ * 29.08.2017 - module Group separated
  * -------------------------------------------
  * public class ElmAttSet - set of model component attribuyes, extracted from Tekla or IFC by method Read
- * public class Group     - Group elements by Materials and Profile
  * public class Mgroup    - group elements by Materials
  */
 using System;
-using System.Reflection;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using log4net;
-
-using Decl = TSmatch.Declaration.Declaration;
 using Msg = TSmatch.Message.Message;
-using Log = match.Lib.Log;
 using Lib = match.Lib.MatchLib;
 using Ifc = TSmatch.IFC.IfcManager.Core.IfcManager.IfcElement;
 using Mtch = TSmatch.Matcher.Mtch;
@@ -48,6 +47,7 @@ namespace TSmatch.ElmAttSet
         public string mat = "";
         public string mat_type = "";
         public string prf = "";
+        public string ru_prf = "";
         public double length = 0.0;
         public double weight = 0.0;
         public double volume = 0.0;
@@ -55,11 +55,11 @@ namespace TSmatch.ElmAttSet
 
         public static Dictionary<string, ElmAttSet> Elements = new Dictionary<string, ElmAttSet>();
 
-        //public string[] TAG = { "GUID", "MATERIAL", "MATERIAL_TYPE", "PROFILE", "LENGTH", "WEIGHT", "VOLUME", "PRICE" };
-        //public enum sumFields { length, weight, volume, price }
+        public ElmAttSet() { }
 
         public ElmAttSet(string _guid, string _mat, string _mat_type, string _prf
-            , double _lng = 0.0, double _weight = 0.0, double _volume = 0.0, double _price = 0.0)
+            , double _lng = 0.0, double _weight = 0.0, double _volume = 0.0
+            , string _ru_prf = "", double _price = 0.0)
         {
             guid = _guid;
             mat = _mat;
@@ -69,6 +69,7 @@ namespace TSmatch.ElmAttSet
             weight = _weight;
             volume = _volume;
             price = _price;
+            ru_prf = _ru_prf;
         }
         public ElmAttSet(Ifc ifc_elm)
         {
@@ -92,22 +93,7 @@ namespace TSmatch.ElmAttSet
             if (result == 0) return -length.CompareTo(other.length);
             return result;
         }
-        /// <summary>
-        /// ElementsMD5 -- calculate hash code MD5 for the list of elements of the model
-        /// </summary>
-        /// <returns></returns>
-        /// <remarks>It could take few minutes or more for the large model</remarks>
-        /// <history>21/6/2016 moved here from TS_OpenAPI
-        /// </history>
-        public static string ElementsMD5()
-        {
-            //            DateTime t0 = DateTime.Now;  
-            string str = "";
-            foreach (var elm in Elements.Values) str += elm.mat + elm.prf + elm.length.ToString();
-            string ModelMD5 = Lib.ComputeMD5(str);
-            return ModelMD5;
-            //            new Log("MD5 time = " + (DateTime.Now - t0).ToString());
-        }
+
         public class ElmAttSetCompararer : IEqualityComparer<ElmAttSet>
         {
             public bool Equals(ElmAttSet p1, ElmAttSet p2)
@@ -122,45 +108,7 @@ namespace TSmatch.ElmAttSet
             }
         } // end ElmAttSetCompararer
     } // end class ElmAttSet
-      /*
-          #region Groups
-          public class Groups
-          {
-              public class materialType //: IComparable<materialType>
-              {
-                  public readonly string matTypeGr;
-                  public readonly List<string> guids;
-                  public readonly double totalWeight;
-                  public readonly double totalVolume;
-                  public readonly double totalPrice;
 
-                  public materialType(string materialType)
-                  {
-                      this.matTypeGr = materialType;
-                      List<string> guids = new List<string>();
-       ///               List<ElmAttSet> mtgrElms = from elm in this by elm.
-                  }
-      //            var mgroups = from elm in elements group elm by elm.mat;
-              } // end class Groups.materialType
-
-              public class Material : IComparable<Material>
-              {
-
-              } // end class Groups.Material
-
-              public class MatPrf : IComparable<MatPrf>
-              {
-
-              } // end class Groups.MatPrf
-
-              public class Supplier : IComparable<Supplier>
-              {
-
-              } // end class Groups.Supplier
-
-          } // end class Groups
-          #endregion Groups
-      */
     #region MaterialTypeGroup, MGroup, Group
 
     ///// <summary>
@@ -279,79 +227,8 @@ namespace TSmatch.ElmAttSet
         {
             return mat.CompareTo(mgr.mat);
         }
-
-        ////////public double setMgrPrice(List<ElmAttSet> Els, List<string> guids)
-        ////////{
-        ////////    totalPrice = 0;
-        ////////    foreach (string id in guids)
-        ////////    {
-        ////////        totalPrice += Els[id].;
-        ////////    }
-        ////////    return totalPrice;
-        ////////}
-        ////internal class Build : Mgroup
-        ////{
-        ////    private List<ElmAttSet> elements;
-
-        ////    public Build(List<ElmAttSet> elements)
-        ////    {
-        ////        this.elements = elements;
-        ////    }
-        ////}
     } // end class Mgroup
-
-    public class Group : IComparable<Group>
-    {
-        public string mat;
-        public string prf;
-        public string Mat;
-        public string Prf;
-        public List<string> guids;
-        public double totalLength;
-        public double totalWeight;
-        public double totalVolume;
-        public double totalPrice;
-        public Mtch match;          // Reference to the matched supply source (i.e.line in price list)   
-        public Dictionary<string, ElmAttSet> Elements = new Dictionary<string, ElmAttSet>();
-        //---- references to other classes - price-list conteiners
-        public string CompSetName;  //список компонентов, с которыми работает правило
-        public string SupplierName; //Поставщик
-
-        public Group(Dictionary<string, ElmAttSet> Els, string _mat, string _prf, List<string> _guids)
-        {
-            Elements = Els;
-            Mat = _mat;
-            Prf = _prf;
-            mat = Lib.ToLat(_mat.ToLower().Replace("*", "x"));
-            prf = Lib.ToLat(_prf.ToLower().Replace("*", "x"));
-            guids = _guids;
-            totalLength = totalWeight = totalVolume = totalPrice = 0.0;
-            foreach (var id in guids)
-            {
-                totalLength += Els[id].length;
-                totalVolume += Els[id].volume;
-                totalWeight += Els[id].weight;
-                totalPrice += Els[id].price;
-            }
-        }
-        public int CompareTo(Group gr)     //to Sort Groups by Materials
-        {
-            int x = mat.CompareTo(gr.mat);
-            if (x == 0) x = prf.CompareTo(gr.prf);
-            return x;
-        }
-        public List<string> getGroupGuids(Dictionary<string, ElmAttSet> elements, string mat, string prf)
-        {
-            List<string> grGuids = new List<string>();
-            foreach (var elm in elements)
-            {
-                if (elm.Value.mat == mat && elm.Value.prf == prf)
-                    grGuids.Add(elm.Key);
-            }
-            return grGuids;
-        }
-    } // end class Group
-    #endregion
+#endregion
     /* 21/6/2016
         public class Group : IComparable<Group>
         {

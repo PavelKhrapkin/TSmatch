@@ -1,31 +1,28 @@
 ﻿/*----------------------------------------------------------------------------
- * Components -- работа с документами - прайс-листами поставщиков компонентов
+ * Components -- Supplier's price-list load and handling 
  * 
- * 24.04.2017  П.Храпкин
+ * 29.08.2017  П.Храпкин
  *
- *----- ToDo -----
- * 29.12.2016 написать загрузку из прайс-листа setComp(..) c разбором LoadDescriptor
- * --- журнал ---
+ * --- Unit Testing ---
+ * 2017.07.15 UT_Component_checkComp, UT_Component_rulePar, UT_isOK OK
+ * --- History ---
  * 30.11.2016 made as separate module, CompSet is now in another file
  * 30.12.2016 fill matFP, prfFP in setComp()
  * 28.02.2017 fill component fields incliding List<FP> from price-list in constructor
  * 22.04.2017 Component match isMatchGrRule=true with empty Section.body
  * 24.04.2017 getMatch method updated
+ *  9.05.2017 Msg.W in Str() about wrong CompSet Load Description
+ *  4.06.2017 IsMatch(..) and ruleRep(pattern, str) made for nest matching
  * ---------------------------------------------------------------------------
- *      МЕТОДЫ:
+ *      Methods:
  * getCompSet(name, Supplier) - getCompSet by  its name in Supplier' list
  * setComp(doc) - инициальзация данных для базы компонентов в doc
  * getComp(doc) - загружает Excel файл - список комплектующих от поставщика
+ * isMatch(gr,rule) - check if this Component in match with Rule and Group
  * UddateFrInternet() - обновляет документ комплектующих из Интернет  
- * ----- class CompSet
- *      МЕТОДЫ:
- * getMatch(gr,rule)    - check if current Component is in match with Group anf Rule
- *                        fill match from CompSet.Components and Suplier.TOC
- * 
- *    --- Вспомогательные методы - подпрограммы ---
+ *    --- Miscelleneous methods ---
  * UpgradeFrExcel(doc, strToDo) - обновление Документа по правилу strToDo
  */
-
 using System.Linq;
 using System.Collections.Generic;
 using log4net;
@@ -45,7 +42,7 @@ namespace TSmatch.Component
     {
         public static readonly ILog log = LogManager.GetLogger("Component");
 
-        public readonly DP compDP;
+        public DP compDP;
 
         /// <summary>
         /// constructor Component(doc, i, List<FP>cs_fps, List<FP>rule_fps) - get Component from price-list in doc line i
@@ -142,14 +139,14 @@ namespace TSmatch.Component
         //////////////////    return Comps; 
         //////////////////}
 #endif
-        public bool isMatch(ElmAttSet.Group gr, Rule.Rule rule = null)
+        public bool isMatch(Group.Group gr, Rule.Rule rule = null)
         {
             if (!isMatchGrRule(SType.Material, gr, rule)) return false;
             if (!isMatchGrRule(SType.Profile, gr, rule)) return false;
             return true;
         }
 
-        bool isMatchGrRule(SType stype, ElmAttSet.Group gr, Rule.Rule rule)
+        bool isMatchGrRule(SType stype, Group.Group gr, Rule.Rule rule)
         {
             if (rule == null || !compDP.dpar.ContainsKey(stype)) return true;
             string sb = new Sec(rule.text, stype).body;
@@ -164,68 +161,61 @@ namespace TSmatch.Component
                 string c = strExclude(comMatPrf, Syns);
                 string g = strExclude(grMatPrf, Syns);
                 if (c == g) return true;
-                string pattern = new Sec(rule.text, stype).body.Replace("=","");
+                string pattern = new Sec(rule.text, stype).body.Replace("=", "");
                 foreach (var s in Syns) pattern = strExclude(pattern, Syns);
-                return isMatch(pattern, c, g);
+                return isOK(pattern, c, g);
             }
-
-            ////////////if(comMatPrf.Contains("50") && grMatPrf.Contains("50"))
-            ////////////{
-            ////////////    for(int i = 0; i < comMatPrf.Length; i++)
-            ////////////    {
-            ////////////        char cc = comMatPrf[i];
-            ////////////        char gg = grMatPrf[i];
-            ////////////        if (cc == gg) continue;
-            ////////////        int ii = 25;
-            ////////////    }
-            ////////////}
-
             return comMatPrf == grMatPrf;
         }
 
-        //check if с - part of currect Component, and g - part of group
+        //check if с - part of current Component, and g - part of group
         //.. is in match in terms of template pattern string with wildcards
-        public bool isMatch(string pattern, string c, string g)
+        public bool isOK(string pattern, string c, string g)
         {
-            var p_c = rp(pattern, c);
-            var p_g = rp(pattern, g);
+            var p_c = rulePar(pattern, c);
+            var p_g = rulePar(pattern, g);
             int cnt = Math.Min(p_c.Count, p_g.Count);
-            for(int i = 0; i < cnt; i++)
+            for (int i = 0; i < cnt; i++)
             {
-                if (p_c[i] != p_g[i]) return false;
+                if (p_c[i] == p_g[i]) continue;
+                if (p_c[i][0] != '@') return false;
+                List<int> pc = Lib.GetPars(p_c[i].Substring(1));
+                List<int> pg = Lib.GetPars(p_g[i].Substring(1));
+                int minPars = Math.Min(pc.Count, pg.Count);
+                for (int n = 0; n < minPars; n++) if (pc[n] < pg[n]) return false;
             }
             return true;
         }
-        public List<string> rp(string pattern, string str)
+
+        /// <summary>
+        /// rulePar(pattern, str) - parse str with rule text pattern with '*' as wildcard
+        /// <para>return List of substring str suits to '*'</para>
+        /// <para>suffix '@' in pattern (f.e. "*x*@") means the Component could be cutted at this parameted dimension</para>
+        /// <para>throw Exception, when str not suit to the Rule.text</para>
+        /// <param name="pattern">pattern to parse</param>
+        /// <param name="str">string to be parsed with pattern</param>
+        /// <returns>list of substrings - parameters</returns>
+        public List<string> rulePar(string pattern, string str)
         {
             List<string> par = new List<string>();
-            string v = "";
-            bool p_mode = false;
-            for (int i = 0, j = 0; i < str.Length & j < pattern.Length; i++)
+            string atFlag = string.Empty;
+            foreach (string s in pattern.Split('*'))
             {
-                char r = pattern[j];
-                char p = str[i];
-                char? next = null;
-                if (j < pattern.Length) next = pattern[j + 1];
-                if (r == '*') p_mode = true;
-                else j++;
-                if (p_mode)
+                if (string.IsNullOrWhiteSpace(s)) continue;
+                char uptoCh = s[0];
+                int ind_str = str.IndexOf(uptoCh);
+                if (ind_str == -1 && uptoCh == 'x')
                 {
-                    if (p == next || next == null || i == str.Length)
-                    {
-                        p_mode = false;
-                        if (v != "") par.Add(v);
-                        v = "";
-                        continue;
-                    }
-                    v += p;
-                    continue;
+                    ind_str = str.IndexOf('*'); // не по ГОСТ, но '*' активно используется в Tekla
+                    if (ind_str == -1) break;
                 }
-                if (r == p) continue;
-                par.Clear();
-                return par;
+                if (ind_str < 0) throw new Exception();
+                string v = str.Substring(0, ind_str);
+                str = str.Substring(ind_str + 1);
+                if (v.Length > 0) par.Add(atFlag + v);
+                atFlag = (s.Length > 1 && s[1] == '@') ? "@" : string.Empty;
             }
-            if (v != "") par.Add(v);
+            if (str.Length > 0) par.Add(atFlag + str);
             return par;
         }
 
@@ -344,6 +334,12 @@ namespace TSmatch.Component
         /// <returns>representation of Component as a string</returns>
         public string Str(SType stype)
         {
+            if (!compDP.dpStr.ContainsKey(stype))
+            {
+                if (stype == SType.Price) throw new KeyNotFoundException();
+                Msg.W("CompSet wrong LoadDescriptor", stype);
+                return string.Empty;
+            }
             return compDP.dpStr[stype];
         }
     } // end class Component

@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------
  * IFC -- Interaction with model in IFC file.
  * 
- * 19.8.2016  Pavel Khrapkin
+ * 21.8.2017  Oleg Turetsky, Pavel Khrapkin
  *  
  *------ ToDo ----------
  * -ISSUE- в Read на входе "Desktop\MyColumb", а открывается файл "\Desktop\out.ifc"
@@ -13,6 +13,7 @@
  * 31.5.2016 Oleg Turetsky made sample based on incEngineCS. PKh started IFC class implementation for TSmatch
  *  1.8.2016 Oleg has changed IfcManager code
  * 19.8.2016 Implemented IAdapterCAD interface
+ * 21.8.2017 CheckIfcGuid
  * -------------------------------------------
  * public Structure AttSet - set of model component attribuyes, extracted from Tekla by method Read
  *                           AttSet is Comparable, means Sort is applicable, and 
@@ -37,6 +38,7 @@ using IfcManager.Core;
 using FileOp = match.FileOp.FileOp;
 using Lib = match.Lib.MatchLib;
 using Msg = TSmatch.Message.Message;
+using Elms = TSmatch.ElmAttSet.ElmAttSet;
 using ElmAttributes = TSmatch.ElmAttSet;
 using TSmatch.IFC.IfcManager.Core;
 
@@ -54,10 +56,10 @@ namespace TSmatch.IFC
             schemaName = _schemaName;
             if (string.IsNullOrEmpty(schemaName)) Msg.F("IFC.init: No schema");
         }
-       public static List<ElmAttributes.ElmAttSet> Read(string dir, string FileName)
-       { return Read(Path.Combine(dir, FileName)); }
+        public static List<Elms> Read(string dir, string FileName)
+        { return Read(Path.Combine(dir, FileName)); }
 
-        public static List<ElmAttributes.ElmAttSet> Read(string ifcFileName)
+        public static List<Elms> Read(string ifcFileName)
         {
             var manager = new IfcManager.Core.IfcManager();
 
@@ -134,10 +136,16 @@ namespace TSmatch.IFC
             return ElmAttSet.ElmAttSet.Elements.Values.ToList();
         }
 
-        //public void init()
-        //{
-        //    throw new NotImplementedException();
-        //}
+        /// <summary>
+        /// CheckIfcGuids() - read Ifc file and check GUIDs of elements in it for Werfau needs
+        /// </summary>
+        internal void CheckIfcGuids(string ifcFile)
+        {
+            if (!FileOp.isFileExist(ifcFile)) Msg.F("No Ifc input file", ifcFile);
+            List<Elms> elements = new List<Elms>();
+            elements = Read(ifcFile);
+            throw new NotImplementedException();
+        }
 
         public List<ElmAttributes.ElmAttSet> Read()
         {
