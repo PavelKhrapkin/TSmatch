@@ -4,6 +4,8 @@
 *=========================================
 */
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Linq;
+using System.Collections.Generic;
 
 using TS = TSmatch.Tekla.Tekla;
 using FileOp = match.FileOp.FileOp;
@@ -29,8 +31,25 @@ namespace TSmatch.Tekla.Tests
         public void UT_Example1()
         {
             var ts = new TS();
-//            ts.Example1();
+            //            ts.Example1();
 
+        }
+
+        [TestMethod()]
+        public void UT_ReadCustomEmbeds()
+        {
+            var embeds = TS.ReadCustomEmbeds();
+            int cnt = embeds.Count;
+            Assert.IsTrue(cnt > 0);
+            var embGrps = embeds.GroupBy(x => x.Name);
+            var quot = new Dictionary<string, int>();
+            foreach(var p in embGrps)
+            {
+                string part = p.Key;
+                int n = embeds.Count(x => x.Name == part);
+                quot.Add(p.Key, n);
+            }
+            Assert.Fail();
         }
     }
 }

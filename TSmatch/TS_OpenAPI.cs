@@ -353,9 +353,25 @@ namespace TSmatch.Tekla
             return result;
         }
 
-        public static void ReadCustom()
+        public static List<Part> ReadCustomEmbeds()
         {
-
+            string vendorName = "Peikko";
+            TSM.Model model = new TSM.Model();
+            TSM.ModelObjectSelector selector = model.GetModelObjectSelector();
+            System.Type[] Types = new System.Type[1];
+            Types.SetValue(typeof(Part), 0);
+            TSM.ModelObjectEnumerator objectList = selector.GetAllObjectsWithType(Types);
+            List<Part> parts = new List<Part>();
+            while (objectList.MoveNext())
+            {
+                TSM.Part myPart = objectList.Current as TSM.Part;
+                if (myPart == null) continue;
+                if (myPart.Class != "100" && myPart.Class != "101") continue;
+                parts.Add(myPart);
+                if (myPart.Name.Contains("SBKL")) continue;
+ //               var project_code = myPart.GetUserProperty("j_fabricator_name", ref vendorName);
+            }
+            return parts;
         }
 #if NOT_READY_YET
         public void Example1()

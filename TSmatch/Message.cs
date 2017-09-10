@@ -97,7 +97,7 @@ namespace TSmatch.Message
             catch { msg = msgcode; errType = "(!)" + errType; }
             if (!knownMsg) errType = "(*)" + errType;
             if (!Dialog) return;
-            if(doMsgBox) MessageBox.Show(msg, errType);
+            if (doMsgBox) MessageBox.Show(msg, errType, MessageBoxButton.OK, MessageBoxImage.Asterisk, reply, MessageBoxOptions.ServiceNotification);
             if (type == Severity.FATAL) Stop();
         }
 
