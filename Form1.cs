@@ -59,10 +59,18 @@ namespace SELECT
                     break;
 
                 case wrForm.modelReport:
+                    label_mat.Text = "Материал";
+                    label_prf.Text = "Профиль";
+                    label_price.Text = "Цена (руб)";
+                    label_vol.Text = "Объем (м3)";
+                    label_wght.Text = "Вес (т)";
                     List<string> modRep = new List<string>();
                     foreach (var gr in model.elmGroups)
                     {
-                        string str = string.Format("{0,12} {1,15} {2,20:N2}", gr.Mat, gr.Prf, gr.totalPrice);
+                        string str = string.Format(
+                            "{0,12} {1,15} {2,15:N2} {3,15:N1} {4,15:N1}"
+                            , gr.Mat, gr.Prf, gr.totalPrice
+                            , gr.totalVolume, gr.totalWeight);
                         modRep.Add(str);
                     }
                     listBox1.DataSource = modRep;
@@ -143,7 +151,7 @@ namespace SELECT
 
             model.ModReset();
             model.Handler();
-            model.wrModel(Mod.WrMod.Report);
+//26/4            model.wrModel(Mod.WrMod.Report);
             WrForm(wrForm.modelReport);
             rePrice.BackColor = Color.GreenYellow;
         }

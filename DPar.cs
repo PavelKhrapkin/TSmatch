@@ -1,4 +1,18 @@
-﻿using System;
+﻿/*--------------------------------------------------------------------------------
+ * DPar -- parse Section to get section parameters in Dictionaries dpar and dpStr
+ * 
+ * dpStr is used to display original string with capital letters
+ * dpar - for internal handling
+ *  
+ * 3.06.2017  P.Khrapkin
+ * ------ History -----
+ * 3.6.2017 - @ parameters handling
+ * ------ Constructors & Methods -----
+ * DPar(str)  - initiate DPar.pdStr dictionary for external display from string str
+ * Ad(str)    - is used to Add string str both to dpar and dpStr
+ * Col(Stype) - return Excel Column number, or -1, when not recognized
+ */
+ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;

@@ -1,11 +1,15 @@
 ﻿/*---------------------------------------------------------------------------------
 * Matrix -- базовый класс для хранения и работы со структурами данных в памяти C#
 *
-*  28.2.2016 П.Л.Храпкин 
+*  21.8.2017 П.Л.Храпкин 
 *
+*--- Unit Tests ---
+* 2017.08.2 UT_iEOL OK
 *---журнал---
 * 2.1.2016 переписан из предыдущей версии, добовлен Indexer
 * 28.2.16 добавлен Double; в Int удаляются разделители тысяч
+* 15.7.17 minor cleanup
+*  2.8.17 iEOL modified to decrease iEOL if empty rows are at the bottom
 *----------------------------------------------------------------------------------
 *   Конструкторы:
 * Matr()            - пустой, для инициирования внутреннего массива по умолчанию
@@ -27,6 +31,7 @@ using System.Collections.Generic;
 using System.Security.Cryptography;
 
 using Log = match.Lib.Log;
+using System.Xml.Serialization;
 
 namespace match.Matrix
 {
@@ -61,10 +66,10 @@ namespace match.Matrix
         /// <param name="str">массив текстовых строк - заголовкий колонок</param>
         public Matr(string[] str)
         {
-            int[] size = { 1, str.Length};
+            int[] size = { 1, str.Length };
             int[] lbnd = { 1, 1 };
             Array m = Array.CreateInstance(typeof(Object), size, lbnd);
-            _matr = (object[,]) m;
+            _matr = (object[,])m;
             int i = 1;
             foreach (var s in str) _matr[1, i++] = s as object;
         }
@@ -120,7 +125,24 @@ namespace match.Matrix
             catch { }//!!! Log.FATAL(msg); }
             return 99999999;
         }
-        public int iEOL() { return _matr.GetLength(0); }
+        public int iEOL()
+        {
+            int row_l = _matr.GetUpperBound(0);
+            int row_0 = _matr.GetLowerBound(0);
+            while (row_l >= row_0)
+            {
+                if (!isRowEmpty(row_l)) break;
+                row_l--;
+            }
+            return row_l;
+        }
+        private bool isRowEmpty(int iRow)
+        {
+            int col_0 = _matr.GetLowerBound(1);
+            int col_l = _matr.GetUpperBound(1);
+            for (int x = col_0; x <= col_l; x++) if (_matr[iRow, x] != null) return false;
+            return true;
+        }
         public int iEOC() { return _matr.GetLength(1); }
         public int LBoundR() { return _matr.GetLowerBound(0); }
         public int LBoundC() { return _matr.GetLowerBound(1); }
@@ -168,8 +190,8 @@ namespace match.Matrix
             for (int i = 1; i < rws; i++)
                 for (int j = 1; j <= old_cls; j++)
                     m[i, j] = _matr[i, j];
-                        int col = 1;
-                        foreach (var s in obj) m[rws, col++] = s;
+            int col = 1;
+            foreach (var s in obj) m[rws, col++] = s;
             _matr = (object[,])m;
         }
         public void Init(dynamic obj)
@@ -180,28 +202,6 @@ namespace match.Matrix
             int col = 0;
             foreach (var s in obj) m[1, ++col] = s;
             _matr = (object[,])m;
-        }
-        /// <summary>
-        /// ComputeMD5() по private матрице _matr
-        /// </summary>
-        /// <returns>строку контрольной суммы MD5 из 32 знаков</returns>
-        /// <history>12.1.2016 PKh</history>
-        public string ComputeMD5()
-        {
-            Log.set("ComputeMD5");
-            string result = "";
-            string str="";
-            try
-            {
-                int min_i = _matr.GetLowerBound(0), max_i = iEOL(),
-                    min_j = _matr.GetLowerBound(1), max_j = iEOC();
-                for (int i = min_i; i <= max_i; i++)
-                    for (int j = min_j; j <= max_j; j++)
-                        str += _matr[i, j] == null? "" : _matr[i,j].ToString();
-                result = Lib.MatchLib.ComputeMD5(str);
-            } catch (Exception e) { Log.FATAL("ошибка MD5: _matr[" + iEOL() + ", " + iEOC() + "]"); return null; }
-            Log.exit();
-            return result;
         }
     } //class Matr
 

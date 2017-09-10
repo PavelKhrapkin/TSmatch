@@ -1,7 +1,7 @@
 ﻿/*-------------------------------------------------------------------------------------------------------
  * Document -- works with all Documents in the system basing on TOC - Table Of Content
  * 
- * 24.04.2017  Pavel Khrapkin, Alex Pass, Alex Bobtsov
+ * 2.08.2017  Pavel Khrapkin, Alex Pass, Alex Bobtsov
  *
  *--------- History ----------------  
  * 2013-2015 заложена система управления документами на основе TOC и Штампов
@@ -27,6 +27,10 @@
  * 13.01.17 - getDoc() = getDoc(Decl.DOC_TOC)
  *  9.04.17 - getDoc optional bool arguments
  * 17.04.17 - getDoc() il = doc.Body.iEOL();
+ *  7.05.17 - bug fix -- fatal с FileOp
+ * 19.07.17 - add wrDoc diagnostics
+ * 31.07.17 - read XML file into doc.Body -- не работает!
+ *  2.08.17 - bug fix on Start; toc is private static reference now; EOLinTOC field removed
  * -------------------------------------------
  *      METHODS:
  * Start()              - Load from directory TOCdir of TOC all known Document attributes, prepare everithing
@@ -60,6 +64,7 @@ using Mtr = match.Matrix.Matr;  // класс для работы с внутр�
 using Lib = match.Lib.MatchLib;
 using Log = match.Lib.Log;
 using Msg = TSmatch.Message.Message;
+using System.IO;
 
 namespace TSmatch.Document
 {
@@ -67,6 +72,7 @@ namespace TSmatch.Document
     {
         private static Dictionary<string, Document> Documents = new Dictionary<string, Document>();   //коллекция Документов
         static Dictionary<string, string> Templates = new Dictionary<string, string>();
+        static Document toc;
 
         #region Document Declaration area
         public string name;
@@ -74,7 +80,6 @@ namespace TSmatch.Document
         public bool isChanged = false;
         public bool isNewDoc = false;   // признак вновь создаваемого Документа
         public string type;
-        private int EOLinTOC;
         public int i0, il;              // номера началной и конечной строк основной таблицы Документа
         public Excel.Workbook Wb;
         public Excel.Worksheet Sheet;
@@ -135,7 +140,8 @@ namespace TSmatch.Document
         {
             Log.set("Document.Start(#Templates)");
             Templates = _Templates;
-            Document toc = tocStart(Templates["#TOC"]);
+            //2/8            Document toc = tocStart(Templates["#TOC"]);
+            toc = tocStart(Templates["#TOC"]);
             Mtr mtr = toc.Body;
             for (int i = toc.i0; i <= toc.il; i++)
             {
@@ -183,7 +189,7 @@ namespace TSmatch.Document
         public static Document tocStart(string TOCdir)
         {
             Log.set("tocStart");
-            Document toc = new Document(Decl.DOC_TOC);
+            toc = new Document(Decl.DOC_TOC);
             toc.Wb = FileOp.fileOpen(TOCdir, Decl.F_MATCH);
             toc.Sheet = toc.Wb.Worksheets[Decl.DOC_TOC];
             toc.Body = FileOp.getSheetValue(toc.Sheet);
@@ -194,35 +200,35 @@ namespace TSmatch.Document
             Log.exit();
             return toc;
         }
-        /// <summary>
-        /// EOLstr(str) - return parsed string str into Int32, or return EOLinTOC, when str is EOL
-        /// </summary>
-        /// <returns>Int32 or EOLinTOC</returns>
-        /// <history>20.3.2016</history>
-        int EOLstr(string str)
-        {
-            Log.set("Document.Int(" + str + ")");
-            int x = 0;
-            if (!Int32.TryParse(str, out x))
-            {
-                if (this.type == "TSmatch") x = this.Sheet.UsedRange.Rows.Count;
-                else if (str == "EOL") x = this.EOLinTOC;
-            }
-            Log.exit();
-            return x;
-        }
+
         /// <summary>
         /// EOL(int tocRow) - setup this Document int numbers EndEOLinTOC, i0, and il - main table borders
+        /// <para>when TSmatch.xlsx document handled, 'EOL' could be in il TOC column</para>
         /// </summary>
         /// <param name="tocRow">line number of this Document in TOC</param>
-        /// <history>19.3.2016</history>
+        /// <history>19.3.2016
+        /// 2017.8.2 - bug fix; EOL works for TSmatch Document type only
+        /// </history>
         void EOL(int tocRow)
         {
-            Document toc = (name == Decl.DOC_TOC) ? this : getDoc();
-            EOLinTOC = EOLstr(toc.Body.Strng(tocRow, Decl.DOC_EOL));
-            this.i0 = EOLstr(toc.Body.Strng(tocRow, Decl.DOC_I0));
-            this.il = EOLstr(toc.Body.Strng(tocRow, Decl.DOC_IL));
+            i0 = Lib.ToInt(toc.Body.Strng(tocRow, Decl.DOC_I0));
+            string str = toc.Body.Strng(tocRow, Decl.DOC_IL);
+            if (str == "EOL")
+            {
+                if (type != Decl.TSMATCH) Msg.F("Shouldn't be 'EOL' here in TSmatch/TOC", tocRow);
+                string shN = toc.Body.Strng(tocRow, Decl.DOC_SHEET);
+                Mtr m;
+                if (shN == Decl.DOC_TOC) m = toc.Body;
+                else m = FileOp.getSheetValue(toc.Wb.Worksheets[shN]);
+                il = m.iEOL();
+            }
+            else il = Lib.ToInt(str);
         }
+
+#if DEBUG //for UT_Document.UT_Start only
+        public static Dictionary<string, Document> __Documents() { return Documents; }
+        public void __EOL(int iTocLine) { EOL(iTocLine); }
+#endif    //for UT_Document.UT_Start only
         #endregion
 
         public static bool IsDocExists(string name)
@@ -256,6 +262,9 @@ namespace TSmatch.Document
         /// 27.4.16 - optional flag load - if false -> don't load contents from the file
         ///  9.4.17 - optional create_if_not_exist argument
         /// 17.4.17 - doc.il = doc.Body.iEOL();
+        /// 27.4.17 - move Reset() later in code, error logic changed
+        /// 31.7.17 - read XML file in doc.Body -- does't works yet!!
+        ///  2.8.18 - bug fix doc.il set re-written
         /// </history>
         public static Document getDoc(string name = Decl.DOC_TOC
             , bool fatal = true, bool load = true, bool create_if_notexist = false, bool reset = false)
@@ -263,11 +272,7 @@ namespace TSmatch.Document
             Log.set("getDoc(" + name + ")");
             Document doc = null;
             string err = "Err getDoc: ", ex = "";
-            try
-            {
-                doc = Documents[name];
-                if (reset) doc.Reset();
-            }
+            try { doc = Documents[name]; }
             catch (Exception e) { err += "doc not in TOC"; ex = e.Message; doc = null; }
             if (doc != null && !doc.isOpen)
             {
@@ -276,24 +281,33 @@ namespace TSmatch.Document
                     if (doc.FileDirectory.Contains("#")) // #Template substitute with Path in Dictionary
                         doc.FileDirectory = Templates[doc.FileDirectory];
                     //-------- Load Document from the file or create it ------------
-                    //9/4                    bool create = !string.IsNullOrEmpty(doc.type) && doc.type[0] == 'N' ? true : false;
-                    doc.Wb = FileOp.fileOpen(doc.FileDirectory, doc.FileName, create_if_notexist);
-                    try
-                    { 
-                        doc.Sheet = doc.Wb.Worksheets[doc.SheetN];
+                    if (doc.type == "XML")
+                    {
+                        string file = Path.Combine(doc.FileDirectory, doc.FileName);
+                        throw new NotImplementedException();
+                        doc.Body = rwXML.XML.ReadFromXmlFile<Mtr>(file);
                     }
-                    catch (Exception e) { err += "no SheetN"; ex = doc.SheetN; doc = null; }
-                    doc.Body = FileOp.getSheetValue(doc.Sheet);
+                    else
+                    {
+                        doc.Wb = FileOp.fileOpen(doc.FileDirectory, doc.FileName, create_if_notexist, fatal);
+                        if (reset) doc.Reset();
+                        try { doc.Sheet = doc.Wb.Worksheets[doc.SheetN]; }
+                        catch (Exception e) { err += "no SheetN"; ex = doc.SheetN; doc = null; }
+                        if (doc != null) doc.Body = FileOp.getSheetValue(doc.Sheet);
+                    }
                 }
             } // end if(!doc.isOpen)
-            if (doc == null && fatal) Msg.F(err, ex, name);
-            if (doc != null && doc.Body != null) doc.isOpen = true;
-            doc.il = (doc.Body == null) ? 0:  doc.Body.iEOL();
+            if (doc != null)
+            {
+                doc.isOpen = true;
+                if (doc.type != Decl.TSMATCH) doc.il = doc.Body.iEOL();
+            }
+            else if (fatal) Msg.F(err, ex, name);
             Log.exit();
             return doc;
         }
         /// <summary>
-        /// Reset() - "Reset" of the Document. All contents of hes Excel Sheet erased, write Header form
+        /// Reset() - "Reset" of the Document. All contents of the Excel Sheet erased, write Header form
         /// Reset("Now") - write DataTime.Now string in Cell [1,1]
         /// </summary>
         /// <history>9.1.2014
@@ -306,16 +320,17 @@ namespace TSmatch.Document
         {
             Log.set("Reset(" + this.name + ")");
             Document toc = getDoc();
-            this.Sheet = FileOp.SheetReset(this.Wb, this.SheetN);
-            Excel.Range rng = FileOp.setRange(this.Sheet);
+            Sheet = FileOp.SheetReset(Wb, SheetN);
+            Excel.Range rng = FileOp.setRange(Sheet);
             if (this.forms.Count == 0) Msg.F("Document.Reset no HDR form", this.name);
-            string myHDR_name = this.forms[0].name;
+            string myHDR_name = forms[0].name;
             FileOp.CopyRng(toc.Wb, myHDR_name, rng);
-            this.Body = FileOp.getSheetValue(this.Sheet);
+            Body = FileOp.getSheetValue(Sheet);
             if (str == "Now")
             {
-                Body[1, 1] = Lib.timeStr();
-                FileOp.setRange(this.Sheet);
+                Body[1, 1] = Lib.timeStr(DateTime.Now, "d.MM.yy H:mm");
+                isChanged = true; 
+                FileOp.setRange(Sheet);
                 FileOp.saveRngValue(Body);
             }
             Log.exit();
@@ -385,6 +400,9 @@ namespace TSmatch.Document
 
             Form frm = forms.Find(x => x.name == formName);
             if (frm == null) Msg.F("Document.wrDoc no form", formName, this.name);
+            if (frm.col.Count != frm.row.Count) Msg.F("wrDoc Form corrupted"
+                , formName, frm.row.Count, frm.col.Count);
+            if (frm.col.Count != obj.Length) Msg.F("wrDoc wrong agroments", obj);
             if (frm.name == Form.last_name)
             {
                 Body.AddRow(obj);
@@ -495,7 +513,7 @@ namespace TSmatch.Document
             }
             ////           doc.Sheet = doc.Wb.Worksheets[name];
             doc.splitBodySummary();
-            doc.FetchInit();
+//24/5/17            doc.FetchInit();
 
             ////// если есть --> запускаем Handler
             ////if (doc.Loader != null) Proc.Reset(doc.Loader);
@@ -534,14 +552,16 @@ namespace TSmatch.Document
                         FileOp.setRange(doc.Sheet);
                         FileOp.saveRngValue(doc.Body);
 //24/4/17                        doc.chkSum = doc.Body.ComputeMD5();
-                        doc.EOLinTOC = doc.Body.iEOL();
+//2/8/17 removed EOLinTOC                       doc.EOLinTOC = doc.Body.iEOL();
+                        doc.il = doc.Body.iEOL();
                         FileOp.fileSave(doc.Wb);
                         doc.isChanged = false;
                     }
                     else
                     {
                         if (MD5.Length < 20 || EOL == 0) Msg.F("ERR_05.8_saveDoc_NOMD5");
-                        else { doc.chkSum = MD5; doc.EOLinTOC = EOLinTOC; }
+//2/8/17 removed EOLinTOC                        else { doc.chkSum = MD5; doc.EOLinTOC = EOLinTOC; }
+                        else { doc.chkSum = MD5; doc.il = EOLinTOC; }
                     }
                     Mtr tmp = FileOp.getSheetValue(toc.Sheet);
                     for (int n = toc.i0; n <= toc.il; n++)
@@ -551,7 +571,8 @@ namespace TSmatch.Document
                         tmp[n, Decl.DOC_TIME] = Lib.timeStr();
                         tmp[n, Decl.DOC_MD5] = doc.chkSum;
                         if (doc.type == "N") tmp[n, Decl.DOC_CREATED] = Lib.timeStr();
-                        if (doc.type != Decl.TSMATCH_TYPE) tmp[n, Decl.DOC_EOL] = doc.EOLinTOC;
+//2/8/17 removed EOLinTOC                        if (doc.type != Decl.TSMATCH_TYPE) tmp[n, Decl.DOC_EOL] = doc.EOLinTOC;
+                        if (doc.type != Decl.TSMATCH_TYPE) tmp[n, Decl.DOC_EOL] = doc.il;
                         FileOp.setRange(toc.Sheet);
                         FileOp.saveRngValue(tmp, AutoFit: false);  //======= save TОC in TSmatch.xlsx
                         break;
@@ -621,13 +642,14 @@ namespace TSmatch.Document
                     finally { Log.exit(); }                  
                 }
         */ //2.1.16
-           /// <summary>
-           /// инициирует Fetch-структуру Документа для Запроса fetch_rqst.
-           /// Если fetch_rqst не указан - для всех Запросов Документа.
-           /// </summary>
-           /// <param name="fetch_rqst"></param>
-           /// <history>11.1.2014 PKh
-           /// 15.1.2014 - дописан FetchInit() - просмотр всех Fetch Документа</history>
+#if FETCH
+        /// <summary>
+        /// инициирует Fetch-структуру Документа для Запроса fetch_rqst.
+        /// Если fetch_rqst не указан - для всех Запросов Документа.
+        /// </summary>
+        /// <param name="fetch_rqst"></param>
+        /// <history>11.1.2014 PKh
+        /// 15.1.2014 - дописан FetchInit() - просмотр всех Fetch Документа</history>
         public void FetchInit()
         {
             Log.set("FetchInit");
@@ -705,6 +727,7 @@ namespace TSmatch.Document
             finally { Log.exit(); }
             return result;
         }
+#endif // FETCH
         /// <summary>
         /// Класс Stamp, описывающий все штампы документа
         /// </summary>
