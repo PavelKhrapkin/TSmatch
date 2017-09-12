@@ -68,6 +68,10 @@ namespace TSmatch.Message.Tests
             Msg.Dialog = false;
             Msg.W("text");
             Assert.IsTrue(true);
+
+            // test 1: message should be modal -- должен спрашивать [OK?]
+            Msg.Dialog = true;
+            Msg.W("Should be modal");
         }
     }
 

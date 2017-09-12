@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------------------
  * Bootstrap - provide initial start of TSmatch, when necessary - startup procedure
  * 
- *  11.09.2017  Pavel Khrapkin
+ *  12.09.2017  Pavel Khrapkin
  *
  *--- History ---
  * 25.3.2016 started 
@@ -21,7 +21,7 @@
  * 17.07.2017 - check Property.TSmatch resources
  * 23.08.2017 - IFC init add for ChechIFCguids() method
  * 10.09.2017 - MessageBox on top of SplashScreen
- * 11.09.2017 - cleanup
+ * 12.09.2017 - Localization of Message in TSmatchMsg.resx and TSmatchMsg.ru.resx -- IN FACT -- NOP
  *  * --- Unit Tests ---
  * 2017.07.15  UT_Bootstrap   OK
  * ---------------------------------------------------------------------------
@@ -134,9 +134,10 @@ namespace TSmatch.Bootstrap
         {
             {ResType.Date, "Dat" },
             {ResType.File, "Fil" },
+            {ResType.Resx, "Res" },
             {ResType.Doc , "Doc" }
         };
-        enum ResType { Date, File, Doc, Err }
+        enum ResType { Date, File, Doc, Resx, Err }
         private void CheckResx(string rName, string rValue)
         {
             ResType type = ResType.Err;
@@ -163,6 +164,8 @@ namespace TSmatch.Bootstrap
                     string sdd = doc.Body.Strng(1, 1);
                     DateTime dd = Lib.getDateTime(sdd);
                     if (dd < d) resError(ResErr.Obsolete, rName);
+                    break;
+                case ResType.Resx:
                     break;
                 default: resError(ResErr.ErrResource, rName); break;
             }

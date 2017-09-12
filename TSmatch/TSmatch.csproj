@@ -118,6 +118,11 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>TSmatch.resx</DependentUpon>
     </Compile>
+    <Compile Include="Properties\TSmatchMsg.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>TSmatchMsg.resx</DependentUpon>
+    </Compile>
     <Compile Include="Rule.cs" />
     <Compile Include="SavedReport.cs" />
     <Compile Include="Section.cs" />
@@ -173,6 +178,11 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>TSmatch.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <EmbeddedResource Include="Properties\TSmatchMsg.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>TSmatchMsg.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\TSmatchMsg.ru.resx" />
     <None Include="Group.cd" />
     <None Include="SavedReport.cd" />
     <None Include="Message.cd" />

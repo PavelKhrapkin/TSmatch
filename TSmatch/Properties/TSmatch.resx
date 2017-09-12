@@ -123,6 +123,14 @@
   <data name="Messages" xml:space="preserve">
     <value>Date: 7.9.2017</value>
   </data>
+  <data name="MessagesEN" xml:space="preserve">
+    <value>Resource: TSmatchMsg.resx</value>
+    <comment>English language messages</comment>
+  </data>
+  <data name="MessagesRU" xml:space="preserve">
+    <value>Resource: TSmatchMsg.ru.resx</value>
+    <comment>Reuusian language messages</comment>
+  </data>
   <data name="TSmatch_xlsx" xml:space="preserve">
     <value>File: TSmatch.xlsx</value>
   </data>

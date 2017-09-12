@@ -1,7 +1,7 @@
 ﻿/*----------------------------------------------------------------------------
  * Message -- multilanguage message system
  * 
- * 31.08.2017  Pavel Khrapkin
+ * 12.09.2017  Pavel Khrapkin
  *
  *--- Unit Tests ---
  * UT_Message: UT_Init, UT_AskS, UT_W, UT_S 31.8.2017 OK
@@ -14,6 +14,7 @@
  * 22.5.2017 - AskYN, Msg.OK()
  * 18.7.2017 - remake with Dictionary as a Messages store
  * 31.8.2017 - Msg.S return string; Dialog flag
+ * 12.9.2017 - TSmatchMsg.resx and TSmatchMsg,ru.resx use as localization resources
  * ---------------------------------------------------------------------------------------
  *      Methods:
  * Init()     - Singleton constructor initiate static msgs Dictionary set
@@ -34,6 +35,7 @@ using log4net;
 using FileOp = match.FileOp.FileOp;
 using Docs = TSmatch.Document.Document;
 using Decl = TSmatch.Declaration.Declaration;
+using System.Resources;
 
 namespace TSmatch.Message
 {
@@ -60,6 +62,19 @@ namespace TSmatch.Message
             int iLanguage = 3;   //iLanguage =2 - ru-Ru; iLanguage = 3 - en-US
             if (getLanguage() == Decl.RUSSIAN) iLanguage = 2;
 
+            //-- check Date of TSmatchMsg.resx
+            ResourceManager mgr = Properties.TSmatchMsg.ResourceManager;
+            //            var d = new Dictionary<string, string>();
+
+            ResourceSet set = mgr.GetResourceSet(CultureInfo.CurrentCulture, true, true);
+            foreach (System.Collections.DictionaryEntry o in set)
+            {
+                _messages.Add(o.Key as string, o.Value as string);
+            }
+            mgr.ReleaseAllResources();
+        }
+
+#if OLD
             Docs doc = Docs.getDoc(Decl.MESSAGES);
             for (int i = doc.i0; i <= doc.il; i++)
             {
@@ -77,7 +92,7 @@ namespace TSmatch.Message
                 catch { F("Messages.Init fault", i - 1, keyMsg, mes); }
             }
         }
-
+#endif // OLD
         /// <summary>
         /// getLanguage() - return Windows system language
         /// </summary>
