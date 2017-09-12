@@ -125,10 +125,28 @@
 		<value>[Match]: нет секции Price в TSmatch.xlsx/TOC/LoadDescriptor
 для "{0}" и "{1}"</value>
 	</data>
-	<data name="Bootstrap__Resourse_obsolete" xml:space="preserve">
-		<value>Ресурс "{0}" устарел. Пожалуйста обновите его!</value>
+	<data name="Bootstrap__Resourse_Obsolete" xml:space="preserve">
+		<value>[Bootstrap]: Ресурс "{0}" устарел. Пожалуйста обновите его!</value>
 	</data>
 	<data name="Message__Init_fault" xml:space="preserve">
 		<value>TSmatch внутренняя ошибка [Message.Init] -- Ошибка инициализации системы сообщений</value>
+	</data>
+	<data name="Bootstrap__No_Resource_File" xml:space="preserve">
+		<value>[Bootstrap]: Нет ресурсного файла "{0}"</value>
+	</data>
+	<data name="Bootstrap__No_Resource_Document" xml:space="preserve">
+		<value>[Bootstrap]: Нет ресурсного документа "{0}"</value>
+	</data>
+	<data name="Bootstrap__Internal_Resource_Error" xml:space="preserve">
+		<value>[Bootstrap]: Внутренняя ошибка ресурса "{0}"</value>
+	</data>
+	<data name="Component__wrong_LoadDescriptor" xml:space="preserve">
+		<value>[Component]: Ошибка описания компоненты "{0}". Проверьте TSmatch.xlsx/TOC</value>
+	</data>
+	<data name="Document__Reset_no_HDR_Form" xml:space="preserve">
+		<value>[Document.Reset]: Reset документа "{0}", для которого нет формы HDR в ТОС</value>
+	</data>
+	<data name="Document__wrDoc_no_Form" xml:space="preserve">
+		<value>[Document.wrDoc]: Нет формы "{0}" для документа "{1}"</value>
 	</data>
 </root>

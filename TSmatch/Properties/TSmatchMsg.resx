@@ -126,9 +126,27 @@
 for "{0}", "{1}"</value>
   </data>
 	<data name="Message__Init_fault" xml:space="preserve">
-    <value>TSmatch Fatal internal Error in [Message.Init] -- Initialization fault  Message System</value>
+    <value>TSmatch Fatal internal Error in [Message.Init] -- Initialization fault Message System</value>
   </data>
-	<data name="Bootstrap__Resourse_obsolete" xml:space="preserve">
+	<data name="Bootstrap__Resourse_Obsolete" xml:space="preserve">
 		<value>[Bootstrap]: Resource "{0}" obsolete. Please, update it!</value>
+	</data>
+	<data name="Bootstrap__No_Resource_File" xml:space="preserve">
+		<value>[Bootstrap]: No TSmatch Resource file "{0}"</value>
+	</data>
+	<data name="Bootstrap__No_Resource_Document" xml:space="preserve">
+		<value>[Bootstrap]: No TSmatch Resource Document "{0}"</value>
+	</data>
+	<data name="Bootstrap__Internal_Resource_Error" xml:space="preserve">
+		<value>[Bootstrap]: Internal Resource error. Resource "{0}".</value>
+	</data>
+	<data name="Component__wrong_LoadDescriptor" xml:space="preserve">
+		<value>[Component]: Wrong LoadDescriptor  "{0}". Please, chech TSmatch.xlsx/TOC</value>
+	</data>
+	<data name="Document__Reset_no_HDR_Form" xml:space="preserve">
+		<value>[Document]: </value>
+	</data>
+	<data name="Document__wrDoc_no_Form" xml:space="preserve">
+		<value>[Document.wrDoc]: No form "{0}" for this Document "{1}"</value>
 	</data>
 </root>
