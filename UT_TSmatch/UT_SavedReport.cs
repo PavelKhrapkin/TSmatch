@@ -1,5 +1,5 @@
 ﻿/*=================================
- * Saved Report Unit Test 21.08.2017
+ * Saved Report Unit Test 13.09.2017
  *=================================
  */
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -15,6 +15,7 @@ using SR = TSmatch.SaveReport.SavedReport;
 using MH = TSmatch.Handler.Handler;
 using Boot = TSmatch.Bootstrap.Bootstrap;
 using TSmatch.Model;
+using System.Threading;
 
 namespace TSmatch.SaveReport.Tests
 {
@@ -185,9 +186,19 @@ namespace TSmatch.SaveReport.Tests
         [TestMethod()]
         public void UT_SR_Raw()
         {
-            // test 1: Msg("No model dir")
+            var U = new UT_TSmatch._UT_Msg();
+            // test 1: Msg("No model dir") -- RU
             Mod mod = new Mod();
             mod.dir = @"C:\ABCDEF";
+
+            try { mod.sr.Raw(mod); }
+            catch (ArgumentException e) { };
+            U.GetTxt();
+            Assert.AreEqual("", U.msg);
+
+            // test 2:  Msg("No model dir") -- EN
+            
+            U.SetCulture("en");
             mod.sr.Raw(mod);
 
             init();

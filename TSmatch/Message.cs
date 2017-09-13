@@ -31,10 +31,11 @@ using System;
 using System.Collections.Generic;
 using System.Windows;
 using System.Globalization;
+using System.Resources;
+using System.Threading;
 using log4net;
 
 using FileOp = match.FileOp.FileOp;
-using System.Resources;
 
 namespace TSmatch.Message
 {
@@ -53,13 +54,13 @@ namespace TSmatch.Message
         /// </summary>
         protected static Dictionary<string, string> _messages = new Dictionary<string, string>();
 
+        protected static ResourceManager mgr = Properties.TSmatchMsg.ResourceManager;
+
         /// <summary>
         /// singleton Message system initialization -- ToDo 31.8.17 make it with rsx Localization
         /// </summary>
         static Message()
         {
-            ResourceManager mgr = Properties.TSmatchMsg.ResourceManager;
-
             ResourceSet set = mgr.GetResourceSet(CultureInfo.CurrentCulture, true, true);
             foreach (System.Collections.DictionaryEntry o in set)
             {
@@ -68,7 +69,7 @@ namespace TSmatch.Message
             mgr.ReleaseAllResources();
         }
   
-        public static string msg, errType;
+        protected static string msg, errType;
         static void txt(Severity type, string msgcode, object[] p, bool doMsgBox=true)
         {
             msgcode = msgcode.Replace(' ', '_');
@@ -77,6 +78,7 @@ namespace TSmatch.Message
             try { msg = knownMsg ? string.Format(_messages[msgcode], p) : string.Format(msgcode, p); }
             catch { msg = knownMsg? _messages[msgcode]: msgcode; errType = "(!)" + errType; }
             if (!knownMsg) errType = "(*)" + errType;
+            if (!Dialog && type == Severity.FATAL) throw new Exception();       // "Msg.F");
             if (!Dialog) return;
             if (doMsgBox) MessageBox.Show(msg, errType, MessageBoxButton.OK, MessageBoxImage.Asterisk, reply, MessageBoxOptions.ServiceNotification);
             if (type == Severity.FATAL) Stop();

@@ -80,6 +80,7 @@
     <Compile Include="UT_SavedReport.cs" />
     <Compile Include="UT_Section.cs" />
     <Compile Include="UT_Tekla.cs" />
+    <Compile Include="_UT_Service.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

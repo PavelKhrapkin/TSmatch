@@ -3,6 +3,7 @@
 *=================================
 */
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+
 using Msg = TSmatch.Message.Message;
 
 namespace TSmatch.Message.Tests
@@ -14,15 +15,25 @@ namespace TSmatch.Message.Tests
         public void UT_init()
         {
             // тест 0: проверяем singleton initialisation
-            var U = new UT_Msg();
+            var U = new UT_TSmatch._UT_Msg();
             int cnt = U.cnt_msgs();
             Assert.IsTrue(cnt > 10);
 
             // test 1: Msg.txt
             Msg.txt("число {0} and {1}", 3.14, 2.7);
-            string tx = Msg.msg, ert = Msg.errType;
-            Assert.AreEqual("число_3,14_and_2,7", Msg.msg);
-            Assert.AreEqual("(*)TSmatch INFO", Msg.errType);
+            U.GetTxt();
+            Assert.AreEqual("число_3,14_and_2,7", U.msg);
+            Assert.AreEqual("(*)TSmatch INFO", U.errType);
+
+            // test 2: change culture to en
+            U.SetCulture("en");
+            string s = Msg.S("S");
+            Assert.AreEqual("Loading", s);
+
+            // test 3: return culture to ru
+            U.SetCulture("ru");
+            s = Msg.S("S");
+            Assert.AreEqual("Гружу", s);
         }
 
         [TestMethod()]
@@ -69,10 +80,5 @@ namespace TSmatch.Message.Tests
             Msg.Dialog = true;
             Msg.W("Should be modal");
         }
-    }
-
-    class UT_Msg : Msg
-    {
-        public int cnt_msgs() { return Msg._messages.Count; }
     }
 }
