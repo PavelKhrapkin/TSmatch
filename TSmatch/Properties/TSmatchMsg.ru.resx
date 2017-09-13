@@ -149,4 +149,10 @@
 	<data name="Document__wrDoc_no_Form" xml:space="preserve">
 		<value>[Document.wrDoc]: Нет формы "{0}" для документа "{1}"</value>
 	</data>
+	<data name="MainWindow__RePrice" xml:space="preserve">
+		<value>Пересчет стоимости материалов</value>
+	</data>
+	<data name="MainWindow__Title" xml:space="preserve">
+		<value>TSmatch - согласование поставщиков в проекте</value>
+	</data>
 </root>

@@ -1,10 +1,11 @@
 ﻿/*-------------------------------------------
- * WPF Main Windows 7.9.2017 Pavel.Khrapkin
+ * WPF Main Windows 13.9.2017 Pavel.Khrapkin
  * --- History ---
  * 2017.05.15 - restored as TSmatch 1.0.1 after Source Control excident
  * 2017.05.23 - Menu OnPriceCheck
  * 2017.08.07 - modified SetModel initialization
  * 2017.09.07 - Splash screen add
+ * 2017.09.13 - Messages from TSmatchMsg.resx
  * --- Known Issue & ToDos ---
  * - ToDo some kind of progress bar moving on the MainWindow, when Tekla re-draw HighLight.
  */
@@ -30,6 +31,7 @@ using Log = match.Lib.Log;
 using FileOp = match.FileOp.FileOp;
 using Boot = TSmatch.Bootstrap.Bootstrap;
 using Msg = TSmatch.Message.Message;
+using M = TSmatch.Properties.TSmatchMsg;
 using Mod = TSmatch.Model.Model;
 using Supl = TSmatch.Suppliers.Supplier;
 using ElmGr = TSmatch.Group.Group;
@@ -43,7 +45,7 @@ namespace TSmatch
     {
         public static readonly ILog log = LogManager.GetLogger("MainWindow");
 
-        const string ABOUT = "TSmatch v1.0.2 6.9.2017";
+        const string ABOUT = "TSmatch v1.0.2 13.9.2017";
         public static Boot boot;
         public static string MyCity = "Санкт-Петербург";
         public delegate void NextPrimeDelegate();
@@ -58,16 +60,13 @@ namespace TSmatch
             Log.START(ABOUT);
             InitializeComponent();
             new SplashScreen().ShowDialog();
-//6/7            boot = new Boot();
             MainWindowLoad();
         }
 
         #region --- MainWindow Panels ---
         private void MainWindowLoad()
         {
-            Title = "TSmatch - согласование поставщиков в проекте"; 
- //7/9           model = new Mod();
- //7/9           model = model.sr.SetModel(boot);
+            Title = Msg.S("MainWindow__Title"); //"TSmatch - согласование поставщиков в проекте"
             WrModelInfoPanel();
             WrReportPanel();
             MWmsg("No Price Groups highlighted");
@@ -263,7 +262,7 @@ namespace TSmatch
 
         private void RePrice_button_Click(object sender, RoutedEventArgs e)
         {
-            Msg.AskFOK("Пересчет стоимости материалов");
+            Msg.AskFOK("MainWindow__RePrice");  //works only as literal, not as a Name(?) - "Пересчет стоимости материалов"
             model.mh.Pricing(ref model);
             model.isChanged = true;
             RePrice.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal

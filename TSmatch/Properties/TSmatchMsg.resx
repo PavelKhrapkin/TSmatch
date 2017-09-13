@@ -144,9 +144,15 @@ for "{0}", "{1}"</value>
 		<value>[Component]: Wrong LoadDescriptor  "{0}". Please, chech TSmatch.xlsx/TOC</value>
 	</data>
 	<data name="Document__Reset_no_HDR_Form" xml:space="preserve">
-		<value>[Document]: </value>
+		<value>[Document]: Reset of the Document "{0}", which has no HDR form in TOC</value>
 	</data>
 	<data name="Document__wrDoc_no_Form" xml:space="preserve">
 		<value>[Document.wrDoc]: No form "{0}" for this Document "{1}"</value>
+	</data>
+	<data name="MainWindow__RePrice" xml:space="preserve">
+		<value>Material Price Re-calculation</value>
+	</data>
+	<data name="MainWindow__Title" xml:space="preserve">
+		<value>TSmatch - Building Materials and Suppliers Management</value>
 	</data>
 </root>
