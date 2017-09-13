@@ -4,7 +4,7 @@
  * 13.09.2017  Pavel Khrapkin
  *
  *--- Unit Tests ---
- * UT_Message: UT_Init, UT_AskS, UT_W, UT_S 31.8.2017 OK
+ * UT_Message: UT_Init, UT_AskS, UT_W, UT_S 13.09.2017 OK
  * --- History ---
  * Feb-2016 Created
  * 20.3.2016 - Error message Code display even when Message system is not initialysed yet
@@ -18,7 +18,7 @@
  * 13.9.2017 - static constructor as a singleton for _messages fill
  * ---------------------------------------------------------------------------------------
  *      Methods:
- * Init()     - Singleton constructor initiate static msgs Dictionary set
+ * static Message() - Singleton constructor initiate static msgs Dictionary set
  * F(Code,..) - Fatal error message output
  * W(Code,..) - Warning message output
  * I(Code,..) - Information Messag
@@ -34,8 +34,6 @@ using System.Globalization;
 using log4net;
 
 using FileOp = match.FileOp.FileOp;
-using Docs = TSmatch.Document.Document;
-using Decl = TSmatch.Declaration.Declaration;
 using System.Resources;
 
 namespace TSmatch.Message
@@ -55,31 +53,12 @@ namespace TSmatch.Message
         /// </summary>
         protected static Dictionary<string, string> _messages = new Dictionary<string, string>();
 
-        static Message()
-        {
-            //-- check Date of TSmatchMsg.resx
-            ResourceManager mgr = Properties.TSmatchMsg.ResourceManager;
-
-            ResourceSet set = mgr.GetResourceSet(CultureInfo.CurrentCulture, true, true);
-            foreach (System.Collections.DictionaryEntry o in set)
-            {
-                _messages.Add(o.Key as string, o.Value as string);
-            }
-            mgr.ReleaseAllResources();
-        }
-
-
         /// <summary>
         /// singleton Message system initialization -- ToDo 31.8.17 make it with rsx Localization
         /// </summary>
-        public static void Init()
+        static Message()
         {
-            int iLanguage = 3;   //iLanguage =2 - ru-Ru; iLanguage = 3 - en-US
-            if (getLanguage() == Decl.RUSSIAN) iLanguage = 2;
-
-            //-- check Date of TSmatchMsg.resx
             ResourceManager mgr = Properties.TSmatchMsg.ResourceManager;
-            //            var d = new Dictionary<string, string>();
 
             ResourceSet set = mgr.GetResourceSet(CultureInfo.CurrentCulture, true, true);
             foreach (System.Collections.DictionaryEntry o in set)
@@ -87,35 +66,6 @@ namespace TSmatch.Message
                 _messages.Add(o.Key as string, o.Value as string);
             }
             mgr.ReleaseAllResources();
-        }
-
-#if OLD
-            Docs doc = Docs.getDoc(Decl.MESSAGES);
-            for (int i = doc.i0; i <= doc.il; i++)
-            {
-                string keyMsg = doc.Body.Strng(i, 1);
-                if (string.IsNullOrWhiteSpace(keyMsg)) continue;
-                string mes = doc.Body.Strng(i, iLanguage);
-                bool emptyNextLine;
-                do
-                {
-                    string nextLine = doc.Body.Strng(++i, iLanguage);
-                    emptyNextLine = string.IsNullOrWhiteSpace(nextLine);
-                    mes += "\n\r" + nextLine;
-                } while (!emptyNextLine);
-                try { _messages.Add(keyMsg, mes.Trim()); }
-                catch { F("Messages.Init fault", i - 1, keyMsg, mes); }
-            }
-        }
-#endif // OLD
-        /// <summary>
-        /// getLanguage() - return Windows system language
-        /// </summary>
-        /// <returns></returns>
-        public static string getLanguage()
-        {
-            CultureInfo ci = CultureInfo.InstalledUICulture;
-            return ci.CompareInfo.Name;
         }
   
         public static string msg, errType;
@@ -165,9 +115,8 @@ namespace TSmatch.Message
         }
 
         public static string AskS(string msgcode, params object[] p)
-        {
+        {   // NotImplemetedYet !!
             txt(Severity.INFO, msgcode, p, doMsgBox: false);
- //           string 
  //           string str = string.Empty;
    //         str = MessageBox.Show(msg);
             return null;
