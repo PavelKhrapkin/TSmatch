@@ -160,4 +160,34 @@
 	<data name="SectionTab_is_empty" xml:space="preserve">
 		<value>[Section]: не инициализирован словарь секций SectionTab</value>
 	</data>
+	<data name="SavedReport__SetModelDir_No_Model_Directory" xml:space="preserve">
+		<value>[SavedReport.SetModelDir]: В каталоге модели нет файла "TSmatchINFO.xlsx".
+Убедитесь, что он сохранен приложением TSmatch, когда модель доступна в Tekla</value>
+	</data>
+	<data name="SavedReport__SetModelDir_No_TSmatchINFO" xml:space="preserve">
+		<value>[SavedReport.SetModelDir]: недоступен каталог модели
+"{0}"</value>
+	</data>
+	<data name="SavedReport__error_recover_impossible" xml:space="preserve">
+		<value>[SavedReport.error] : Сохраненный отчет по модели испорчен.
+Попытайтесь сохранить его заново при выходе из приложения TSmatch</value>
+	</data>
+	<data name="SavedReport__error_Corrupted_saved_report_TSmatchINFO" xml:space="preserve">
+		<value>[SavedReport.error] : Испорчен файл TSmatchINFO.xlsx
+Попробуйте записать его заново при выходе из приложения TSmatch</value>
+	</data>
+	<data name="SavedReport__Raw_CAD_Read" xml:space="preserve">
+		<value>[SavedReport.Raw]: Файл "Raw.xml" не доступен или испорчен.
+Вы действительно хотите получить его из САПР заново?</value>
+	</data>
+	<data name="SavedReport__Raw_No_model_dir" xml:space="preserve">
+		<value>[SavedReport.Raw]: не найден каталог модели, на который указывает
+                                 запись в TSmatchINFO.xlsx
+
+"{0}"
+
+Это сообщение возникает, когда нет файла TSmatchINFO.xlsx,
+и нет Tekla, чтобы его можно было создать заново.
+Попробуйте запустить Tsmatch на машине, где есть Tekla.</value>
+	</data>
 </root>

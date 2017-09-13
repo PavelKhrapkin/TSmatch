@@ -185,6 +185,11 @@ namespace TSmatch.SaveReport.Tests
         [TestMethod()]
         public void UT_SR_Raw()
         {
+            // test 1: Msg("No model dir")
+            Mod mod = new Mod();
+            mod.dir = @"C:\ABCDEF";
+            mod.sr.Raw(mod);
+
             init();
 
             model.elements = model.sr.Raw(model);

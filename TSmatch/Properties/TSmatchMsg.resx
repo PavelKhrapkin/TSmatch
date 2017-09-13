@@ -160,4 +160,30 @@ for "{0}", "{1}"</value>
 	<data name="SectionTab_is_empty" xml:space="preserve">
 		<value>[Section]: SectionTab is not initialized</value>
 	</data>
+	<data name="SavedReport__SetModelDir_No_Model_Directory" xml:space="preserve">
+		<value>[SavedReport.SetModelDir]: No "TSmatchINFO.xlsx" in model directory 
+Ensure, that this file is written by TSmatch application, when Tekla is available</value>
+	</data>
+	<data name="SavedReport__SetModelDir_No_TSmatchINFO" xml:space="preserve">
+		<value>[SavedReport.SetModelDir]: No model directory
+"{0}" is available</value>
+	</data>
+	<data name="SavedReport__error_recover_impossible" xml:space="preserve">
+		<value>[SavedReport.error] : Saved model is corrupted, and we cannot resore it.
+Try to save it again on exit of TSmatch application.</value>
+	</data>
+	<data name="SavedReport__error_Corrupted_saved_report_TSmatchINFO" xml:space="preserve">
+		<value>[SavedReport.error] : Saved model report in "TSmatchINFO.xlsx" is corrupted.
+Please, try to write it again in TSmatch application, when model in Tecla is available.</value>
+	</data>
+	<data name="SavedReport__Raw_CAD_Read" xml:space="preserve">
+		<value>[SavedReport.Raw]: File "Raw.xml" is corrupted or unavailable.
+Would you like to read it from CAD once again?</value>
+	</data>
+	<data name="SavedReport__Raw_No_model_dir" xml:space="preserve">
+		<value>[SavedReport.Raw]:  not found model directory
+"{0}" 
+pointed in TSmatchINFO.xlsx, and no Teklato read and re-create it again. 
+Please, try to run TSmatch on PC with Tekla.</value>
+	</data>
 </root>
