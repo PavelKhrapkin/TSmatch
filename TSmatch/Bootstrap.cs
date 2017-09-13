@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------------------
  * Bootstrap - provide initial start of TSmatch, when necessary - startup procedure
  * 
- *  12.09.2017  Pavel Khrapkin
+ *  13.09.2017  Pavel Khrapkin
  *
  *--- History ---
  * 25.3.2016 started 
@@ -21,9 +21,9 @@
  * 17.07.2017 - check Property.TSmatch resources
  * 23.08.2017 - IFC init add for ChechIFCguids() method
  * 10.09.2017 - MessageBox on top of SplashScreen
- * 12.09.2017 - Localization of Message in TSmatchMsg.resx and TSmatchMsg.ru.resx -- IN FACT -- NOP
+ * 12.09.2017 - remove Message.Init and all message related resources handling
  *  * --- Unit Tests ---
- * 2017.07.15  UT_Bootstrap   OK
+ * 2017.09.13  UT_Bootstrap   OK
  * ---------------------------------------------------------------------------
  *      Bootstrap Methods:
  * Bootstrap()      - check all resources and start all other modules
@@ -119,9 +119,6 @@ namespace TSmatch.Bootstrap
                     };
             Docs.Start(Templates);
             docTSmatch = Docs.getDoc();
-            //--- initiate Messages
-            Msg.Init();
-            CheckResx("Messages", Resx.Messages);
             //--- iniciate Ifc
             IFCschema = Path.Combine(_TOCdir, @"..\inp\IFC2X3.exp");
             ifc.init(IFCschema);        // инициируем IFC, используя файл схемы IFC - обычно из Tekla

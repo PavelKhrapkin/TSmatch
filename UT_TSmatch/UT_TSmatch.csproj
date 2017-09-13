@@ -58,6 +58,11 @@
   </Choose>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\ResourceUT.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ResourceUT.resx</DependentUpon>
+    </Compile>
     <Compile Include="UT_Bootstrap.cs" />
     <Compile Include="UT_Component.cs" />
     <Compile Include="UT_Documents.cs" />
@@ -84,6 +89,12 @@
       <Project>{FBAE5BDB-3A4F-4FA5-BDCE-AC3FB437CAA4}</Project>
       <Name>TSmatch</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\ResourceUT.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ResourceUT.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

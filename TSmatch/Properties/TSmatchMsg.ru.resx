@@ -117,10 +117,6 @@
 	<resheader name="writer">
 		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
 	</resheader>
-	<data name="_Date" xml:space="preserve">
-    <value>12.09.2017</value>
-    <comment>reated 12.09.2017 Pavel Khrapkin</comment>
-  </data>
 	<data name="Match__Bad_Price_Descriptor" xml:space="preserve">
 		<value>[Match]: нет секции Price в TSmatch.xlsx/TOC/LoadDescriptor
 для "{0}" и "{1}"</value>
@@ -154,5 +150,11 @@
 	</data>
 	<data name="MainWindow__Title" xml:space="preserve">
 		<value>TSmatch - согласование поставщиков в проекте</value>
+	</data>
+	<data name="Splash__Loading_Bootstrap" xml:space="preserve">
+		<value>[Bootstrap]: Загрузка диспетчерской базы TSmatch.xlsx</value>
+	</data>
+	<data name="S" xml:space="preserve">
+		<value>Гружу</value>
 	</data>
 </root>

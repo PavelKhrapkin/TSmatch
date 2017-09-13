@@ -1,7 +1,7 @@
 ﻿/*----------------------------------------------------------------------------
  * Message -- multilanguage message system
  * 
- * 12.09.2017  Pavel Khrapkin
+ * 13.09.2017  Pavel Khrapkin
  *
  *--- Unit Tests ---
  * UT_Message: UT_Init, UT_AskS, UT_W, UT_S 31.8.2017 OK
@@ -15,6 +15,7 @@
  * 18.7.2017 - remake with Dictionary as a Messages store
  * 31.8.2017 - Msg.S return string; Dialog flag
  * 12.9.2017 - TSmatchMsg.resx and TSmatchMsg,ru.resx use as localization resources
+ * 13.9.2017 - static constructor as a singleton for _messages fill
  * ---------------------------------------------------------------------------------------
  *      Methods:
  * Init()     - Singleton constructor initiate static msgs Dictionary set
@@ -53,6 +54,20 @@ namespace TSmatch.Message
         /// _messages - set of key- Message code string and message value- string in local culture
         /// </summary>
         protected static Dictionary<string, string> _messages = new Dictionary<string, string>();
+
+        static Message()
+        {
+            //-- check Date of TSmatchMsg.resx
+            ResourceManager mgr = Properties.TSmatchMsg.ResourceManager;
+
+            ResourceSet set = mgr.GetResourceSet(CultureInfo.CurrentCulture, true, true);
+            foreach (System.Collections.DictionaryEntry o in set)
+            {
+                _messages.Add(o.Key as string, o.Value as string);
+            }
+            mgr.ReleaseAllResources();
+        }
+
 
         /// <summary>
         /// singleton Message system initialization -- ToDo 31.8.17 make it with rsx Localization
@@ -109,7 +124,7 @@ namespace TSmatch.Message
             errType = "TSmatch " + type;
             bool knownMsg = _messages.ContainsKey(msgcode);
             try { msg = knownMsg ? string.Format(_messages[msgcode], p) : string.Format(msgcode, p); }
-            catch { msg = msgcode; errType = "(!)" + errType; }
+            catch { msg = knownMsg? _messages[msgcode]: msgcode; errType = "(!)" + errType; }
             if (!knownMsg) errType = "(*)" + errType;
             if (!Dialog) return;
             if (doMsgBox) MessageBox.Show(msg, errType, MessageBoxButton.OK, MessageBoxImage.Asterisk, reply, MessageBoxOptions.ServiceNotification);
