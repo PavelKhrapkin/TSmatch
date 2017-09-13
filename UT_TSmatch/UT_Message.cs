@@ -21,7 +21,7 @@ namespace TSmatch.Message.Tests
             // test 1: Msg.txt
             Msg.txt("число {0} and {1}", 3.14, 2.7);
             string tx = Msg.msg, ert = Msg.errType;
-            Assert.AreEqual("число 3,14 and 2,7", Msg.msg);
+            Assert.AreEqual("число_3,14_and_2,7", Msg.msg);
             Assert.AreEqual("(*)TSmatch INFO", Msg.errType);
         }
 
@@ -38,7 +38,7 @@ namespace TSmatch.Message.Tests
         {
             // test 0: Message не инициализирован, сообщение "незнакомое"
             string s = Msg.S("Not Initialized Message");
-            Assert.AreEqual(s, "(*)TSmatch SPLASH Not Initialized Message");
+            Assert.AreEqual(s, "(*)TSmatch SPLASH Not_Initialized_Message");
 
             // test 1: нормальный вывод сообщения по русски
             s = Msg.S("Bootstrap__No_Resource_File", "нечто");
@@ -51,6 +51,10 @@ namespace TSmatch.Message.Tests
             // test 3: вывод сообщения, которое есть, но с отсутствующим параметром
             s = Msg.S("Bootstrap__No_Resource_File");
             Assert.AreEqual(s, "(!)TSmatch SPLASH [Bootstrap]: Нет ресурсного файла \"{0}\"");
+
+            // test 4: распознавание сообщения с пробелами, замена их на '_'
+            s = Msg.S("SectionTab is empty");
+            Assert.AreEqual("[Section]: не инициализирован словарь секций SectionTab", s);
         }
 
         [TestMethod()]

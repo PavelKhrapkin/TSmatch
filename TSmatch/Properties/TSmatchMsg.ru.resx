@@ -157,4 +157,7 @@
 	<data name="S" xml:space="preserve">
 		<value>Гружу</value>
 	</data>
+	<data name="SectionTab_is_empty" xml:space="preserve">
+		<value>[Section]: не инициализирован словарь секций SectionTab</value>
+	</data>
 </root>

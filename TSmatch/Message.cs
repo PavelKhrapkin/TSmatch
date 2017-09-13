@@ -71,6 +71,7 @@ namespace TSmatch.Message
         public static string msg, errType;
         static void txt(Severity type, string msgcode, object[] p, bool doMsgBox=true)
         {
+            msgcode = msgcode.Replace(' ', '_');
             errType = "TSmatch " + type;
             bool knownMsg = _messages.ContainsKey(msgcode);
             try { msg = knownMsg ? string.Format(_messages[msgcode], p) : string.Format(msgcode, p); }

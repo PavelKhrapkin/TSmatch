@@ -157,4 +157,7 @@ for "{0}", "{1}"</value>
 	<data name="S" xml:space="preserve">
 		<value>Loading</value>
 	</data>
+	<data name="SectionTab_is_empty" xml:space="preserve">
+		<value>[Section]: SectionTab is not initialized</value>
+	</data>
 </root>
