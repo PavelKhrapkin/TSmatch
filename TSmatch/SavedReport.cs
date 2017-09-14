@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------------------
  * SavedReport -- class for handle saved reports in TSmatchINFO.xlsx
  * 
- *  13.09.2017 П.Л. Храпкин
+ *  14.09.2017 П.Л. Храпкин
  *  
  *--- Unit Tests ---
  * UT_GetModelInfo, UT-GetSavedReport, UT_GetSavedRules 18.8.2017 OK 
@@ -26,7 +26,7 @@
  * 14.08.2017 - CheckModelIntegrity: no model.name is tested in without file; check IfDirExist()
  * 16.08.2017 - SetSavedMod method removed; protected instead of public methods; Recovery audit
  * 20.08.2017 - SavedReport audit: model.dir in TSMatchINFO.xlsx ignored, used one from Boot
- * 13.09.2017 - Msg audit
+ * 14.09.2017 - Msg audit
  *--- Methods: -------------------      
  * SetModel(boot)   - initialize model by reading from TSmatchINFO.xlsx ans Raw.xml or from scratch
  *      private SetModDir(boot) - subset of SetModel(), setup model.dir, name and phase

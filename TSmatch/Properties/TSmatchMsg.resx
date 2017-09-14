@@ -181,9 +181,12 @@ Please, try to write it again in TSmatch application, when model in Tecla is ava
 Would you like to read it from CAD once again?</value>
 	</data>
 	<data name="SavedReport__Raw_No_model_dir" xml:space="preserve">
-		<value>[SavedReport.Raw]:  not found model directory
+		<value>[SavedReport.Raw]:  not found model directory, pointed by
+     TSmatchINFO.xlsx, or written in Windows Environment
+
 "{0}" 
-pointed in TSmatchINFO.xlsx, and no Teklato read and re-create it again. 
+
+and there is no Tekla active to read and re-create it again. 
 Please, try to run TSmatch on PC with Tekla.</value>
 	</data>
 </root>

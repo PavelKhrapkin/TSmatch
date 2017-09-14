@@ -182,12 +182,12 @@
 	</data>
 	<data name="SavedReport__Raw_No_model_dir" xml:space="preserve">
 		<value>[SavedReport.Raw]: не найден каталог модели, на который указывает
-                                 запись в TSmatchINFO.xlsx
+            запись в TSmatchINFO.xlsx или записано в регистре Windows
 
 "{0}"
 
 Это сообщение возникает, когда нет файла TSmatchINFO.xlsx,
 и нет Tekla, чтобы его можно было создать заново.
-Попробуйте запустить Tsmatch на машине, где есть Tekla.</value>
+Попробуйте запустить TSmatch на машине, где есть Tekla.</value>
 	</data>
 </root>

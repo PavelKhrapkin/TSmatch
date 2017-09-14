@@ -184,22 +184,52 @@ namespace TSmatch.SaveReport.Tests
         }
 #endif
         [TestMethod()]
-        public void UT_SR_Raw()
+        public void UT_SR_RawMsg()
         {
+            // -- чтобы посмотреть, как выглядит MessageBox, но с Assert.Fault по Msg.FOK(), используй
+            //var U = new UT_TSmatch._UT_Msg(true);
             var U = new UT_TSmatch._UT_Msg();
             // test 1: Msg("No model dir") -- RU
             Mod mod = new Mod();
             mod.dir = @"C:\ABCDEF";
-
             try { mod.sr.Raw(mod); }
-            catch (ArgumentException e) { };
+            catch (Exception ex) { Assert.AreEqual("Msg.F", ex.Message); }
             U.GetTxt();
-            Assert.AreEqual("", U.msg);
+            Assert.AreEqual("[SavedReport.Raw]: не найден каталог модели, на который указывает\r\n            запись в TSmatchINFO.xlsx или записано в регистре Windows\r\n\r\n\"C:\\ABCDEF\"\r\n\r\nЭто сообщение возникает, когда нет файла TSmatchINFO.xlsx,\r\nи нет Tekla, чтобы его можно было создать заново.\r\nПопробуйте запустить TSmatch на машине, где есть Tekla.", U.msg);
 
             // test 2:  Msg("No model dir") -- EN
-            
+            // -- чтобы посмотреть, как выглядит MessageBox, но с Assert.Fault по Msg.FOK(), используй
+            //U.SetCulture("en", true);
             U.SetCulture("en");
-            mod.sr.Raw(mod);
+            try { mod.sr.Raw(mod); }
+            catch (Exception ex) { Assert.AreEqual("Msg.F", ex.Message); }
+            U.GetTxt();
+            Assert.AreEqual("[SavedReport.Raw]:  not found model directory, pointed by\r\n     TSmatchINFO.xlsx, or written in Windows Environment\r\n\r\n\"C:\\ABCDEF\" \r\n\r\nand there is no Tekla active to read and re-create it again. \r\nPlease, try to run TSmatch on PC with Tekla.", U.msg);
+
+            // test 3:  Msg("Raw_CAD_Read") -- EN
+            // -- чтобы посмотреть, как выглядит MessageBox, но с Assert.Fault по Msg.FOK(), используй
+            //U.SetCulture("en", true);
+            U.SetCulture("en");
+            mod.dir = @"C:\Windows";
+            try { mod.sr.Raw(mod); }
+            catch (Exception ex) { Assert.AreEqual("Msg.F", ex.Message); }
+            U.GetTxt();
+            Assert.AreEqual("[SavedReport.Raw]: File \"Raw.xml\" is corrupted or unavailable.\r\nWould you like to read it from CAD once again?", U.msg);
+
+            // test 4:  Msg("Raw_CAD_Read") -- RU
+            // -- чтобы посмотреть, как выглядит MessageBox, но с Assert.Fault по Msg.FOK(), используй
+            //U.SetCulture("ru", true);
+            U.SetCulture("ru");
+            mod.dir = @"C:\Windows";
+            try { mod.sr.Raw(mod); }
+            catch (Exception ex) { Assert.AreEqual("Msg.F", ex.Message); }
+            U.GetTxt();
+            Assert.AreEqual("[SavedReport.Raw]: Файл \"Raw.xml\" не доступен или испорчен.\r\nВы действительно хотите получить его из САПР заново?", U.msg);
+        }
+
+        [TestMethod()]
+        public void UT_SR_Raw()
+        { 
 
             init();
 

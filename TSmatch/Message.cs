@@ -78,8 +78,7 @@ namespace TSmatch.Message
             try { msg = knownMsg ? string.Format(_messages[msgcode], p) : string.Format(msgcode, p); }
             catch { msg = knownMsg? _messages[msgcode]: msgcode; errType = "(!)" + errType; }
             if (!knownMsg) errType = "(*)" + errType;
-            if (!Dialog && type == Severity.FATAL) throw new Exception();       // "Msg.F");
-            if (!Dialog) return;
+            if (!Dialog) throw new ArgumentException("Msg.F");
             if (doMsgBox) MessageBox.Show(msg, errType, MessageBoxButton.OK, MessageBoxImage.Asterisk, reply, MessageBoxOptions.ServiceNotification);
             if (type == Severity.FATAL) Stop();
         }
