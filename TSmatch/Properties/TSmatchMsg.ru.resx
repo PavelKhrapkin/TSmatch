@@ -190,4 +190,7 @@
 и нет Tekla, чтобы его можно было создать заново.
 Попробуйте запустить TSmatch на машине, где есть Tekla.</value>
 	</data>
+	<data name="Splash__Loading_TSmatchINFO" xml:space="preserve">
+		<value>[SavedReport]: Загружаю "{0}" и "{1}"</value>
+	</data>
 </root>

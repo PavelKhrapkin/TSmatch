@@ -189,4 +189,7 @@ Would you like to read it from CAD once again?</value>
 and there is no Tekla active to read and re-create it again. 
 Please, try to run TSmatch on PC with Tekla.</value>
 	</data>
+	<data name="Splash__Loading_TSmatchINFO" xml:space="preserve">
+		<value>[SavedReport]: Loading "{0}" and "{1}".</value>
+	</data>
 </root>

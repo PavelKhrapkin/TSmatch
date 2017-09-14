@@ -1,5 +1,5 @@
 ﻿<!--
-    SplashScreen Pavel Khrapkin 10.09.2017
+    SplashScreen Pavel Khrapkin 14.09.2017
     used code code https://www.codeproject.com/Articles/38291/Implement-Splash-Screen-with-WPF
     
     NB: Hide part not in use!
@@ -27,13 +27,13 @@
             <ThicknessAnimationUsingKeyFrames Storyboard.TargetProperty="(FrameworkElement.Margin)"
                                               Storyboard.TargetName="txtLoading">
                 <EasingThicknessKeyFrame KeyTime="0:0:0" Value="0,0,0,40"/>
-                <EasingThicknessKeyFrame KeyTime="0:0:3" Value="0,0,0,200"/>
+                <EasingThicknessKeyFrame KeyTime="0:0:3" Value="0,0,0,150"/>
             </ThicknessAnimationUsingKeyFrames>
         </Storyboard>
     </Window.Resources>
     <Grid Background="Ivory">
         <Grid VerticalAlignment="Bottom" HorizontalAlignment="Stretch" Height="150" >
-            <TextBlock x:Name="txtLoading" TextAlignment="Left" FontSize="16" FontWeight="Normal"
+            <TextBlock x:Name="txtLoading" TextAlignment="Left" FontSize="14" FontWeight="Normal"
                        Foreground="#FF052045"  Text="Beta 0.9"  TextWrapping="Wrap" 
                        VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="421">
                 <TextBlock.Effect>

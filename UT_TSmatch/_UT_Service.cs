@@ -1,7 +1,7 @@
 ﻿/*=======================================================
 * _UT_Service - common service module for all Unit Tests
 * 
-* 13.09.2017 Pavel Khrapkin 2.8.2017
+* 14.09.2017 Pavel Khrapkin 2.8.2017
 *========================================================
 */
 using System;

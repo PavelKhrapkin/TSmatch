@@ -1,5 +1,5 @@
 ﻿/*=================================
- * Saved Report Unit Test 13.09.2017
+ * Saved Report Unit Test 14.09.2017
  *=================================
  */
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -7,15 +7,11 @@ using System;
 using System.Linq;
 
 using Decl = TSmatch.Declaration.Declaration;
-using Lib = match.Lib.MatchLib;
 using FileOp = match.FileOp.FileOp;
-using Docs = TSmatch.Document.Document;
 using Mod = TSmatch.Model.Model;
 using SR = TSmatch.SaveReport.SavedReport;
 using MH = TSmatch.Handler.Handler;
 using Boot = TSmatch.Bootstrap.Bootstrap;
-using TSmatch.Model;
-using System.Threading;
 
 namespace TSmatch.SaveReport.Tests
 {

@@ -1,7 +1,7 @@
 ﻿/*----------------------------------------------------------------------------
  * Message -- multilanguage message system
  * 
- * 13.09.2017  Pavel Khrapkin
+ * 14.09.2017  Pavel Khrapkin
  *
  *--- Unit Tests ---
  * UT_Message: UT_Init, UT_AskS, UT_W, UT_S 13.09.2017 OK
@@ -15,7 +15,7 @@
  * 18.7.2017 - remake with Dictionary as a Messages store
  * 31.8.2017 - Msg.S return string; Dialog flag
  * 12.9.2017 - TSmatchMsg.resx and TSmatchMsg,ru.resx use as localization resources
- * 13.9.2017 - static constructor as a singleton for _messages fill
+ * 14.9.2017 - static constructor as a singleton for _messages fill; ArgumentException for UTs
  * ---------------------------------------------------------------------------------------
  *      Methods:
  * static Message() - Singleton constructor initiate static msgs Dictionary set
