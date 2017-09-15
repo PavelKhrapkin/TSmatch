@@ -97,6 +97,7 @@
     <Compile Include="Document.cs" />
     <Compile Include="DPar.cs" />
     <Compile Include="ElmAttSet.cs" />
+    <Compile Include="EmbedAttSet.cs" />
     <Compile Include="FileOp.cs" />
     <Compile Include="Group.cs" />
     <Compile Include="IFC.cs" />

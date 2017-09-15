@@ -1,7 +1,7 @@
 ﻿/*--------------------------------------------------------------------------------------
  * ElmAttSet -- Definitions of Properties, and their Names of the Elements in the Model 
  * 
- *  29.08.2017  Pavel Khrapkin
+ *  15.09.2017  Pavel Khrapkin
  * 
  * ----- TODO 30.9.2016, 20.07.2017, 18.08.2017 ------
  * - закомментировать неиспользуемые методы группировки (Ctrl/F12 empty)
@@ -9,7 +9,6 @@
  * - заменить Dictionary Elements на поле в Model
  * - убрать все static
  * - выделить Mgroup и Group в отдельные классы
- * - убрать поле ElmAttSet.prf_rus
  *----- History ------------------------------------------
  * 01.06.2016 - created from structure AttSet in Tekla.Open_API module
  * 19.06.2016 - move Group and Mgroup classes from module Model
@@ -21,21 +20,19 @@
  * 20.07.2017 - error message "different meterials in group"  supress, group cleanup
  * 18.08.2017 - add Group.compDescription field
  * 29.08.2017 - module Group separated
+ * 15.09.2017 - audit & cleanup
  * -------------------------------------------
  * public class ElmAttSet - set of model component attribuyes, extracted from Tekla or IFC by method Read
  * public class Mgroup    - group elements by Materials
  */
+using log4net;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using log4net;
-using Msg = TSmatch.Message.Message;
-using Lib = match.Lib.MatchLib;
-using Ifc = TSmatch.IFC.IfcManager.Core.IfcManager.IfcElement;
-using Mtch = TSmatch.Matcher.Mtch;
 using CmpSet = TSmatch.CompSet.CompSet;
+using Ifc = TSmatch.IFC.IfcManager.Core.IfcManager.IfcElement;
+using Lib = match.Lib.MatchLib;
+using Msg = TSmatch.Message.Message;
 using Supl = TSmatch.Suppliers.Supplier;
-
 
 namespace TSmatch.ElmAttSet
 {
@@ -110,80 +107,6 @@ namespace TSmatch.ElmAttSet
     } // end class ElmAttSet
 
     #region MaterialTypeGroup, MGroup, Group
-
-    ///// <summary>
-    ///// Group Elemets by Material Types
-    ///// </summary>
-    //public class MaterialTypeGroup : IComparable<MaterialTypeGroup>
-    //{
-    //    public string matTypeGr;
-    //    public List<string> guids;
-    //    public double totalWeight;
-    //    public double totalVolume;
-    //    public double totalPrice;
-
-    //    public static List<MaterialTypeGroup> MatTypeGroups = new List<MaterialTypeGroup>();
-    //    public static double[] MatTypeGrSummary = new double[6];
-
-    //    public MaterialTypeGroup(string matTypeGr, List<string> guids)
-    //    {
-    //        if (guids.Count == 0) return;
-    //        this.matTypeGr = matTypeGr;
-    //        this.guids = guids;
-    //        totalWeight = ElmAttSet.SumAtt(ElmAttSet.sumFields.weight, guids);
-    //        totalVolume = ElmAttSet.SumAtt(ElmAttSet.sumFields.volume, guids);
-    //        totalPrice  = ElmAttSet.SumAtt(ElmAttSet.sumFields.price, guids);
-    //        MatTypeGroups.Add(this);
-    //    }
-    //    public int CompareTo(MaterialTypeGroup mtg)     //to Sort Groups by Material Types
-    //    {
-    //        return matTypeGr.CompareTo(mtg.matTypeGr);
-    //    }
-    //    public static List<MaterialTypeGroup> setMaterialTypeGroups()
-    //    {
-    //        string curMTG = "";
-    //        List<string> curGuids = new List<string>();
-    //        foreach (var elm in ElmAttSet.Elements.Values)
-    //        {
-    //            if (elm.mat_type == curMTG) curGuids.Add(elm.guid);
-    //            else
-    //            {
-    //                new MaterialTypeGroup(curMTG, curGuids);
-    //                curMTG = elm.mat_type;
-    //                curGuids.Clear();
-    //                curGuids.Add(elm.guid);
-    //            }
-    //        }
-    //        new MaterialTypeGroup(curMTG, curGuids);
-    //        return MatTypeGroups;
-    //    }
-    //    /// <summary>
-    //    /// getMatTypeGrSummay() - get in MatTypeGrSummary results by Material Type Group
-    //    ///   !!  this is hardcode defined for CONCRETE and STEEL groups only !!
-    //    /// </summary>
-    //    public static void getMatTypeGrSummary()
-    //    {
-    //        Log.set("getMatTypeGrSummary");
-    //        setMaterialTypeGroups();
-    //        foreach(var v in MatTypeGroups)
-    //        {
-    //            if (v.matTypeGr.ToLower().Contains("concrete"))
-    //            {       // CONCRETE //
-    //                MatTypeGrSummary[0] = v.totalVolume/1000/1000/1000;
-    //                MatTypeGrSummary[2] = v.totalWeight;
-    //                MatTypeGrSummary[4] = v.totalPrice;
-    //            }
-    //            else
-    //            {       // STEEL //
-    //                MatTypeGrSummary[1] = v.totalVolume/1000/1000/1000;
-    //                MatTypeGrSummary[3] = v.totalWeight;
-    //                MatTypeGrSummary[5] = v.totalPrice;
-    //            }
-    //        }
-    //        Log.exit();
-    //    }
-    //} // end class MaterialTypeGroup
-
     /// <summary>
     /// Mgroup - Group Elements by Materials
     /// </summary>
