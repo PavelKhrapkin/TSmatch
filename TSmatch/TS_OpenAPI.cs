@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------
  * TS_OpenAPI -- Interaction with Tekla Structure over Open API
  * 
- * 15.09.2017  Pavel Khrapkin, Alex Bobtsov
+ * 18.09.2017  Pavel Khrapkin, Alex Bobtsov
  *
  *----- ToDo ---------------------------------------------
  * - реализовать интерфейс IAdapterCAD, при этом избавится от static
@@ -26,6 +26,7 @@
  * 22.8.2016 PKh - Scale method to account unit in Model
  * 29.5.2017 PKh - Get Russian GOST profile from UDA
  *  7.9.2017 PKh - Read Embed objects
+ * 18.9.2017 PKh - private ReadModObj() use
  * -------------------------------------------
  * public Structure AttSet - set of model component attribuyes, extracted from Tekla by method Read
  *                           AttSet is Comparable, means Sort is applicable, and 
@@ -62,7 +63,7 @@ using Lib = match.Lib.MatchLib;
 using TSM = Tekla.Structures.Model;
 using Elm = TSmatch.ElmAttSet.ElmAttSet;
 using Emb = TSmatch.EmbedAttSet.EmbedAttSet;
-
+using System.Collections;
 
 namespace TSmatch.Tekla
 {
@@ -70,7 +71,7 @@ namespace TSmatch.Tekla
     {
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger("Tekla:TS_OpenAPI");
 
-        const string MYNAME = "Tekla.Read v2.2";
+        const string MYNAME = "Tekla.Read v2.3";
 
         public enum ModelDir { exceldesign, model, macro, environment };
         public static TSM.ModelInfo ModInfo;
@@ -79,14 +80,16 @@ namespace TSmatch.Tekla
 
         ////public List<Elm> Read(string modName) { return Read(); }
         ////public List<Elm> Read(this TSmatch.Model.Model _mod ) { return Read(_mod.name); }
-        private TSM.Model model = new TSM.Model();
+        protected TSM.Model model = new TSM.Model();
+        protected TSM.ModelObjectSelector selector;
         /// <summary>
         /// parts - Dictionary of all Parts in Model with GUID as a Key
         /// </summary>
         protected Dictionary<string, Part> dicParts = new Dictionary<string, Part>();
 
-        public Tekla() { } // конструктор класса Tekla - пока пустой 6.4.17
+        public Tekla() { }
 
+        #region --- Read Model area ---
         public List<Elm> Read(string dir = "", string name = "")
         {
             Log.set("TS_OpenAPI.Read");
@@ -95,63 +98,63 @@ namespace TSmatch.Tekla
             if (dir != "" && ModInfo.ModelPath != dir
                 || name != "" && ModInfo.ModelName != String.Concat(name, ".db1")) Msg.F("Tekla.Read: Another model loaded, not", name);
             ModInfo.ModelName = ModInfo.ModelName.Replace(".db1", "");
-            TSM.ModelObjectSelector selector = model.GetModelObjectSelector();
-            System.Type[] Types = new System.Type[1];
-            Types.SetValue(typeof(Part), 0);
-
-            TSM.ModelObjectEnumerator objectList = selector.GetAllObjectsWithType(Types);
-            int totalCnt = objectList.GetSize();
-            var progress = new TSM.Operations.Operation.ProgressBar();
-            bool displayResult = progress.Display(100, "TSmatch", "Reading model. Pass component records:", "Cancel", " ");
-            int ii = 0;
-            while (objectList.MoveNext())
+ 
+            dicParts = ReadModObj<Part>();
+        
+            ArrayList part_string = new ArrayList() { "MATERIAL", "MATERIAL_TYPE", "PROFILE" };
+            ArrayList part_double = new ArrayList() { "LENGTH", "WEIGHT", "VOLUME" };
+            Hashtable str = new Hashtable();
+            Hashtable dbl = new Hashtable();
+            
+            foreach (var part in dicParts)
             {
-                TSM.Part myPart = objectList.Current as TSM.Part;
-                if (myPart != null)
-                {
-                    ii++;
-                    double lng = 0.0;
-                    double weight = 0.0;
-                    double vol = 0.0;
-                    string guid = "";
-                    string mat_type = "";
-                    double price = 0.0;
-
-                    myPart.GetReportProperty("GUID", ref guid);
-                    myPart.GetReportProperty("LENGTH", ref lng);
-                    myPart.GetReportProperty("WEIGHT", ref weight);
-                    myPart.GetReportProperty("VOLUME", ref vol);
-                    myPart.GetReportProperty("MATERIAL_TYPE", ref mat_type);
-
-                    string ru_prf = "";
-                    myPart.GetReportProperty("PROFILE.TPL_NAME_FULL", ref ru_prf);
-                    //31/5/17                    prf = ru_prf == string.Empty ? myPart.Profile.ProfileString : ru_prf;
-
-                    string pp = "";
-                    myPart.GetReportProperty("PROFILE", ref pp);
-
-                    lng = Math.Round(lng, 0);
-                    dicParts.Add(guid, myPart);
-                    elements.Add(new Elm(guid, myPart.Material.MaterialString,
-                        mat_type, myPart.Profile.ProfileString, lng, weight, vol, _ru_prf: ru_prf));
- // !!                  if (ii % 500 == 0) // progress update every 500th items
-                    {
-                        if (progress.Canceled())
-                        {
-//                            new Log("\n\n======= TSmatch pass model CANCEL!! =======  ii=" + ii);
-//                            TSD.Show()
-                            break;
-                        }
-                        progress.SetProgress(ii.ToString(), 100 * ii / totalCnt);
-                    }
-                }
-            } //while
-            progress.Close();
+                Elm elm = new Elm();
+                
+                part.Value.GetStringReportProperties(part_string, ref str);
+                part.Value.GetDoubleReportProperties(part_double, ref dbl);
+                elm.mat    = (string)str[part_string[0]];
+                elm.mat_type = (string)str[part_string[1]];
+                elm.prf    = (string)str[part_string[2]];
+                elm.length = (double)dbl[part_double[0]];
+                elm.weight = (double)dbl[part_double[1]];
+                elm.volume = (double)dbl[part_double[2]];
+                elm.guid = part.Key;
+                elements.Add(elm);
+            }
             Scale(elements);
             elements.Sort();
             Log.exit();
             return elements;
         } // Read
+
+        protected Dictionary<string, T> ReadModObj<T>() where T : ModelObject
+        {
+            var result = new Dictionary<string, T>();
+            selector = model.GetModelObjectSelector();
+            Type[] Types = new Type[1];
+            Types.SetValue(typeof(T), 0);
+            ModelObjectEnumerator objParts = selector.GetAllObjectsWithType(Types);
+            int totalCnt = objParts.GetSize();
+            var progress = new Operation.ProgressBar();
+            bool displayResult = progress.Display(100, "TSmatch", "Reading model. Pass component records:", "Cancel", " ");
+            int iProgress = 0;
+            while(objParts.MoveNext())
+            {
+                T myObj = objParts.Current as T;
+                if (myObj == null) continue;
+                string guid = string.Empty;
+                myObj.GetReportProperty("GUID", ref guid);
+                result.Add(guid, myObj);
+                iProgress++;
+                if (iProgress % 500 == 0)
+                {
+                    progress.SetProgress(iProgress.ToString(), 100 * iProgress / totalCnt);
+                    if (progress.Canceled()) break;
+                }
+            }
+            progress.Close();
+            return result;
+        }
 
         static void Scale(List<Elm> elements)
         {
@@ -168,6 +171,7 @@ namespace TSmatch.Tekla
             string name = Path.GetFileName(path);
             return Read(dir, name);
         }
+#endregion --- Read area ---
 
         public bool IfLockedWait(string FileName)
         {
@@ -220,8 +224,6 @@ namespace TSmatch.Tekla
         public int elementsCount()
         {
             Log.set("TS_OpenAPI.elementsCount()");
-            //10/4/17            var i = model.GetPhases();
-            //10/4/17            int ii = TSM.Phase .PhaseNumber(); 
             TSM.ModelObjectSelector selector = model.GetModelObjectSelector();
             System.Type[] Types = new System.Type[1];
             Types.SetValue(typeof(Part), 0);

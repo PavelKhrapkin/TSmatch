@@ -1,6 +1,6 @@
 ﻿using TSmatch.Tekla;
 /*=========================================
-* Model Unit Tekla = TS_OpenAPI 5.9.2017
+* Model Unit Tekla = TS_OpenAPI 18.9.2017
 *=========================================
 */
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using TS = TSmatch.Tekla.Tekla;
 using FileOp = match.FileOp.FileOp;
 using System;
+using TSM = Tekla.Structures.Model;
 
 namespace TSmatch.Tekla.Tests
 {
@@ -57,7 +58,7 @@ namespace TSmatch.Tekla.Tests
 
         [TestMethod()]
         public void UT_Read()
-        {           
+        {
             var u = new _UT_Tekla();
             u.Read();
             Assert.AreEqual(u.elementsCount(), u.dicPartsCnt());
@@ -68,10 +69,25 @@ namespace TSmatch.Tekla.Tests
             u.GrClass();
         }
 
+        [TestMethod()]
+        public void UT_ReadModObj()
+        {
+            var u = new _UT_Tekla();
+            var parts = u._ReadModObj();
+            Assert.IsTrue(parts.Count() > 0);
+            foreach(var p in parts)
+            {
+                Assert.IsTrue(p.Key.Length > 15);
+            }
+        }
     }
 
     class _UT_Tekla : TS
     {
+        public Dictionary<string, TSM.Part>_ReadModObj()
+        {
+            return ReadModObj<TSM.Part>();
+        }
         public int dicPartsCnt() { return dicParts.Count; }
 
         public int Class100cnt(string c) { return dicParts.Count(x => x.Value.Class == c); }
