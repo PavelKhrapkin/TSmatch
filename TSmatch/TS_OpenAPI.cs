@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------
  * TS_OpenAPI -- Interaction with Tekla Structure over Open API
  * 
- * 14.09.2017  Pavel Khrapkin, Alex Bobtsov
+ * 15.09.2017  Pavel Khrapkin, Alex Bobtsov
  *
  *----- ToDo ---------------------------------------------
  * - реализовать интерфейс IAdapterCAD, при этом избавится от static
@@ -46,7 +46,7 @@ using System.IO;
 using System.Collections.Generic;
 using System.Threading;
 using System.Diagnostics;
-using log4net.Config;
+using log4net;
 
 using Tekla.Structures;
 using TSD = Tekla.Structures.Dialog.ErrorDialog;
@@ -61,6 +61,7 @@ using Msg = TSmatch.Message.Message;
 using Lib = match.Lib.MatchLib;
 using TSM = Tekla.Structures.Model;
 using Elm = TSmatch.ElmAttSet.ElmAttSet;
+using Emb = TSmatch.EmbedAttSet.EmbedAttSet;
 
 
 namespace TSmatch.Tekla
@@ -69,7 +70,7 @@ namespace TSmatch.Tekla
     {
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger("Tekla:TS_OpenAPI");
 
-        const string MYNAME = "Tekla.Read v2.1";
+        const string MYNAME = "Tekla.Read v2.2";
 
         public enum ModelDir { exceldesign, model, macro, environment };
         public static TSM.ModelInfo ModInfo;
@@ -78,8 +79,11 @@ namespace TSmatch.Tekla
 
         ////public List<Elm> Read(string modName) { return Read(); }
         ////public List<Elm> Read(this TSmatch.Model.Model _mod ) { return Read(_mod.name); }
-        TSM.Model model = new TSM.Model();
-        List<Part> parts = new List<Part>();
+        private TSM.Model model = new TSM.Model();
+        /// <summary>
+        /// parts - Dictionary of all Parts in Model with GUID as a Key
+        /// </summary>
+        protected Dictionary<string, Part> dicParts = new Dictionary<string, Part>();
 
         public Tekla() { } // конструктор класса Tekla - пока пустой 6.4.17
 
@@ -112,7 +116,6 @@ namespace TSmatch.Tekla
                     string guid = "";
                     string mat_type = "";
                     double price = 0.0;
-//31/5/17                    string prf = string.Empty;
 
                     myPart.GetReportProperty("GUID", ref guid);
                     myPart.GetReportProperty("LENGTH", ref lng);
@@ -128,6 +131,7 @@ namespace TSmatch.Tekla
                     myPart.GetReportProperty("PROFILE", ref pp);
 
                     lng = Math.Round(lng, 0);
+                    dicParts.Add(guid, myPart);
                     elements.Add(new Elm(guid, myPart.Material.MaterialString,
                         mat_type, myPart.Profile.ProfileString, lng, weight, vol, _ru_prf: ru_prf));
  // !!                  if (ii % 500 == 0) // progress update every 500th items
@@ -353,11 +357,11 @@ namespace TSmatch.Tekla
             return result;
         }
 
-        public static List<Part> ReadCustomEmbeds()
+        public List<Emb> ReadCustomParts()
         {
-            string vendorName = "Peikko";
-            TSM.Model model = new TSM.Model();
-            TSM.ModelObjectSelector selector = model.GetModelObjectSelector();
+            List<Emb> result = new List<Emb>();
+  //          TSM.Model model = new TSM.Model();
+            TSM.ModelObjectSelector selector = this.model.GetModelObjectSelector();
             System.Type[] Types = new System.Type[1];
             Types.SetValue(typeof(Part), 0);
             TSM.ModelObjectEnumerator objectList = selector.GetAllObjectsWithType(Types);
@@ -371,7 +375,23 @@ namespace TSmatch.Tekla
                 if (myPart.Name.Contains("SBKL")) continue;
  //               var project_code = myPart.GetUserProperty("j_fabricator_name", ref vendorName);
             }
-            return parts;
+            return result;
+        }
+
+        /// <summary>
+        /// PartsInAssembly - Return List of GUIDs of Parts in assembly or empty list, if Part is not Assembly Father
+        /// </summary>
+        public List<string> PartsInAssembly(string guid)
+        {
+            const string me = "Tekla__PartsInAssembly_";
+            ////if (parts.Count == 0) Msg.F(me + "PartList_Not_Initialized");
+            ////Part myPart = parts.Find(x => x.)
+            ////if (!parts.Contains(myPart)) Msg.F(me + "Part_Not_In_Model");
+            List<string> guids = new List<string>();
+            string myPartGuid = string.Empty;
+////            myPart.GetReportProperty("GUID", ref myPartGuid);
+
+            return guids;
         }
 #if NOT_READY_YET
         public void Example1()

@@ -1,12 +1,22 @@
-﻿using System;
+﻿/*--------------------------------------------------------------------------------------
+ * EmbedAttSet -- Properties and Methods of Emberded Custom Parts
+ * 
+ *  15.09.2017  Pavel Khrapkin
+ * 
+ *----- History ------------------------------------------
+ * 15.09.2019 - created from Excercize EmbedsQuotation
+ */
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace TSmatch
+namespace TSmatch.EmbedAttSet
 {
-    class EmbedAttSet
+    public class EmbedAttSet
     {
+        public string mark, vendor;
+        public int quantity;
+        public double priceOne, priceTotal;
+        public List<string> partGuids = new List<string>();
+
+        internal EmbedAttSet() { }
     }
 }

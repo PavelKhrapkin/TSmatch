@@ -9,6 +9,7 @@ using System.Collections.Generic;
 
 using TS = TSmatch.Tekla.Tekla;
 using FileOp = match.FileOp.FileOp;
+using System;
 
 namespace TSmatch.Tekla.Tests
 {
@@ -38,18 +39,51 @@ namespace TSmatch.Tekla.Tests
         [TestMethod()]
         public void UT_ReadCustomEmbeds()
         {
-            var embeds = TS.ReadCustomEmbeds();
-            int cnt = embeds.Count;
-            Assert.IsTrue(cnt > 0);
-            var embGrps = embeds.GroupBy(x => x.Name);
-            var quot = new Dictionary<string, int>();
-            foreach(var p in embGrps)
+            var u = new _UT_Tekla();
+            var embeds = u.ReadCustomParts();
+
+            //int cnt = embeds.Count;
+            //Assert.IsTrue(cnt > 0);
+            //var embGrps = embeds.GroupBy(x => x.Name);
+            //var quot = new Dictionary<string, int>();
+            //foreach (var p in embGrps)
+            //{
+            //    string part = p.Key;
+            //    int n = embeds.Count(x => x.Name == part);
+            //    quot.Add(p.Key, n);
+            //}
+            //Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void UT_Read()
+        {           
+            var u = new _UT_Tekla();
+            u.Read();
+            Assert.AreEqual(u.elementsCount(), u.dicPartsCnt());
+            Assert.IsTrue(u.dicPartsCnt() > 0);
+
+            int c100 = u.Class100cnt("100");
+            int c101 = u.Class100cnt("101");
+            u.GrClass();
+        }
+
+    }
+
+    class _UT_Tekla : TS
+    {
+        public int dicPartsCnt() { return dicParts.Count; }
+
+        public int Class100cnt(string c) { return dicParts.Count(x => x.Value.Class == c); }
+
+        public void GrClass()
+        {
+            var grClasses = dicParts.GroupBy(x => x.Value.Class);
+            foreach (var gr in grClasses)
             {
-                string part = p.Key;
-                int n = embeds.Count(x => x.Name == part);
-                quot.Add(p.Key, n);
+                string cl = gr.Key;
+                int grCnt = gr.Count();
             }
-            Assert.Fail();
         }
     }
 }
