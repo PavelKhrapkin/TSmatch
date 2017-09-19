@@ -219,7 +219,7 @@
             </Button>
             <!-- Button ISO Read -->
             <Button Name="IsoRead" HorizontalAlignment="Right" Margin="0,0,155,10" 
-                VerticalAlignment="bottom" Width="35" Click="OnTeklaRead_button_click" Height="35">
+                VerticalAlignment="bottom" Width="35" Click="OnIsoRead_button_click" Height="35">
                 <Button.Background>
                     <ImageBrush ImageSource="ifc.ico"/>
                 </Button.Background>

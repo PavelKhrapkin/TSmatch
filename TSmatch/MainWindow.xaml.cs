@@ -1,11 +1,12 @@
 ﻿/*-------------------------------------------
- * WPF Main Windows 13.9.2017 Pavel.Khrapkin
+ * WPF Main Windows 19.9.2017 Pavel.Khrapkin
  * --- History ---
  * 2017.05.15 - restored as TSmatch 1.0.1 after Source Control excident
  * 2017.05.23 - Menu OnPriceCheck
  * 2017.08.07 - modified SetModel initialization
  * 2017.09.07 - Splash screen add
  * 2017.09.13 - Messages from TSmatchMsg.resx
+ * 2017.09.19 - Iso Read button
  * --- Known Issue & ToDos ---
  * - ToDo some kind of progress bar moving on the MainWindow, when Tekla re-draw HighLight.
  */
@@ -33,6 +34,7 @@ using Boot = TSmatch.Bootstrap.Bootstrap;
 using Msg = TSmatch.Message.Message;
 using M = TSmatch.Properties.TSmatchMsg;
 using Mod = TSmatch.Model.Model;
+using Ifc = TSmatch.IFC.IFC;
 using Supl = TSmatch.Suppliers.Supplier;
 using ElmGr = TSmatch.Group.Group;
 
@@ -70,9 +72,7 @@ namespace TSmatch
             WrModelInfoPanel();
             WrReportPanel();
             MWmsg("No Price Groups highlighted");
-            //30/5            model.HighLightElements(Mod.HighLightMODE.NoPrice);
-            //25/7 message = "вначале группы без цен...";
- //31/8           msg.Text = message;
+            if (!boot.isTeklaActive) TeklaRead.IsEnabled = false;
         }
 
         private void WrModelInfoPanel()
@@ -252,11 +252,19 @@ namespace TSmatch
         }
         #endregion --- [Read], [RePrice], and [OK] buttons ---
 
-        #region --- [Read], [RePrice], and [OK] buttons ---
+        #region --- [Read], [iso], [RePrice], and [OK] buttons ---
         private void OnTeklaRead_button_click(object sender, RoutedEventArgs e)
         {
             MessageBox.Show("Читать?", "TSmatch", MessageBoxButton.OK);
             model.Read();
+            model.isChanged = true;
+        }
+
+        private void OnIsoRead_button_click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("Читать ISO?", "TSmatch", MessageBoxButton.OK);
+            model.ifcPath = @"C:\Users\khrapkin\Desktop\Сибур IFC\18.09.17 (3).ifc";
+            model.elements = Ifc.Read(model.ifcPath);
             model.isChanged = true;
         }
 
