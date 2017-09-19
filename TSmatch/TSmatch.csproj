@@ -201,7 +201,7 @@
     <Resource Include="TSmatch.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="logo.png" />
+    <Resource Include="Tekla_logo.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="OK.jpg" />
@@ -211,6 +211,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Exit.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="ifc.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

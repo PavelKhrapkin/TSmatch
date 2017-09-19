@@ -1,10 +1,11 @@
 ﻿<!--
-    MainWindow xaml design Pavel Khrapkin 2017.9.10
+    MainWindow xaml design Pavel Khrapkin 2017.9.19
     
     History:
     2017 May - Created
     2017.09.7 - Window Topmost attribut
     2017.09.10 - Change Image on button "OK" click
+    2017.09.19 - add ISO button
  -->
 <Window x:Class="TSmatch.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -205,47 +206,55 @@
                 </GridView>
             </ListView.View>
         </ListView>
-        <!-- Button Tekla Read -->
-        <Button Name="TeklaRead" HorizontalAlignment="Right" Margin="10 10 200 10" 
-                VerticalAlignment="bottom" Width="46" Click="OnTeklaRead_button_click" Height="29"
-                Grid.Column="2" Grid.Row="2">
-            <Button.Background>
-                <ImageBrush ImageSource="logo.png"/>
-            </Button.Background>
-
-        </Button>
-        <!-- RePrice button -->
-        <Button Name="RePrice" HorizontalAlignment="Right" 
-                Margin="10,10,110,10" Height="35"
+        
+        <!-- Button Panel -->
+        <Grid HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Height="60"
+              Opacity="10" Grid.Column="2" Grid.Row="2">
+            <!-- Button Tekla Read -->
+            <Button Name="TeklaRead" HorizontalAlignment="Right" Margin="0,0,223,12" 
+                VerticalAlignment="bottom" Width="46" Click="OnTeklaRead_button_click" Height="29">
+                <Button.Background>
+                    <ImageBrush ImageSource="Tekla_logo.png"/>
+                </Button.Background>
+            </Button>
+            <!-- Button ISO Read -->
+            <Button Name="IsoRead" HorizontalAlignment="Right" Margin="0,0,155,10" 
+                VerticalAlignment="bottom" Width="35" Click="OnTeklaRead_button_click" Height="35">
+                <Button.Background>
+                    <ImageBrush ImageSource="ifc.ico"/>
+                </Button.Background>
+            </Button>
+            <!-- RePrice button -->
+            <Button Name="RePrice" HorizontalAlignment="Right" 
+                Margin="0,0,85,10" Height="35"
                 VerticalAlignment="Bottom" Width="35"
-                Click="RePrice_button_Click"
-                Grid.Column="2" Grid.Row="2">
-            <Button.Background>
-                <ImageBrush ImageSource="TSmatch.ico"/>
-            </Button.Background>
-        </Button>
-        <!-- OK button -->
-        <Button Name="OK" HorizontalAlignment="Right"
+                Click="RePrice_button_Click">
+                <Button.Background>
+                    <ImageBrush ImageSource="TSmatch.ico"/>
+                </Button.Background>
+            </Button>
+            <!-- OK button -->
+            <Button Name="OK" HorizontalAlignment="Right"
                 Margin="10,10,10,2" 
                 VerticalAlignment="Bottom" Width="50" 
-                Click="OK_button_Click" Height="50" 
-                Grid.Column="2" Grid.Row="2">
-            <Button.Template>
-                <ControlTemplate>
-                    <Image>
-                        <Image.Style>
-                            <Style TargetType="{x:Type Image}">
-                                <Setter Property="Source" Value="OK.jpg"/>
-                                <Style.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Source" Value="Exit.jpg"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Image.Style>
-                    </Image>
-                </ControlTemplate>
-            </Button.Template>
-        </Button>
+                Click="OK_button_Click" Height="50">
+                <Button.Template>
+                    <ControlTemplate>
+                        <Image>
+                            <Image.Style>
+                                <Style TargetType="{x:Type Image}">
+                                    <Setter Property="Source" Value="OK.jpg"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Source" Value="Exit.jpg"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Image.Style>
+                        </Image>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
+        </Grid>
     </Grid>
 </Window>
