@@ -138,6 +138,10 @@ namespace TSmatch
             foreach (var gr in model.elmGroups) totalPrice += gr.totalPrice;
             string st = string.Format("Общая цена проекта {0:N0} руб", totalPrice);
             ModPriceSummary.Text = st;
+
+            //--TMP!!
+            List<string> suppliers = new List<string>() { "СтальХолдинг", "ЛенСпецСталь", "База СЕВЗАПМЕТАЛЛ" };
+            SupplierTMP.ItemsSource = suppliers;
         }
 
         public class gr
@@ -185,6 +189,10 @@ namespace TSmatch
             MWmsg("выделяю группу..");
             elm_groups.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal
                 , new NextPrimeDelegate(HighLighting));
+        }
+
+        private void SupplierTMP_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
         }
 
         private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
