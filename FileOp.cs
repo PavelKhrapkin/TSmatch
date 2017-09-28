@@ -1,7 +1,7 @@
 /*--------------------------------------------
  * FileOp - File System primitives
  * 
- *  7.05.2017  Pavel Khrapkin, Alex Pass
+ *  13.09.2017  Pavel Khrapkin, Alex Pass
  *
  *--- History ---
  * 2013 - 2016 - created
@@ -12,6 +12,7 @@
  * 13.1.2016 - getRange(str)
  * 22.4.2017 - AppQuit() method add
  *  7.5.2017 - fileOpen logic changed with create_if_notexist and fatal flag
+ * 13.9.2017 - check _app != null to avoid error message in DisplayAlert and QuitApp
  * -------------------------------------------        
  * fileOpen(dir,name[,create])  - Open or Create file name in dir catalog
  * fileRename(dir, oldName, newName) - rename file in the same Directory
@@ -146,7 +147,7 @@ namespace match.FileOp
         {
             File.Delete(path);
         }
-        public static void DisplayAlert(bool val) { _app.DisplayAlerts = val; }
+        public static void DisplayAlert(bool val) { if(_app != null) _app.DisplayAlerts = val; }
         public static void fileSave(Excel.Workbook Wb) { Wb.Save(); }
         /// <summary>
         /// CopyFile(FrDir, FileName, ToDir [,overwrite]) - copy FileName from FrDir to ToDir 
@@ -381,9 +382,12 @@ namespace match.FileOp
 
         public static void AppQuit()
         {
-            DisplayAlert(false);
-            _app.Quit();
-            DisplayAlert(true);
+            if (_app != null)
+            {
+                DisplayAlert(false);
+                _app.Quit();
+                DisplayAlert(true);
+            }
         }
     }  // end class FileOp
 }  // end namespace FileOp

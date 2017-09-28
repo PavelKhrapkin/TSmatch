@@ -1,10 +1,12 @@
 ﻿/*-------------------------------------------
- * WPF Main Windows 7.9.2017 Pavel.Khrapkin
+ * WPF Main Windows 19.9.2017 Pavel.Khrapkin
  * --- History ---
  * 2017.05.15 - restored as TSmatch 1.0.1 after Source Control excident
  * 2017.05.23 - Menu OnPriceCheck
  * 2017.08.07 - modified SetModel initialization
  * 2017.09.07 - Splash screen add
+ * 2017.09.13 - Messages from TSmatchMsg.resx
+ * 2017.09.19 - Iso Read button
  * --- Known Issue & ToDos ---
  * - ToDo some kind of progress bar moving on the MainWindow, when Tekla re-draw HighLight.
  */
@@ -30,7 +32,9 @@ using Log = match.Lib.Log;
 using FileOp = match.FileOp.FileOp;
 using Boot = TSmatch.Bootstrap.Bootstrap;
 using Msg = TSmatch.Message.Message;
+using M = TSmatch.Properties.TSmatchMsg;
 using Mod = TSmatch.Model.Model;
+using Ifc = TSmatch.IFC.IFC;
 using Supl = TSmatch.Suppliers.Supplier;
 using ElmGr = TSmatch.Group.Group;
 
@@ -43,7 +47,7 @@ namespace TSmatch
     {
         public static readonly ILog log = LogManager.GetLogger("MainWindow");
 
-        const string ABOUT = "TSmatch v1.0.2 6.9.2017";
+        const string ABOUT = "TSmatch v1.0.2 13.9.2017";
         public static Boot boot;
         public static string MyCity = "Санкт-Петербург";
         public delegate void NextPrimeDelegate();
@@ -58,22 +62,17 @@ namespace TSmatch
             Log.START(ABOUT);
             InitializeComponent();
             new SplashScreen().ShowDialog();
-//6/7            boot = new Boot();
             MainWindowLoad();
         }
 
         #region --- MainWindow Panels ---
         private void MainWindowLoad()
         {
-            Title = "TSmatch - согласование поставщиков в проекте"; 
- //7/9           model = new Mod();
- //7/9           model = model.sr.SetModel(boot);
+            Title = Msg.S("MainWindow__Title"); //"TSmatch - согласование поставщиков в проекте"
             WrModelInfoPanel();
             WrReportPanel();
             MWmsg("No Price Groups highlighted");
-            //30/5            model.HighLightElements(Mod.HighLightMODE.NoPrice);
-            //25/7 message = "вначале группы без цен...";
- //31/8           msg.Text = message;
+            if (!boot.isTeklaActive) TeklaRead.IsEnabled = false;
         }
 
         private void WrModelInfoPanel()
@@ -139,6 +138,10 @@ namespace TSmatch
             foreach (var gr in model.elmGroups) totalPrice += gr.totalPrice;
             string st = string.Format("Общая цена проекта {0:N0} руб", totalPrice);
             ModPriceSummary.Text = st;
+
+            //--TMP!!
+            List<string> suppliers = new List<string>() { "СтальХолдинг", "ЛенСпецСталь", "База СЕВЗАПМЕТАЛЛ" };
+            SupplierTMP.ItemsSource = suppliers;
         }
 
         public class gr
@@ -186,6 +189,10 @@ namespace TSmatch
             MWmsg("выделяю группу..");
             elm_groups.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal
                 , new NextPrimeDelegate(HighLighting));
+        }
+
+        private void SupplierTMP_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
         }
 
         private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
@@ -253,7 +260,7 @@ namespace TSmatch
         }
         #endregion --- [Read], [RePrice], and [OK] buttons ---
 
-        #region --- [Read], [RePrice], and [OK] buttons ---
+        #region --- [Read], [iso], [RePrice], and [OK] buttons ---
         private void OnTeklaRead_button_click(object sender, RoutedEventArgs e)
         {
             MessageBox.Show("Читать?", "TSmatch", MessageBoxButton.OK);
@@ -261,9 +268,17 @@ namespace TSmatch
             model.isChanged = true;
         }
 
+        private void OnIsoRead_button_click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("Читать ISO?", "TSmatch", MessageBoxButton.OK);
+            model.ifcPath = @"C:\Users\khrapkin\Desktop\Сибур IFC\18.09.17 (3).ifc";
+            model.elements = Ifc.Read(model.ifcPath);
+            model.isChanged = true;
+        }
+
         private void RePrice_button_Click(object sender, RoutedEventArgs e)
         {
-            Msg.AskFOK("Пересчет стоимости материалов");
+            Msg.AskFOK("MainWindow__RePrice");  //works only as literal, not as a Name(?) - "Пересчет стоимости материалов"
             model.mh.Pricing(ref model);
             model.isChanged = true;
             RePrice.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal

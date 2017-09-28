@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------------------
  * SavedReport -- class for handle saved reports in TSmatchINFO.xlsx
  * 
- *  21.08.2017 П.Л. Храпкин
+ *  14.09.2017 П.Л. Храпкин
  *  
  *--- Unit Tests ---
  * UT_GetModelInfo, UT-GetSavedReport, UT_GetSavedRules 18.8.2017 OK 
@@ -26,6 +26,7 @@
  * 14.08.2017 - CheckModelIntegrity: no model.name is tested in without file; check IfDirExist()
  * 16.08.2017 - SetSavedMod method removed; protected instead of public methods; Recovery audit
  * 20.08.2017 - SavedReport audit: model.dir in TSMatchINFO.xlsx ignored, used one from Boot
+ * 14.09.2017 - Msg audit
  *--- Methods: -------------------      
  * SetModel(boot)   - initialize model by reading from TSmatchINFO.xlsx ans Raw.xml or from scratch
  *      private SetModDir(boot) - subset of SetModel(), setup model.dir, name and phase
@@ -101,6 +102,7 @@ namespace TSmatch.SaveReport
 
         private void SetModDir(Boot boot)
         {
+            const string me = "SavedReport__SetModelDir_";
             if (boot.isTeklaActive)
             {   // if Tekla is active - get Path of TSmatch
                 model.name = Path.GetFileNameWithoutExtension(TS.ModInfo.ModelName);
@@ -112,8 +114,8 @@ namespace TSmatch.SaveReport
             else
             {   // if Tekla not active - get model attributes from TSmatchINFO.xlsx in ModelDir
                 model.dir = boot.ModelDir;
-                if (!FileOp.isDirExist(model.dir)) Msg.F("No Model Directory", model.dir);
-                if (!Docs.IsDocExists(Decl.TSMATCHINFO_MODELINFO)) Msg.F("No TSmatchINFO.xlsx file");
+                if (!FileOp.isDirExist(model.dir)) Msg.F(me + "No Model Directory", model.dir);
+                if (!Docs.IsDocExists(Decl.TSMATCHINFO_MODELINFO)) Msg.F(me + "No TSmatchINFO.xlsx file");
                 dINFO = Docs.getDoc(sINFO, fatal: false);
                 if (dINFO == null || dINFO.il < 10 || !FileOp.isDirExist(model.dir)) error();
                 model.name = dINFO.Body.Strng(Decl.MODINFO_NAME_R, 2);
@@ -258,14 +260,15 @@ namespace TSmatch.SaveReport
         /// </summary>
         private void error(bool errRep = false)
         {
-            Log.set("SR.errer()");
+            const string me = "SR__error_";
+            Log.set("SR.error()");
             log.Info("error() model.errRecover = " + model.errRecover.ToString());
             if (model.errRecover)
             {
-                Msg.AskFOK("Corrupted saved report TSmatchINFO.xlsx");
+                Msg.AskFOK(me + "Corrupted saved report TSmatchINFO.xlsx");
                 model.elements = Raw(model);
                 dRep = Docs.getDoc(sRep);
-                if (dRep == null || errRep) Msg.F("SavedReport recover impossible");
+                if (dRep == null || errRep) Msg.F(me + "recover impossible");
                 GetSavedReport();
                 Recover(sINFO, RecoverToDo.ResetRep);
                 //21/7           Recover(mod, sRep,  RecoverToDo.ResetRep);
@@ -331,10 +334,11 @@ namespace TSmatch.SaveReport
         /// <returns>updated list of elements in file and in memory</returns>
         public List<Elm> Raw(Mod mod, bool write = false)
         {
+            const string me = "SavedReport__Raw_";
             Log.set("SR.Raw(" + mod.name + ")");
             model = mod;
             List<Elm> elms = new List<Elm>();
-            if (string.IsNullOrEmpty(model.dir)) Msg.F("SR.Raw: No model.dir");
+            if (!FileOp.isDirExist(model.dir)) Msg.F(me + "No model dir", model.dir);
             string file = Path.Combine(model.dir, Decl.RAWXML);
             if (!write && FileOp.isFileExist(file))
             {                               // Read Raw.xml
@@ -343,7 +347,7 @@ namespace TSmatch.SaveReport
             }
             else
             {                               // get from CAD and Write or re-Write Raw.xml 
-                Msg.AskFOK("SR.Raw: CAD Read");
+                Msg.AskFOK(me + "CAD Read");
                 model.Read();
                 rwXML.XML.WriteToXmlFile(file, model.elements);
                 elms = model.elements;

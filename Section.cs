@@ -2,7 +2,7 @@
  * Section -- class dealing with the fragment of string related to
  *            some section - f.e. Material, or Price
  *
- * 8.08.2017 Pavel Khrapkin
+ * 13.09.2017 Pavel Khrapkin
  *
  * --- Unit Tests ---
  * 2017.08.8  - UT_Section OK
@@ -12,6 +12,7 @@
  * 21.03.2017 call Bootstrap.initSection() for SectionTab
  * 28.03.2017 munli-header Section like "M: Def: body"
  *  8.08.2017 static constructor as a singleton initializator of SectionTab
+ * 13.09.2017 cosmetic, multilanguage Msg
  * ------ Fields ------
  * type section - recognized enum Section type, f.e. Material, Price etc
  * string body  - text string, contained in Section between ':' and ';' or end
@@ -29,7 +30,6 @@ using log4net;
 using Lib = match.Lib.MatchLib;
 using Msg = TSmatch.Message.Message;
 using Par = TSmatch.Parameter.Parameter;
-using Boot = TSmatch.Bootstrap.Bootstrap;
 
 namespace TSmatch.Section
 {
@@ -85,7 +85,6 @@ namespace TSmatch.Section
 
         public Section(string _text, SType stype = SType.NOT_DEFINED)
         {
-//8/8            if (SectionTab == null) SectionTab = new Boot.initSection().SectionTab;
             string[] sections = Lib.ToLat(_text).ToLower().Replace(" ", "").Split(';');
             if (stype == SType.NOT_DEFINED)
             {
@@ -180,10 +179,6 @@ namespace TSmatch.Section
             for (int i = 1; i < m.Groups.Count; i++)
                 result.Add(new Par(m.Groups[i].Value));
             return result;
-        }
-
-        private class Syn : List<string>
-        {
         }
     } // end class Section
 } // end namespace TSmatch.Section
