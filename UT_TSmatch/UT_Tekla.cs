@@ -60,7 +60,10 @@ namespace TSmatch.Tekla.Tests
         public void UT_Read()
         {
             var u = new _UT_Tekla();
+            DateTime t0 = DateTime.Now;
             u.Read();
+            DateTime t1 = DateTime.Now;
+            string dt = (t1 - t0).ToString();
             Assert.AreEqual(u.elementsCount(), u.dicPartsCnt());
             Assert.IsTrue(u.dicPartsCnt() > 0);
 

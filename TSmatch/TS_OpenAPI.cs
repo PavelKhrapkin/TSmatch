@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------
  * TS_OpenAPI -- Interaction with Tekla Structure over Open API
  * 
- * 18.09.2017  Pavel Khrapkin, Alex Bobtsov
+ * 28.09.2017  Pavel Khrapkin, Alex Bobtsov
  *
  *----- ToDo ---------------------------------------------
  * - реализовать интерфейс IAdapterCAD, при этом избавится от static
@@ -27,6 +27,7 @@
  * 29.5.2017 PKh - Get Russian GOST profile from UDA
  *  7.9.2017 PKh - Read Embed objects
  * 18.9.2017 PKh - private ReadModObj() use
+ * 28.9.2017 PKh - 9% acceleration with GetAllReportProperty
  * -------------------------------------------
  * public Structure AttSet - set of model component attribuyes, extracted from Tekla by method Read
  *                           AttSet is Comparable, means Sort is applicable, and 
@@ -103,21 +104,19 @@ namespace TSmatch.Tekla
         
             ArrayList part_string = new ArrayList() { "MATERIAL", "MATERIAL_TYPE", "PROFILE" };
             ArrayList part_double = new ArrayList() { "LENGTH", "WEIGHT", "VOLUME" };
-            Hashtable str = new Hashtable();
-            Hashtable dbl = new Hashtable();
+            ArrayList part_int = new ArrayList();
+            Hashtable all_val = new Hashtable();
             
             foreach (var part in dicParts)
             {
                 Elm elm = new Elm();
-                
-                part.Value.GetStringReportProperties(part_string, ref str);
-                part.Value.GetDoubleReportProperties(part_double, ref dbl);
-                elm.mat    = (string)str[part_string[0]];
-                elm.mat_type = (string)str[part_string[1]];
-                elm.prf    = (string)str[part_string[2]];
-                elm.length = (double)dbl[part_double[0]];
-                elm.weight = (double)dbl[part_double[1]];
-                elm.volume = (double)dbl[part_double[2]];
+                part.Value.GetAllReportProperties(part_string, part_double, part_int, ref all_val);
+                elm.mat = (string)all_val[part_string[0]];
+                elm.mat_type = (string)all_val[part_string[1]];
+                elm.prf = (string)all_val[part_string[2]];
+                elm.length = (double)all_val[part_double[0]];
+                elm.weight = (double)all_val[part_double[1]];
+                elm.volume = (double)all_val[part_double[2]];
                 elm.guid = part.Key;
                 elements.Add(elm);
             }
