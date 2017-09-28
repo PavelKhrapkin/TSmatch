@@ -46,6 +46,7 @@
       <HintPath>..\packages\MSTest.TestFramework.1.1.11\lib\net45\Microsoft.VisualStudio.TestPlatform.TestFramework.Extensions.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="Tekla.Structures.Model, Version=2017.0.0.0, Culture=neutral, PublicKeyToken=2f04dbe497b71114" />
   </ItemGroup>
   <Choose>
     <When Condition="('$(VisualStudioVersion)' == '10.0' or '$(VisualStudioVersion)' == '') and '$(TargetFrameworkVersion)' == 'v3.5'">
@@ -57,9 +58,15 @@
   </Choose>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\ResourceUT.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ResourceUT.resx</DependentUpon>
+    </Compile>
     <Compile Include="UT_Bootstrap.cs" />
     <Compile Include="UT_Component.cs" />
     <Compile Include="UT_Documents.cs" />
+    <Compile Include="UT_Group.cs" />
     <Compile Include="UT_MatchLib.cs" />
     <Compile Include="UT_Matr.cs" />
     <Compile Include="UT_Message.cs" />
@@ -73,6 +80,7 @@
     <Compile Include="UT_SavedReport.cs" />
     <Compile Include="UT_Section.cs" />
     <Compile Include="UT_Tekla.cs" />
+    <Compile Include="_UT_Service.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -82,6 +90,12 @@
       <Project>{FBAE5BDB-3A4F-4FA5-BDCE-AC3FB437CAA4}</Project>
       <Name>TSmatch</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\ResourceUT.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ResourceUT.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
