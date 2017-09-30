@@ -1,11 +1,12 @@
 ﻿<!--
-    MainWindow xaml design Pavel Khrapkin 2017.9.19
+    MainWindow xaml design Pavel Khrapkin 2017.9.30
     
     History:
     2017 May - Created
     2017.09.7 - Window Topmost attribut
     2017.09.10 - Change Image on button "OK" click
     2017.09.19 - add ISO button
+    2017.09.30 - DataGrid instead of ListView
  -->
 <Window x:Class="TSmatch.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -146,6 +147,29 @@
                 Margin="0,0, 10,60"  />
 
         <!-- Groups <Material,Profile,Price, Weight, Volume, Length> Panel -->
+        <DataGrid Name="elm_groups" ItemsSource="{Binding Path=Items}"
+                  SelectionChanged="elmGroups_SelectionChanged" 
+                  CanUserAddRows="False" CanUserDeleteRows="False"
+                  AutoGenerateColumns="False"                   
+                  FontSize="12" Margin="2" Grid.Row="2">
+            <DataGrid.Columns>
+                <DataGridTextColumn x:Name="grMat" Header="Материал"
+                                    Binding="{Binding Path=mat}"/>
+                <DataGridTextColumn x:Name="grPrf" Header="Профиль"
+                                    Binding="{Binding Path=prf}"/>
+                <DataGridTextColumn x:Name="grPrice" Header="Цена (руб)"
+                                    Binding="{Binding Path=price}" FontWeight="Bold"/>
+                <DataGridTextColumn x:Name="grWgt" Header="Вес (кг)"
+                                    Binding="{Binding Path=wgt}"/>
+                <DataGridTextColumn x:Name="grVol" Header="Объем (м3)"
+                                    Binding="{Binding Path=vol}"/>
+                <DataGridTextColumn x:Name="grLng" Header="Длина (м)"
+                                    Binding="{Binding Path=lng}"/>
+                <DataGridTextColumn x:Name="grSupl" Header="Поставщик"
+                                    Binding="{Binding Path=supl}"/>
+            </DataGrid.Columns>
+        </DataGrid>
+<!-- change ListView to DataGrid       
         <ListView Name="elm_groups"
                   HorizontalAlignment="Stretch"
                   SelectionChanged="elmGroups_SelectionChanged" FontSize="12"
@@ -155,7 +179,7 @@
             <ListView.Resources>
                 <Style TargetType="{x:Type ListViewItem}">
                     <Style.Triggers>
-                        <DataTrigger Binding="{ Binding supl }" Value="---">
+                        <DataTrigger Binding="{ Binding supl }" Value="-">
                             <Setter Property="Background" Value="LightBlue" />
                         </DataTrigger>
                     </Style.Triggers>
@@ -206,6 +230,7 @@
                 </GridView>
             </ListView.View>
         </ListView>
+change ListView to DataGrid -->
         <!-- Button Panel -->
         <Grid HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Height="60"
               Opacity="10" Grid.Column="2" Grid.Row="2">
