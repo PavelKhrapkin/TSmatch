@@ -22,14 +22,14 @@ namespace TSmatch.Properties {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class TSmatch {
+    internal class TSmatchMsg {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal TSmatch() {
+        internal TSmatchMsg() {
         }
         
         /// <summary>
@@ -39,7 +39,7 @@ namespace TSmatch.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("TSmatch.Properties.TSmatch", typeof(TSmatch).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("TSmatch.Properties.TSmatchMsg", typeof(TSmatchMsg).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -61,20 +61,30 @@ namespace TSmatch.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Date: 16.7.2017.
+        ///   Looks up a localized string similar to 12.09.2017.
         /// </summary>
-        internal static string Forms {
+        internal static string Date {
             get {
-                return ResourceManager.GetString("Forms", resourceCulture);
+                return ResourceManager.GetString("Date", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to File: TSmatch.xlsx.
+        ///   Looks up a localized string similar to Match: Bad Price descriptor: no Price section in TSmatch.xlsx/TOC/LoadDescriptor
+        ///for &quot;{0}&quot;, &quot;{1}&quot;.
         /// </summary>
-        internal static string TSmatch_xlsx {
+        internal static string Match__Bad_Price_Descriptor {
             get {
-                return ResourceManager.GetString("TSmatch_xlsx", resourceCulture);
+                return ResourceManager.GetString("Match__Bad_Price_Descriptor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to TSmatch Fatal internal Error in [Message.Init] -- Initialization fault  .
+        /// </summary>
+        internal static string Message__Init_fault {
+            get {
+                return ResourceManager.GetString("Message__Init_fault", resourceCulture);
             }
         }
     }

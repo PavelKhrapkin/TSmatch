@@ -1,10 +1,9 @@
 ﻿/*=================================
-* Message Unit Test 22.8.2017
+* Message Unit Test 14.9.2017
 *=================================
 */
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Boot = TSmatch.Bootstrap.Bootstrap;
-using FileOp = match.FileOp.FileOp;
+
 using Msg = TSmatch.Message.Message;
 
 namespace TSmatch.Message.Tests
@@ -15,31 +14,34 @@ namespace TSmatch.Message.Tests
         [TestMethod()]
         public void UT_init()
         {
-            var boot = new Boot();
-
             // тест 0: проверяем singleton initialisation
-            var U = new UT_Msg();
+            var U = new UT_TSmatch._UT_Msg();
             int cnt = U.cnt_msgs();
             Assert.IsTrue(cnt > 10);
 
             // test 1: Msg.txt
             Msg.txt("число {0} and {1}", 3.14, 2.7);
-            string tx = Msg.msg, ert = Msg.errType;
-            Assert.AreEqual("число 3,14 and 2,7", Msg.msg);
-            Assert.AreEqual("(*)TSmatch INFO", Msg.errType);
+            U.GetTxt();
+            Assert.AreEqual("число_3,14_and_2,7", U.msg);
+            Assert.AreEqual("(*)TSmatch INFO", U.errType);
 
-            FileOp.AppQuit();
+            // test 2: change culture to en
+            U.SetCulture("en");
+            string s = Msg.S("S");
+            Assert.AreEqual("Loading", s);
+
+            // test 3: return culture to ru
+            U.SetCulture("ru");
+            s = Msg.S("S");
+            Assert.AreEqual("Гружу", s);
         }
 
         [TestMethod()]
         public void UT_AskS()
         {
-            var boot = new Boot();
-
+            // 2017.09.13 - AskS еще не реализован - заглушка в Message и тут в UT
             string reply = Msg.AskS("редактируем текст:", "text examle");
-            //22/8           Assert.Fail();
-
-            FileOp.AppQuit();
+            Assert.IsNull(reply);
         }
 
         [TestMethod()]
@@ -47,18 +49,23 @@ namespace TSmatch.Message.Tests
         {
             // test 0: Message не инициализирован, сообщение "незнакомое"
             string s = Msg.S("Not Initialized Message");
-            Assert.AreEqual(s, "(*)TSmatch SPLASH Not Initialized Message");
+            Assert.AreEqual(s, "(*)TSmatch SPLASH Not_Initialized_Message");
 
             // test 1: нормальный вывод сообщения по русски
-            var boot = new Boot();
-            s = Msg.S("No TSmatch Resource file", "нечто");
-            Assert.AreEqual(s, "Нет ресурсного файла \"нечто\"");
+            s = Msg.S("Bootstrap__No_Resource_File", "нечто");
+            Assert.AreEqual(s, "[Bootstrap]: Нет ресурсного файла \"нечто\"");
 
-            // test 2: вывод сообщения, которое есть, но с отсутствующим параметром
-            s = Msg.S("No TSmatch Resource file");
-            Assert.AreEqual(s, "(!)TSmatch SPLASH No TSmatch Resource file");
+            // test 2: вывод неизвестного сообщения
+            s = Msg.S("тра-ля-ля", "и маленькая тележка");
+            Assert.AreEqual("(*)TSmatch SPLASH тра-ля-ля", s);
 
-            FileOp.AppQuit();
+            // test 3: вывод сообщения, которое есть, но с отсутствующим параметром
+            s = Msg.S("Bootstrap__No_Resource_File");
+            Assert.AreEqual(s, "(!)TSmatch SPLASH [Bootstrap]: Нет ресурсного файла \"{0}\"");
+
+            // test 4: распознавание сообщения с пробелами, замена их на '_'
+            s = Msg.S("SectionTab is empty");
+            Assert.AreEqual("[Section]: не инициализирован словарь секций SectionTab", s);
         }
 
         [TestMethod()]
@@ -68,11 +75,10 @@ namespace TSmatch.Message.Tests
             Msg.Dialog = false;
             Msg.W("text");
             Assert.IsTrue(true);
-        }
-    }
 
-    class UT_Msg : Msg
-    {
-        public int cnt_msgs() { return Msg._messages.Count; }
+            // test 1: message should be modal -- должен спрашивать [OK?]
+            Msg.Dialog = true;
+            Msg.W("Should be modal");
+        }
     }
 }

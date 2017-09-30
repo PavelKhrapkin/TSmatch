@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace TSmatch.Properties {
+namespace UT_TSmatch.Properties {
     using System;
     
     
@@ -22,14 +22,14 @@ namespace TSmatch.Properties {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class TSmatch {
+    internal class ResourceUT {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal TSmatch() {
+        internal ResourceUT() {
         }
         
         /// <summary>
@@ -39,7 +39,7 @@ namespace TSmatch.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("TSmatch.Properties.TSmatch", typeof(TSmatch).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("UT_TSmatch.Properties.ResourceUT", typeof(ResourceUT).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -61,20 +61,11 @@ namespace TSmatch.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Date: 16.7.2017.
+        ///   Looks up a localized string similar to это строка для тестирования ресурса в UT.
         /// </summary>
-        internal static string Forms {
+        internal static string strUT {
             get {
-                return ResourceManager.GetString("Forms", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to File: TSmatch.xlsx.
-        /// </summary>
-        internal static string TSmatch_xlsx {
-            get {
-                return ResourceManager.GetString("TSmatch_xlsx", resourceCulture);
+                return ResourceManager.GetString("strUT", resourceCulture);
             }
         }
     }

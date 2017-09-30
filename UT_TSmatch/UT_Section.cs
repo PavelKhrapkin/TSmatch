@@ -47,17 +47,17 @@ namespace TSmatch.Section.Tests
             Assert.AreEqual(s.body, "77");
 
             s = new Sect("единица: ");
-            //8/8/17            Assert.AreEqual(s.type, SType.Unit); //не распознается. Возможно, займусь отдельно
+//8/8/17            Assert.AreEqual(s.type, SType.Unit); //не распознается. Возможно, займусь отдельно
             Assert.AreEqual(s.body, "");
 
             //----- error input text handling -----
             s = new Sect("Цена 2540");   // no ':'
-                                         //8/8/17            Assert.AreEqual(s.type, SType.Price);
-                                         //8/8/17            Assert.AreEqual(s.body, "");
+//8/8/17            Assert.AreEqual(s.type, SType.Price);
+//8/8/17            Assert.AreEqual(s.body, "");
 
             s = new Sect("Цена 2540;");
-            //8/8/17            Assert.AreEqual(s.type, SType.Price);
-            //8/8/17            Assert.AreEqual(s.body, "");
+//8/8/17            Assert.AreEqual(s.type, SType.Price);
+//8/8/17            Assert.AreEqual(s.body, "");
 
             s = new Sect("; профиль: L");
             Assert.AreEqual(s.type, SType.NOT_DEFINED);
@@ -75,7 +75,7 @@ namespace TSmatch.Section.Tests
             // performatce test миллион циклов за 14 сек, т.е. на Sect 14 микросекунд
             int cnt = 1000000;
             DateTime t0 = DateTime.Now;
-            for (int i = 0; i < cnt; i++)
+            for(int i=0; i<cnt;i++)
             {
                 string hdr = "Prof" + i % 10;
                 string body = " A" + i % 15;

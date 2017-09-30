@@ -1,12 +1,16 @@
 ﻿using TSmatch.Tekla;
 /*=========================================
-* Model Unit Tekla = TS_OpenAPI 5.9.2017
+* Model Unit Tekla = TS_OpenAPI 18.9.2017
 *=========================================
 */
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-
+using System.Linq;
+using System.Collections.Generic;
+#if TEKLA
 using TS = TSmatch.Tekla.Tekla;
 using FileOp = match.FileOp.FileOp;
+using System;
+using TSM = Tekla.Structures.Model;
 
 namespace TSmatch.Tekla.Tests
 {
@@ -29,8 +33,77 @@ namespace TSmatch.Tekla.Tests
         public void UT_Example1()
         {
             var ts = new TS();
-//            ts.Example1();
+            //            ts.Example1();
 
+        }
+
+        [TestMethod()]
+        public void UT_ReadCustomEmbeds()
+        {
+            var u = new _UT_Tekla();
+            var embeds = u.ReadCustomParts();
+
+            //int cnt = embeds.Count;
+            //Assert.IsTrue(cnt > 0);
+            //var embGrps = embeds.GroupBy(x => x.Name);
+            //var quot = new Dictionary<string, int>();
+            //foreach (var p in embGrps)
+            //{
+            //    string part = p.Key;
+            //    int n = embeds.Count(x => x.Name == part);
+            //    quot.Add(p.Key, n);
+            //}
+            //Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void UT_Read()
+        {
+            var u = new _UT_Tekla();
+            DateTime t0 = DateTime.Now;
+            u.Read();
+            DateTime t1 = DateTime.Now;
+            string dt = (t1 - t0).ToString();
+            Assert.AreEqual(u.elementsCount(), u.dicPartsCnt());
+            Assert.IsTrue(u.dicPartsCnt() > 0);
+
+            int c100 = u.Class100cnt("100");
+            int c101 = u.Class100cnt("101");
+            u.GrClass();
+        }
+
+        [TestMethod()]
+        public void UT_ReadModObj()
+        {
+            var u = new _UT_Tekla();
+            var parts = u._ReadModObj();
+            Assert.IsTrue(parts.Count() > 0);
+            foreach(var p in parts)
+            {
+                Assert.IsTrue(p.Key.Length > 15);
+            }
+        }
+    }
+
+    class _UT_Tekla : TS
+    {
+        public Dictionary<string, TSM.Part>_ReadModObj()
+        {
+            return ReadModObj<TSM.Part>();
+        }
+        public int dicPartsCnt() { return dicParts.Count; }
+
+        public int Class100cnt(string c) { return dicParts.Count(x => x.Value.Class == c); }
+
+        public void GrClass()
+        {
+            //var grClasses = dicParts.GroupBy(x => x.Value.Class);
+            //foreach (var gr in grClasses)
+            //{
+            //    string cl = gr.Key;
+            //    int grCnt = gr.Count();
+            //}
         }
     }
 }
+#endif

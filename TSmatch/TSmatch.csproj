@@ -97,6 +97,7 @@
     <Compile Include="Document.cs" />
     <Compile Include="DPar.cs" />
     <Compile Include="ElmAttSet.cs" />
+    <Compile Include="EmbedAttSet.cs" />
     <Compile Include="FileOp.cs" />
     <Compile Include="Group.cs" />
     <Compile Include="IFC.cs" />
@@ -117,6 +118,11 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>TSmatch.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\TSmatchMsg.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>TSmatchMsg.resx</DependentUpon>
     </Compile>
     <Compile Include="Rule.cs" />
     <Compile Include="SavedReport.cs" />
@@ -173,6 +179,11 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>TSmatch.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <EmbeddedResource Include="Properties\TSmatchMsg.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>TSmatchMsg.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\TSmatchMsg.ru.resx" />
     <None Include="Group.cd" />
     <None Include="SavedReport.cd" />
     <None Include="Message.cd" />
@@ -181,6 +192,7 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
+    <None Include="Tekla.cd" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -189,7 +201,7 @@
     <Resource Include="TSmatch.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="logo.png" />
+    <Resource Include="Tekla_logo.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="OK.jpg" />
@@ -199,6 +211,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Exit.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="ifc.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

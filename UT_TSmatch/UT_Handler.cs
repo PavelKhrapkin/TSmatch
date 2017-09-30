@@ -58,7 +58,7 @@ namespace TSmatch.Handler.Tests
             Assert.AreEqual(model.getMD5(model.elements), MD5);
 
             // проверка наличия compDescription, sCS? sSupl и totalPrice в группах
-            foreach (var gr in model.elmGroups)
+            foreach(var gr in model.elmGroups)
             {
                 if (gr.totalPrice == 0) continue;
                 Assert.IsTrue(gr.compDescription.Length > 0);

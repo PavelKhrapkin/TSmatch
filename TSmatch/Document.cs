@@ -1,7 +1,7 @@
 ﻿/*-------------------------------------------------------------------------------------------------------
  * Document -- works with all Documents in the system basing on TOC - Table Of Content
  * 
- * 2.08.2017  Pavel Khrapkin, Alex Pass, Alex Bobtsov
+ * 13.09.2017  Pavel Khrapkin, Alex Pass, Alex Bobtsov
  *
  *--------- History ----------------  
  * 2013-2015 заложена система управления документами на основе TOC и Штампов
@@ -31,6 +31,7 @@
  * 19.07.17 - add wrDoc diagnostics
  * 31.07.17 - read XML file into doc.Body -- не работает!
  *  2.08.17 - bug fix on Start; toc is private static reference now; EOLinTOC field removed
+ * 13.09.17 - getLanguage method moved here from Messages
  * -------------------------------------------
  *      METHODS:
  * Start()              - Load from directory TOCdir of TOC all known Document attributes, prepare everithing
@@ -56,6 +57,8 @@
 using System;
 using System.Data;
 using System.Collections.Generic;
+using System.IO;
+using System.Globalization;
 using Excel = Microsoft.Office.Interop.Excel;
 
 using FileOp = match.FileOp.FileOp;
@@ -64,7 +67,6 @@ using Mtr = match.Matrix.Matr;  // класс для работы с внутр�
 using Lib = match.Lib.MatchLib;
 using Log = match.Lib.Log;
 using Msg = TSmatch.Message.Message;
-using System.IO;
 
 namespace TSmatch.Document
 {
@@ -888,7 +890,7 @@ namespace TSmatch.Document
         {
             internal static Excel.Workbook Wb;
             internal static Mtr tocMtr;
-            internal static bool language = Msg.getLanguage() == Decl.ENGLISH;
+            internal static bool language = getLanguage() == Decl.ENGLISH;
             internal static string last_name;
             internal static int nStr;
 
@@ -938,6 +940,17 @@ namespace TSmatch.Document
                 Log.exit();
                 return Forms;
             }
+
+            /// <summary>
+            /// getLanguage() - return Windows system language
+            /// </summary>
+            /// <returns></returns>
+            public static string getLanguage()
+            {
+                CultureInfo ci = CultureInfo.InstalledUICulture;
+                return ci.CompareInfo.Name;
+            }
+
             public static void setWb(Excel.Workbook _Wb, Mtr _tocMtr)
             {
                 Wb = _Wb; tocMtr = _tocMtr;

@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------------------
  * Bootstrap - provide initial start of TSmatch, when necessary - startup procedure
  * 
- *  11.09.2017  Pavel Khrapkin
+ *  13.09.2017  Pavel Khrapkin
  *
  *--- History ---
  * 25.3.2016 started 
@@ -21,9 +21,9 @@
  * 17.07.2017 - check Property.TSmatch resources
  * 23.08.2017 - IFC init add for ChechIFCguids() method
  * 10.09.2017 - MessageBox on top of SplashScreen
- * 11.09.2017 - cleanup
+ * 12.09.2017 - remove Message.Init and all message related resources handling
  *  * --- Unit Tests ---
- * 2017.07.15  UT_Bootstrap   OK
+ * 2017.09.13  UT_Bootstrap   OK
  * ---------------------------------------------------------------------------
  *      Bootstrap Methods:
  * Bootstrap()      - check all resources and start all other modules
@@ -85,7 +85,7 @@ namespace TSmatch.Bootstrap
         public object classCAD;
         public Mod model;
 
-        public Bootstrap() 
+        public Bootstrap()
         {
             Log.set("Bootstrap");
             desktop_path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
@@ -119,9 +119,6 @@ namespace TSmatch.Bootstrap
                     };
             Docs.Start(Templates);
             docTSmatch = Docs.getDoc();
-            //--- initiate Messages
-            Msg.Init();
-            CheckResx("Messages", Resx.Messages);
             //--- iniciate Ifc
             IFCschema = Path.Combine(_TOCdir, @"..\inp\IFC2X3.exp");
             ifc.init(IFCschema);        // инициируем IFC, используя файл схемы IFC - обычно из Tekla
@@ -134,9 +131,10 @@ namespace TSmatch.Bootstrap
         {
             {ResType.Date, "Dat" },
             {ResType.File, "Fil" },
+            {ResType.Resx, "Res" },
             {ResType.Doc , "Doc" }
         };
-        enum ResType { Date, File, Doc, Err}
+        enum ResType { Date, File, Doc, Resx, Err }
         private void CheckResx(string rName, string rValue)
         {
             ResType type = ResType.Err;
@@ -158,11 +156,13 @@ namespace TSmatch.Bootstrap
                     break;
                 case ResType.Date:
                     DateTime d = Lib.getDateTime(v);
-                    Docs doc = Docs.getDoc(rName, fatal:false);
+                    Docs doc = Docs.getDoc(rName, fatal: false);
                     if (doc == null) resError(ResErr.NoDoc, rName);
                     string sdd = doc.Body.Strng(1, 1);
                     DateTime dd = Lib.getDateTime(sdd);
                     if (dd < d) resError(ResErr.Obsolete, rName);
+                    break;
+                case ResType.Resx:
                     break;
                 default: resError(ResErr.ErrResource, rName); break;
             }
@@ -181,7 +181,8 @@ namespace TSmatch.Bootstrap
                 case ResErr.Obsolete:
                     Msg.F("TSmatch Resource Obsolete", rName);
                     break;
-                default: Msg.F("TSmatch internal Resource error", rName);
+                default:
+                    Msg.F("TSmatch internal Resource error", rName);
                     break;
             }
         }
