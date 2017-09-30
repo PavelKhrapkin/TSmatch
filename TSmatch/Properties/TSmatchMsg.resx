@@ -192,4 +192,25 @@ Please, try to run TSmatch on PC with Tekla.</value>
 	<data name="Splash__Loading_TSmatchINFO" xml:space="preserve">
 		<value>[SavedReport]: Loading "{0}" and "{1}".</value>
 	</data>
+	<data name="WPF_MainWindow_grMat" xml:space="preserve">
+		<value>Material</value>
+	</data>
+	<data name="WPF_MainWindow_grPrf" xml:space="preserve">
+		<value>Profile</value>
+	</data>
+	<data name="WPF_MainWindow_grWeight" xml:space="preserve">
+		<value>Weight</value>
+	</data>
+	<data name="WPF_MainWindow_grLength" xml:space="preserve">
+		<value>Length</value>
+	</data>
+	<data name="WPF_MainWindow_grVolume" xml:space="preserve">
+		<value>Volume</value>
+	</data>
+	<data name="WPF_MainWindow_grPrice" xml:space="preserve">
+		<value>Price</value>
+	</data>
+	<data name="WPF_MainWindow_grSupplier" xml:space="preserve">
+		<value>Supplier</value>
+	</data>
 </root>

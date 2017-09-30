@@ -153,20 +153,13 @@
                   AutoGenerateColumns="False"                   
                   FontSize="12" Margin="2" Grid.Row="2">
             <DataGrid.Columns>
-                <DataGridTextColumn x:Name="grMat" Header="Материал"
-                                    Binding="{Binding Path=mat}"/>
-                <DataGridTextColumn x:Name="grPrf" Header="Профиль"
-                                    Binding="{Binding Path=prf}"/>
-                <DataGridTextColumn x:Name="grPrice" Header="Цена (руб)"
-                                    Binding="{Binding Path=price}" FontWeight="Bold"/>
-                <DataGridTextColumn x:Name="grWgt" Header="Вес (кг)"
-                                    Binding="{Binding Path=wgt}"/>
-                <DataGridTextColumn x:Name="grVol" Header="Объем (м3)"
-                                    Binding="{Binding Path=vol}"/>
-                <DataGridTextColumn x:Name="grLng" Header="Длина (м)"
-                                    Binding="{Binding Path=lng}"/>
-                <DataGridTextColumn x:Name="grSupl" Header="Поставщик"
-                                    Binding="{Binding Path=supl}"/>
+                <DataGridTextColumn x:Name="grMat" Binding="{Binding Path=mat}"/>
+                <DataGridTextColumn x:Name="grPrf" Binding="{Binding Path=prf}"/>
+                <DataGridTextColumn x:Name="grPrice" Binding="{Binding Path=price}" FontWeight="Bold"/>
+                <DataGridTextColumn x:Name="grWgt" Binding="{Binding Path=wgt}"/>
+                <DataGridTextColumn x:Name="grVol" Binding="{Binding Path=vol}"/>
+                <DataGridTextColumn x:Name="grLng" Binding="{Binding Path=lng}"/>
+                <DataGridTextColumn x:Name="grSupl" Binding="{Binding Path=supl}"/>
             </DataGrid.Columns>
         </DataGrid>
 <!-- change ListView to DataGrid       
