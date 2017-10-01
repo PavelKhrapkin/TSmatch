@@ -48,7 +48,7 @@ namespace TSmatch
     {
         public static readonly ILog log = LogManager.GetLogger("MainWindow");
 
-        const string ABOUT = "TSmatch v1.0.2 1.10.2017";
+        const string VERSION = "TSmatch v1.0.2 1.10.2017";
         public static Boot boot;
         public static string MyCity = "Санкт-Петербург";
         public delegate void NextPrimeDelegate();
@@ -60,9 +60,9 @@ namespace TSmatch
 
         public MainWindow()
         {
-            Log.START(ABOUT);
+            Log.START(VERSION);
             InitializeComponent();
-            new SplashScreen().ShowDialog();
+            new SplashScreen(VERSION).ShowDialog();
             MainWindowLoad();
         }
 
@@ -301,7 +301,7 @@ namespace TSmatch
 
         private void OnAbout(object sender, RoutedEventArgs e)
         {
-            Msg.AskFOK(ABOUT);
+            Msg.AskFOK(VERSION);
         }
 
         private void OK_button_Click(object sender, RoutedEventArgs e)
