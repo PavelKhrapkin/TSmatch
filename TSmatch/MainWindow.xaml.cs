@@ -148,8 +148,8 @@ namespace TSmatch
             ModPriceSummary.Text = st;
 
             //--TMP!!
-            List<string> suppliers = new List<string>() { "СтальХолдинг", "ЛенСпецСталь", "База СЕВЗАПМЕТАЛЛ" };
-            SupplierTMP.ItemsSource = suppliers;
+            List<string> suppliers = new List<string>() { "СтальХолдинг", "ЛенСпецСталь", "База СЕВЗАПМЕТАЛЛ", "ГК Монолит СПб" };
+            grSupl.ItemsSource = suppliers;
         }
 
         public class gr
@@ -199,7 +199,7 @@ namespace TSmatch
                 , new NextPrimeDelegate(HighLighting));
         }
 
-        private void SupplierTMP_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void SupplierChanged(object sender, SelectionChangedEventArgs e)
         {
         }
 
