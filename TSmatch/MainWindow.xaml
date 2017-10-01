@@ -155,10 +155,15 @@
             <DataGrid.Columns>
                 <DataGridTextColumn x:Name="grMat" Binding="{Binding Path=mat}"/>
                 <DataGridTextColumn x:Name="grPrf" Binding="{Binding Path=prf}"/>
-                <DataGridTextColumn x:Name="grPrice" Binding="{Binding Path=price}" FontWeight="Bold"/>
-                <DataGridTextColumn x:Name="grWgt" Binding="{Binding Path=wgt}"/>
-                <DataGridTextColumn x:Name="grVol" Binding="{Binding Path=vol}"/>
-                <DataGridTextColumn x:Name="grLng" Binding="{Binding Path=lng}"/>
+                <DataGridTextColumn x:Name="grPrice" Binding="{Binding Path=price}"                                     
+                                    ElementStyle="{StaticResource AlignmentRight}"
+                                    FontWeight="Bold"/>
+                <DataGridTextColumn x:Name="grWgt" Binding="{Binding Path=wgt}"
+                                    ElementStyle="{StaticResource AlignmentRight}"/>
+                <DataGridTextColumn x:Name="grVol" Binding="{Binding Path=vol}"
+                                    ElementStyle="{StaticResource AlignmentRight}"/>
+                <DataGridTextColumn x:Name="grLng" Binding="{Binding Path=lng}"
+                                    ElementStyle="{StaticResource AlignmentRight}"/>
                 <DataGridTextColumn x:Name="grSupl" Binding="{Binding Path=supl}"/>
             </DataGrid.Columns>
         </DataGrid>
