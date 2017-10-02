@@ -1,8 +1,13 @@
 ﻿<!--
-    SplashScreen Pavel Khrapkin 14.09.2017
+    SplashScreen Pavel Khrapkin 1.10.2017
     used code code https://www.codeproject.com/Articles/38291/Implement-Splash-Screen-with-WPF
     
     NB: Hide part not in use!
+    
+    History:
+    2017.09.12 - created and simplified from Article
+    2017.10.01 - TextBlock for Version and Date add
+    
  -->
 <Window x:Class="TSmatch.SplashScreen"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -32,15 +37,17 @@
         </Storyboard>
     </Window.Resources>
     <Grid Background="Ivory">
-        <Grid VerticalAlignment="Bottom" HorizontalAlignment="Stretch" Height="150" >
+        <Image VerticalAlignment="Top" Source="TSmatchSplashScreen.jpg" />
+        <Grid VerticalAlignment="Bottom" HorizontalAlignment="Stretch" Height="165" >
+            <TextBlock x:Name="AboutStr"
+                       VerticalAlignment="Top" HorizontalAlignment="Center" FontSize="20" Foreground="White"/>
             <TextBlock x:Name="txtLoading" TextAlignment="Left" FontSize="14" FontWeight="Normal"
-                       Foreground="#FF052045"  Text="Beta 0.9"  TextWrapping="Wrap" 
+                       Foreground="#FF052045" TextWrapping="Wrap" 
                        VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="421">
                 <TextBlock.Effect>
                     <DropShadowEffect BlurRadius="6" Color="#FF797979" Direction="201" Opacity="0.68" ShadowDepth="3"/>
                 </TextBlock.Effect>
-            </TextBlock>       
+            </TextBlock>
         </Grid>
-        <Image VerticalAlignment="Top" Source="TSmatchSplashScreen.jpg" />
     </Grid>
 </Window>

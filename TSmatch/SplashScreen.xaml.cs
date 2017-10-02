@@ -2,11 +2,12 @@
  * SplashScreen() -- Display TSmatch splash screen and status messages on the data load
  * used idea from https://www.codeproject.com/Articles/116875/WPF-Loading-Splash-Screen
  * 
- * 14.09.2017 Pavel Khrapkin
+ * 1.10.2017 Pavel Khrapkin
  * 
  *--- History ---
  *  7.09.2017 - created
  * 14.09.2017 - Multilanguage support from Message module
+ *  1.10.2017 - Version TextBlock
  * 
  * Note: Hide of the messages not in use
  */
@@ -33,9 +34,10 @@ namespace TSmatch
         ShowDelegate showDelegate;
         HideDelegate hideDelegate;
 
-        public SplashScreen()
+        public SplashScreen(string version)
         {
             InitializeComponent();
+            AboutStr.Text = version;
             showDelegate = new ShowDelegate(this.showText);
             hideDelegate = new HideDelegate(this.hideText);
             Showboard = this.Resources["showStoryBoard"] as Storyboard;

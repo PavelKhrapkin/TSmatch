@@ -1,5 +1,5 @@
 ﻿/*-------------------------------------------
- * WPF Main Windows 19.9.2017 Pavel.Khrapkin
+ * WPF Main Windows 1.10.2017 Pavel.Khrapkin
  * --- History ---
  * 2017.05.15 - restored as TSmatch 1.0.1 after Source Control excident
  * 2017.05.23 - Menu OnPriceCheck
@@ -7,6 +7,7 @@
  * 2017.09.07 - Splash screen add
  * 2017.09.13 - Messages from TSmatchMsg.resx
  * 2017.09.19 - Iso Read button
+ * 2017.10.01 - DataGrid support
  * --- Known Issue & ToDos ---
  * - ToDo some kind of progress bar moving on the MainWindow, when Tekla re-draw HighLight.
  */
@@ -47,7 +48,7 @@ namespace TSmatch
     {
         public static readonly ILog log = LogManager.GetLogger("MainWindow");
 
-        const string ABOUT = "TSmatch v1.0.2 13.9.2017";
+        const string VERSION = "TSmatch v1.0.2 1.10.2017";
         public static Boot boot;
         public static string MyCity = "Санкт-Петербург";
         public delegate void NextPrimeDelegate();
@@ -59,9 +60,9 @@ namespace TSmatch
 
         public MainWindow()
         {
-            Log.START(ABOUT);
+            Log.START(VERSION);
             InitializeComponent();
-            new SplashScreen().ShowDialog();
+            new SplashScreen(VERSION).ShowDialog();
             MainWindowLoad();
         }
 
@@ -111,6 +112,13 @@ namespace TSmatch
 
         private void WrReportPanel()
         {
+            grMat.Header = Msg.S("WPF_MainWindow_grMat");
+            grPrf.Header = Msg.S("WPF_MainWindow_grPrf");
+            grPrice.Header = Msg.S("WPF_MainWindow_grPrice");
+            grVol.Header = Msg.S("WPF_MainWindow_grVolume");
+            grWgt.Header = Msg.S("WPF_MainWindow_grWeight");
+            grLng.Header = Msg.S("WPF_MainWindow_grLength");
+            grSupl.Header = Msg.S("WPF_MainWindow_grSupplier");
             List<gr> items = new List<gr>();
             foreach (var gr in model.elmGroups)
             {
@@ -140,8 +148,8 @@ namespace TSmatch
             ModPriceSummary.Text = st;
 
             //--TMP!!
-            List<string> suppliers = new List<string>() { "СтальХолдинг", "ЛенСпецСталь", "База СЕВЗАПМЕТАЛЛ" };
-            SupplierTMP.ItemsSource = suppliers;
+            List<string> suppliers = new List<string>() { "СтальХолдинг", "ЛенСпецСталь", "База СЕВЗАПМЕТАЛЛ", "ГК Монолит СПб" };
+            grSupl.ItemsSource = suppliers;
         }
 
         public class gr
@@ -191,7 +199,7 @@ namespace TSmatch
                 , new NextPrimeDelegate(HighLighting));
         }
 
-        private void SupplierTMP_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void SupplierChanged(object sender, SelectionChangedEventArgs e)
         {
         }
 
@@ -293,7 +301,7 @@ namespace TSmatch
 
         private void OnAbout(object sender, RoutedEventArgs e)
         {
-            Msg.AskFOK(ABOUT);
+            Msg.AskFOK(VERSION);
         }
 
         private void OK_button_Click(object sender, RoutedEventArgs e)

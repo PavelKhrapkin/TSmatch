@@ -193,4 +193,25 @@
 	<data name="Splash__Loading_TSmatchINFO" xml:space="preserve">
 		<value>[SavedReport]: Загружаю "{0}" и "{1}"</value>
 	</data>
+	<data name="WPF_MainWindow_grMat" xml:space="preserve">
+		<value>Материал</value>
+	</data>
+	<data name="WPF_MainWindow_grPrf" xml:space="preserve">
+		<value>Профиль</value>
+	</data>
+	<data name="WPF_MainWindow_grWeight" xml:space="preserve">
+		<value>Вес (кг)</value>
+	</data>
+	<data name="WPF_MainWindow_grLength" xml:space="preserve">
+		<value>Длина (м)</value>
+	</data>
+	<data name="WPF_MainWindow_grVolume" xml:space="preserve">
+		<value>Объем (м3)</value>
+	</data>
+	<data name="WPF_MainWindow_grPrice" xml:space="preserve">
+		<value>Цена (руб)</value>
+	</data>
+	<data name="WPF_MainWindow_grSupplier" xml:space="preserve">
+		<value>Поставщик</value>
+	</data>
 </root>

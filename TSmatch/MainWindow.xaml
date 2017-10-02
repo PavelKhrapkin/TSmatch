@@ -1,11 +1,12 @@
 ﻿<!--
-    MainWindow xaml design Pavel Khrapkin 2017.9.19
+    MainWindow xaml design Pavel Khrapkin 2017.9.30
     
     History:
     2017 May - Created
     2017.09.7 - Window Topmost attribut
     2017.09.10 - Change Image on button "OK" click
     2017.09.19 - add ISO button
+    2017.09.30 - DataGrid with ComboBox instead of ListView
  -->
 <Window x:Class="TSmatch.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -146,66 +147,34 @@
                 Margin="0,0, 10,60"  />
 
         <!-- Groups <Material,Profile,Price, Weight, Volume, Length> Panel -->
-        <ListView Name="elm_groups"
-                  HorizontalAlignment="Stretch"
-                  SelectionChanged="elmGroups_SelectionChanged" FontSize="12"
-                  Margin="2"
-                  Grid.Row="2">
+        <DataGrid Name="elm_groups" ItemsSource="{Binding Path=Items}"
+                  SelectionChanged="elmGroups_SelectionChanged" 
+                  CanUserAddRows="False" CanUserDeleteRows="False"
+                  AutoGenerateColumns="False"                   
+                  FontSize="12" Margin="2" Grid.Row="2">
+            <DataGrid.Columns>
+                <DataGridTextColumn x:Name="grMat" Binding="{Binding Path=mat}"/>
+                <DataGridTextColumn x:Name="grPrf" Binding="{Binding Path=prf}"/>
+                <DataGridTextColumn x:Name="grPrice" Binding="{Binding Path=price}"                                     
+                                    ElementStyle="{StaticResource AlignmentRight}"
+                                    FontWeight="Bold"/>
+                <DataGridTextColumn x:Name="grWgt" Binding="{Binding Path=wgt}"
+                                    ElementStyle="{StaticResource AlignmentRight}"/>
+                <DataGridTextColumn x:Name="grVol" Binding="{Binding Path=vol}"
+                                    ElementStyle="{StaticResource AlignmentRight}"/>
+                <DataGridTextColumn x:Name="grLng" Binding="{Binding Path=lng}"
+                                    ElementStyle="{StaticResource AlignmentRight}"/>
+                <DataGridComboBoxColumn x:Name="grSupl"
+                                        SelectedValueBinding="{Binding Path=supl}">
+                    <DataGridComboBoxColumn.ElementStyle>
+                        <Style TargetType="{x:Type ComboBox}">
+                            <EventSetter Event="SelectionChanged" Handler="SupplierChanged"/>
+                        </Style>
+                    </DataGridComboBoxColumn.ElementStyle>
+                </DataGridComboBoxColumn>
+            </DataGrid.Columns>
+        </DataGrid>
 
-            <ListView.Resources>
-                <Style TargetType="{x:Type ListViewItem}">
-                    <Style.Triggers>
-                        <DataTrigger Binding="{ Binding supl }" Value="---">
-                            <Setter Property="Background" Value="LightBlue" />
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </ListView.Resources>
-            <ListView.ItemContainerStyle>
-                <Style TargetType="ListViewItem">
-                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                </Style>
-            </ListView.ItemContainerStyle>
-
-            <ListView.View>
-                <GridView>
-                    <GridViewColumn Header="Материал" Width="Auto"
-                        DisplayMemberBinding="{Binding mat}" />
-                    <GridViewColumn Header="Профиль" Width="Auto"
-                        DisplayMemberBinding="{Binding prf}" />
-                    <GridViewColumn Header="Цена (руб)" Width="Auto">
-                        <GridViewColumn.CellTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding price}" TextAlignment="Right" FontWeight="Bold" />
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
-                    <GridViewColumn Header="Вес (кг)" Width="Auto">
-                        <GridViewColumn.CellTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding wgt}" TextAlignment="Right" />
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
-                    <GridViewColumn Header="Объем (м3)" Width="Auto">
-                        <GridViewColumn.CellTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding vol}" TextAlignment="Right" />
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
-                    <GridViewColumn Header="Длина (м)" Width="Auto">
-                        <GridViewColumn.CellTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding lng}" TextAlignment="Right" />
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
-                    <GridViewColumn Header="Поставщик" Width="Auto"
-                        DisplayMemberBinding="{Binding supl}" />
-                </GridView>
-            </ListView.View>
-        </ListView>
         <!-- Button Panel -->
         <Grid HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Height="60"
               Opacity="10" Grid.Column="2" Grid.Row="2">
@@ -255,14 +224,5 @@
                 </Button.Template>
             </Button>
         </Grid>
- 
-        <!-- TMP ComboBox Canvas -->
-        <Canvas VerticalAlignment="Top" HorizontalAlignment="Left" Margin="222,200,210,100"
-                  Grid.Column="0">
-            <ComboBox Name="SupplierTMP"      
-                      FontSize="12" SelectionChanged="SupplierTMP_SelectionChanged"
-                      IsReadOnly="True" IsEditable="True" Canvas.Left="200" Canvas.Top="10"
-                  />
-        </Canvas>
     </Grid>
 </Window>
