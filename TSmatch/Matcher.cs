@@ -66,8 +66,8 @@ namespace TSmatch.Matcher
         /// <param name="_rule"></param>
         public Mtch(Group.Group gr, Rule.Rule _rule)
         {
-            //28/6            gr.Elements  
-            if (gr == null || gr.guids.Count < 1) return;
+            if (gr == null || gr.guids == null || gr.guids.Count < 1)
+                Msg.F("Matcher__Mtch Bad arguments");
             ok = OK.NoMatch;
             group = gr;
             foreach (var comp in _rule.CompSet.Components)

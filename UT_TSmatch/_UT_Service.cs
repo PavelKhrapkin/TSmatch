@@ -35,7 +35,7 @@ namespace UT_TSmatch
         public void _txt(string str, params object[] p)
         {
             try { txt(str, p); }
-            catch (ArgumentException e) when (e.Message == "Msg.F") { };
+            catch { }; // (ArgumentException e) when (e.Message == "Message_UT_NoDialog") { };
         }
 
         private string _S(string str, params object[] p)
@@ -54,15 +54,8 @@ namespace UT_TSmatch
         }
 
         public string Msg_S(string str, params object[] p) { return _S(str, p); }
-        public void Msg_W(string str, params object[] p) { _S(str, p); }
+        public void Msg_W(string str, params object[] p) { _txt(str, p); }
         public void Msg_F(string str, params object[] p) { _txt(str, p); }
         public void Msg_I(string str, params object[] p) { _txt(str, p); }
     }
-    //public class Msg
-    //{
-    //    public string S(string str, params object[] p) { return _UT_Msg._S(str, p); }
-    //    public void W(string str, params object[] p) { _UT_Msg._S(str, p); }
-    //    public void F(string str, params object[] p) { _UT_Msg._S(str, p); }
-    //    public void I(string str, params object[] p) { _UT_Msg._S(str, p); }
-    //}
 }

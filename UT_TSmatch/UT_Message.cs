@@ -37,17 +37,18 @@ namespace TSmatch.Message.Tests
             Assert.AreEqual("Гружу", s);
         }
 
-        [TestMethod()]
-        public void UT_AskS()
-        {
-            // 2017.09.13 - AskS еще не реализован - заглушка в Message и тут в UT
-            string reply = Msg.AskS("редактируем текст:", "text examle");
-            Assert.IsNull(reply);
-        }
+        //[TestMethod()]
+        //public void UT_AskS()
+        //{
+        //    // 2017.09.13 - AskS еще не реализован - заглушка в Message и тут в UT
+        //    string reply = Msg.AskS("редактируем текст:", "text examle");
+        //    Assert.IsNull(reply);
+        //}
 
         [TestMethod()]
         public void UT_S()
         {
+            Msg.Dialog = true;  //наличие этой строки связано с использованием static в Msg - портится в тестах
             // test 0: Message не инициализирован, сообщение "незнакомое"
             string s = Msg.S("Not Initialized Message");
             Assert.AreEqual(s, "(*)TSmatch SPLASH Not_Initialized_Message");
@@ -74,9 +75,10 @@ namespace TSmatch.Message.Tests
         {
             // test 0: Dialog = false - работаем без остановки
             var U = new UT_TSmatch._UT_Msg();
+ //           Assert.ThrowsException()
             U.Msg_W("text for test");
             U.GetTxt();
-            Assert.AreEqual("(*)TSmatch SPLASH text_for_test", U.msg);
+            Assert.AreEqual("text_for_test", U.msg);
 
             // test 1: message should be modal -- должен спрашивать [OK?]
             // --!!-- этот тест закомментирован. Открывать комментарии только для проверки Msg.W вручную

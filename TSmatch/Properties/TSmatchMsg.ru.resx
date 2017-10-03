@@ -117,8 +117,8 @@
 	<resheader name="writer">
 		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
 	</resheader>
-	<data name="Match__Bad_Price_Descriptor" xml:space="preserve">
-		<value>[Match]: нет секции Price в TSmatch.xlsx/TOC/LoadDescriptor
+	<data name="Matcher__Mtch_Bad_Price_Descriptor" xml:space="preserve">
+		<value>[Matcher.Mtch]: нет секции Price в TSmatch.xlsx/TOC/LoadDescriptor
 для "{0}" и "{1}"</value>
 	</data>
 	<data name="Bootstrap__Resourse_Obsolete" xml:space="preserve">
@@ -216,5 +216,9 @@
 	</data>
 	<data name="Handler__PriceGr_Rules_not_Initialized" xml:space="preserve">
 		<value>[Handler.PriceGr]: Не инциированы правила модели</value>
+	</data>
+	<data name="Matcher__Mtch_Bad_arguments" xml:space="preserve">
+		<value>[Matcher.Mtch]: Неправильно инициализирован 
+входной аргумент - группа элементов.</value>
 	</data>
 </root>

@@ -44,9 +44,9 @@ namespace TSmatch.PriceList
                     CS cs = null;
                     try { cs = new CS(csName, s); }
                     catch { }
-                    var ruleLst = Rule.Rule.getList(s.name);
+                    var ruleLst = Rule.Rule.getList(s.Name);
                     string msg = string.Format("PriceList \"{0}\" "
-                        + " not awalable from Supplier \"{1}\"", csName, s.name);
+                        + " not awalable from Supplier \"{1}\"", csName, s.Name);
                     if (ruleLst.Count == 0) msg += ", and no Rule for him";
                     else msg += string.Format(", however, available {0} for him", ruleLst.Count);
                     log.Info(msg);

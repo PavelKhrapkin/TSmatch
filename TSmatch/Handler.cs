@@ -107,17 +107,27 @@ namespace TSmatch.Handler
             Log.exit();
         }
 
-        public Match PriceGr(Mod mod, ElmGr gr)
+        public Mtch PriceGr(Mod mod, ElmGr gr)
         {
             Log.set("Handler.PriceGr");
-            Match match = new Match();
+            Mtch match = null;
+            bool found=false;
             if (mod.Rules == null || mod.Rules.Count == 0) Msg.F("Handler__PriceGr Rules not Initialized");// mod = sr._GetSavedRules(mod);
-            foreach(var r in mod.Rules)
+            foreach(var rule in mod.Rules)
             {
-                if (gr.SupplierName != string.Empty && gr.SupplierName != r.sSupl) continue;
-
+                if (gr.SupplierName != string.Empty && gr.SupplierName != rule.sSupl) continue;
+                match = new Mtch(gr, rule);
+                if (match.ok == Mtch.OK.Match)
+                {
+                    mod.matches.Add(match);
+                    gr.CompSetName = match.rule.sCS;
+                    gr.SupplierName = match.rule.sSupl;
+                    gr.compDescription = match.component.Str(Section.Section.SType.Description);
+                    found = true;
+                    break;
+                }
             }
-            throw new NotFiniteNumberException();
+            if (!found) log.Info("No Match Group. mat= " + gr.mat + "\tprf=" + gr.prf);
             Log.exit();
             return match;
         }

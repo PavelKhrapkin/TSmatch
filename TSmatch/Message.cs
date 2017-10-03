@@ -42,7 +42,6 @@ namespace TSmatch.Message
         public static readonly ILog log = LogManager.GetLogger("Message");
 
         public enum Severity { INFO = 0, WARNING, FATAL, SPLASH };
-        public static bool Trace = false;  // For TRACE mode chage to "true";
         public static bool Dialog = true;  //for Unit Test set Dialog = false;
 
         public Message() { }
@@ -68,7 +67,7 @@ namespace TSmatch.Message
         }
   
         protected static string msg, errType;
-        static void txt(Severity type, string msgcode, object[] p, bool doMsgBox=true)
+        private static void txt(Severity type, string msgcode, object[] p, bool doMsgBox=true)
         {
             msgcode = msgcode.Replace(' ', '_');
             errType = "TSmatch " + type;
@@ -76,7 +75,8 @@ namespace TSmatch.Message
             try { msg = knownMsg ? string.Format(_messages[msgcode], p) : string.Format(msgcode, p); }
             catch { msg = knownMsg? _messages[msgcode]: msgcode; errType = "(!)" + errType; }
             if (!knownMsg) errType = "(*)" + errType;
-            if (!Dialog) throw new ArgumentException("Msg.F");
+            string exstr = "Message_UT_NoDialog" + "\tDialog=" + Dialog.ToString() + "\t" + msgcode;
+            if (!Dialog) throw new ArgumentException(exstr);    // "Message_UT_NoDialog");
             if (doMsgBox) MessageBox.Show(msg, errType, MessageBoxButton.OK, MessageBoxImage.Asterisk, reply, MessageBoxOptions.ServiceNotification);
             if (type == Severity.FATAL) Stop();
         }

@@ -160,10 +160,10 @@ namespace TSmatch
             Supl supl = new Supl(currentGroup.SupplierName);
             Supl_CS_Mat_Prf.Text = SuplName + "\t" + currentGroup.CompSetName;
             string str = "Адрес: ";
-            if (!string.IsNullOrEmpty(supl.index)) str += supl.index + ", ";
+            if (!string.IsNullOrEmpty(supl.Index)) str += supl.Index + ", ";
             str += supl.City + ", ";
             if (str.Length > 20) str += "\n";
-            str += supl.street + "\nтел." + supl.telephone;
+            str += supl.Street + "\nтел." + supl.Telephone;
             Supl_CS.Text = str;
             //--2017.07.26 не вполне работает Hyperlink- нет вызова сайта при клике. Пока оставил так..
             Supl_URL.Inlines.Clear();

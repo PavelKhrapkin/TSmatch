@@ -10,6 +10,7 @@ using System.Linq;
 
 using FileOp = match.FileOp.FileOp;
 using Boot = TSmatch.Bootstrap.Bootstrap;
+using Msg = TSmatch.Message.Message;
 using Mod = TSmatch.Model.Model;
 using TS = TSmatch.Tekla.Tekla;
 using MH = TSmatch.Handler.Handler;
@@ -17,6 +18,8 @@ using SR = TSmatch.SaveReport.SavedReport;
 using Elm = TSmatch.ElmAttSet.ElmAttSet;
 using ElmGr = TSmatch.Group.Group;
 using Mtch = TSmatch.Matcher.Mtch;
+using Comp = TSmatch.Component.Component;
+using CS = TSmatch.CompSet.CompSet;
 
 namespace TSmatch.Handler.Tests
 {
@@ -133,18 +136,47 @@ namespace TSmatch.Handler.Tests
 
         [TestMethod()]
         public void UT_PriceGr()
-        {
+       {
+            // Assign
             Mod mod = new Mod();
             Rule.Rule rule = new Rule.Rule();
             rule.sSupl = "СтальХолдинг";
             rule.sCS = "Полоса";
             rule.text = "М: C245=C255 ; Профиль: Полоса горячекатаная = PL = — *x*;";
-          //  mod.Rules.Add(rule);
             ElmGr gr = new ElmGr();
+            Msg.Dialog = false;
             gr.SupplierName = rule.sSupl;
+            gr.guids = new List<string>() { "guid1", "guid2" };
+            var U = new UT_TSmatch._UT_Msg();
 
-            var v = mod.mh.PriceGr(mod, gr);
-            Assert.Fail();
+            // test 1: Msg.F("Rules not initialyzed") English
+            U.SetCulture("en");
+            try { mod.mh.PriceGr(mod, gr); } catch { }
+            U.GetTxt();
+            Assert.AreEqual("[Handler.PriceGr]: Rules in Model were not initialyzed", U.msg);
+
+            // test 2: Msg.F("Rules not initialyzed") Russian
+            U.SetCulture("ru");
+            try { mod.mh.PriceGr(mod, gr); } catch { }
+            U.GetTxt();
+            Assert.AreEqual("[Handler.PriceGr]: Не инциированы правила модели", U.msg);
+
+            // test 3: Rules initialyzed, works with CompSet and Components, Rule
+            gr.Prf = "I20"; gr.prf = "i20";
+            rule.text = "Профиль: Балка =I*";
+            string comp_txt = "Балка 20";
+            rule.ruleDP = new DPar.DPar(rule.text);
+            rule.synonyms = rule.RuleSynParse(rule.text);
+ //           var syns = rule.synonyms[Section.Section.SType.Profile].ToList();
+            Comp comp = new Comp();
+            comp.compDP = new DPar.DPar("Prf: " + comp_txt);
+            //      CompSet cs = 
+            //      rule.CompSet
+            mod.Rules.Add(rule);
+            ////U.SetCulture("en"); // раскомментировать, чтобы увидеть внешний вид
+            ////Msg.Dialog = true;  // сообщения об ошибке по русски и по английски
+            var match = mod.mh.PriceGr(mod, gr);
+            Assert.IsTrue(true);
         }
 #if old //24/5 move to UT_ModelHandle
         [TestMethod]

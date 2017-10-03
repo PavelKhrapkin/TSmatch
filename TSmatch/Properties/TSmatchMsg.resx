@@ -117,8 +117,8 @@
 	<resheader name="writer">
 		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
 	</resheader>
-	<data name="Match__Bad_Price_Descriptor" xml:space="preserve">
-    <value>[Match]: Bad Price descriptor: no Price section in TSmatch.xlsx/TOC/LoadDescriptor
+	<data name="Matcher__Mtch_Bad_Price_Descriptor" xml:space="preserve">
+    <value>[Matcher.Mtch]: Bad Price descriptor: no Price section in TSmatch.xlsx/TOC/LoadDescriptor
 for "{0}", "{1}"</value>
   </data>
 	<data name="Message__Init_fault" xml:space="preserve">
@@ -215,5 +215,8 @@ Please, try to run TSmatch on PC with Tekla.</value>
 	</data>
 	<data name="Handler__PriceGr_Rules_not_Initialized" xml:space="preserve">
 		<value>[Handler.PriceGr]: Rules in Model were not initialyzed</value>
+	</data>
+	<data name="Matcher__Mtch_Bad_arguments" xml:space="preserve">
+		<value>[Matcher.Mtch]: Bad entry argument "group"</value>
 	</data>
 </root>

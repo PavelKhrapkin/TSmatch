@@ -65,6 +65,7 @@
     </Compile>
     <Compile Include="UT_Bootstrap.cs" />
     <Compile Include="UT_Component.cs" />
+    <Compile Include="UT_CompSet.cs" />
     <Compile Include="UT_Documents.cs" />
     <Compile Include="UT_Group.cs" />
     <Compile Include="UT_MatchLib.cs" />

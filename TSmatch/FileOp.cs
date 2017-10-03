@@ -220,7 +220,7 @@ namespace match.FileOp
             }
             catch (Exception e)
             {
-                if (Msg.Trace) Msg.I("TRACE_33.1_IsNameRangeExist", e, name);
+ //               Msg.I("FileOp__IsNameRangeExist", e, name);
                 result = false;
             }
             return result;
