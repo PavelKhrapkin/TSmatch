@@ -1,7 +1,7 @@
 ﻿/*----------------------------------------------------------------------------------------------
  * Matcher -- module fulfill matching Group of the Elements with CompSet in accrding with Rule
  *
- * 29.8.2017 Pavel Khrapkin
+ * 2.10.2017 Pavel Khrapkin
  *
  *--- History ---
  * 2016 previous editions P.Khrapkin, A.Pass, A.Bobtsov
@@ -9,6 +9,7 @@
  *  3.03.2017 enum ok {Match, NoMatch, NoSection}
  *  7.03.2017 use Section module
  *  4.06.2017 fair and handle Exception in Component when cannot parse Rule or Group
+ *  2.10.2017 audit
  *  
  *  <ToDo> 2017.03.2 Matcher revision:
  *  - check Shft/F12 all referenced to Mtch
@@ -32,27 +33,13 @@
  * isRuleApplicable(r.text, gr.mat, gr.prf) - определяет, применимо ли Правило?
  * isOKexist(n) - возвращает true, если для группы n уже найдено соответствие в OKs
  */
-using System;
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using log4net;
 //----- My modules and classes -----------
 using Lib = match.Lib.MatchLib;
-using Log = match.Lib.Log;
-using Decl = TSmatch.Declaration.Declaration;
-using Docs = TSmatch.Document.Document;
 using Mod = TSmatch.Model.Model;
 // 30.11.2016 using Cmp = TSmatch.CompSet.Component.Component;
-using CS = TSmatch.CompSet.CompSet;
-using Comp = TSmatch.Component.Component;
-using Rule = TSmatch.Rule.Rule;
-using TSmatch.ElmAttSet;
-using TSmatch.Rule;
 using Msg = TSmatch.Message.Message;
-using Sec = TSmatch.Section.Section;
-using Elm = TSmatch.ElmAttSet.ElmAttSet;
 using SType = TSmatch.Section.Section.SType;
-using TSmatch.DPar;
 
 namespace TSmatch.Matcher
 {
@@ -119,6 +106,13 @@ namespace TSmatch.Matcher
             return model.MD5 == newMD5;
         }
 #endif
+        /// <summary>
+        /// getPrice(gr, csDP, priceStr) - return price made from priceStr in price-list as set in csDP price type 
+        /// </summary>
+        /// <param name="group">element group to be priced</param>
+        /// <param name="csDP">CompSet Dictionary of Parameters</param>
+        /// <param name="priceStr">price string in price-list</param>
+        /// <returns>double price value, converted from priceStr, group of elemetsa, and pricing type</returns>
         private double getPrice(Group.Group group, DPar.DPar csDP, string priceStr)
         {
             double price = Lib.ToDouble(priceStr);

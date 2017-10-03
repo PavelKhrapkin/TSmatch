@@ -214,4 +214,7 @@
 	<data name="WPF_MainWindow_grSupplier" xml:space="preserve">
 		<value>Поставщик</value>
 	</data>
+	<data name="Handler__PriceGr_Rules_not_Initialized" xml:space="preserve">
+		<value>[Handler.PriceGr]: Не инциированы правила модели</value>
+	</data>
 </root>

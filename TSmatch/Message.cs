@@ -1,10 +1,10 @@
 ﻿/*----------------------------------------------------------------------------
  * Message -- multilanguage message system
  * 
- * 14.09.2017  Pavel Khrapkin
+ * 3.10.2017  Pavel Khrapkin
  *
  *--- Unit Tests ---
- * UT_Message: UT_Init, UT_AskS, UT_W, UT_S 13.09.2017 OK
+ * UT_Message: UT_Init, UT_AskS, UT_W, UT_S with _UT_Service 3.10.2017 OK
  * --- History ---
  * Feb-2016 Created
  * 20.3.2016 - Error message Code display even when Message system is not initialysed yet
@@ -27,14 +27,12 @@
  * AskYN(text?)  - ask with text as a prompt, and respont Yes or No
  * AskS(text:)   - request string entry with text as a prompt
  */
+using log4net;
 using System;
 using System.Collections.Generic;
-using System.Windows;
 using System.Globalization;
 using System.Resources;
-using System.Threading;
-using log4net;
-
+using System.Windows;
 using FileOp = match.FileOp.FileOp;
 
 namespace TSmatch.Message

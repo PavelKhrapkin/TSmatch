@@ -213,4 +213,7 @@ Please, try to run TSmatch on PC with Tekla.</value>
 	<data name="WPF_MainWindow_grSupplier" xml:space="preserve">
 		<value>Supplier</value>
 	</data>
+	<data name="Handler__PriceGr_Rules_not_Initialized" xml:space="preserve">
+		<value>[Handler.PriceGr]: Rules in Model were not initialyzed</value>
+	</data>
 </root>

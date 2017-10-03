@@ -107,6 +107,21 @@ namespace TSmatch.Handler
             Log.exit();
         }
 
+        public Match PriceGr(Mod mod, ElmGr gr)
+        {
+            Log.set("Handler.PriceGr");
+            Match match = new Match();
+            if (mod.Rules == null || mod.Rules.Count == 0) Msg.F("Handler__PriceGr Rules not Initialized");// mod = sr._GetSavedRules(mod);
+            foreach(var r in mod.Rules)
+            {
+                if (gr.SupplierName != string.Empty && gr.SupplierName != r.sSupl) continue;
+
+            }
+            throw new NotFiniteNumberException();
+            Log.exit();
+            return match;
+        }
+
         public void Pricing(ref Mod m, bool unit_test_mode = false)
         {
             Log.set("mh.Pricing");
@@ -124,6 +139,13 @@ namespace TSmatch.Handler
             Log.Trace("      date=\t" + m.date + "\tMD5=" + m.MD5 + "\telements.Count=" + m.elements.Count);
             Log.Trace("price date=\t" + m.pricingDate + "\tMD5=" + m.pricingMD5 + "\ttotal price" + m.total_price);
             Log.exit();
+        }
+
+        public class Match
+        {
+            public string RuleText;
+            public string SupplierName;
+            public string CompSetName;
         }
     } // end class Handler : Model
     class _SR : SR

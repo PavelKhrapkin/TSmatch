@@ -1,7 +1,8 @@
-﻿/*=================================
- * Handler Unit Test 16.8.2017
- *=================================
- */
+﻿using TSmatch.Handler;
+/*=================================
+* Handler Unit Test 16.8.2017
+*=================================
+*/
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -14,6 +15,7 @@ using TS = TSmatch.Tekla.Tekla;
 using MH = TSmatch.Handler.Handler;
 using SR = TSmatch.SaveReport.SavedReport;
 using Elm = TSmatch.ElmAttSet.ElmAttSet;
+using ElmGr = TSmatch.Group.Group;
 using Mtch = TSmatch.Matcher.Mtch;
 
 namespace TSmatch.Handler.Tests
@@ -58,7 +60,7 @@ namespace TSmatch.Handler.Tests
             Assert.AreEqual(model.getMD5(model.elements), MD5);
 
             // проверка наличия compDescription, sCS? sSupl и totalPrice в группах
-            foreach(var gr in model.elmGroups)
+            foreach (var gr in model.elmGroups)
             {
                 if (gr.totalPrice == 0) continue;
                 Assert.IsTrue(gr.compDescription.Length > 0);
@@ -127,6 +129,22 @@ namespace TSmatch.Handler.Tests
             Assert.AreEqual(32, pricing_md5.Length);
 
             FileOp.AppQuit();
+        }
+
+        [TestMethod()]
+        public void UT_PriceGr()
+        {
+            Mod mod = new Mod();
+            Rule.Rule rule = new Rule.Rule();
+            rule.sSupl = "СтальХолдинг";
+            rule.sCS = "Полоса";
+            rule.text = "М: C245=C255 ; Профиль: Полоса горячекатаная = PL = — *x*;";
+          //  mod.Rules.Add(rule);
+            ElmGr gr = new ElmGr();
+            gr.SupplierName = rule.sSupl;
+
+            var v = mod.mh.PriceGr(mod, gr);
+            Assert.Fail();
         }
 #if old //24/5 move to UT_ModelHandle
         [TestMethod]

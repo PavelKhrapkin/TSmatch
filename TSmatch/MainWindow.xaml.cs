@@ -11,33 +11,22 @@
  * --- Known Issue & ToDos ---
  * - ToDo some kind of progress bar moving on the MainWindow, when Tekla re-draw HighLight.
  */
+using log4net;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Diagnostics;
-
-using log4net;
-using Log = match.Lib.Log;
-using FileOp = match.FileOp.FileOp;
 using Boot = TSmatch.Bootstrap.Bootstrap;
-using Msg = TSmatch.Message.Message;
-using M = TSmatch.Properties.TSmatchMsg;
-using Mod = TSmatch.Model.Model;
-using Ifc = TSmatch.IFC.IFC;
-using Supl = TSmatch.Suppliers.Supplier;
 using ElmGr = TSmatch.Group.Group;
+using Ifc = TSmatch.IFC.IFC;
+using Log = match.Lib.Log;
+using Mod = TSmatch.Model.Model;
+using Msg = TSmatch.Message.Message;
+using Supl = TSmatch.Suppliers.Supplier;
 
 namespace TSmatch
 {
@@ -268,7 +257,7 @@ namespace TSmatch
         }
         #endregion --- [Read], [RePrice], and [OK] buttons ---
 
-        #region --- [Read], [iso], [RePrice], and [OK] buttons ---
+        #region --- [Read], [Ifc], [RePrice], and [OK] buttons ---
         private void OnTeklaRead_button_click(object sender, RoutedEventArgs e)
         {
             MessageBox.Show("Читать?", "TSmatch", MessageBoxButton.OK);

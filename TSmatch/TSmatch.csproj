@@ -185,6 +185,7 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\TSmatchMsg.ru.resx" />
     <None Include="Group.cd" />
+    <None Include="Matcher.cd" />
     <None Include="SavedReport.cd" />
     <None Include="Message.cd" />
     <None Include="PriceList.cd" />
