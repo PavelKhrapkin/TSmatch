@@ -1,7 +1,8 @@
-﻿/*=================================
- * Components Unit Test 21.8.2017
- *=================================
- */
+﻿using TSmatch.Component;
+/*=================================
+* Components Unit Test 21.8.2017
+*=================================
+*/
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.Linq;
@@ -71,7 +72,7 @@ namespace TSmatch.Component.Tests
                 foreach (var r in model.Rules)
                 {
                     _mtch = new Mtch(g, r);
-                    if (g.prf != "—8" || !r.text.Contains("—") ) continue;
+                    if (g.prf != "—8" || !r.text.Contains("—")) continue;
                     Assert.AreEqual(Mtch.OK.Match, _mtch.ok);
                     found_mtch = _mtch;
                     break;
@@ -320,6 +321,15 @@ namespace TSmatch.Component.Tests
             Assert.AreEqual(v.Count, 2);
             Assert.AreEqual(v[0], "10");
             Assert.AreEqual(v[1], "@300");
+        }
+
+        [TestMethod()]
+        public void UT_Str()
+        {
+            // test 1: Component not initiated, no DP
+            var comp = new Component();
+            comp.Str(SType.Price);
+            Assert.Fail();
         }
 
         private void initGr(string v, string mat = "C245")

@@ -20,6 +20,8 @@ using ElmGr = TSmatch.Group.Group;
 using Mtch = TSmatch.Matcher.Mtch;
 using Comp = TSmatch.Component.Component;
 using CS = TSmatch.CompSet.CompSet;
+using DP = TSmatch.DPar.DPar;
+using Supl = TSmatch.Suppliers.Supplier;
 
 namespace TSmatch.Handler.Tests
 {
@@ -161,20 +163,27 @@ namespace TSmatch.Handler.Tests
             U.GetTxt();
             Assert.AreEqual("[Handler.PriceGr]: Не инциированы правила модели", U.msg);
 
-            // test 3: Rules initialyzed, works with CompSet and Components, Rule
+            // test 3: Rules initialyzed, works with CompSet and Components, Rule, MsgF Wrong LoadDescriptor
             gr.Prf = "I20"; gr.prf = "i20";
             rule.text = "Профиль: Балка =I*";
             string comp_txt = "Балка 20";
             rule.ruleDP = new DPar.DPar(rule.text);
             rule.synonyms = rule.RuleSynParse(rule.text);
- //           var syns = rule.synonyms[Section.Section.SType.Profile].ToList();
+            //           var syns = rule.synonyms[Section.Section.SType.Profile].ToList();
+            List<Comp> comps = new List<Comp>()
+            {
+                new Comp(new DP("Prf:I10; Price:23456")),
+                new Comp(new DP("Prf:I20; Price:34567"))
+            };
+            Supl supl = new Supl("СтальХолдинг", init: false);
+            string LoadDescriptor = "M:1; опис:3; профиль:2; цена: 4; Ед: руб/т";
+            CS cs = new CS("Балка", supl, LoadDescriptor, comps);
             Comp comp = new Comp();
-            comp.compDP = new DPar.DPar("Prf: " + comp_txt);
-            //      CompSet cs = 
-            //      rule.CompSet
+            comp.compDP = new DP("Prf: " + comp_txt);
             mod.Rules.Add(rule);
-            ////U.SetCulture("en"); // раскомментировать, чтобы увидеть внешний вид
-            ////Msg.Dialog = true;  // сообщения об ошибке по русски и по английски
+            U.SetCulture("en"); // раскомментировать, чтобы увидеть внешний вид
+            Msg.Dialog = true;  // сообщения об ошибке по русски и по английски
+            rule.CompSet = cs;
             var match = mod.mh.PriceGr(mod, gr);
             Assert.IsTrue(true);
         }

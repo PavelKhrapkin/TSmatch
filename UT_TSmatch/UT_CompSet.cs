@@ -33,6 +33,8 @@ namespace TSmatch.CompSet.Tests
             Assert.AreEqual("4", cs.csDP.dpar[SType.Price]);
             Assert.AreEqual("СтальХолдинг", cs.Supplier.Name);
             Assert.AreEqual(2, cs.Components.Count);
+            Assert.AreEqual("I10", cs.Components[0].Str(SType.Profile));
+            Assert.AreEqual("I20", cs.Components[1].Str(SType.Profile));
         }
     }
 }
