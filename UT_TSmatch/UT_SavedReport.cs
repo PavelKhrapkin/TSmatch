@@ -1,5 +1,5 @@
 ﻿/*=================================
- * Saved Report Unit Test 14.09.2017
+ * Saved Report Unit Test 6.10.2017
  *=================================
  */
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -18,16 +18,45 @@ namespace TSmatch.SaveReport.Tests
     [TestClass()]
     public class UT_SavedReportTests
     {
-        Boot boot;
+        public Boot boot;
         SR sr;
         MH mh;
         Mod model;
         UT_SR U = new UT_SR();
 
         [TestMethod()]
+        public void UT_SR_Msg()
+        {
+            boot = new Boot(init: false);
+            var Umsg = new UT_TSmatch._UT_Msg();
+
+            model = new Mod();
+            var sr = model.sr;
+            Umsg.SetCulture("en");
+
+            // test 0: "en" NoFile, NoDoc, Obsolet, ErrResource
+
+            try { sr.SetModel(boot); } catch { } Umsg.GetTxt();
+            Assert.AreEqual("[SavedReport.SetModelDir]: No \"TSmatchINFO.xlsx\" in model directory \r\nEnsure, that this file is written by TSmatch application, when Tekla is available", Umsg.msg);
+        }
+
+        [TestMethod()]
         public void UT_SetModel()
         {
-            boot = new Boot();
+            boot = new Boot(init:true);
+            sr = new SR();
+
+            model = sr.SetModel(boot);
+
+            Assert.IsTrue(sr.CheckModelIntegrity(model));
+
+            FileOp.AppQuit();
+        }
+
+        [TestMethod()]
+        public void UT_SetModDir()
+        {
+            boot = new Boot(init: true);
             sr = new SR();
 
             model = sr.SetModel(boot);
@@ -40,7 +69,7 @@ namespace TSmatch.SaveReport.Tests
         [TestMethod()]
         public void UT_CheckModelIntegrity()
         {
-            boot = new Boot();
+            boot = new Boot(init:true);
             model = new Mod();
             model = model.sr.SetModel(boot);
 
@@ -81,7 +110,7 @@ namespace TSmatch.SaveReport.Tests
         {
             // GetModelINFO() - базовый метод, вызываемый в SetModel.
             //..поэтому пользоваться обычным init() для этого UT_ нельзя 
-            boot = new Boot();
+            boot = new Boot(init:true);
             model = new Mod();
             model.dir = boot.ModelDir;
             if (string.IsNullOrEmpty(model.dir)) model.dir = boot.DebugDir;
@@ -104,7 +133,7 @@ namespace TSmatch.SaveReport.Tests
             // GetModelINFO() - базовый метод, вызываемый в SetModel.
             //..поэтому пользоваться обычным init() для этого UT_ нельзя 
             const string defaultModName = "MyTestName";
-            boot = new Boot();
+            boot = new Boot(init:true);
             model = new Mod();
             model.dir = boot.ModelDir;
             if (string.IsNullOrEmpty(model.dir)) model.dir = boot.DebugDir;
@@ -296,7 +325,7 @@ namespace TSmatch.SaveReport.Tests
         }
     }
 
-    class UT_SR : TSmatch.SaveReport.SavedReport
+    class UT_SR : SR
     {
         public void _GetTSmatchINFO(Mod mod, bool ut_mode = false)
         {
@@ -311,6 +340,13 @@ namespace TSmatch.SaveReport.Tests
         internal Mod _GetSavedRules(Mod model, bool init_mode)
         {
             return GetSavedRules(model, init_mode);
+        }
+
+        internal Mod _SetModDir(Mod mod)
+        {
+  //          var gg = UT_SavedReportTests.
+   //         var result = mod.SetModDir();
+            return null;
         }
     }
 }

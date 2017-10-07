@@ -33,7 +33,7 @@ using Log = match.Lib.Log;
 using FileOp = match.FileOp.FileOp;
 using Boot = TSmatch.Bootstrap.Bootstrap;
 using Msg = TSmatch.Message.Message;
-using M = TSmatch.Properties.TSmatchMsg;
+//using M = TSmatch.Properties.TSmatchMsg;
 using Mod = TSmatch.Model.Model;
 using Ifc = TSmatch.IFC.IFC;
 using Supl = TSmatch.Suppliers.Supplier;
@@ -48,7 +48,7 @@ namespace TSmatch
     {
         public static readonly ILog log = LogManager.GetLogger("MainWindow");
 
-        const string VERSION = "TSmatch v1.0.2 1.10.2017";
+        const string VERSION = "TSmatch v1.0.2 6.10.2017";
         public static Boot boot;
         public static string MyCity = "Санкт-Петербург";
         public delegate void NextPrimeDelegate();
@@ -171,10 +171,10 @@ namespace TSmatch
             Supl supl = new Supl(currentGroup.SupplierName);
             Supl_CS_Mat_Prf.Text = SuplName + "\t" + currentGroup.CompSetName;
             string str = "Адрес: ";
-            if (!string.IsNullOrEmpty(supl.index)) str += supl.index + ", ";
+            if (!string.IsNullOrEmpty(supl.Index)) str += supl.Index + ", ";
             str += supl.City + ", ";
             if (str.Length > 20) str += "\n";
-            str += supl.street + "\nтел." + supl.telephone;
+            str += supl.Street + "\nтел." + supl.Telephone;
             Supl_CS.Text = str;
             //--2017.07.26 не вполне работает Hyperlink- нет вызова сайта при клике. Пока оставил так..
             Supl_URL.Inlines.Clear();

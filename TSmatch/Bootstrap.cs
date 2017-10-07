@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------------------
  * Bootstrap - provide initial start of TSmatch, when necessary - startup procedure
  * 
- *  13.09.2017  Pavel Khrapkin
+ *  6.10.2017  Pavel Khrapkin
  *
  *--- History ---
  * 25.3.2016 started 
@@ -22,8 +22,9 @@
  * 23.08.2017 - IFC init add for ChechIFCguids() method
  * 10.09.2017 - MessageBox on top of SplashScreen
  * 12.09.2017 - remove Message.Init and all message related resources handling
+ *  6.10.2017 - UT_ for Resource check, cleanup
  *  * --- Unit Tests ---
- * 2017.09.13  UT_Bootstrap   OK
+ * 2017.10.6  - UT_Boot_ResxError, UT_Bootstrap   OK
  * ---------------------------------------------------------------------------
  *      Bootstrap Methods:
  * Bootstrap()      - check all resources and start all other modules
@@ -85,8 +86,10 @@ namespace TSmatch.Bootstrap
         public object classCAD;
         public Mod model;
 
-        public Bootstrap()
+        public Bootstrap() { }
+        public Bootstrap(bool init = true)
         {
+            if (!init) return;
             Log.set("Bootstrap");
             desktop_path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
             debug_path = desktop_path;
@@ -135,7 +138,7 @@ namespace TSmatch.Bootstrap
             {ResType.Doc , "Doc" }
         };
         enum ResType { Date, File, Doc, Resx, Err }
-        private void CheckResx(string rName, string rValue)
+        protected void CheckResx(string rName, string rValue)
         {
             ResType type = ResType.Err;
             foreach (var x in ResTab)
@@ -149,269 +152,30 @@ namespace TSmatch.Bootstrap
             switch (type)
             {
                 case ResType.Doc:
-                    if (!Docs.IsDocExists(rName)) resError(ResErr.NoDoc, rName);
+                    if (!Docs.IsDocExists(rName)) resxError(ResErr.NoDoc, rName);
                     break;
                 case ResType.File:
-                    if (!FileOp.isFileExist(rName)) resError(ResErr.NoFile, rName);
+                    if (!FileOp.isFileExist(rName)) resxError(ResErr.NoFile, rName);
                     break;
                 case ResType.Date:
                     DateTime d = Lib.getDateTime(v);
                     Docs doc = Docs.getDoc(rName, fatal: false);
-                    if (doc == null) resError(ResErr.NoDoc, rName);
+                    if (doc == null) resxError(ResErr.NoDoc, rName);
                     string sdd = doc.Body.Strng(1, 1);
                     DateTime dd = Lib.getDateTime(sdd);
-                    if (dd < d) resError(ResErr.Obsolete, rName);
+                    if (dd < d) resxError(ResErr.Obsolete, rName);
                     break;
                 case ResType.Resx:
                     break;
-                default: resError(ResErr.ErrResource, rName); break;
+                default: resxError(ResErr.ErrResource, rName); break;
             }
         }
-        enum ResErr { ErrResource, NoFile, NoDoc, Obsolete }
-        void resError(ResErr errType, string rName)
+        protected enum ResErr { ErrResource, NoFile, NoDoc, Obsolete }
+        protected void resxError(ResErr errType, string resName)
         {
-            switch (errType)
-            {
-                case ResErr.NoFile:
-                    Msg.F("No TSmatch Resource file", rName);
-                    break;
-                case ResErr.NoDoc:
-                    Msg.F("No TSmatch Resource Document", rName);
-                    break;
-                case ResErr.Obsolete:
-                    Msg.F("TSmatch Resource Obsolete", rName);
-                    break;
-                default:
-                    Msg.F("TSmatch internal Resource error", rName);
-                    break;
-            }
+            string myName = "Bootstrap__resError_";
+            var v = errType.ToString();
+            Msg.F(myName + v, resName);
         }
-#if OLD //15/7
-        /// <summary>
-        /// init(name [,arg]) - initiate TSmatch module name
-        /// </summary>
-        /// <param name="name">name of module</param>
-        /// <param name="arg">optional methop paramentr</param>
-        /// <returns>return one instnce of 'name' or List<instances> depending on module specifics and arg value</returns>
-        /// <history>30.8.2016
-        /// 22.11.2016 use RecentModel() instead of Models[0]
-        /// 14.12.2016 init(BOOTSTRAP)
-        /// 22.12.2016 enum BootInitMode
-        /// </history>
-        public enum BootInitMode { Bootstrap, Tekla, TSmatch, Model }
-
-        internal object init(BootInitMode mode, string arg = "")
-        {
-            List<Resource> Resources = new List<Resource>();
-
-            object moduleApp = null;
-            switch (mode)
-            {
-                case BootInitMode.Bootstrap:
-                    Resources = Resource.Start();   //Initiate Resorse list with their types and dates
-                    Resources.Find(x => x.name == Decl.R_TEKLA).checkResource(Resource.R_name.Tekla);
-                    desktop_path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-                    debug_path = desktop_path;
-                    if (isTeklaActive)
-                    {   // if Tekla is active - get Path of TSmatch
-                        classCAD = new TS();
-                        _TOCdir = TS.GetTeklaDir(TS.ModelDir.exceldesign);
-                        ModelDir = TS.GetTeklaDir(TS.ModelDir.model);
-                        //6/4/17                        macroDir = TS.GetTeklaDir(TS.ModelDir.macro);
-                        classCAD = new TS();
-                    }
-                    else
-                    {   // if not active - Windows Environment Variable value
-                        _TOCdir = Environment.GetEnvironmentVariable(Decl.WIN_TSMATCH_DIR,
-                            EnvironmentVariableTarget.User);
-                        ModelDir = desktop_path;
-                        classCAD = ifc;
-                    }
-                    //22.12.16 позже, при реинжиниринге TSmatch, нужно будет специально заняться ресурсами - RESX .Net
-                    //.. тогда и понадобится эта строчка    Console.WriteLine("IsTeklaActive=" + isTeklaActive + "\tTOCdir=" + TOCdir);
-                    Resource.checkResource(Resources, Resource.R_name.TSmatch, TOCdir);
-
-                    Dictionary<string, string> Templates = new Dictionary<string, string>
-                    {
-                        {"#TOC",    TOCdir },
-                        {"#Model",  ModelDir},
-                        {"#Components", TOCdir + @"\База комплектующих"},
-                        {"#TMP",    TMPdir},
-                        {"#DEBUG",  DebugDir},
-                        {"#Macros", macroDir},
-                        {"#Envir",  IFCschema}
-                    };
-                    Docs.Start(Templates);
-                    docTSmatch = Docs.getDoc();
-                    Msg.Start();
-                    break;
-
-                    //17/3/2017                    new initSection();
-                    recentModel = Model.Model.RecentModel();
-                    //            bool flg = Resource.Check();
-                    //20/12/16//                  TOCdir = Directory.GetCurrentDirectory();
-                    ////////////desktop_path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-                    ////////////DebugDir = desktop_path;
-                    ////////////Resource.Start();               // подготавливаем ресурсы - в Bootstrap
-                    ////////////Resource.checkResource(Decl.R_TEKLA);   // проверяем, активна ли Tekla
-                    ////////////Resource.checkResource(Decl.R_TSMATCH); // проверяем, доступен ли файл TSmach.xlsx
-                    ////////////Template.Start();               // подготавливаем #шаблоны - в Bootstrap
-                    ////////////Docs.Start(TOCdir);             // инициируем Документы из TSmatch.xlsx/TOC
-                    ////////////Msg.Start();                    // инициируем Сообщения из TSmatch.xlsx/Messages
-                    ////////////Resource.checkResource();       // проверяем все ресурсы, в частности, актуальность даты в [1,1]          
-                    ////////////recentModel = Model.Model.RecentModel();
-                    ////////////ModelDir = recentModel.ModelDir();
-                    ////////////if (!isTeklaActive)
-                    ////////////{
-                    ////////////    recentModel = Model.Model.RecentModel();
-                    ////////////    ModelDir = recentModel.ModelDir();
-                    ////////////    Template.Reset(Decl.TEMPL_MODEL, ModelDir);
-                    ////////////    ifc = new Ifc();
-                    ////////////    ifc.init(IFCschema);        // инициируем IFC, используя файл схемы IFC - обычно из Tekla
-                    ////////////}
-     
-                case BootInitMode.Tekla:
-                    moduleApp = arg == "" ? recentModel : models.Find(x => x.name == arg);
-                    if (moduleApp.Equals(null)) moduleApp = Model.Model.newModelOpenDialog(out models);
-                    break;
-                case BootInitMode.TSmatch:
-                    throw new NotImplementedException();
-                    //29/11                    moduleApp = suppliers;
-                    break;
-                case BootInitMode.Model:
-                    if (isTeklaActive)
-                    {
-                        //7/6                        moduleApp = Model.Model.getModelFrTekla();
-                        moduleApp = new Model.Model();
-                    }
-                    else
-                    {
-                        moduleApp = arg == "" ? recentModel : models.Find(x => x.name == arg);
-                        if (moduleApp.Equals(null)) moduleApp = Model.Model.newModelOpenDialog(out models);
-                        classCAD = ifc;
-                    }
-                    break;
-            }
-            return moduleApp;
-        }
-
-        /// <summary>
-        /// Resource - internal resource of TSmatch being checked in Bootstrap
-        /// </summary>
-        /// <history>
-        /// 2016.12.14 - re-created without static
-        /// </history>
-        private class All_Resources
-        {
-            List<Resource> Resources = new List<Resource>();
-            public All_Resources()
-            {
-                Resources.Add(new Resource(Decl.R_TEKLA,       Decl.R_TEKLA_TYPE,       Decl.R_TEKLA_DATE));
-                Resources.Add(new Resource(Decl.R_TSMATCH,     Decl.R_TSMATCH_TYPE,     Decl.R_TSMATCH_DATE));
-                Resources.Add(new Resource(Decl.R_TOC,         Decl.R_TOC_TYPE,         Decl.R_TOC_DATE));
-                Resources.Add(new Resource(Decl.R_MSG,         Decl.R_MSG_TYPE,         Decl.R_MSG_DATE));
-                Resources.Add(new Resource(Decl.R_FORM,        Decl.R_FORM_TYPE,        Decl.R_FORM_DATE));
-                Resources.Add(new Resource(Decl.R_SUPPLIERS,   Decl.R_SUPPLIERS_TYPE,   Decl.R_SUPPLIERS_DATE));
-                Resources.Add(new Resource(Decl.R_CONST,       Decl.R_CONST_TYPE,       Decl.R_CONST_DATE));
-                Resources.Add(new Resource(Decl.R_TSMATCH_EXE, Decl.R_TSMATCH_EXE_TYPE, Decl.R_TSMATCH_EXE_DATE));
-                Resources.Add(new Resource(Decl.R_BUTTON_CS,   Decl.R_BUTTON_CS_TYPE,   Decl.R_BUTTON_CS_DATE));
-                Resources.Add(new Resource(Decl.R_BUTTON_BMP,  Decl.R_BUTTON_BMP_TYPE,  Decl.R_BUTTON_BMP_DATE));
-                Resources.Add(new Resource(Decl.R_IFC2X3,      Decl.R_IFC2X3_TYPE,      Decl.R_IFC2X3_DATE));
-            }
-
-            internal void Check(string rName)
-            {
-                var r = Resources.Find(x => x.name == rName);
-                switch (r.type)
-                {
-
-                }
-        //        r.checkResource(Resources, rName);
-                //Resources.Find(x => x.name == Decl.R_TEKLA).checkResource(Resource.R_name.Tekla);
-            }
-        }
-        private class Resource
-        {
-            public string type;
-            public string name;
-            private DateTime date;
-
-            public Resource(string _name, string _type, string _dat)
-            {
-                type = _type;
-                name = _name;
-                date = Lib.getDateTime(_dat);
-            }
-
-            //////internal static List<Resource> Start()
-            //////{
-            //////    Log.set("Bootstrap.Resource.Start");
-            //////    List<Resource> result = new List<Resource>();
-            //////    result.Add(new Resource(Decl.R_TEKLA, Decl.R_TEKLA_TYPE, Decl.R_TEKLA_DATE));
-            //////    result.Add(new Resource(Decl.R_TSMATCH, Decl.R_TSMATCH_TYPE, Decl.R_TSMATCH_DATE));
-            //////    result.Add(new Resource(Decl.R_TOC, Decl.R_TOC_TYPE, Decl.R_TOC_DATE));
-            //////    result.Add(new Resource(Decl.R_MSG, Decl.R_MSG_TYPE, Decl.R_MSG_DATE));
-            //////    result.Add(new Resource(Decl.R_FORM, Decl.R_FORM_TYPE, Decl.R_FORM_DATE));
-            //////    result.Add(new Resource(Decl.R_SUPPLIERS, Decl.R_SUPPLIERS_TYPE, Decl.R_SUPPLIERS_DATE));
-            //////    result.Add(new Resource(Decl.R_CONST, Decl.R_CONST_TYPE, Decl.R_CONST_DATE));
-            //////    result.Add(new Resource(Decl.R_TSMATCH_EXE, Decl.R_TSMATCH_EXE_TYPE, Decl.R_TSMATCH_EXE_DATE));
-            //////    result.Add(new Resource(Decl.R_BUTTON_CS, Decl.R_BUTTON_CS_TYPE, Decl.R_BUTTON_CS_DATE));
-            //////    result.Add(new Resource(Decl.R_BUTTON_BMP, Decl.R_BUTTON_BMP_TYPE, Decl.R_BUTTON_BMP_DATE));
-            //////    result.Add(new Resource(Decl.R_IFC2X3, Decl.R_IFC2X3_TYPE, Decl.R_IFC2X3_DATE));
-            //////    Log.exit();
-            //////    return result;
-            //////}
-            /// <summary>
-            /// checkResource([name]) - check Resource name with the date in [1,1]. Default - check all
-            /// </summary>
-            /// <param name="name">if name == "" - check all resources</param>
-            /// <returns>true if Resource in uptodate</returns>
-            /// <history>31.3.2016
-            /// 14.4.2016 - non static overload checkResource()
-            /// 19.4.2016 - check Resource data
-            /// 12.12.2016 - Msg.F("TOCdir = "")
-            /// 21.12.2016 - 
-            /// </history>
-            public enum R_name { Tekla, TSmatch }
-
-            internal void checkResource(R_name name, string arg = "")
-            {
-                bool ok = false;
-                switch (name)
-                {
-                    case R_name.Tekla:
-                        //9/4                        ok = TS.isTeklaActive();
-                        break;
-                    case R_name.TSmatch:
-                        throw new NotImplementedException();
-                        break;
-                }
-            }
-            internal static bool checkResource(List<Resource> Resources, R_name name, string arg = "")
-            {
-                bool ok = false;
-                switch (name)
-                {
-                    case R_name.Tekla:
-                        ok = TS.isTeklaActive();
-                        break;
-                    case R_name.TSmatch:
-                        string TOCdir = arg;
-                        if (String.IsNullOrEmpty(TOCdir)) Msg.F(
-                            "\n\r\n\r================================================"
-                          + "\n\rTSmatch application is not initiated properly:"
-                          + "\n\rTSmatch.xlsx not available, because TOCdir=null."
-                          + "\n\r================================================\n\r");
-                        ok = FileOp.isFileExist(TOCdir, Decl.F_MATCH);
-                        Resource r = Resources.Find(x => x.name == Decl.TSMATCH);
-
-                        //////                     if (!ok) Recover(Decl.RESOURCE_FAULT_REASON.NoFile);
-                        //////                     if (!checkTOCdate(TOCdir, this)) Recover(Decl.RESOURCE_FAULT_REASON.Obsolete);
-                        break;
-                }
-                return ok;
-            }
-        } // end class Resource
-#endif // OLD
     } // end class Bootsrap
 } // end namespace

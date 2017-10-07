@@ -59,7 +59,7 @@ namespace TSmatch.Model.WrModelInfo
                     doc.wrDocSetForm("FORM_ModSupplierLine", 4, AutoFit: true);
                     foreach (var s in mod.Suppliers)
                     {
-                        doc.wrDocForm(s.name, s.Url, s.City, s.index, s.street, s.telephone);
+                        doc.wrDocForm(s.Name, s.Url, s.City, s.Index, s.Street, s.Telephone);
                     }
                     break;
                 case WrMod.Rules:       // перечень Правил, используемых для обработки модели

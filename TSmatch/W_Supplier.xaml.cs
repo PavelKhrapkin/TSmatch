@@ -48,8 +48,8 @@ namespace TSmatch
             for (int i = doc.i0; i <= doc.il; i++)
             {
                 Supl s = new Supl(i);
-                if (s == null || string.IsNullOrWhiteSpace(s.name) || string.IsNullOrWhiteSpace(s.City)) continue;
-                items.Add(new Spl(s.name, Lib.ToInt(s.index), s.City, s.street, s.Url));
+                if (s == null || string.IsNullOrWhiteSpace(s.Name) || string.IsNullOrWhiteSpace(s.City)) continue;
+                items.Add(new Spl(s.Name, Lib.ToInt(s.Index), s.City, s.Street, s.Url));
                 suppliers.Add(s);
             }
             Spl oldSupl = items.Find(x => x.SuplName == MainWindow.SuplName);
@@ -97,7 +97,7 @@ namespace TSmatch
             selectedSupplier = selectedSupl.SuplName;
             log.Info("new Supplier selected = \"" + selectedSupl.SuplName + "\"");
 
-            var selSupl = suppliers.Find(x => x.name == selectedSupl.SuplName);
+            var selSupl = suppliers.Find(x => x.Name == selectedSupl.SuplName);
             if (selSupl == null) Msg.F("Inconsystent W_Supplier");
             var grOLD = MainWindow.currentGroup;
             var grNEW = selSupl.getNEWcs(selSupl, grOLD);
@@ -105,7 +105,7 @@ namespace TSmatch
             {
                  Msg.AskOK("\"{0}\" не поставляет [{1}, {2}], но Вы можете изменить Правила" +
                     " и согласовать изменения с проектировщиком."
-                    , selSupl.name, grOLD.Mat, grOLD.Prf);
+                    , selSupl.Name, grOLD.Mat, grOLD.Prf);
             }
             else
             {

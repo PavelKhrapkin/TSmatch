@@ -2,7 +2,7 @@
  * SplashScreen() -- Display TSmatch splash screen and status messages on the data load
  * used idea from https://www.codeproject.com/Articles/116875/WPF-Loading-Splash-Screen
  * 
- * 1.10.2017 Pavel Khrapkin
+ * 6.10.2017 Pavel Khrapkin
  * 
  *--- History ---
  *  7.09.2017 - created
@@ -52,7 +52,7 @@ namespace TSmatch
         private void load()
         {
             Dispatcher.Invoke(showDelegate, Msg.S("Splash__Loading_Bootstrap"));
-            MainWindow.boot = new Boot();
+            MainWindow.boot = new Boot(init:true);
 
             //load data
 //7/9            Dispatcher.Invoke(hideDelegate);

@@ -202,6 +202,7 @@ namespace match.Lib
         }
         public static int ToInt(string s, string msg = "не разобрана строка")
         {
+            if (string.IsNullOrEmpty(s)) return -1;
             int v;
             if (int.TryParse(s, out v)) return v;
             Log.Warning(msg + " \"" + s + "\"");
