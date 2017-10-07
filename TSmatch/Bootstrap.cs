@@ -52,7 +52,7 @@ using Log = match.Lib.Log;
 using FileOp = match.FileOp.FileOp;
 using TS = TSmatch.Tekla.Tekla;
 using Ifc = TSmatch.IFC.IFC;
-using Msg = TSmatch.Message.Message;
+//8/10 using Msg = TSmatch.Message.Message;
 using Docs = TSmatch.Document.Document;
 using Mod = TSmatch.Model.Model;
 
@@ -85,6 +85,7 @@ namespace TSmatch.Bootstrap
         public Ifc ifc = new Ifc();         // IFC class reference
         public object classCAD;
         public Mod model;
+        public Message.Message Msg = new Message.Message();
 
         public Bootstrap() { }
         public Bootstrap(bool init = true)
@@ -175,7 +176,7 @@ namespace TSmatch.Bootstrap
         {
             string myName = "Bootstrap__resError_";
             var v = errType.ToString();
-            Msg.F(myName + v, resName);
+            Msg.FF(myName + v, resName);
         }
     } // end class Bootsrap
 } // end namespace

@@ -36,8 +36,8 @@ namespace TSmatch.SaveReport.Tests
 
             // test 0: "en" NoFile, NoDoc, Obsolet, ErrResource
 
-            try { sr.SetModel(boot); } catch { } Umsg.GetTxt();
-            Assert.AreEqual("[SavedReport.SetModelDir]: No \"TSmatchINFO.xlsx\" in model directory \r\nEnsure, that this file is written by TSmatch application, when Tekla is available", Umsg.msg);
+            try { sr.SetModel(boot); } catch { }
+            Assert.AreEqual("[SavedReport.SetModelDir]: No \"TSmatchINFO.xlsx\" in model directory \r\nEnsure, that this file is written by TSmatch application, when Tekla is available", Umsg.GetMsg());
         }
 
         [TestMethod()]
@@ -217,39 +217,31 @@ namespace TSmatch.SaveReport.Tests
             // test 1: Msg("No model dir") -- RU
             Mod mod = new Mod();
             mod.dir = @"C:\ABCDEF";
-            try { mod.sr.Raw(mod); }
-            catch (Exception ex) { Assert.AreEqual("Msg.F", ex.Message); }
-            U.GetTxt();
-            Assert.AreEqual("[SavedReport.Raw]: не найден каталог модели, на который указывает\r\n            запись в TSmatchINFO.xlsx или записано в регистре Windows\r\n\r\n\"C:\\ABCDEF\"\r\n\r\nЭто сообщение возникает, когда нет файла TSmatchINFO.xlsx,\r\nи нет Tekla, чтобы его можно было создать заново.\r\nПопробуйте запустить TSmatch на машине, где есть Tekla.", U.msg);
+            try { mod.sr.Raw(mod); } catch (Exception ex) { Assert.AreEqual("Msg.F", ex.Message); }
+            Assert.AreEqual("[SavedReport.Raw]: не найден каталог модели, на который указывает\r\n            запись в TSmatchINFO.xlsx или записано в регистре Windows\r\n\r\n\"C:\\ABCDEF\"\r\n\r\nЭто сообщение возникает, когда нет файла TSmatchINFO.xlsx,\r\nи нет Tekla, чтобы его можно было создать заново.\r\nПопробуйте запустить TSmatch на машине, где есть Tekla.", U.GetMsg());
 
             // test 2:  Msg("No model dir") -- EN
             // -- чтобы посмотреть, как выглядит MessageBox, но с Assert.Fault по Msg.FOK(), используй
             //U.SetCulture("en", true);
             U.SetCulture("en");
-            try { mod.sr.Raw(mod); }
-            catch (Exception ex) { Assert.AreEqual("Msg.F", ex.Message); }
-            U.GetTxt();
-            Assert.AreEqual("[SavedReport.Raw]:  not found model directory, pointed by\r\n     TSmatchINFO.xlsx, or written in Windows Environment\r\n\r\n\"C:\\ABCDEF\" \r\n\r\nand there is no Tekla active to read and re-create it again. \r\nPlease, try to run TSmatch on PC with Tekla.", U.msg);
+            try { mod.sr.Raw(mod); }  catch (Exception ex) { Assert.AreEqual("Msg.F", ex.Message); }
+            Assert.AreEqual("[SavedReport.Raw]:  not found model directory, pointed by\r\n     TSmatchINFO.xlsx, or written in Windows Environment\r\n\r\n\"C:\\ABCDEF\" \r\n\r\nand there is no Tekla active to read and re-create it again. \r\nPlease, try to run TSmatch on PC with Tekla.", U.GetMsg());
 
             // test 3:  Msg("Raw_CAD_Read") -- EN
             // -- чтобы посмотреть, как выглядит MessageBox, но с Assert.Fault по Msg.FOK(), используй
             //U.SetCulture("en", true);
             U.SetCulture("en");
             mod.dir = @"C:\Windows";
-            try { mod.sr.Raw(mod); }
-            catch (Exception ex) { Assert.AreEqual("Msg.F", ex.Message); }
-            U.GetTxt();
-            Assert.AreEqual("[SavedReport.Raw]: File \"Raw.xml\" is corrupted or unavailable.\r\nWould you like to read it from CAD once again?", U.msg);
+            try { mod.sr.Raw(mod); } catch (Exception ex) { Assert.AreEqual("Msg.F", ex.Message); }
+            Assert.AreEqual("[SavedReport.Raw]: File \"Raw.xml\" is corrupted or unavailable.\r\nWould you like to read it from CAD once again?", U.GetMsg());
 
             // test 4:  Msg("Raw_CAD_Read") -- RU
             // -- чтобы посмотреть, как выглядит MessageBox, но с Assert.Fault по Msg.FOK(), используй
             //U.SetCulture("ru", true);
             U.SetCulture("ru");
             mod.dir = @"C:\Windows";
-            try { mod.sr.Raw(mod); }
-            catch (Exception ex) { Assert.AreEqual("Msg.F", ex.Message); }
-            U.GetTxt();
-            Assert.AreEqual("[SavedReport.Raw]: Файл \"Raw.xml\" не доступен или испорчен.\r\nВы действительно хотите получить его из САПР заново?", U.msg);
+            try { mod.sr.Raw(mod); } catch (Exception ex) { Assert.AreEqual("Msg.F", ex.Message); }
+            Assert.AreEqual("[SavedReport.Raw]: Файл \"Raw.xml\" не доступен или испорчен.\r\nВы действительно хотите получить его из САПР заново?", U.GetMsg());
         }
 
         [TestMethod()]

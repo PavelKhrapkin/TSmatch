@@ -10,15 +10,15 @@ using System;
 using System.Globalization;
 using System.Resources;
 
-using Msg = TSmatch.Message.Message;
+//8/10 using Msg = TSmatch.Message.Message;
 
 namespace UT_TSmatch
 {
-    public class _UT_Msg : Msg
+    public class _UT_Msg : TSmatch.Message.Message
     {
         public string msg, errType;
 
-        public _UT_Msg(bool dialog = false) { Dialog = dialog; }
+        public _UT_Msg(bool dialog = false) { DDialog = dialog; }
         public int cnt_msgs() { return _messages.Count; }
 
         public void SetCulture(string culture, bool dialog = false)
@@ -36,7 +36,7 @@ namespace UT_TSmatch
 
         public void _txt(string str, params object[] p)
         {
-            try { txt(str, p); }
+            try { ttxt(str, p); }
             catch { }; // (ArgumentException e) when (e.Message == "Message_UT_NoDialog") { };
         }
 
@@ -49,22 +49,21 @@ namespace UT_TSmatch
             return s;
         }
 
-        internal void GetTxt()
+        public string GetMsg() { return TSmatch.Message.Message.msg; }
+        public string GetErrType() { return TSmatch.Message.Message.errType; }
+
+        //           Assert.ThrowsException() -- пока не умею этим пользоваться
+
+        // try { resxError(ResErr.NoFile, "TSmatch.xlsx"); } catch { } U.GetTxt();
+        // Assert.AreEqual("[Bootstrap.resError]: Не найден файл \"TSmatch.xlsx\"", U.msg);
+
+        //       public delegate string mes(Enum x, string str);
+
+        public string Try2(Func<int, string> func, int p1, string p2)
         {
-            msg = Msg.msg;
-            errType = Msg.errType;
-        }
-
-
-
-// try { resxError(ResErr.NoFile, "TSmatch.xlsx"); } catch { } U.GetTxt();
-// Assert.AreEqual("[Bootstrap.resError]: Не найден файл \"TSmatch.xlsx\"", U.msg);
-
-        public string Try2(Func<object, object, string> func, object p1, object p2)
-        {
-            try { func(p1, p2); }
-            catch { }
-            GetTxt();
+            ////try { func(p1, p2); }
+            ////catch { }
+            ////GetTxt();
             return msg;
 
         }

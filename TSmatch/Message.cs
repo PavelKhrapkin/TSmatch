@@ -1,7 +1,7 @@
 ﻿/*----------------------------------------------------------------------------
  * Message -- multilanguage message system
  * 
- * 14.09.2017  Pavel Khrapkin
+ * 8.10.2017  Pavel Khrapkin
  *
  *--- Unit Tests ---
  * UT_Message: UT_Init, UT_AskS, UT_W, UT_S 13.09.2017 OK
@@ -16,6 +16,7 @@
  * 31.8.2017 - Msg.S return string; Dialog flag
  * 12.9.2017 - TSmatchMsg.resx and TSmatchMsg,ru.resx use as localization resources
  * 14.9.2017 - static constructor as a singleton for _messages fill; ArgumentException for UTs
+ * 8.10.2017 - Instance F,W,I istead of static
  * ---------------------------------------------------------------------------------------
  *      Methods:
  * static Message() - Singleton constructor initiate static msgs Dictionary set
@@ -93,7 +94,34 @@ namespace TSmatch.Message
             if (errType.Contains("(")) msg = errType + " " + msg;
             return msg;
         }
+        //--new no static
+        protected bool DDialog=true;
 
+        protected string mmsg, eerrtype;
+        protected void ttxt(Severity type, string msgcode, object[] p, bool doMsgBox = true)
+        {
+            msgcode = msgcode.Replace(' ', '_');
+            errType = "TSmatch " + type;
+            bool knownMsg = _messages.ContainsKey(msgcode);
+            try { msg = knownMsg ? string.Format(_messages[msgcode], p) : string.Format(msgcode, p); }
+            catch { msg = knownMsg ? _messages[msgcode] : msgcode; errType = "(!)" + errType; }
+            if (!knownMsg) errType = "(*)" + errType;
+            if (!DDialog) throw new ArgumentException("Msg.F");
+            if (doMsgBox) MessageBox.Show(msg, errType, MessageBoxButton.OK, MessageBoxImage.Asterisk, reply, MessageBoxOptions.ServiceNotification);
+            if (type == Severity.FATAL) Stop();
+        }
+
+        public void ttxt(string str, params object[] p) { ttxt(Severity.INFO, str, p, doMsgBox: false); }
+        public void FF(string str, params object[] p) { ttxt(Severity.FATAL, str, p); }
+        public void WW(string str, params object[] p) { ttxt(Severity.WARNING, str, p); }
+        public void II(string str, params object[] p) { ttxt(Severity.INFO, str, p); }
+        public string SS(string str, params object[] p)
+        {
+            ttxt(Severity.SPLASH, str, p, doMsgBox: false);
+            if (errType.Contains("(")) msg = errType + " " + msg;
+            return msg;
+        }
+//--new no static
         public static bool AskYN(string msgcode, params object[] p)
         {
             txt(Severity.INFO, msgcode, p, doMsgBox: false);

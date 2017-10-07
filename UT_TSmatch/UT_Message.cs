@@ -1,10 +1,12 @@
 ﻿/*=================================
-* Message Unit Test 3.10.2017
+* Message Unit Test 8.10.2017
 *=================================
+* History:
+*  8.10.2017 - no static in Message
 */
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-using Msg = TSmatch.Message.Message;
+//8/10/17 using Msg = TSmatch.Message.Message;
 
 namespace TSmatch.Message.Tests
 {
@@ -21,9 +23,8 @@ namespace TSmatch.Message.Tests
 
             // test 1: Msg.txt
             U._txt("число {0} и {1}", 3.14, 2.7);
-            U.GetTxt();
-            Assert.AreEqual("число_3,14_и_2,7", U.msg);
-            Assert.AreEqual("(*)TSmatch INFO", U.errType);
+            Assert.AreEqual("число_3,14_и_2,7", U.GetMsg());
+            Assert.AreEqual("(*)TSmatch INFO", U.GetErrType());
 
             // test 2: change culture to en
             U.SetCulture("en");
@@ -48,25 +49,26 @@ namespace TSmatch.Message.Tests
         [TestMethod()]
         public void UT_S()
         {
-            Msg.Dialog = true;  //наличие этой строки связано с использованием static в Msg - портится в тестах
+            var Msg = new Message();
+
             // test 0: Message не инициализирован, сообщение "незнакомое"
-            string s = Msg.S("Not Initialized Message");
+            string s = Msg.SS("Not Initialized Message");
             Assert.AreEqual(s, "(*)TSmatch SPLASH Not_Initialized_Message");
 
             // test 1: нормальный вывод сообщения по русски
-            s = Msg.S("SectionTab_is_empty");
+            s = Msg.SS("SectionTab_is_empty");
             Assert.AreEqual(s, "[Section]: не инициализирован словарь секций SectionTab");
 
             // test 2: вывод неизвестного сообщения
-            s = Msg.S("тра-ля-ля", "и маленькая тележка");
+            s = Msg.SS("тра-ля-ля", "и маленькая тележка");
             Assert.AreEqual("(*)TSmatch SPLASH тра-ля-ля", s);
 
             // test 3: вывод сообщения, которое есть, но с отсутствующим параметром
-            s = Msg.S("Bootstrap__No_Resource_File");
-            Assert.AreEqual(s, "(*)TSmatch SPLASH Bootstrap__No_Resource_File");
+            s = Msg.SS("Bootstrap__No_Resource_File");
+            Assert.AreEqual(s, "(!)TSmatch SPLASH [Bootstrap]: Нет ресурсного файла \"{0}\"");
 
             // test 4: распознавание сообщения с пробелами, замена их на '_'
-            s = Msg.S("SectionTab is empty");
+            s = Msg.SS("SectionTab is empty");
             Assert.AreEqual("[Section]: не инициализирован словарь секций SectionTab", s);
         }
 
@@ -75,10 +77,8 @@ namespace TSmatch.Message.Tests
         {
             // test 0: Dialog = false - работаем без остановки
             var U = new UT_TSmatch._UT_Msg();
-            //           Assert.ThrowsException()
             U.Msg_W("text for test");
-            U.GetTxt();
-            Assert.AreEqual("text_for_test", U.msg);
+            Assert.AreEqual("text_for_test", U.GetMsg());
 
             // test 1: message should be modal -- должен спрашивать [OK?]
             // --!!-- этот тест закомментирован. Открывать комментарии только для проверки Msg.W вручную
