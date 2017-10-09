@@ -117,24 +117,24 @@
 	<resheader name="writer">
 		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
 	</resheader>
-	<data name="Match__Bad_Price_Descriptor" xml:space="preserve">
-    <value>[Match]: Bad Price descriptor: no Price section in TSmatch.xlsx/TOC/LoadDescriptor
+	<data name="Matcher__Mtch_Bad_Price_Descriptor" xml:space="preserve">
+    <value>[Matcher.Mtch]: Bad Price descriptor: no Price section in TSmatch.xlsx/TOC/LoadDescriptor
 for "{0}", "{1}"</value>
   </data>
 	<data name="Message__Init_fault" xml:space="preserve">
     <value>TSmatch Fatal internal Error in [Message.Init] -- Initialization fault Message System</value>
   </data>
-	<data name="Bootstrap__Resourse_Obsolete" xml:space="preserve">
-		<value>[Bootstrap]: Resource "{0}" obsolete. Please, update it!</value>
+	<data name="Bootstrap__resError_Obsolete" xml:space="preserve">
+		<value>[Bootstrap.resError]: Resource "{0}" obsolete. Please, update it!</value>
 	</data>
-	<data name="Bootstrap__No_Resource_File" xml:space="preserve">
-		<value>[Bootstrap]: No TSmatch Resource file "{0}"</value>
+	<data name="Bootstrap__resError_NoFile" xml:space="preserve">
+		<value>[Bootstrap.resError]: Not found TSmatch file "{0}"</value>
 	</data>
-	<data name="Bootstrap__No_Resource_Document" xml:space="preserve">
-		<value>[Bootstrap]: No TSmatch Resource Document "{0}"</value>
+	<data name="Bootstrap__resError_NoDoc" xml:space="preserve">
+		<value>[Bootstrap.resError]: No TSmatch Resource Document "{0}"</value>
 	</data>
-	<data name="Bootstrap__Internal_Resource_Error" xml:space="preserve">
-		<value>[Bootstrap]: Internal Resource error. Resource "{0}".</value>
+	<data name="Bootstrap__resError_ErrResource" xml:space="preserve">
+		<value>[Bootstrap.resError]: Internal Resource error. Resource "{0}".</value>
 	</data>
 	<data name="Component__wrong_LoadDescriptor" xml:space="preserve">
 		<value>[Component]: Wrong LoadDescriptor  "{0}". Please, chech TSmatch.xlsx/TOC</value>
@@ -212,5 +212,11 @@ Please, try to run TSmatch on PC with Tekla.</value>
 	</data>
 	<data name="WPF_MainWindow_grSupplier" xml:space="preserve">
 		<value>Supplier</value>
+	</data>
+	<data name="Handler__PriceGr_Rules_not_Initialized" xml:space="preserve">
+		<value>[Handler.PriceGr]: Rules in Model were not initialyzed</value>
+	</data>
+	<data name="Matcher__Mtch_Bad_arguments" xml:space="preserve">
+		<value>[Matcher.Mtch]: Bad entry argument "group"</value>
 	</data>
 </root>

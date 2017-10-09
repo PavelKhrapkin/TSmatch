@@ -6,8 +6,6 @@
 */
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-//8/10/17 using Msg = TSmatch.Message.Message;
-
 namespace TSmatch.Message.Tests
 {
     [TestClass()]
@@ -64,8 +62,8 @@ namespace TSmatch.Message.Tests
             Assert.AreEqual("(*)TSmatch SPLASH тра-ля-ля", s);
 
             // test 3: вывод сообщения, которое есть, но с отсутствующим параметром
-            s = Msg.SS("Bootstrap__No_Resource_File");
-            Assert.AreEqual(s, "(!)TSmatch SPLASH [Bootstrap]: Нет ресурсного файла \"{0}\"");
+            s = Msg.SS("Bootstrap__resError_NoFile");
+            Assert.AreEqual(s, "(!)TSmatch SPLASH [Bootstrap.resError]: Не найден файл \"{0}\"");
 
             // test 4: распознавание сообщения с пробелами, замена их на '_'
             s = Msg.SS("SectionTab is empty");

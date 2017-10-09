@@ -16,7 +16,7 @@ namespace UT_TSmatch
 {
     public class _UT_Msg : TSmatch.Message.Message
     {
-        public string msg, errType;
+//8/10        public string msg, errType;
 
         public _UT_Msg(bool dialog = false) { DDialog = dialog; }
         public int cnt_msgs() { return _messages.Count; }
@@ -49,8 +49,8 @@ namespace UT_TSmatch
             return s;
         }
 
-        public string GetMsg() { return TSmatch.Message.Message.msg; }
-        public string GetErrType() { return TSmatch.Message.Message.errType; }
+        public string GetMsg() { return mmsg; }
+        public string GetErrType() { return eerrType; }
 
         //           Assert.ThrowsException() -- пока не умею этим пользоваться
 

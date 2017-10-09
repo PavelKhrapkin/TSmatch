@@ -1,5 +1,5 @@
 ﻿/*================================
-* Bootstrap Test 6.10.2017
+* Bootstrap Test 8.10.2017
 *=================================
 * Specific probel of this Unit Test for Bootstrap:
 * It cannot run, only if all resesources loaded at startup time not available

@@ -97,17 +97,17 @@ namespace TSmatch.Message
         //--new no static
         protected bool DDialog=true;
 
-        protected string mmsg, eerrtype;
+        protected string mmsg, eerrType;
         protected void ttxt(Severity type, string msgcode, object[] p, bool doMsgBox = true)
         {
             msgcode = msgcode.Replace(' ', '_');
-            errType = "TSmatch " + type;
+            eerrType = "TSmatch " + type;
             bool knownMsg = _messages.ContainsKey(msgcode);
-            try { msg = knownMsg ? string.Format(_messages[msgcode], p) : string.Format(msgcode, p); }
-            catch { msg = knownMsg ? _messages[msgcode] : msgcode; errType = "(!)" + errType; }
-            if (!knownMsg) errType = "(*)" + errType;
-            if (!DDialog) throw new ArgumentException("Msg.F");
-            if (doMsgBox) MessageBox.Show(msg, errType, MessageBoxButton.OK, MessageBoxImage.Asterisk, reply, MessageBoxOptions.ServiceNotification);
+            try { mmsg = knownMsg ? string.Format(_messages[msgcode], p) : string.Format(msgcode, p); }
+            catch { mmsg = knownMsg ? _messages[msgcode] : msgcode; eerrType = "(!)" + eerrType; }
+            if (!knownMsg) eerrType = "(*)" + eerrType;
+            if (!DDialog && type == Severity.FATAL) throw new ArgumentException("Msg.F");
+            if (doMsgBox) MessageBox.Show(mmsg, eerrType, MessageBoxButton.OK, MessageBoxImage.Asterisk, reply, MessageBoxOptions.ServiceNotification);
             if (type == Severity.FATAL) Stop();
         }
 
@@ -118,8 +118,8 @@ namespace TSmatch.Message
         public string SS(string str, params object[] p)
         {
             ttxt(Severity.SPLASH, str, p, doMsgBox: false);
-            if (errType.Contains("(")) msg = errType + " " + msg;
-            return msg;
+            if (eerrType.Contains("(")) mmsg = eerrType + " " + mmsg;
+            return mmsg;
         }
 //--new no static
         public static bool AskYN(string msgcode, params object[] p)

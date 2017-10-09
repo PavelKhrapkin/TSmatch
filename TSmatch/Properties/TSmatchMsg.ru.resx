@@ -117,24 +117,24 @@
 	<resheader name="writer">
 		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
 	</resheader>
-	<data name="Match__Bad_Price_Descriptor" xml:space="preserve">
-		<value>[Match]: нет секции Price в TSmatch.xlsx/TOC/LoadDescriptor
+	<data name="Matcher__Mtch_Bad_Price_Descriptor" xml:space="preserve">
+		<value>[Matcher.Mtch]: нет секции Price в TSmatch.xlsx/TOC/LoadDescriptor
 для "{0}" и "{1}"</value>
 	</data>
-	<data name="Bootstrap__Resourse_Obsolete" xml:space="preserve">
-		<value>[Bootstrap]: Ресурс "{0}" устарел. Пожалуйста обновите его!</value>
+	<data name="Bootstrap__resError_Obsolete" xml:space="preserve">
+		<value>[Bootstrap.resError]: Ресурс "{0}" устарел. Пожалуйста обновите его!</value>
 	</data>
 	<data name="Message__Init_fault" xml:space="preserve">
 		<value>TSmatch внутренняя ошибка [Message.Init] -- Ошибка инициализации системы сообщений</value>
 	</data>
-	<data name="Bootstrap__No_Resource_File" xml:space="preserve">
-		<value>[Bootstrap]: Нет ресурсного файла "{0}"</value>
+	<data name="Bootstrap__resError_NoFile" xml:space="preserve">
+		<value>[Bootstrap.resError]: Не найден файл "{0}"</value>
 	</data>
-	<data name="Bootstrap__No_Resource_Document" xml:space="preserve">
-		<value>[Bootstrap]: Нет ресурсного документа "{0}"</value>
+	<data name="Bootstrap__resError_NoDoc" xml:space="preserve">
+		<value>[Bootstrap.resError]: Нет ресурсного документа "{0}"</value>
 	</data>
-	<data name="Bootstrap__Internal_Resource_Error" xml:space="preserve">
-		<value>[Bootstrap]: Внутренняя ошибка ресурса "{0}"</value>
+	<data name="Bootstrap__resError_ErrResource" xml:space="preserve">
+		<value>[Bootstrap.resError]: Внутренняя ошибка ресурса "{0}"</value>
 	</data>
 	<data name="Component__wrong_LoadDescriptor" xml:space="preserve">
 		<value>[Component]: Ошибка описания компоненты "{0}". Проверьте TSmatch.xlsx/TOC</value>
@@ -213,5 +213,12 @@
 	</data>
 	<data name="WPF_MainWindow_grSupplier" xml:space="preserve">
 		<value>Поставщик</value>
+	</data>
+	<data name="Handler__PriceGr_Rules_not_Initialized" xml:space="preserve">
+		<value>[Handler.PriceGr]: Не инциированы правила модели</value>
+	</data>
+	<data name="Matcher__Mtch_Bad_arguments" xml:space="preserve">
+		<value>[Matcher.Mtch]: Неправильно инициализирован 
+входной аргумент - группа элементов.</value>
 	</data>
 </root>
