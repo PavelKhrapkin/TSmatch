@@ -1,20 +1,22 @@
-﻿/*=================================
-* Bootstrap Test 17.7.2017
+﻿/*================================
+* Bootstrap Test 8.10.2017
 *=================================
+* Specific probel of this Unit Test for Bootstrap:
+* It cannot run, only if all resesources loaded at startup time not available
 */
+using match.FileOp;
+using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-using FileOp = match.FileOp.FileOp;
 
 namespace TSmatch.Bootstrap.Tests
 {
     [TestClass()]
-    public class UT_BootstrapTests
+    public class UT_Bootstrap_Tests : Bootstrap
     {
         [TestMethod()]
         public void UT_Bootstrap()
         {
-            var boot = new Bootstrap();
+            var boot = new Bootstrap(init: true);
 
             Assert.IsTrue(boot.ModelDir.Length > 0);
             Assert.IsTrue(boot.TOCdir.Length > 0);
@@ -23,6 +25,43 @@ namespace TSmatch.Bootstrap.Tests
             Assert.IsTrue(boot.docTSmatch.il > 20);
 
             FileOp.AppQuit();
+        }
+
+        // 6/10/17        public delegate string mes(Enum x, string str);
+
+        [TestMethod()]
+        public void UT_Boot_ResxErr()
+        {
+            var boot = new Bootstrap(init: false);
+            var U = new UT_TSmatch._UT_Msg();
+            U.SetCulture("en");
+
+            // test 0: "en" NoFile, NoDoc, Obsolet, ErrResource
+            try { resxError(ResErr.NoFile, "TSmatch.xlsx"); } catch { }; var ss = U.GetMsg();
+            Assert.AreEqual("[Bootstrap.resError]: Not found TSmatch file \"TSmatch.xlsx\"", U.GetMsg());
+
+            try { resxError(ResErr.NoDoc, "TOC"); } catch { }
+            Assert.AreEqual("[Bootstrap.resError]: No TSmatch Resource Document \"TOC\"", U.GetMsg());
+
+            try { resxError(ResErr.Obsolete, "Forms"); } catch { }
+            Assert.AreEqual("[Bootstrap.resError]: Resource \"Forms\" obsolete. Please, update it!", U.GetMsg());
+
+            try { resxError(ResErr.ErrResource, "TSmatch_xlsx"); } catch { }
+            Assert.AreEqual("[Bootstrap.resError]: Internal Resource error. Resource \"TSmatch_xlsx\".", U.GetMsg());
+
+            // test 1: "ru" NoFile, NoDoc, Obsolet, ErrResource
+            U.SetCulture("ru");
+            try { resxError(ResErr.NoFile, "TSmatch.xlsx"); } catch { }
+            Assert.AreEqual("[Bootstrap.resError]: Не найден файл \"TSmatch.xlsx\"", U.GetMsg());
+
+            try { resxError(ResErr.NoDoc, "TOC"); } catch { }
+            Assert.AreEqual("[Bootstrap.resError]: Нет ресурсного документа \"TOC\"", U.GetMsg());
+
+            try { resxError(ResErr.Obsolete, "Forms"); } catch { }
+            Assert.AreEqual("[Bootstrap.resError]: Ресурс \"Forms\" устарел. Пожалуйста обновите его!", U.GetMsg());
+
+            try { resxError(ResErr.ErrResource, "TSmatch_xlsx"); } catch { }
+            Assert.AreEqual("[Bootstrap.resError]: Внутренняя ошибка ресурса \"TSmatch_xlsx\"", U.GetMsg());
         }
     }
 }
