@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{FBAE5BDB-3A4F-4FA5-BDCE-AC3FB437CAA4}</ProjectGuid>
+    <ProjectGuid>{06CADC99-3028-406C-9C77-3A2D8C1AF8F9}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <RootNamespace>TSmatch</RootNamespace>
     <AssemblyName>TSmatch</AssemblyName>
@@ -38,18 +38,18 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="IfcEngineCS">
-      <HintPath>..\..\..\..\..\Desktop\TSmatch\C#\TSmatchSelect\TSM_Select\TSM_Select\bin\Debug\IfcEngineCS.dll</HintPath>
+      <HintPath>..\..\TSmatch LIBRARY\IfcEngineCS.dll</HintPath>
     </Reference>
     <Reference Include="IfcManager">
-      <HintPath>..\..\..\..\..\Desktop\TSmatch\C#\TSmatchSelect\TSM_Select\TSM_Select\bin\Debug\IfcManager.dll</HintPath>
+      <HintPath>..\..\TSmatch LIBRARY\IfcManager.dll</HintPath>
     </Reference>
     <Reference Include="log4net">
-      <HintPath>..\..\..\..\..\Desktop\TSmatch\C#\TSmatchSelect\TSM_Select\TSM_Select\bin\Debug\log4net.dll</HintPath>
+      <HintPath>..\..\TSmatch LIBRARY\log4net.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Office.Interop.Excel, Version=15.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <EmbedInteropTypes>True</EmbedInteropTypes>
-      <HintPath>..\..\..\..\..\..\..\..\..\Program Files (x86)\Microsoft Office\root\Office16\DCF\Microsoft.Office.Interop.Excel.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Microsoft Office\root\Office16\DCF\Microsoft.Office.Interop.Excel.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -62,24 +62,21 @@
     <Reference Include="System.Xaml">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
-    <Reference Include="Tekla.Structures, Version=2017.0.0.0, Culture=neutral, PublicKeyToken=2f04dbe497b71114, processorArchitecture=MSIL">
+    <Reference Include="Tekla.Common.Geometry, Version=4.5.3.0, Culture=neutral, PublicKeyToken=93c0f7e4f1ca9619, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\TSmatch\Tsmatch LIBRARY\Tekla.Structures.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Windows\Microsoft.NET\assembly\GAC_MSIL\Tekla.Common.Geometry\v4.0_4.5.3.0__93c0f7e4f1ca9619\Tekla.Common.Geometry.dll</HintPath>
     </Reference>
-    <Reference Include="Tekla.Structures.Dialog, Version=2017.0.0.0, Culture=neutral, PublicKeyToken=2f04dbe497b71114, processorArchitecture=MSIL">
+    <Reference Include="Tekla.Structures, Version=2017.1.0.0, Culture=neutral, PublicKeyToken=2f04dbe497b71114, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\TSmatch\Tsmatch LIBRARY\Tekla.Structures.Dialog.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Windows\Microsoft.NET\assembly\GAC_MSIL\Tekla.Structures\v4.0_2017.1.0.0__2f04dbe497b71114\Tekla.Structures.dll</HintPath>
     </Reference>
-    <Reference Include="Tekla.Structures.Drawing, Version=2017.0.0.0, Culture=neutral, PublicKeyToken=2f04dbe497b71114, processorArchitecture=MSIL">
+    <Reference Include="Tekla.Structures.Dialog, Version=2017.1.0.0, Culture=neutral, PublicKeyToken=2f04dbe497b71114, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\TSmatch\Tsmatch LIBRARY\Tekla.Structures.Drawing.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Windows\Microsoft.NET\assembly\GAC_MSIL\Tekla.Structures.Dialog\v4.0_2017.1.0.0__2f04dbe497b71114\Tekla.Structures.Dialog.dll</HintPath>
     </Reference>
-    <Reference Include="Tekla.Structures.Geometry3d.Compatibility">
-      <HintPath>..\..\..\TSmatch\Tsmatch LIBRARY\Tekla.Structures.Geometry3d.Compatibility.dll</HintPath>
-    </Reference>
-    <Reference Include="Tekla.Structures.Model, Version=2017.0.0.0, Culture=neutral, PublicKeyToken=2f04dbe497b71114, processorArchitecture=MSIL">
+    <Reference Include="Tekla.Structures.Model, Version=2017.1.0.0, Culture=neutral, PublicKeyToken=2f04dbe497b71114, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\TSmatch\Tsmatch LIBRARY\Tekla.Structures.Model.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Windows\Microsoft.NET\assembly\GAC_MSIL\Tekla.Structures.Model\v4.0_2017.1.0.0__2f04dbe497b71114\Tekla.Structures.Model.dll</HintPath>
     </Reference>
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
@@ -90,30 +87,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Bootstrap.cs" />
-    <Compile Include="Components.cs" />
-    <Compile Include="CompSet.cs" />
-    <Compile Include="Declaration.cs" />
-    <Compile Include="Document.cs" />
-    <Compile Include="DPar.cs" />
-    <Compile Include="ElmAttSet.cs" />
-    <Compile Include="EmbedAttSet.cs" />
-    <Compile Include="FileOp.cs" />
-    <Compile Include="Group.cs" />
-    <Compile Include="IFC.cs" />
-    <Compile Include="IModelWrFile.cs" />
-    <Compile Include="Interface.cs" />
-    <Compile Include="Matcher.cs" />
-    <Compile Include="MatchLib.cs" />
-    <Compile Include="Matrix.cs" />
-    <Compile Include="MD5gen.cs" />
-    <Compile Include="Message.cs" />
-    <Compile Include="Models.cs" />
-    <Compile Include="Handler.cs" />
-    <Compile Include="ModelWrFile.cs" />
-    <Compile Include="Parameter.cs" />
-    <Compile Include="PriceList.cs" />
-    <Compile Include="ProfileUpdate.cs" />
     <Compile Include="Properties\TSmatch.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -128,18 +101,11 @@
     <Compile Include="SavedReport.cs" />
     <Compile Include="Section.cs" />
     <Compile Include="Serialized_object.cs" />
-    <Compile Include="SplashScreen.xaml.cs">
-      <DependentUpon>SplashScreen.xaml</DependentUpon>
-    </Compile>
+    <Compile Include="SplashScreen.xaml.cs" />
     <Compile Include="Suppliers.cs" />
     <Compile Include="TS_OpenAPI.cs" />
-    <Compile Include="W_Rules.xaml.cs">
-      <DependentUpon>W_Rules.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="W_Supplier.xaml.cs">
-      <DependentUpon>W_Supplier.xaml</DependentUpon>
-    </Compile>
+    <Compile Include="W_Rules.xaml.cs" />
+    <Compile Include="W_Supplier.xaml.cs" />
     <Compile Include="XML.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -149,24 +115,48 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Bootstrap.cs" />
+    <Compile Include="Components.cs" />
+    <Compile Include="CompSet.cs" />
+    <Compile Include="Declaration.cs" />
+    <Compile Include="Document.cs" />
+    <Compile Include="DPar.cs" />
+    <Compile Include="ElmAttSet.cs" />
+    <Compile Include="EmbedAttSet.cs" />
+    <Compile Include="FileOp.cs" />
+    <Compile Include="Group.cs" />
+    <Compile Include="Handler.cs" />
+    <Compile Include="IFC.cs" />
+    <Compile Include="IModelWrFile.cs" />
+    <Compile Include="Interface.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
     <Page Include="SplashScreen.xaml">
-      <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="W_Rules.xaml">
-      <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="W_Supplier.xaml">
-      <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Matcher.cs" />
+    <Compile Include="MatchLib.cs" />
+    <Compile Include="Matrix.cs" />
+    <Compile Include="MD5gen.cs" />
+    <Compile Include="Message.cs" />
+    <Compile Include="Models.cs" />
+    <Compile Include="ModelWrFile.cs" />
+    <Compile Include="Parameter.cs" />
+    <Compile Include="PriceList.cs" />
+    <Compile Include="ProfileUpdate.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -184,33 +174,22 @@
       <LastGenOutput>TSmatchMsg.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\TSmatchMsg.ru.resx" />
-    <None Include="Group.cd" />
-    <None Include="SavedReport.cd" />
-    <None Include="Message.cd" />
-    <None Include="PriceList.cd" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
-    <None Include="Tekla.cd" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="TSmatch.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Tekla_logo.png" />
-  </ItemGroup>
-  <ItemGroup>
+    <Resource Include="Exit.jpg" />
     <Resource Include="OK.jpg" />
-  </ItemGroup>
-  <ItemGroup>
+    <Resource Include="Tekla_logo.png" />
     <Resource Include="TSmatchSplashScreen.jpg" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Exit.jpg" />
+    <Resource Include="TSmatch.ico" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="ifc.ico" />

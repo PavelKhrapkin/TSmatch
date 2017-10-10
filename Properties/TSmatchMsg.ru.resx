@@ -1,0 +1,225 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+	<!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+	<xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+		<xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+		<xsd:element name="root" msdata:IsDataSet="true">
+			<xsd:complexType>
+				<xsd:choice maxOccurs="unbounded">
+					<xsd:element name="metadata">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" />
+							</xsd:sequence>
+							<xsd:attribute name="name" use="required" type="xsd:string" />
+							<xsd:attribute name="type" type="xsd:string" />
+							<xsd:attribute name="mimetype" type="xsd:string" />
+							<xsd:attribute ref="xml:space" />
+						</xsd:complexType>
+					</xsd:element>
+					<xsd:element name="assembly">
+						<xsd:complexType>
+							<xsd:attribute name="alias" type="xsd:string" />
+							<xsd:attribute name="name" type="xsd:string" />
+						</xsd:complexType>
+					</xsd:element>
+					<xsd:element name="data">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+								<xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+							</xsd:sequence>
+							<xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+							<xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+							<xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+							<xsd:attribute ref="xml:space" />
+						</xsd:complexType>
+					</xsd:element>
+					<xsd:element name="resheader">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+							</xsd:sequence>
+							<xsd:attribute name="name" type="xsd:string" use="required" />
+						</xsd:complexType>
+					</xsd:element>
+				</xsd:choice>
+			</xsd:complexType>
+		</xsd:element>
+	</xsd:schema>
+	<resheader name="resmimetype">
+		<value>text/microsoft-resx</value>
+	</resheader>
+	<resheader name="version">
+		<value>2.0</value>
+	</resheader>
+	<resheader name="reader">
+		<value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+	<resheader name="writer">
+		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+	<data name="Matcher__Mtch_Bad_Price_Descriptor" xml:space="preserve">
+    <value>[Matcher.Mtch]: нет секции Price в TSmatch.xlsx/TOC/LoadDescriptor
+для "{0}" и "{1}"</value>
+  </data>
+	<data name="Bootstrap__resError_Obsolete" xml:space="preserve">
+    <value>[Bootstrap.resError]: Ресурс "{0}" устарел. Пожалуйста обновите его!</value>
+  </data>
+	<data name="Message__Init_fault" xml:space="preserve">
+    <value>TSmatch внутренняя ошибка [Message.Init] -- Ошибка инициализации системы сообщений</value>
+  </data>
+	<data name="Bootstrap__resError_NoFile" xml:space="preserve">
+    <value>[Bootstrap.resError]: Не найден файл "{0}"</value>
+  </data>
+	<data name="Bootstrap__resError_NoDoc" xml:space="preserve">
+    <value>[Bootstrap.resError]: Нет ресурсного документа "{0}"</value>
+  </data>
+	<data name="Bootstrap__resError_ErrResource" xml:space="preserve">
+    <value>[Bootstrap.resError]: Внутренняя ошибка ресурса "{0}"</value>
+  </data>
+	<data name="Component__wrong_LoadDescriptor" xml:space="preserve">
+    <value>[Component]: Ошибка описания компоненты "{0}". Проверьте TSmatch.xlsx/TOC</value>
+  </data>
+	<data name="Document__Reset_no_HDR_Form" xml:space="preserve">
+    <value>[Document.Reset]: Reset документа "{0}", для которого нет формы HDR в ТОС</value>
+  </data>
+	<data name="Document__wrDoc_no_Form" xml:space="preserve">
+    <value>[Document.wrDoc]: Нет формы "{0}" для документа "{1}"</value>
+  </data>
+	<data name="MainWindow__RePrice" xml:space="preserve">
+    <value>Пересчет стоимости материалов</value>
+  </data>
+	<data name="MainWindow__Title" xml:space="preserve">
+    <value>TSmatch - согласование поставщиков в проекте</value>
+  </data>
+	<data name="Splash__Loading_Bootstrap" xml:space="preserve">
+    <value>[Bootstrap]: Загрузка диспетчерской базы TSmatch.xlsx</value>
+  </data>
+	<data name="S" xml:space="preserve">
+    <value>Гружу</value>
+  </data>
+	<data name="SectionTab_is_empty" xml:space="preserve">
+    <value>[Section]: не инициализирован словарь секций SectionTab</value>
+  </data>
+	<data name="SavedReport__SetModelDir_No_Model_Directory" xml:space="preserve">
+    <value>[SavedReport.SetModelDir]: В каталоге модели нет файла "TSmatchINFO.xlsx".
+Убедитесь, что он сохранен приложением TSmatch, когда модель
+доступна в Tekla, а затем помещен в папку, известную TSmatch.</value>
+  </data>
+	<data name="SavedReport__SetModelDir_No_TSmatchINFO" xml:space="preserve">
+    <value>[SavedReport.SetModelDir]: Отчет по модели "TSmatchINFO.xlsx".
+не обнаружен в папке "{0}"</value>
+  </data>
+	<data name="SavedReport__error_recover_impossible" xml:space="preserve">
+    <value>[SavedReport.error] : Сохраненный отчет по модели испорчен.
+Попытайтесь сохранить его заново при выходе из приложения TSmatch</value>
+  </data>
+	<data name="SavedReport__error_Corrupted_saved_report_TSmatchINFO" xml:space="preserve">
+    <value>[SavedReport.error] : Испорчен файл TSmatchINFO.xlsx
+Попробуйте записать его заново при выходе из приложения TSmatch</value>
+  </data>
+	<data name="SavedReport__Raw_CAD_Read" xml:space="preserve">
+    <value>[SavedReport.Raw]: Файл "Raw.xml" не доступен или испорчен.
+Вы действительно хотите получить его из САПР заново?</value>
+  </data>
+	<data name="SavedReport__Raw_No_model_dir" xml:space="preserve">
+    <value>[SavedReport.Raw]: не найден каталог модели, на который указывает
+            запись в TSmatchINFO.xlsx или записано в регистре Windows
+
+"{0}"
+
+Это сообщение возникает, когда нет файла TSmatchINFO.xlsx,
+и нет Tekla, чтобы его можно было создать заново.
+Попробуйте запустить TSmatch на машине, где есть Tekla.</value>
+  </data>
+	<data name="Splash__Loading_TSmatchINFO" xml:space="preserve">
+    <value>[SavedReport]: Загружаю "{0}" и "{1}"</value>
+  </data>
+	<data name="WPF_MainWindow_grMat" xml:space="preserve">
+    <value>Материал</value>
+  </data>
+	<data name="WPF_MainWindow_grPrf" xml:space="preserve">
+    <value>Профиль</value>
+  </data>
+	<data name="WPF_MainWindow_grWeight" xml:space="preserve">
+    <value>Вес (кг)</value>
+  </data>
+	<data name="WPF_MainWindow_grLength" xml:space="preserve">
+    <value>Длина (м)</value>
+  </data>
+	<data name="WPF_MainWindow_grVolume" xml:space="preserve">
+    <value>Объем (м3)</value>
+  </data>
+	<data name="WPF_MainWindow_grPrice" xml:space="preserve">
+    <value>Цена (руб)</value>
+  </data>
+	<data name="WPF_MainWindow_grSupplier" xml:space="preserve">
+    <value>Поставщик</value>
+  </data>
+	<data name="Handler__PriceGr_Rules_not_Initialized" xml:space="preserve">
+    <value>[Handler.PriceGr]: Не инциированы правила модели</value>
+  </data>
+	<data name="Matcher__Mtch_Bad_arguments" xml:space="preserve">
+    <value>[Matcher.Mtch]: Неправильно инициализирован 
+входной аргумент - группа элементов.</value>
+  </data>
+</root>

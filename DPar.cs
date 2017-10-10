@@ -12,13 +12,8 @@
  * Ad(str)    - is used to Add string str both to dpar and dpStr
  * Col(Stype) - return Excel Column number, or -1, when not recognized
  */
- using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using log4net;
-
+using System.Collections.Generic;
 using Lib = match.Lib.MatchLib;
 using Sec = TSmatch.Section.Section;
 using SType = TSmatch.Section.Section.SType;

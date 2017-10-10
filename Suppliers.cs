@@ -1,7 +1,7 @@
 ﻿/*----------------------------------------------------------------------------
  * Suppliers - componets supplier organisations
  * 
- *  26.7.2017  Pavel Khrapkin
+ *  3.10.2017  Pavel Khrapkin
  *
  *--- History ---
  * 27.4.2016 - Remove List<string> doc_names from the Supplier class
@@ -9,6 +9,7 @@
  * 16.04.2017 - getSupplierStr() method add for Windows Form use
  * 10.05.2017 - Not existing Supplier Handle
  * 26.07.2017 - move getSupplierStr to MainWindow
+ *  3.10.2017 - adapted to Unit Test, refactoring
  * ---------------------------------------------------------------------------
  *      METHODS:
  * getSupplier(name)    - create Suplier(name), get data from TSmatch.xlsx/Supplier    
@@ -19,14 +20,12 @@
  */
 using System;
 using System.Collections.Generic;
-
-using Decl = TSmatch.Declaration.Declaration;
-using Msg = TSmatch.Message.Message;
-using Lib = match.Lib.MatchLib;
-using Docs = TSmatch.Document.Document;
 using CmpSet = TSmatch.CompSet.CompSet;
-using TSmatch.ElmAttSet;
+using Decl = TSmatch.Declaration.Declaration;
+using Docs = TSmatch.Document.Document;
 using Gr = TSmatch.Group.Group;
+using Lib = match.Lib.MatchLib;
+using Msg = TSmatch.Message.Message;
 
 namespace TSmatch.Suppliers
 {
@@ -35,15 +34,15 @@ namespace TSmatch.Suppliers
     /// </summary>
     public class Supplier : IComparable<Supplier>
     {
-        public DateTime date;   // Last Update Supplier' Date
-        public string name;
+        public DateTime Date;   // Last Update Supplier' Date
+        public string Name;
         public string Url;
         public string City;
-        public string index;
-        public string street;
-        public string country;
-        public string telephone;
-        public string contact;
+        public string Index;
+        public string Street;
+        public string Country;
+        public string Telephone;
+        public string Contact;
         public List<CmpSet> CompSets = new List<CmpSet>();
 
         /// <summary>
@@ -57,21 +56,23 @@ namespace TSmatch.Suppliers
         /// <param name="index">post intex of the Supplier</param>
         /// <param name="tel">Telephone of the Supplier</param>
         /// <param name="List<CompSet> CompSets">collection of CompSet related to the Supplier</param>
-        public Supplier(DateTime date, string name, string url, string city, string street, string index, string tel, List<CmpSet> CompSets)
+        public Supplier(DateTime date, string name, string url, string city, string street, string index, string tel, List<CmpSet> cs)
         {
-            this.date = date;
-            this.name = name;
-            this.Url = url;
-            this.City = city;
-            this.index = index;
-            this.street = street;
-            this.telephone = tel;
-            this.CompSets = CompSets;
+            Date = date;
+            Name = name;
+            Url = url;
+            City = city;
+            Index = index;
+            Street = street;
+            Telephone = tel;
+            CompSets = cs;
         }
         public Supplier(int n) { getSupplier(n); }
 
-        public Supplier(string _name)
+        public Supplier(string _name, bool init=true)
         {
+            Name = _name;
+            if (!init) return;
             Docs docSupl = Docs.getDoc(Decl.SUPPLIERS);
             for (int i = docSupl.i0; i <= docSupl.il; i++)
             {
@@ -86,13 +87,13 @@ namespace TSmatch.Suppliers
         private void getSupplier(int n)
         {
             Docs docSupl = Docs.getDoc(Decl.SUPPLIERS);
-            date = Lib.getDateTime(docSupl.Body[n, Decl.SUPL_DATE]);
-            name = (string)docSupl.Body[n, Decl.SUPL_NAME];
+            Date = Lib.getDateTime(docSupl.Body[n, Decl.SUPL_DATE]);
+            Name = (string)docSupl.Body[n, Decl.SUPL_NAME];
             Url = (string)docSupl.Body[n, Decl.SUPL_URL];
             City = (string)docSupl.Body[n, Decl.SUPL_CITY];
-            street = (string)docSupl.Body[n, Decl.SUPL_STREET];
-            index = (string)docSupl.Body[n, Decl.SUPL_INDEX];
-            telephone = (string)docSupl.Body[n, Decl.SUPL_TEL];
+            Street = (string)docSupl.Body[n, Decl.SUPL_STREET];
+            Index = (string)docSupl.Body[n, Decl.SUPL_INDEX];
+            Telephone = (string)docSupl.Body[n, Decl.SUPL_TEL];
         }
 
         /// <summary>
@@ -137,7 +138,7 @@ namespace TSmatch.Suppliers
             doc.Reset("Now");
             foreach (var s in Suppliers)
             {
-                doc.wrDoc(1, s.date, s.name, s.Url, s.City, s.index, s.street, s.telephone, s.CompSets.Count);
+                doc.wrDoc(1, s.Date, s.Name, s.Url, s.City, s.Index, s.Street, s.Telephone, s.CompSets.Count);
                 foreach (var cs in s.CompSets)
                 {
                     //11.1.17                    cs.getCompSet();

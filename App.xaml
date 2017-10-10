@@ -9,29 +9,29 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:TSmatch"
              StartupUri="MainWindow.xaml">
-    <Application.Resources>
-        <Style x:Key="AlignmentRight" TargetType="{x:Type TextBlock}">
-            <Setter Property="HorizontalAlignment" Value="Right"/>
-        </Style>
-         <Style x:Key="InfoPanel" TargetType="StackPanel">
-            <Setter Property="Control.Height" Value="16"/>
-            <Setter Property="Control.HorizontalAlignment" Value="Stretch"/>
-            <Setter Property="Control.Margin" Value="5, 0"/>
-            <Setter Property="Control.FontFamily" Value="Arial"/>
-            <Setter Property="TextBlock.TextWrapping" Value="Wrap"/>
-        </Style>
-        <Style x:Key="UnderlinedTextBlock">
-            <Setter Property="Control.Margin" Value="2, 0"/>
-            <Setter Property="Control.FontSize" Value="13"/>
-            <Setter Property="Control.FontFamily" Value="Arial"/>
-            <Setter Property="TextBlock.TextDecorations" Value="Underline" />
-        </Style>
-        <Style x:Key="InfoPanelField">
-            <Setter Property="Control.FontSize" Value="13"/>
-            <Setter Property="Control.FontFamily" Value="Arial"/>
-        </Style>
-        <Style x:Key="RightJustifiedDigit" TargetType="Control">
-            <Setter Property="HorizontalAlignment" Value="Right"/>
-        </Style>
-    </Application.Resources>
-</Application>
+        <Application.Resources>
+            <Style x:Key="AlignmentRight" TargetType="{x:Type TextBlock}">
+                <Setter Property="HorizontalAlignment" Value="Right"/>
+            </Style>
+            <Style x:Key="InfoPanel" TargetType="StackPanel">
+                <Setter Property="Control.Height" Value="16"/>
+                <Setter Property="Control.HorizontalAlignment" Value="Stretch"/>
+                <Setter Property="Control.Margin" Value="5, 0"/>
+                <Setter Property="Control.FontFamily" Value="Arial"/>
+                <Setter Property="TextBlock.TextWrapping" Value="Wrap"/>
+            </Style>
+            <Style x:Key="UnderlinedTextBlock">
+                <Setter Property="Control.Margin" Value="2, 0"/>
+                <Setter Property="Control.FontSize" Value="13"/>
+                <Setter Property="Control.FontFamily" Value="Arial"/>
+                <Setter Property="TextBlock.TextDecorations" Value="Underline" />
+            </Style>
+            <Style x:Key="InfoPanelField">
+                <Setter Property="Control.FontSize" Value="13"/>
+                <Setter Property="Control.FontFamily" Value="Arial"/>
+            </Style>
+            <Style x:Key="RightJustifiedDigit" TargetType="Control">
+                <Setter Property="HorizontalAlignment" Value="Right"/>
+            </Style>
+        </Application.Resources>
+    </Application>

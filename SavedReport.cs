@@ -1,9 +1,10 @@
 ﻿/*-----------------------------------------------------------------------------------
  * SavedReport -- class for handle saved reports in TSmatchINFO.xlsx
  * 
- *  14.09.2017 П.Л. Храпкин
+ *  10.10.2017 П.Л. Храпкин
  *  
  *--- Unit Tests ---
+ * UT_SR_Msg
  * UT_GetModelInfo, UT-GetSavedReport, UT_GetSavedRules 18.8.2017 OK 
  * UT_TSmatchINFO_FileExists, UT_TSmatchINFO_NoFiles    18.8.2017 OK
  * UT_SR_Raw    2017.07.23 OK 2 sec
@@ -26,7 +27,7 @@
  * 14.08.2017 - CheckModelIntegrity: no model.name is tested in without file; check IfDirExist()
  * 16.08.2017 - SetSavedMod method removed; protected instead of public methods; Recovery audit
  * 20.08.2017 - SavedReport audit: model.dir in TSMatchINFO.xlsx ignored, used one from Boot
- * 14.09.2017 - Msg audit
+ * 10.10.2017 - UT & Msg adotion
  *--- Methods: -------------------      
  * SetModel(boot)   - initialize model by reading from TSmatchINFO.xlsx ans Raw.xml or from scratch
  *      private SetModDir(boot) - subset of SetModel(), setup model.dir, name and phase
@@ -46,7 +47,7 @@ using System.Collections.Generic;
 using Log = match.Lib.Log;
 using Lib = match.Lib.MatchLib;
 using FileOp = match.FileOp.FileOp;
-using Msg = TSmatch.Message.Message;
+//10/10 using Msg = TSmatch.Message.Message;
 using Decl = TSmatch.Declaration.Declaration;
 using Docs = TSmatch.Document.Document;
 using Elm = TSmatch.ElmAttSet.ElmAttSet;
@@ -65,9 +66,10 @@ namespace TSmatch.SaveReport
 
         #region -- field definitions
         /// <summary> Model class reference</summary>
-        Mod model;
+        protected Mod model;
         /// <summary> Handler class reference</summary>
         MH mh;
+        Message.Message Msg;
         /// <summary> ModelINFO Document.Name - string</summary>
         const string sINFO = Decl.TSMATCHINFO_MODELINFO;
         /// <summary> Report Document.Name - string</summary>
@@ -100,9 +102,10 @@ namespace TSmatch.SaveReport
             return model;
         }
 
-        private void SetModDir(Boot boot)
+        protected void SetModDir(Boot boot)
         {
             const string me = "SavedReport__SetModelDir_";
+            Msg = boot.Msg;
             if (boot.isTeklaActive)
             {   // if Tekla is active - get Path of TSmatch
                 model.name = Path.GetFileNameWithoutExtension(TS.ModInfo.ModelName);
@@ -114,8 +117,8 @@ namespace TSmatch.SaveReport
             else
             {   // if Tekla not active - get model attributes from TSmatchINFO.xlsx in ModelDir
                 model.dir = boot.ModelDir;
-                if (!FileOp.isDirExist(model.dir)) Msg.F(me + "No Model Directory", model.dir);
-                if (!Docs.IsDocExists(Decl.TSMATCHINFO_MODELINFO)) Msg.F(me + "No TSmatchINFO.xlsx file");
+                if (!FileOp.isDirExist(model.dir)) Msg.FF(me + "No Model Directory", model.dir);
+                if (!Docs.IsDocExists(Decl.TSMATCHINFO_MODELINFO)) Msg.FF(me + "No_TSmatchINFO", model.dir);
                 dINFO = Docs.getDoc(sINFO, fatal: false);
                 if (dINFO == null || dINFO.il < 10 || !FileOp.isDirExist(model.dir)) error();
                 model.name = dINFO.Body.Strng(Decl.MODINFO_NAME_R, 2);
@@ -258,17 +261,17 @@ namespace TSmatch.SaveReport
         /// <summary>
         /// error() - SavedReport error handler method
         /// </summary>
-        private void error(bool errRep = false)
+        protected void error(bool errRep = false)
         {
             const string me = "SR__error_";
             Log.set("SR.error()");
             log.Info("error() model.errRecover = " + model.errRecover.ToString());
             if (model.errRecover)
             {
-                Msg.AskFOK(me + "Corrupted saved report TSmatchINFO.xlsx");
+                Msg.AAskFOK(me + "Corrupted saved report TSmatchINFO.xlsx");
                 model.elements = Raw(model);
                 dRep = Docs.getDoc(sRep);
-                if (dRep == null || errRep) Msg.F(me + "recover impossible");
+                if (dRep == null || errRep) Msg.FF(me + "recover impossible");
                 GetSavedReport();
                 Recover(sINFO, RecoverToDo.ResetRep);
                 //21/7           Recover(mod, sRep,  RecoverToDo.ResetRep);
@@ -293,18 +296,18 @@ namespace TSmatch.SaveReport
         public void Recover(string repNm, RecoverToDo to_do)
         {
             Log.set(@"SR.Recover(" + repNm + "\")");
-            if (!CheckModelIntegrity(model)) Msg.AskFOK("Recovery impossible");
+            if (!CheckModelIntegrity(model)) Msg.AAskFOK("Recovery impossible");
             switch (to_do)
             {
                 case RecoverToDo.CreateRep:
-                    Msg.AskFOK("В каталоге модели нет TSmatchINFO.xlsx/" + repNm + ". Создать?");
+                    Msg.AAskFOK("В каталоге модели нет TSmatchINFO.xlsx/" + repNm + ". Создать?");
                     resetDialog = false;
                     Docs.getDoc(repNm, reset: true, create_if_notexist: true);
-                    if (!Docs.IsDocExists(repNm)) Msg.F("SaveDoc.Recover cannot create ", repNm);
+                    if (!Docs.IsDocExists(repNm)) Msg.FF("SaveDoc.Recover cannot create ", repNm);
                     Recover(repNm, RecoverToDo.ResetRep);
                     break;
                 case RecoverToDo.ResetRep:
-                    if (resetDialog) Msg.AskFOK("Вы действительно намерены переписать TSmatchINFO.xlsx/" + repNm + "?");
+                    if (resetDialog) Msg.AAskFOK("Вы действительно намерены переписать TSmatchINFO.xlsx/" + repNm + "?");
                     var w = new WrMod();
                     switch (repNm)
                     {
@@ -338,7 +341,7 @@ namespace TSmatch.SaveReport
             Log.set("SR.Raw(" + mod.name + ")");
             model = mod;
             List<Elm> elms = new List<Elm>();
-            if (!FileOp.isDirExist(model.dir)) Msg.F(me + "No model dir", model.dir);
+            if (!FileOp.isDirExist(model.dir)) Msg.FF(me + "No model dir", model.dir);
             string file = Path.Combine(model.dir, Decl.RAWXML);
             if (!write && FileOp.isFileExist(file))
             {                               // Read Raw.xml
@@ -347,7 +350,7 @@ namespace TSmatch.SaveReport
             }
             else
             {                               // get from CAD and Write or re-Write Raw.xml 
-                Msg.AskFOK(me + "CAD Read");
+                Msg.AAskFOK(me + "CAD Read");
                 model.Read();
                 rwXML.XML.WriteToXmlFile(file, model.elements);
                 elms = model.elements;

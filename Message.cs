@@ -1,7 +1,7 @@
 ﻿/*----------------------------------------------------------------------------
  * Message -- multilanguage message system
  * 
- * 14.09.2017  Pavel Khrapkin
+ * 10.10.2017  Pavel Khrapkin
  *
  *--- Unit Tests ---
  * UT_Message: UT_Init, UT_AskS, UT_W, UT_S 13.09.2017 OK
@@ -16,6 +16,7 @@
  * 31.8.2017 - Msg.S return string; Dialog flag
  * 12.9.2017 - TSmatchMsg.resx and TSmatchMsg,ru.resx use as localization resources
  * 14.9.2017 - static constructor as a singleton for _messages fill; ArgumentException for UTs
+ * 8.10.2017 - Instance F,W,I istead of static
  * ---------------------------------------------------------------------------------------
  *      Methods:
  * static Message() - Singleton constructor initiate static msgs Dictionary set
@@ -93,6 +94,58 @@ namespace TSmatch.Message
             if (errType.Contains("(")) msg = errType + " " + msg;
             return msg;
         }
+        //--new no static
+        private bool dDialog;
+        public bool DDialog { get => dDialog; set => dDialog = value; }
+
+        protected string mmsg, eerrType;
+        protected void ttxt(Severity type, string msgcode, object[] p, bool doMsgBox = true)
+        {
+            msgcode = msgcode.Replace(' ', '_');
+            eerrType = "TSmatch " + type;
+            bool knownMsg = _messages.ContainsKey(msgcode);
+            try { mmsg = knownMsg ? string.Format(_messages[msgcode], p) : string.Format(msgcode, p); }
+            catch { mmsg = knownMsg ? _messages[msgcode] : msgcode; eerrType = "(!)" + eerrType; }
+            if (!knownMsg) eerrType = "(*)" + eerrType;
+            // PKh> To have a look to the MessageBox with the message, add comment to the next line check Dialog
+            if (!DDialog && type == Severity.FATAL) throw new ArgumentException("Msg.F: " + mmsg);
+            if (doMsgBox) MessageBox.Show(mmsg, eerrType, MessageBoxButton.OK, MessageBoxImage.Asterisk, reply, MessageBoxOptions.ServiceNotification);
+            if (type == Severity.FATAL) Stop();
+        }
+
+        public void ttxt(string str, params object[] p) { ttxt(Severity.INFO, str, p, doMsgBox: false); }
+        public void FF(string str, params object[] p) { ttxt(Severity.FATAL, str, p); }
+        public void WW(string str, params object[] p) { ttxt(Severity.WARNING, str, p); }
+        public void II(string str, params object[] p) { ttxt(Severity.INFO, str, p); }
+        public string SS(string str, params object[] p)
+        {
+            ttxt(Severity.SPLASH, str, p, doMsgBox: false);
+            if (eerrType.Contains("(")) mmsg = eerrType + " " + mmsg;
+            return mmsg;
+        }
+
+        public bool AAskYN(string msgcode, params object[] p)
+        {
+            ttxt(Severity.INFO, msgcode, p, doMsgBox: false);
+            var X = MessageBox.Show(msg, eerrType, MessageBoxButton.YesNo, MessageBoxImage.Question);
+            return X == MessageBoxResult.Yes;
+        }
+
+        private MessageBoxResult rreply;
+
+        public void AAskOK(string msgcode, params object[] p)
+        {
+            txt(Severity.INFO, msgcode, p, doMsgBox: false);
+            rreply = MessageBox.Show(msg, errType, MessageBoxButton.OKCancel, MessageBoxImage.Question);
+        }
+
+        public void AAskFOK(string msgcode, params object[] p)
+        {
+            AskOK(msgcode, p);
+            if (rreply == MessageBoxResult.OK) return;
+            Stop();
+        }
+        //--new no static
 
         public static bool AskYN(string msgcode, params object[] p)
         {

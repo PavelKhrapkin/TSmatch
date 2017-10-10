@@ -107,6 +107,31 @@ namespace TSmatch.Handler
             Log.exit();
         }
 
+        public Mtch PriceGr(Mod mod, ElmGr gr)
+        {
+            Log.set("Handler.PriceGr");
+            Mtch match = null;
+            bool found=false;
+            if (mod.Rules == null || mod.Rules.Count == 0) Msg.F("Handler__PriceGr Rules not Initialized");// mod = sr._GetSavedRules(mod);
+            foreach(var rule in mod.Rules)
+            {
+                if (gr.SupplierName != string.Empty && gr.SupplierName != rule.sSupl) continue;
+                match = new Mtch(gr, rule);
+                if (match.ok == Mtch.OK.Match)
+                {
+                    mod.matches.Add(match);
+                    gr.CompSetName = match.rule.sCS;
+                    gr.SupplierName = match.rule.sSupl;
+                    gr.compDescription = match.component.Str(Section.Section.SType.Description);
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) log.Info("No Match Group. mat= " + gr.mat + "\tprf=" + gr.prf);
+            Log.exit();
+            return match;
+        }
+
         public void Pricing(ref Mod m, bool unit_test_mode = false)
         {
             Log.set("mh.Pricing");
@@ -124,6 +149,13 @@ namespace TSmatch.Handler
             Log.Trace("      date=\t" + m.date + "\tMD5=" + m.MD5 + "\telements.Count=" + m.elements.Count);
             Log.Trace("price date=\t" + m.pricingDate + "\tMD5=" + m.pricingMD5 + "\ttotal price" + m.total_price);
             Log.exit();
+        }
+
+        public class Match
+        {
+            public string RuleText;
+            public string SupplierName;
+            public string CompSetName;
         }
     } // end class Handler : Model
     class _SR : SR

@@ -48,23 +48,18 @@ using System.IO;
 using System.Collections.Generic;
 using System.Threading;
 using System.Diagnostics;
-using log4net;
-
-using Tekla.Structures;
-using TSD = Tekla.Structures.Dialog.ErrorDialog;
 using Tekla.Structures.Model;
-using Tekla.Structures.Geometry3d;
 using Tekla.Structures.Model.UI;
 using Tekla.Structures.Model.Operations;
 //using Tekla.Structures.Drawing;
 
 using Log = match.Lib.Log;
 using Msg = TSmatch.Message.Message;
-using Lib = match.Lib.MatchLib;
 using TSM = Tekla.Structures.Model;
 using Elm = TSmatch.ElmAttSet.ElmAttSet;
 using Emb = TSmatch.EmbedAttSet.EmbedAttSet;
 using System.Collections;
+using Tekla.Structures;
 
 namespace TSmatch.Tekla
 {
@@ -86,7 +81,7 @@ namespace TSmatch.Tekla
         /// <summary>
         /// parts - Dictionary of all Parts in Model with GUID as a Key
         /// </summary>
-        protected Dictionary<string, Part> dicParts = new Dictionary<string, Part>();
+        protected Dictionary<string, TSM.Part> dicParts = new Dictionary<string, TSM.Part>();
 
         public Tekla() { }
 
@@ -100,7 +95,7 @@ namespace TSmatch.Tekla
                 || name != "" && ModInfo.ModelName != String.Concat(name, ".db1")) Msg.F("Tekla.Read: Another model loaded, not", name);
             ModInfo.ModelName = ModInfo.ModelName.Replace(".db1", "");
  
-            dicParts = ReadModObj<Part>();
+            dicParts = ReadModObj<TSM.Part>();
         
             ArrayList part_string = new ArrayList() { "MATERIAL", "MATERIAL_TYPE", "PROFILE" };
             ArrayList part_double = new ArrayList() { "LENGTH", "WEIGHT", "VOLUME" };
@@ -225,7 +220,7 @@ namespace TSmatch.Tekla
             Log.set("TS_OpenAPI.elementsCount()");
             TSM.ModelObjectSelector selector = model.GetModelObjectSelector();
             System.Type[] Types = new System.Type[1];
-            Types.SetValue(typeof(Part), 0);
+            Types.SetValue(typeof(TSM.Part), 0);
             TSM.ModelObjectEnumerator objectList = selector.GetAllObjectsWithType(Types);
             Log.exit();
             int totalCnt = objectList.GetSize();
@@ -239,7 +234,7 @@ namespace TSmatch.Tekla
         public void HighlightElements(Dictionary<string, Elm> els, int color = 1)
         {
             Log.set("TS_OpenAPI.HighLightElements");
-            var colorObjects = new List<ModelObject>();
+            var colorObjects = new List<TSM.ModelObject>();
             foreach (var elm in els)
             {
                 Identifier id = new Identifier(elm.Key);

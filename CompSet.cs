@@ -1,10 +1,10 @@
 ﻿/*----------------------------------------------------------------------------
  * CompSet -- Set of Components from the Supplier' price-list
  * 
- * 29.5.2017  P.Khrapkin
+ * 3.10.2017  P.Khrapkin
  *
- * -- ToDo
- * 31.12.16 использовать Rule.FPs и LoadDescription при конструировании CompSet
+ *--- Unit Tests ---
+ * UT_CompSet_init 3.10.2017 OK
  * --- History ---
  * 30.11.2016 made from previous edition of module Components
  * 31.12.2016 Rule.FPs accounted
@@ -12,6 +12,7 @@
  *  2.04.2017 simplified with PRICE - DPar instead of FPs, don't use Rule.Parser
  *  2.05.2017 FingerPrint reference removed, audit
  * 22.05.2017 Not existing CompSet event handle;
+ *  3.10.2017 audit
  * ---------------------------------------------------------------------------
  *      Methods:
  * getCompSet(name, Supplier) - getCompSet by  its name in Supplier' list
@@ -25,30 +26,15 @@
  * UpgradeFrExcel(doc, strToDo) - обновление Документа по правилу strToDo
  */
 
-using System;
-using System.Linq;
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using log4net;
-
-using Lib = match.Lib.MatchLib;
-using Log = match.Lib.Log;
-using Msg = TSmatch.Message.Message;
-using Decl = TSmatch.Declaration.Declaration;
-using TS = TSmatch.Tekla.Tekla;
-using Docs = TSmatch.Document.Document;
-using Mod = TSmatch.Model.Model;
-using Mtch = TSmatch.Matcher.Mtch;
-using Supl = TSmatch.Suppliers.Supplier;
+using System;
+using System.Collections.Generic;
 using TSmatch.Suppliers;
 using Comp = TSmatch.Component.Component;
-using TSmatch.ElmAttSet;
-using TSmatch.Rule;
-using Sec = TSmatch.Section.Section;
-using SType = TSmatch.Section.Section.SType;
-using Par = TSmatch.Parameter.Parameter;
+using Decl = TSmatch.Declaration.Declaration;
+using Docs = TSmatch.Document.Document;
 using DP = TSmatch.DPar.DPar;
-using TSmatch.Document;
+using Supl = TSmatch.Suppliers.Supplier;
 
 namespace TSmatch.CompSet
 {
@@ -63,7 +49,9 @@ namespace TSmatch.CompSet
         public readonly DP csDP;
         public readonly List<Comp> Components = new List<Comp>();
 
-        public CompSet(string _name, Supl _supl, string LoadDescription = "", List<Comp> comps = null, bool init = true)
+        public CompSet() { }
+
+        public CompSet(string _name, Supl _supl, string LoadDescription = "", List<Comp> comps = null)
         {
             name = _name;
             Supplier = _supl;
@@ -90,7 +78,7 @@ namespace TSmatch.CompSet
             {
                 string suplName = toc.Body.Strng(i, Decl.DOC_SUPPLIER);
                 string csSheet = toc.Body.Strng(i, Decl.DOC_SHEET);
-                if (suplName != Supplier.name || csSheet != name) continue;
+                if (suplName != Supplier.Name || csSheet != name) continue;
                 docName = toc.Body.Strng(i, Decl.DOC_NAME);
                 break;
             }
