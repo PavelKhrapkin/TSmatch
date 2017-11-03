@@ -1,8 +1,6 @@
 ﻿/*================================
-* Bootstrap Test 8.10.2017
+* Bootstrap Test 9.10.2017
 *=================================
-* Specific probel of this Unit Test for Bootstrap:
-* It cannot run, only if all resesources loaded at startup time not available
 */
 using match.FileOp;
 using System;
@@ -11,12 +9,15 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace TSmatch.Bootstrap.Tests
 {
     [TestClass()]
-    public class UT_Bootstrap_Tests : Bootstrap
+    public class UT_Bootstrap_Tests
     {
+        _Bootstrap boot = new _Bootstrap();
+        UT_TSmatch._UT_MsgService U = new UT_TSmatch._UT_MsgService();
+
         [TestMethod()]
         public void UT_Bootstrap()
         {
-            var boot = new Bootstrap(init: true);
+            boot.Init();
 
             Assert.IsTrue(boot.ModelDir.Length > 0);
             Assert.IsTrue(boot.TOCdir.Length > 0);
@@ -27,41 +28,61 @@ namespace TSmatch.Bootstrap.Tests
             FileOp.AppQuit();
         }
 
-        // 6/10/17        public delegate string mes(Enum x, string str);
-
         [TestMethod()]
         public void UT_Boot_ResxErr()
         {
-            var boot = new Bootstrap(init: false);
-            var U = new UT_TSmatch._UT_Msg();
             U.SetCulture("en");
 
-            // test 0: "en" NoFile, NoDoc, Obsolet, ErrResource
-            try { resxError(ResErr.NoFile, "TSmatch.xlsx"); } catch { }; var ss = U.GetMsg();
-            Assert.AreEqual("[Bootstrap.resError]: Not found TSmatch file \"TSmatch.xlsx\"", U.GetMsg());
+            // test 0: "en" - English
+            string s = boot._rErr(1, "TSmatch.xlsx");   // 1 - ResErr.NoFile - нет ресурсного файла
+            Assert.AreEqual("[Bootstrap.resError]: Not found TSmatch file \"TSmatch.xlsx\"", s);
 
-            try { resxError(ResErr.NoDoc, "TOC"); } catch { }
-            Assert.AreEqual("[Bootstrap.resError]: No TSmatch Resource Document \"TOC\"", U.GetMsg());
+            s = boot._rErr(2, "TOC");                   // 2 - ResErr.NoDoc - нет ресурсного документа
+            Assert.AreEqual("[Bootstrap.resError]: No TSmatch Resource Document \"TOC\"", s);
 
-            try { resxError(ResErr.Obsolete, "Forms"); } catch { }
-            Assert.AreEqual("[Bootstrap.resError]: Resource \"Forms\" obsolete. Please, update it!", U.GetMsg());
+            s = boot._rErr(3, "Forms");                 // 3 - ResErr.Obsolete - ресурс устарел
+            Assert.AreEqual("[Bootstrap.resError]: Resource \"Forms\" obsolete. Please, update it!", s);
 
-            try { resxError(ResErr.ErrResource, "TSmatch_xlsx"); } catch { }
-            Assert.AreEqual("[Bootstrap.resError]: Internal Resource error. Resource \"TSmatch_xlsx\".", U.GetMsg());
+            s = boot._rErr(0, "Something");             // 0 - ResErr.ErrResource - нет такого ресурса 
+            Assert.AreEqual("[Bootstrap.resError]: Internal Resource error. Resource \"Something\".", s);
 
-            // test 1: "ru" NoFile, NoDoc, Obsolet, ErrResource
+            // test 1: "ru" - Russian
             U.SetCulture("ru");
-            try { resxError(ResErr.NoFile, "TSmatch.xlsx"); } catch { }
-            Assert.AreEqual("[Bootstrap.resError]: Не найден файл \"TSmatch.xlsx\"", U.GetMsg());
 
-            try { resxError(ResErr.NoDoc, "TOC"); } catch { }
-            Assert.AreEqual("[Bootstrap.resError]: Нет ресурсного документа \"TOC\"", U.GetMsg());
+            s = boot._rErr(1, "TSmatch.xlsx");          // 1 - ResErr.NoFile - нет ресурсного файла
+            Assert.AreEqual("[Bootstrap.resError]: Не найден файл \"TSmatch.xlsx\"", s);
 
-            try { resxError(ResErr.Obsolete, "Forms"); } catch { }
-            Assert.AreEqual("[Bootstrap.resError]: Ресурс \"Forms\" устарел. Пожалуйста обновите его!", U.GetMsg());
+            s = boot._rErr(2, "TOC");                   // 2 - ResErr.NoDoc - нет ресурсного документа
+            Assert.AreEqual("[Bootstrap.resError]: Нет ресурсного документа \"TOC\"", s);
 
-            try { resxError(ResErr.ErrResource, "TSmatch_xlsx"); } catch { }
-            Assert.AreEqual("[Bootstrap.resError]: Внутренняя ошибка ресурса \"TSmatch_xlsx\"", U.GetMsg());
+            s = boot._rErr(3, "Forms");                 // 3 - ResErr.Obsolete - ресурс устарел
+            Assert.AreEqual("[Bootstrap.resError]: Ресурс \"Forms\" устарел. Пожалуйста обновите его!", s);
+
+            s = boot._rErr(0, "Something");             // 0 - ResErr.ErrResource - нет такого ресурса
+            Assert.AreEqual("[Bootstrap.resError]: Внутренняя ошибка ресурса \"Something\"", s);
+        }
+
+
+        /// <summary>
+        /// Перехват сообщений о фатальных ошибках в Msg.F
+        /// </summary>
+        public class _Bootstrap : Bootstrap
+        {
+            public string _rErr(int type, string str)
+            {
+                string result = "";
+                ResErr errType = (ResErr)type;
+                if (!Enum.IsDefined(typeof(ResErr), errType))
+                    Assert.Fail("enum Bootstrap.ResErr=" + type + " not defined");
+                try { resxError(errType, str); }
+                catch (Exception e)
+                {
+                    const string prefix = "Msg.F: ";
+                    if (e.Message.IndexOf(prefix) != 0) Assert.Fail();
+                    result = e.Message.Substring(prefix.Length);
+                }
+                return result;
+            }
         }
     }
 }

@@ -1,5 +1,5 @@
 ﻿/*-------------------------------------------
- * WPF Main Windows 1.10.2017 Pavel.Khrapkin
+ * WPF Main Windows 3.11.2017 Pavel.Khrapkin
  * --- History ---
  * 2017.05.15 - restored as TSmatch 1.0.1 after Source Control excident
  * 2017.05.23 - Menu OnPriceCheck
@@ -8,36 +8,27 @@
  * 2017.09.13 - Messages from TSmatchMsg.resx
  * 2017.09.19 - Iso Read button
  * 2017.10.01 - DataGrid support
+ * 2017.11.03 - Property.Settings parameters, menu multi-language
  * --- Known Issue & ToDos ---
  * - ToDo some kind of progress bar moving on the MainWindow, when Tekla re-draw HighLight.
  */
+using log4net;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
+using System.Windows.Media.Imaging;
 using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Diagnostics;
-
-using log4net;
-using Log = match.Lib.Log;
-using FileOp = match.FileOp.FileOp;
 using Boot = TSmatch.Bootstrap.Bootstrap;
-using Msg = TSmatch.Message.Message;
-//using M = TSmatch.Properties.TSmatchMsg;
-using Mod = TSmatch.Model.Model;
-using Ifc = TSmatch.IFC.IFC;
-using Supl = TSmatch.Suppliers.Supplier;
 using ElmGr = TSmatch.Group.Group;
+using Ifc = TSmatch.IFC.IFC;
+using Log = match.Lib.Log;
+using Mod = TSmatch.Model.Model;
+using Msg = TSmatch.Message.Message;
+using Supl = TSmatch.Suppliers.Supplier;
 
 namespace TSmatch
 {
@@ -48,9 +39,11 @@ namespace TSmatch
     {
         public static readonly ILog log = LogManager.GetLogger("MainWindow");
 
-        const string VERSION = "TSmatch v1.0.2 6.10.2017";
-        public static Boot boot;
-        public static string MyCity = "Санкт-Петербург";
+        private readonly string version = Properties.Settings.Default.VERSION;
+        public string sLanguage = Properties.Settings.Default.sLanguage;
+        public string MyCity = Properties.Settings.Default.MyCity;
+
+        public static readonly Boot boot = new Boot();
         public delegate void NextPrimeDelegate();
 
         public static Mod model;
@@ -60,16 +53,17 @@ namespace TSmatch
 
         public MainWindow()
         {
-            Log.START(VERSION);
+            Log.START(version);
             InitializeComponent();
-            new SplashScreen(VERSION).ShowDialog();
+            new SplashScreen(version).ShowDialog();
             MainWindowLoad();
         }
 
         #region --- MainWindow Panels ---
         private void MainWindowLoad()
         {
-            Title = Msg.S("MainWindow__Title"); //"TSmatch - согласование поставщиков в проекте"
+            Title = Msg.S("MainWindow__Title");
+            SetMenuHdrs();
             WrModelInfoPanel();
             WrReportPanel();
             MWmsg("No Price Groups highlighted");
@@ -216,6 +210,27 @@ namespace TSmatch
         #endregion --- MainWindow Panels ---
 
         #region --- Menu Items ---
+        private void SetMenuHdrs()
+        {
+            mFile.Header = Msg.S("MainWindow mFile");
+            mSaveAs.Header = Msg.S("MainWindow mSaveAs");
+            mSetting.Header = Msg.S("MainWindow mSetting");
+            mLanguage.Header = Msg.S("MainWindow_mLanguage");
+            mSelect.Header = Msg.S("MainWindow mSelect");
+            mExit.Header = Msg.S("MainWindow mExit");
+
+            //3/11            MyLng.Header = setHeader("Language", "Язык");           
+
+            //3/11            mView.Header = setHeader("View", "Вид");
+
+        }
+
+        private void OnLanguage(object sender, RoutedEventArgs e)
+        {
+//3/11/17            mLanguage.Icon = new System.Windows.Controls.Image(Source = new BitmapCacheOption());
+            Msg.AskFOK("Not ready yet");
+        }
+
         private void OnSaveAs(object sender, RoutedEventArgs e)
         {
             Msg.AskFOK("Not ready yet");
@@ -301,7 +316,7 @@ namespace TSmatch
 
         private void OnAbout(object sender, RoutedEventArgs e)
         {
-            Msg.AskFOK(VERSION);
+            Msg.AskFOK(version);
         }
 
         private void OK_button_Click(object sender, RoutedEventArgs e)

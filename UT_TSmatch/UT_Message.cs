@@ -1,10 +1,13 @@
 ﻿/*=================================
-* Message Unit Test 8.10.2017
+* Message Unit Test 25.10.2017
 *=================================
 * History:
 *  8.10.2017 - no static in Message
+*  9.10.2017 - Msg.F
+* 25.10.2017 - Msg.AskOK, AskFok, AskYN
 */
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 
 namespace TSmatch.Message.Tests
 {
@@ -15,7 +18,7 @@ namespace TSmatch.Message.Tests
         public void UT_init()
         {
             // тест 0: проверяем singleton initialisation
-            var U = new UT_TSmatch._UT_Msg();
+            var U = new UT_TSmatch._UT_MsgService();
             int cnt = U.cnt_msgs();
             Assert.IsTrue(cnt > 10);
 
@@ -74,7 +77,7 @@ namespace TSmatch.Message.Tests
         public void UT_W()
         {
             // test 0: Dialog = false - работаем без остановки
-            var U = new UT_TSmatch._UT_Msg();
+            var U = new UT_TSmatch._UT_MsgService();
             U.Msg_W("text for test");
             Assert.AreEqual("text_for_test", U.GetMsg());
 
@@ -83,5 +86,46 @@ namespace TSmatch.Message.Tests
             //Msg.Dialog = true;
             //Msg.W("Should be modal");
         }
+
+        [TestMethod()]
+        public void UT_AskYN()
+        {
+            // test 0: Dialog = false - работаем без остановки
+            var U = new UT_TSmatch._UT_MsgService();
+            try { U.AAskYN("text for test"); }
+            catch (ArgumentException e) when (e.Message == "Msg.AskYN: text_for_test") { };
+        }
+
+        [TestMethod()]
+        public void UT_AskOK()
+        {
+            // test 0: Dialog = false - работаем без остановки
+            var U = new UT_TSmatch._UT_MsgService();
+            try { U.AAskOK("text for test"); }
+            catch (ArgumentException e) when (e.Message == "Msg.AskOK: text_for_test") { }
+
+            // test 1: Dialog = false - работаем без остановки; AskFOK()
+            string exCode = string.Empty;
+            try { U.AAskFOK("text for test 2"); }
+            catch (ArgumentException e) { exCode = e.Message; }
+            Assert.AreEqual("Msg.AskOK: text_for_test_2", exCode);
+        }
+
+#if NOT_MADE_YET
+        [TestMethod()]
+        public void UT_F()
+        {
+            // test 0: перехват Exception Msg.F
+            var U = new UT_TSmatch._UT_MsgService();
+            U.FF()
+            U.Msg_W("text for test");
+            Assert.AreEqual("text_for_test", U.GetMsg());
+
+            // test 1: message should be modal -- должен спрашивать [OK?]
+            // --!!-- этот тест закомментирован. Открывать комментарии только для проверки Msg.W вручную
+            //Msg.Dialog = true;
+            //Msg.W("Should be modal");
+        }
+#endif
     }
 }

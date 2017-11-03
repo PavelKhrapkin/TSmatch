@@ -1,5 +1,5 @@
 ﻿<!--
-    MainWindow xaml design Pavel Khrapkin 2017.9.30
+    MainWindow xaml design Pavel Khrapkin 2017.11.3
     
     History:
     2017 May - Created
@@ -7,6 +7,7 @@
     2017.09.10 - Change Image on button "OK" click
     2017.09.19 - add ISO button
     2017.09.30 - DataGrid with ComboBox instead of ListView
+    2017.11.3  - Menu multi-language support
  -->
 <Window x:Class="TSmatch.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -37,18 +38,19 @@
         <DockPanel Grid.ColumnSpan="3" 
                    Background="#FFEAEAF8" Margin="2" VerticalAlignment="Center">
             <Menu IsMainMenu="True" Height="16">
-                <MenuItem Header="Файл">
-                    <MenuItem Header="_Сохранить как" Click="OnSaveAs"/>
+                <MenuItem x:Name="mFile">
+                    <MenuItem x:Name="mSaveAs" Click="OnSaveAs"/>
                     <Separator />
-                    <MenuItem Header="_Настройки" Click="OnSaveAs"/>
+                    <MenuItem x:Name="mSetting" Click="OnSaveAs"/>
+                    <MenuItem x:Name="mLanguage" Click="OnLanguage"/>
                     <Separator/>
                     <MenuItem Header="Проверка прайс-листов" Click="OnPriceCheck"/>
-                    <MenuItem Header="Выход" Click="OK_button_Click"/>
+                    <MenuItem x:Name="mExit" Click="OK_button_Click"/>
                 </MenuItem>
                 <MenuItem Header="Вид">
                     <MenuItem Header="Размер шрифта" Click="OnPriceCheck"/>
                 </MenuItem>
-                <MenuItem Header="Выбор">
+                <MenuItem x:Name="mSelect">
                     <MenuItem Header="По_ставщик" Click="OnSupllier"/>
                     <MenuItem Header="_Сортамент" Click="OnCompSet"/>
                     <MenuItem Header="_Материал" Click="OnMaterial"/>

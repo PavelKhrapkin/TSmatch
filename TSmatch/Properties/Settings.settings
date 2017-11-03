@@ -1,7 +1,15 @@
 ﻿<?xml version='1.0' encoding='utf-8'?>
-<SettingsFile xmlns="uri:settings" CurrentProfile="(Default)">
-  <Profiles>
-    <Profile Name="(Default)" />
-  </Profiles>
-  <Settings />
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="TSmatch.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="VERSION" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">TSmatch v1.0.2 3.11.2017</Value>
+    </Setting>
+    <Setting Name="sLanguage" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="MyCity" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Санкт-Петербург, Россия</Value>
+    </Setting>
+  </Settings>
 </SettingsFile>

@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------------------
  * Bootstrap - provide initial start of TSmatch, when necessary - startup procedure
  * 
- *  6.10.2017  Pavel Khrapkin
+ *  9.10.2017  Pavel Khrapkin
  *
  *--- History ---
  * 25.3.2016 started 
@@ -23,8 +23,9 @@
  * 10.09.2017 - MessageBox on top of SplashScreen
  * 12.09.2017 - remove Message.Init and all message related resources handling
  *  6.10.2017 - UT_ for Resource check, cleanup
+ *  9.10.2017 - Instance Msg, 
  *  * --- Unit Tests ---
- * 2017.10.6  - UT_Boot_ResxError, UT_Bootstrap   OK
+ * 2017.10.9  - UT_Boot_ResxError, UT_Bootstrap   OK
  * ---------------------------------------------------------------------------
  *      Bootstrap Methods:
  * Bootstrap()      - check all resources and start all other modules
@@ -33,7 +34,7 @@
  * Recover(fault reason) - try to restore or recover Resource
  *! checkFile(name, date) - check if file name exists and not obsolete; Recover it if necessary
  *! getFile()           - get file with Resource name to replace or resore the Resource
- * checkTOCdate(dir)   - get TSmatch.xlsx file from directory dir, and check if it is not obsolete
+ * checkTOCdate(dir)    - get TSmatch.xlsx file from directory dir, and check if it is not obsolete
  *! readZIP(name)       - read from ZIP TSmatch components
  *      sub-class Template Methods:
  *! Start()             - fill #templates with and without Tekla
@@ -52,7 +53,6 @@ using Log = match.Lib.Log;
 using FileOp = match.FileOp.FileOp;
 using TS = TSmatch.Tekla.Tekla;
 using Ifc = TSmatch.IFC.IFC;
-//8/10 using Msg = TSmatch.Message.Message;
 using Docs = TSmatch.Document.Document;
 using Mod = TSmatch.Model.Model;
 
@@ -62,7 +62,7 @@ namespace TSmatch.Bootstrap
     {
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger("Bootstrap");
 
-        public readonly bool isTeklaActive = TS.isTeklaActive();
+        public bool isTeklaActive = TS.isTeklaActive();
         //----- Directories - TSmatch evironment
         string desktop_path;
         string debug_path;  //7/4 { get { return desktop_path; } }
@@ -81,19 +81,21 @@ namespace TSmatch.Bootstrap
         public string DebugDir = string.Empty;
 
         //------------ Main TSmatch classes --------------------------
+        public Message.Message Msg = new Message.Message();
         public List<Mod> models;            // CAD model list used in TSmatch, model journal
         public Ifc ifc = new Ifc();         // IFC class reference
         public object classCAD;
         public Mod model;
-        public Message.Message Msg = new Message.Message();
 
         public Bootstrap() { }
-        public Bootstrap(bool init = true)
+
+        public void Init(bool init = true)
         {
             if (!init) return;
             Log.set("Bootstrap");
             desktop_path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
             debug_path = desktop_path;
+            Msg.DDialog = true;
             if (isTeklaActive)
             {   // if Tekla is active - get Path of TSmatch
                 classCAD = new TS();

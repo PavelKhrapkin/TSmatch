@@ -1,7 +1,7 @@
 ﻿/*=======================================================
 * _UT_Service - common service module for all Unit Tests
 * 
-* 6.10.2017 Pavel Khrapkin
+* 10.10.2017 Pavel Khrapkin
 *========================================================
 * History:
 * 2017.10.6  - delegate TryMsg
@@ -14,11 +14,13 @@ using System.Resources;
 
 namespace UT_TSmatch
 {
-    public class _UT_Msg : TSmatch.Message.Message
+    public class _UT_MsgService : TSmatch.Message.Message
     {
-//8/10        public string msg, errType;
+        //8/10        public string msg, errType;
 
-        public _UT_Msg(bool dialog = false) { DDialog = dialog; }
+        public _UT_MsgService(bool dialog = false) { DDialog = dialog; }
+        public void _NoDialog() { DDialog = false; }
+        public void _YesDialog() { DDialog = true; }
         public int cnt_msgs() { return _messages.Count; }
 
         public void SetCulture(string culture, bool dialog = false)
@@ -31,7 +33,7 @@ namespace UT_TSmatch
                 _messages.Add(o.Key as string, o.Value as string);
             }
             mgr.ReleaseAllResources();
-            Dialog = dialog;
+            DDialog = dialog;
         }
 
         public void _txt(string str, params object[] p)
