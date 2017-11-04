@@ -45,6 +45,7 @@ namespace TSmatch
 
         public static readonly Boot boot = new Boot();
         public delegate void NextPrimeDelegate();
+        private Uri[] lngFlag = {new Uri("")}
 
         public static Mod model;
         public static ElmGr currentGroup;
@@ -227,7 +228,7 @@ namespace TSmatch
 
         private void OnLanguage(object sender, RoutedEventArgs e)
         {
-//3/11/17            mLanguage.Icon = new System.Windows.Controls.Image(Source = new BitmapCacheOption());
+            mLanguage.Icon = new System.Windows.Controls.Image(Source = new BitmapCacheOption());
             Msg.AskFOK("Not ready yet");
         }
 

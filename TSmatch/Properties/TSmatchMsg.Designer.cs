@@ -133,6 +133,15 @@ namespace TSmatch.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to .
+        /// </summary>
+        internal static string LanguageFlag {
+            get {
+                return ResourceManager.GetString("LanguageFlag", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Material Price Re-calculation.
         /// </summary>
         internal static string MainWindow__RePrice {
@@ -147,6 +156,42 @@ namespace TSmatch.Properties {
         internal static string MainWindow__Title {
             get {
                 return ResourceManager.GetString("MainWindow__Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to File.
+        /// </summary>
+        internal static string MainWindow_mFile {
+            get {
+                return ResourceManager.GetString("MainWindow_mFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Language.
+        /// </summary>
+        internal static string MainWindow_mLanguage {
+            get {
+                return ResourceManager.GetString("MainWindow_mLanguage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Select.
+        /// </summary>
+        internal static string MainWindow_mSelect {
+            get {
+                return ResourceManager.GetString("MainWindow_mSelect", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Setting.
+        /// </summary>
+        internal static string MainWindow_mSetting {
+            get {
+                return ResourceManager.GetString("MainWindow_mSetting", resourceCulture);
             }
         }
         
