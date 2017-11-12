@@ -95,7 +95,7 @@ namespace TSmatch.Bootstrap
             Log.set("Bootstrap");
             desktop_path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
             debug_path = desktop_path;
-            Msg.DDialog = true;
+ //12/11           Msg.DDialog = true;
             if (isTeklaActive)
             {   // if Tekla is active - get Path of TSmatch
                 classCAD = new TS();

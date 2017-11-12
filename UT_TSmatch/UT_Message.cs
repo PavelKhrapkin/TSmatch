@@ -127,7 +127,7 @@ namespace TSmatch.Message.Tests
             // test 0: Dialog = false - работаем без остановки
             var U = new UT_TSmatch._UT_MsgService();
             try { U.AskYN("text for test"); }
-            catch (ArgumentException e) when (e.Message == "Msg.AskYN: text_for_test") { };
+            catch (ArgumentException e) when (e.Message == "Msg.I: text_for_test") { };
         }
 
         [TestMethod()]
@@ -135,14 +135,15 @@ namespace TSmatch.Message.Tests
         {
             // test 0: Dialog = false - работаем без остановки
             var U = new UT_TSmatch._UT_MsgService();
+            U.SetLanguage("");
             try { U.AskOK("text for test"); }
-            catch (ArgumentException e) when (e.Message == "Msg.AskOK: text_for_test") { }
+            catch (ArgumentException e) when (e.Message == "Msg.I: text_for_test") { }
 
             // test 1: Dialog = false - работаем без остановки; AskFOK()
             string exCode = string.Empty;
             try { U.AskFOK("text for test 2"); }
             catch (ArgumentException e) { exCode = e.Message; }
-            Assert.AreEqual("Msg.AskOK: text_for_test_2", exCode);
+            Assert.AreEqual("Msg.I: text_for_test_2", exCode);
         }
 
 #if NOT_MADE_YET

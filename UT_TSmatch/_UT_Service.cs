@@ -20,7 +20,7 @@ namespace UT_TSmatch
     {
         public _UT_MsgService(bool inUT = true) { in_UT = inUT; }
 
-        public int cnt_msgs() { return __messages.Count; }
+        public int cnt_msgs() { return _messages.Count; }
 
         internal void _W(string str, params object[] p)
         {

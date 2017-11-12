@@ -49,14 +49,9 @@ namespace TSmatch.Message
         /// <summary>
         /// _messages - set of <Message.Key, Message.Value> strings in local culture
         /// </summary>
-        protected Dictionary<string, string> __messages = new Dictionary<string, string>();
+        protected Dictionary<string, string> _messages = new Dictionary<string, string>();
         internal initMessageDic v = new initMessageDic();
         public enum Severity { INFO = 0, WARNING, FATAL, STRING };
-        public static bool Trace = false;  // For TRACE mode chage to "true";
-        public static bool Dialog = true;  //for Unit Test set Dialog = false;
-
-        private bool dDialog;
-        public bool DDialog { get => dDialog; set => dDialog = value; }
 
         protected string msg, errType;
 
@@ -64,36 +59,34 @@ namespace TSmatch.Message
 
         public void SetLanguage(string sLang)
         {
-            __messages = v.get_mesDic(sLang) as Dictionary<string, string>;
+            _messages = v.get_mesDic(sLang) as Dictionary<string, string>;
         }
 
         protected void txt(Severity type, string msgcode, object[] p, bool doMsgBox = true)
         {
             msgcode = msgcode.Replace(' ', '_');
             errType = "TSmatch " + type;
-            bool knownMsg = __messages.ContainsKey(msgcode);
+            bool knownMsg = _messages.ContainsKey(msgcode);
 
-            try { msg = knownMsg ? string.Format(__messages[msgcode], p) : string.Format(msgcode, p); }
-            catch { msg = knownMsg ? __messages[msgcode] : msgcode; errType = "(!)" + errType; }
+            try { msg = knownMsg ? string.Format(_messages[msgcode], p) : string.Format(msgcode, p); }
+            catch { msg = knownMsg ? _messages[msgcode] : msgcode; errType = "(!)" + errType; }
             if (!knownMsg) errType = "(*)" + errType;
-            if (type == Severity.STRING) return;
-            if(in_UT)
+            string str= "F";
+            switch (type)
             {
-                string str = "F";
-                switch (type)
-                {
-                    case Severity.FATAL: break;
-                    case Severity.WARNING: str = "W"; break;
-                    case Severity.INFO: str = "I"; break;
-                }
-                throw new ArgumentException("Msg." + str + ": " + msg);
+                case Severity.STRING: return;
+                case Severity.FATAL: break;
+                case Severity.WARNING: str = "W"; break;
+                case Severity.INFO: str = "I"; break;
             }
+            if (in_UT) throw new ArgumentException("Msg." + str + ": " + msg);
             // PKh> To have a look to the MessageBox with the message, add comment to the next line, which check doMsgBox
-            if (doMsgBox) MessageBox.Show(msg, errType, MessageBoxButton.OK, MessageBoxImage.Asterisk, rreply, MessageBoxOptions.ServiceNotification);
+            if (doMsgBox)
+                if (str == "I")
+                    MessageBox.Show(msg, errType, MessageBoxButton.OK, MessageBoxImage.Asterisk, reply, MessageBoxOptions.ServiceNotification);
             if (type == Severity.FATAL) Stop();
         }
 
-//12/11        public void txt(string str, params object[] p) { txt(Severity.INFO, str, p, doMsgBox: false); }
         public void F(string str, params object[] p) { txt(Severity.FATAL, str, p); }
         public void W(string str, params object[] p) { txt(Severity.WARNING, str, p); }
         public void I(string str, params object[] p) { txt(Severity.INFO, str, p); }
@@ -107,26 +100,22 @@ namespace TSmatch.Message
         public bool AskYN(string msgcode, params object[] p)
         {
             txt(Severity.INFO, msgcode, p, doMsgBox: false);
-            // PKh> To have a look to the MessageBox with the message, add comment to the next line check Dialog
-            if (!DDialog) throw new ArgumentException("Msg.AskYN: " + msg);
             var X = MessageBox.Show(msg, errType, MessageBoxButton.YesNo, MessageBoxImage.Question);
             return X == MessageBoxResult.Yes;
         }
 
-        private MessageBoxResult rreply;
+        private MessageBoxResult reply;
 
         public void AskOK(string msgcode, params object[] p)
         {
             txt(Severity.INFO, msgcode, p, doMsgBox: false);
-            // PKh> To have a look to the MessageBox with the message, add comment to the next line check Dialog
-            if (!DDialog) throw new ArgumentException("Msg.AskOK: " + msg);
-            rreply = MessageBox.Show(msg, errType, MessageBoxButton.OKCancel, MessageBoxImage.Question);
+            reply = MessageBox.Show(msg, errType, MessageBoxButton.OKCancel, MessageBoxImage.Question);
         }
 
         public void AskFOK(string msgcode, params object[] p)
         {
             AskOK(msgcode, p);
-            if (rreply == MessageBoxResult.OK) return;
+            if (reply == MessageBoxResult.OK) return;
             Stop();
         }
 
