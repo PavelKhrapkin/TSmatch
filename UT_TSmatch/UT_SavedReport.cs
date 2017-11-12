@@ -31,37 +31,37 @@ namespace TSmatch.SaveReport.Tests
         public void UT_SR_Msg()
         {
             // test 1-en: English Msg.F("Directory doesn't exist")
-            U.SetCulture("en");
+            U.SetLanguage("en");
             string s = sr._SetModDir(boot, 1);
             Assert.AreEqual("No \"TSmatchINFO.xlsx\" in model directory \r\nEnsure, that this file is written by TSmatch application, when Tekla is\r\n available, and then put to the Directory, which is known to TSmatch."
                 , s);
 
             // test 1-ru: Russian Msg.F("Directory doesn't exist")
-            U.SetCulture("ru");
+            U.SetLanguage("ru");
             s = sr._SetModDir(boot, 1);
             Assert.AreEqual("В каталоге модели нет файла \"TSmatchINFO.xlsx\".\r\nУбедитесь, что он сохранен приложением TSmatch, когда модель\r\nдоступна в Tekla, а затем помещен в папку, известную TSmatch."
                 , s);
 
             // test 2-en: English Msg.F("No TSmatchINFO.xlsx")
-            U.SetCulture("en");
+            U.SetLanguage("en");
             s = sr._SetModDir(boot, 2);
             Assert.AreEqual("\"TSmatchINFO.xlsx\" not found\r\nin directory \"C:\\Windows\""
                 , s);
 
             // test 2-ru: Russian Msg.F("No TSmatchINFO.xlsx")
-            U.SetCulture("ru");
+            U.SetLanguage("ru");
             s = sr._SetModDir(boot, 2);
             Assert.AreEqual("Отчет по модели \"TSmatchINFO.xlsx\".\r\nне обнаружен в папке \"C:\\Windows\""
                 , s);
 
             // test 3-en: English
-            U.SetCulture("en");
+            U.SetLanguage("en");
             s = sr._error();
             Assert.AreEqual("Saved model report in \"TSmatchINFO.xlsx\" is corrupted.\r\nPlease, try to write it again in TSmatch application, when model in Tecla is available."
                 , s);
 
             // test 3-ru: Russian
-            U.SetCulture("ru");
+            U.SetLanguage("ru");
             s = sr._error();
             Assert.AreEqual("Испорчен файл TSmatchINFO.xlsx\r\nПопробуйте записать его заново при выходе из приложения TSmatch"
                 , s);
@@ -278,8 +278,8 @@ namespace TSmatch.SaveReport.Tests
 
             // test 2:  Msg("No model dir") -- EN
             // -- чтобы посмотреть, как выглядит MessageBox, но с Assert.Fault по Msg.FOK(), используй
-            //U.SetCulture("en", true);
-            U.SetCulture("en");
+            //U.SetLanguage("en", true);
+            U.SetLanguage("en");
             try { mod.sr.Raw(mod); }
             catch (Exception ex) { Assert.AreEqual("Msg.F", ex.Message); }
             Assert.AreEqual("[SavedReport.Raw]:  not found model directory, pointed by\r\n     TSmatchINFO.xlsx, or written in Windows Environment\r\n\r\n\"C:\\ABCDEF\" \r\n\r\nand there is no Tekla active to read and re-create it again. \r\nPlease, try to run TSmatch on PC with Tekla.", 
@@ -287,8 +287,8 @@ namespace TSmatch.SaveReport.Tests
 
             // test 3:  Msg("Raw_CAD_Read") -- EN
             // -- чтобы посмотреть, как выглядит MessageBox, но с Assert.Fault по Msg.FOK(), используй
-            //U.SetCulture("en", true);
-            U.SetCulture("en");
+            //U.SetLanguage("en", true);
+            U.SetLanguage("en");
             mod.dir = @"C:\Windows";
             try { mod.sr.Raw(mod); }
             catch (Exception ex) { Assert.AreEqual("Msg.F", ex.Message); }
@@ -297,8 +297,8 @@ namespace TSmatch.SaveReport.Tests
 
             // test 4:  Msg("Raw_CAD_Read") -- RU
             // -- чтобы посмотреть, как выглядит MessageBox, но с Assert.Fault по Msg.FOK(), используй
-            //U.SetCulture("ru", true);
-            U.SetCulture("ru");
+            //U.SetLanguage("ru", true);
+            U.SetLanguage("ru");
             mod.dir = @"C:\Windows";
             try { mod.sr.Raw(mod); }
             catch (Exception ex) { Assert.AreEqual("Msg.F", ex.Message); }

@@ -157,7 +157,7 @@ namespace TSmatch.Section
 
         public bool isSectionMatch(string template)
         {
-            if(!SectionTab.Any()) Msg.F("SectionTab is empty");
+ //12/11    if(!SectionTab.Any()) Msg.F("SectionTab is empty");
             string[] sections = Lib.ToLat(template).ToLower().Replace(" ", "").Split(';');
             foreach(string str in sections)
             {

@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1" MembersFormat="NameAndType">
+  <Comment CommentText="2.10.2017&#xD;&#xA;Pavel Khrapkin">
+    <Position X="0.5" Y="0.5" Height="0.49" Width="1.23" />
+  </Comment>
+  <Comment CommentText="_______UT_Matcher_________&#xD;&#xA;UT_Mtch	- check&#xD;&#xA;">
+    <Position X="1.865" Y="0.5" Height="0.501" Width="1.866" />
+  </Comment>
+  <Comment CommentText="Matcher - module to check the matching price for the &lt;Material, Profile&gt; group in price-list.&#xD;&#xA;Result is placed to to class Mtch.&#xD;&#xA;Enum OK beyond Match-NoMatch return some diagnostic: NoSection and NoGroup&#xD;&#xA;">
+    <Position X="4.073" Y="0.5" Height="1.094" Width="3.107" />
+  </Comment>
+  <Class Name="TSmatch.Matcher.Mtch">
+    <Position X="0.5" Y="1.75" Width="2" />
+    <Compartments>
+      <Compartment Name="Nested Types" Collapsed="false" />
+    </Compartments>
+    <NestedTypes>
+      <Enum Name="TSmatch.Matcher.Mtch.OK">
+        <TypeIdentifier>
+          <NewMemberFileName>Matcher.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>QAAAQAAAAAAAAAAAAAAACBAAAAAABAAAAAAAAAAIQQA=</HashCode>
+      <FileName>Matcher.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

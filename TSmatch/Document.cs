@@ -217,7 +217,7 @@ namespace TSmatch.Document
             string str = toc.Body.Strng(tocRow, Decl.DOC_IL);
             if (str == "EOL")
             {
-                if (type != Decl.TSMATCH) Msg.F("Shouldn't be 'EOL' here in TSmatch/TOC", tocRow);
+//12/11         if (type != Decl.TSMATCH) Msg.F("Shouldn't be 'EOL' here in TSmatch/TOC", tocRow);
                 string shN = toc.Body.Strng(tocRow, Decl.DOC_SHEET);
                 Mtr m;
                 if (shN == Decl.DOC_TOC) m = toc.Body;
@@ -304,7 +304,7 @@ namespace TSmatch.Document
                 doc.isOpen = true;
                 if (doc.type != Decl.TSMATCH) doc.il = doc.Body.iEOL();
             }
-            else if (fatal) Msg.F(err, ex, name);
+  //12/11   else if (fatal) Msg.F(err, ex, name);
             Log.exit();
             return doc;
         }
@@ -324,7 +324,7 @@ namespace TSmatch.Document
             Document toc = getDoc();
             Sheet = FileOp.SheetReset(Wb, SheetN);
             Excel.Range rng = FileOp.setRange(Sheet);
-            if (this.forms.Count == 0) Msg.F("Document.Reset no HDR form", this.name);
+//12/11     if (this.forms.Count == 0) Msg.F("Document.Reset no HDR form", this.name);
             string myHDR_name = forms[0].name;
             FileOp.CopyRng(toc.Wb, myHDR_name, rng);
             Body = FileOp.getSheetValue(Sheet);
@@ -344,7 +344,7 @@ namespace TSmatch.Document
         internal void wrDocSetForm(string formName, int nStrBody = -1, bool AutoFit = false)
         {
             Log.set("wrDocSetForm");
-            if (!Form.isFormExist(forms, formName)) Msg.F("Document.wrDoc no form", formName, this.name);
+//12/11     if (!Form.isFormExist(forms, formName)) Msg.F("Document.wrDoc no form", formName, this.name);
             form = Form.getFormByName(this, formName);
             form.AutoFit = AutoFit;
             Form.last_name = "";
@@ -401,10 +401,10 @@ namespace TSmatch.Document
             //           Type ob = typeof(obj);  //.IsAssignableFrom(type); 
 
             Form frm = forms.Find(x => x.name == formName);
-            if (frm == null) Msg.F("Document.wrDoc no form", formName, this.name);
-            if (frm.col.Count != frm.row.Count) Msg.F("wrDoc Form corrupted"
-                , formName, frm.row.Count, frm.col.Count);
-            if (frm.col.Count != obj.Length) Msg.F("wrDoc wrong agroments", obj);
+  //12/11   if (frm == null) Msg.F("Document.wrDoc no form", formName, this.name);
+  //12/11   if (frm.col.Count != frm.row.Count) Msg.F("wrDoc Form corrupted"
+  //12/11       , formName, frm.row.Count, frm.col.Count);
+   //12/11  if (frm.col.Count != obj.Length) Msg.F("wrDoc wrong agroments", obj);
             if (frm.name == Form.last_name)
             {
                 Body.AddRow(obj);
@@ -559,12 +559,12 @@ namespace TSmatch.Document
                         FileOp.fileSave(doc.Wb);
                         doc.isChanged = false;
                     }
-                    else
-                    {
-                        if (MD5.Length < 20 || EOL == 0) Msg.F("ERR_05.8_saveDoc_NOMD5");
+   //12/11          else
+  //12/11           {
+//12/11                 if (MD5.Length < 20 || EOL == 0) Msg.F("ERR_05.8_saveDoc_NOMD5");
 //2/8/17 removed EOLinTOC                        else { doc.chkSum = MD5; doc.EOLinTOC = EOLinTOC; }
                         else { doc.chkSum = MD5; doc.il = EOLinTOC; }
-                    }
+  //12/11           }
                     Mtr tmp = FileOp.getSheetValue(toc.Sheet);
                     for (int n = toc.i0; n <= toc.il; n++)
                     {   // находим и меняем строку документа doc TOC
@@ -958,7 +958,7 @@ namespace TSmatch.Document
             internal static Form getFormByName(Document doc, string name)
             {
 
-                if (!isFormExist(doc.forms, name)) Msg.F("Document.wrDoc no form", name, doc.name);
+   //12/11      if (!isFormExist(doc.forms, name)) Msg.F("Document.wrDoc no form", name, doc.name);
                 name = Lang(name);
                 return doc.forms.Find(x => x.name == name);
             }

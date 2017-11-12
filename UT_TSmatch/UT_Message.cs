@@ -1,10 +1,11 @@
 ﻿/*=================================
-* Message Unit Test 25.10.2017
+* Message Unit Test 12.11.2017
 *=================================
 * History:
 *  8.10.2017 - no static in Message
 *  9.10.2017 - Msg.F
 * 25.10.2017 - Msg.AskOK, AskFok, AskYN
+* 10.11.2017 - no static and refactoring in Message
 */
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
@@ -19,25 +20,41 @@ namespace TSmatch.Message.Tests
         {
             // тест 0: проверяем singleton initialisation
             var U = new UT_TSmatch._UT_MsgService();
+            U.SetLanguage("ru");
             int cnt = U.cnt_msgs();
             Assert.IsTrue(cnt > 10);
 
-            // test 1: Msg.txt
-            U._txt("число {0} и {1}", 3.14, 2.7);
-            Assert.AreEqual("число_3,14_и_2,7", U.GetMsg());
-            Assert.AreEqual("(*)TSmatch INFO", U.GetErrType());
+            // test 1: Msg.S ru not known
+            string s = U.S("число {0} и {1}", 3.14, 2.7);
+            Assert.AreEqual("число_3,14_и_2,7", uS(s));
 
-            // test 2: change culture to en
-            U.SetCulture("en");
-
-            string s = U.Msg_S("S");
+            // test 2: change culture to en, known
+            U.SetLanguage("en");
+            s = U.S("S");
             Assert.AreEqual("Loading", s);
 
             // test 3: return culture to ru
-            U.SetCulture("ru");
-            s = U.Msg_S("S");
+            U.SetLanguage("ru");
+            s = U.S("S");
             Assert.AreEqual("Гружу", s);
         }
+
+        [TestMethod()]
+        public void UT_SetLanguage()
+        {
+            var Msg = new Message();
+
+            // test 1: "en"
+            Msg.SetLanguage("en");
+            string s = Msg.S("S");
+            Assert.AreEqual("Loading", s);
+
+            // test 2: return culture to ru
+            Msg.SetLanguage("ru");
+            s = Msg.S("S");
+            Assert.AreEqual("Гружу", s);
+        }
+
 
         //[TestMethod()]
         //public void UT_AskS()
@@ -53,38 +70,55 @@ namespace TSmatch.Message.Tests
             var Msg = new Message();
 
             // test 0: Message не инициализирован, сообщение "незнакомое"
-            string s = Msg.SS("Not Initialized Message");
-            Assert.AreEqual(s, "(*)TSmatch SPLASH Not_Initialized_Message");
+            string s = Msg.S("Not Initialized Message");
+            Assert.AreEqual(uS(s), "Not_Initialized_Message");
 
             // test 1: нормальный вывод сообщения по русски
-            s = Msg.SS("SectionTab_is_empty");
-            Assert.AreEqual(s, "[Section]: не инициализирован словарь секций SectionTab");
+            Msg.SetLanguage("ru");
+            s = Msg.S("MainWindow__RePrice");
+            Assert.AreEqual(s, "Пересчет стоимости материалов");
 
             // test 2: вывод неизвестного сообщения
-            s = Msg.SS("тра-ля-ля", "и маленькая тележка");
-            Assert.AreEqual("(*)TSmatch SPLASH тра-ля-ля", s);
+            s = Msg.S("тра-ля-ля", "и маленькая тележка");
+            Assert.AreEqual("тра-ля-ля", uS(s));
 
             // test 3: вывод сообщения, которое есть, но с отсутствующим параметром
-            s = Msg.SS("Bootstrap__resError_NoFile");
-            Assert.AreEqual(s, "(!)TSmatch SPLASH [Bootstrap.resError]: Не найден файл \"{0}\"");
+            s = Msg.S("Bootstrap__resError_NoFile");
+            Assert.AreEqual(s, "(!)TSmatch STRING [Bootstrap.resError]: Не найден файл \"{0}\"");
 
             // test 4: распознавание сообщения с пробелами, замена их на '_'
-            s = Msg.SS("SectionTab is empty");
-            Assert.AreEqual("[Section]: не инициализирован словарь секций SectionTab", s);
+            s = Msg.S("WPF_MainWindow_grPrf");
+            Assert.AreEqual("Профиль", s);
+        }
+
+        internal string uS(string str)
+        {
+            string prefix = "(*)TSmatch STRING ";
+            int i0 = prefix.Length;
+            return str.Substring(i0);
         }
 
         [TestMethod()]
-        public void UT_W()
+        public void UT_W_I_F()
         {
-            // test 0: Dialog = false - работаем без остановки
+            // test 0: in_UT, not known message
             var U = new UT_TSmatch._UT_MsgService();
-            U.Msg_W("text for test");
+            U.SetLanguage("en");
+            U._W("text for test");
             Assert.AreEqual("text_for_test", U.GetMsg());
 
-            // test 1: message should be modal -- должен спрашивать [OK?]
-            // --!!-- этот тест закомментирован. Открывать комментарии только для проверки Msg.W вручную
-            //Msg.Dialog = true;
-            //Msg.W("Should be modal");
+            // test 1: W(str, parameters)
+            U._W("Bootstrap__resError_NoFile", 3.1415);
+            Assert.AreEqual("[Bootstrap.resError]: Not found TSmatch file \"3,1415\"", U.GetMsg());
+
+            // test 2: I(str, parameters)
+            U.SetLanguage("ru");
+            U._I("Bootstrap__resError_NoDoc", "какой-то.doc");
+            Assert.AreEqual("[Bootstrap.resError]: Нет ресурсного документа \"какой-то.doc\"", U.GetMsg());
+
+            // test 3: F(str, parameters)
+            U._F("Bootstrap__resError_Obsolete", "город");
+            Assert.AreEqual("[Bootstrap.resError]: Ресурс \"город\" устарел. Пожалуйста обновите его!", U.GetMsg());
         }
 
         [TestMethod()]
@@ -92,7 +126,7 @@ namespace TSmatch.Message.Tests
         {
             // test 0: Dialog = false - работаем без остановки
             var U = new UT_TSmatch._UT_MsgService();
-            try { U.AAskYN("text for test"); }
+            try { U.AskYN("text for test"); }
             catch (ArgumentException e) when (e.Message == "Msg.AskYN: text_for_test") { };
         }
 
@@ -101,12 +135,12 @@ namespace TSmatch.Message.Tests
         {
             // test 0: Dialog = false - работаем без остановки
             var U = new UT_TSmatch._UT_MsgService();
-            try { U.AAskOK("text for test"); }
+            try { U.AskOK("text for test"); }
             catch (ArgumentException e) when (e.Message == "Msg.AskOK: text_for_test") { }
 
             // test 1: Dialog = false - работаем без остановки; AskFOK()
             string exCode = string.Empty;
-            try { U.AAskFOK("text for test 2"); }
+            try { U.AskFOK("text for test 2"); }
             catch (ArgumentException e) { exCode = e.Message; }
             Assert.AreEqual("Msg.AskOK: text_for_test_2", exCode);
         }

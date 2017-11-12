@@ -56,12 +56,12 @@ namespace TSmatch.Handler
         public List<ElmGr> getGrps(List<Elm> elements)
         {
             Log.set("getGrps(" + elements.Count + ")");
-            if (elements == null || elements.Count == 0) Msg.F("getGrps: no elements");
+//12/11            if (elements == null || elements.Count == 0) Msg.F("getGrps: no elements");
             var gr = new ElmGr();
             List<ElmGr> groups = new List<ElmGr>();
             var grps = elements.GroupBy(x => x.prf);
             foreach (var grp in grps) groups.Add(new ElmGr(grp));
-            if (elements.Count != groups.Sum(x => x.guids.Count)) Msg.F("getGrps internal error");
+//12/11            if (elements.Count != groups.Sum(x => x.guids.Count)) Msg.F("getGrps internal error");
             var v = new ProfileUpdate.ProfileUpdate(ref groups);
             Log.exit();
             return groups;
@@ -75,7 +75,7 @@ namespace TSmatch.Handler
         {
             Log.set("MH.Hndl");
             mod.elmGroups = getGrps(mod.elements);
-            if (mod.elmGroups.Count < 1 || mod.Rules.Count < 1) Msg.F("No Rules or element Groups");
+//12/11            if (mod.elmGroups.Count < 1 || mod.Rules.Count < 1) Msg.F("No Rules or element Groups");
             if(testMode) { Log.exit(); return; }
 
             foreach (var rules in mod.Rules)

@@ -118,8 +118,8 @@ namespace TSmatch.SaveReport
             else
             {   // if Tekla not active - get model attributes from TSmatchINFO.xlsx in ModelDir
                 model.dir = boot.ModelDir;
-                if (!FileOp.isDirExist(model.dir)) Msg.FF(me + "No Model Directory", model.dir);
-                if (!Docs.IsDocExists(Decl.TSMATCHINFO_MODELINFO)) Msg.FF(me + "No_TSmatchINFO", model.dir);
+                if (!FileOp.isDirExist(model.dir)) Msg.F(me + "No Model Directory", model.dir);
+                if (!Docs.IsDocExists(Decl.TSMATCHINFO_MODELINFO)) Msg.F(me + "No_TSmatchINFO", model.dir);
                 dINFO = Docs.getDoc(sINFO, fatal: false);
                 if (dINFO == null || dINFO.il < 10 || !FileOp.isDirExist(model.dir)) error();
                 model.name = dINFO.Body.Strng(Decl.MODINFO_NAME_R, 2);
@@ -269,10 +269,10 @@ namespace TSmatch.SaveReport
             log.Info("error() model.errRecover = " + model.errRecover.ToString());
             if (model.errRecover)
             {
-                Msg.AAskFOK(me + "Corrupted saved report TSmatchINFO");
+                Msg.AskFOK(me + "Corrupted saved report TSmatchINFO");
                 model.elements = Raw(model);
                 dRep = Docs.getDoc(sRep);
-                if (dRep == null || errRep) Msg.FF(me + "recover impossible");
+                if (dRep == null || errRep) Msg.F(me + "recover impossible");
                 GetSavedReport();
                 Recover(sINFO, RecoverToDo.ResetRep);
                 //21/7           Recover(mod, sRep,  RecoverToDo.ResetRep);
@@ -297,18 +297,18 @@ namespace TSmatch.SaveReport
         public void Recover(string repNm, RecoverToDo to_do)
         {
             Log.set(@"SR.Recover(" + repNm + "\")");
-            if (!CheckModelIntegrity(model)) Msg.AAskFOK("Recovery impossible");
+            if (!CheckModelIntegrity(model)) Msg.AskFOK("Recovery impossible");
             switch (to_do)
             {
                 case RecoverToDo.CreateRep:
-                    Msg.AAskFOK("В каталоге модели нет TSmatchINFO.xlsx/" + repNm + ". Создать?");
+                    Msg.AskFOK("В каталоге модели нет TSmatchINFO.xlsx/" + repNm + ". Создать?");
                     resetDialog = false;
                     Docs.getDoc(repNm, reset: true, create_if_notexist: true);
-                    if (!Docs.IsDocExists(repNm)) Msg.FF("SaveDoc.Recover cannot create ", repNm);
+                    if (!Docs.IsDocExists(repNm)) Msg.F("SaveDoc.Recover cannot create ", repNm);
                     Recover(repNm, RecoverToDo.ResetRep);
                     break;
                 case RecoverToDo.ResetRep:
-                    if (resetDialog) Msg.AAskFOK("Вы действительно намерены переписать TSmatchINFO.xlsx/" + repNm + "?");
+                    if (resetDialog) Msg.AskFOK("Вы действительно намерены переписать TSmatchINFO.xlsx/" + repNm + "?");
                     var w = new WrMod();
                     switch (repNm)
                     {
@@ -342,7 +342,7 @@ namespace TSmatch.SaveReport
             Log.set("SR.Raw(" + mod.name + ")");
             model = mod;
             List<Elm> elms = new List<Elm>();
-            if (!FileOp.isDirExist(model.dir)) Msg.FF(me + "No model dir", model.dir);
+            if (!FileOp.isDirExist(model.dir)) Msg.F(me + "No model dir", model.dir);
             string file = Path.Combine(model.dir, Decl.RAWXML);
             if (!write && FileOp.isFileExist(file))
             {                               // Read Raw.xml
@@ -351,7 +351,7 @@ namespace TSmatch.SaveReport
             }
             else
             {                               // get from CAD and Write or re-Write Raw.xml 
-                Msg.AAskFOK(me + "CAD Read");
+                Msg.AskFOK(me + "CAD Read");
                 model.Read();
                 rwXML.XML.WriteToXmlFile(file, model.elements);
                 elms = model.elements;

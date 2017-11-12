@@ -68,13 +68,13 @@ namespace TSmatch.Group
         /// <param name="groups"></param>
         public void CheckGroups(ref Model.Model mod)
         {
-            if (mod == null || mod.elements == null || mod.elements.Count < 1
-                || mod.elmGroups == null || mod.elmGroups.Count < 1
-                || mod.elements.Count != mod.elmGroups.Sum(x => x.guids.Count)) Msg.F("ChechGroup: bad model", mod.name);
-            var _dic = mod.elements.ToDictionary(x => x.guid);
+//12/11            if (mod == null || mod.elements == null || mod.elements.Count < 1
+  //12/11              || mod.elmGroups == null || mod.elmGroups.Count < 1
+//12/11                || mod.elements.Count != mod.elmGroups.Sum(x => x.guids.Count)) Msg.F("ChechGroup: bad model", mod.name);
+//12/11            var _dic = mod.elements.ToDictionary(x => x.guid);
             foreach(var gr in mod.elmGroups)
             {
-                elmsDic = _dic.Where(x => gr.guids.Contains(x.Value.guid)).ToDictionary(v => v.Key, v => v.Value);
+//12/11                elmsDic = _dic.Where(x => gr.guids.Contains(x.Value.guid)).ToDictionary(v => v.Key, v => v.Value);
                 Mat = elmsDic.First().Value.mat;
                 int grIndex = mod.elmGroups.IndexOf(gr);
                 bool errFlag = false;
@@ -84,7 +84,7 @@ namespace TSmatch.Group
                     mod.elmGroups[grIndex].type = GrType.Warning;
                     mod.HighLightElements(elmsDic);
                     if (errFlag) continue;
-                    Msg.W("CheckGroups: various materials in Group", grIndex, gr.Prf, Mat, elm.Value.mat);
+ //12/11                   Msg.W("CheckGroups: various materials in Group", grIndex, gr.Prf, Mat, elm.Value.mat);
                     errFlag = true;
                 }
             }

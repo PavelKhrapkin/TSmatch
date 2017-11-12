@@ -95,8 +95,8 @@ namespace TSmatch.Matcher
 #endif
                 ok = OK.Match;
                 string priceStr;
-                try { priceStr = comp.Str(SType.Price); }
-                catch { Msg.F("Match: Bad Price descriptor", _rule.sSupl, _rule.sCS); }
+                //12/11/////try { priceStr = comp.Str(SType.Price); }
+                ////////////catch { Msg.F("Match: Bad Price descriptor", _rule.sSupl, _rule.sCS); }
 #if CHECK_MD5
                 if (!OK_MD5()) Msg.AskFOK("corrupted MD5");
 #endif

@@ -96,8 +96,8 @@ namespace TSmatch.Tekla
             Log.set("TS_OpenAPI.Read");
             List<Elm> elements = new List<Elm>();
             ModInfo = model.GetInfo();
-            if (dir != "" && ModInfo.ModelPath != dir
-                || name != "" && ModInfo.ModelName != String.Concat(name, ".db1")) Msg.F("Tekla.Read: Another model loaded, not", name);
+//12/11            if (dir != "" && ModInfo.ModelPath != dir
+       //12/11         || name != "" && ModInfo.ModelName != String.Concat(name, ".db1")) Msg.F("Tekla.Read: Another model loaded, not", name);
             ModInfo.ModelName = ModInfo.ModelName.Replace(".db1", "");
  
             dicParts = ReadModObj<Part>();
@@ -205,18 +205,18 @@ namespace TSmatch.Tekla
         {
             Operation.CreateReportFromAll("ОМ_Список", path, "MyTitle", "", "");
             while (!File.Exists(path)) Thread.Sleep(500);
-            if (!IfLockedWait(path)) Msg.F("No Tekla Report created");
+//12/11            if (!IfLockedWait(path)) Msg.F("No Tekla Report created");
         }
 
         public string ReadReport(string path)
         {
             String rep = string.Empty;
-            try
-            {
-                using (StreamReader sr = new StreamReader(path))
-                rep = sr.ReadToEnd();
-            }
-            catch (Exception e) { Msg.F("Tekla ReadReport: can't read file: " + e.Message); }
+            //////////try
+            //////////{
+            //12/11///    using (StreamReader sr = new StreamReader(path))
+            //////////    rep = sr.ReadToEnd();
+            //////////}
+//12//11            catch (Exception e) { Msg.F("Tekla ReadReport: can't read file: " + e.Message); }
             return rep;
         }
 
@@ -313,13 +313,13 @@ namespace TSmatch.Tekla
                 if (clsProcess.ProcessName.ToLower().Contains(Tekla.ToLower()))
                 {
                     TSM.Model model = new TSM.Model();
-                    if (!model.GetConnectionStatus()) Msg.W("===== No Tekla active =========");
-                    try
-                    {
-                        ModInfo = model.GetInfo();
-                        ok = model.GetConnectionStatus() && ModInfo.ModelName != "";
-                    }
-                    catch { Msg.W("isTeklaActive no model Connection"); }
+   //12/11          if (!model.GetConnectionStatus()) Msg.W("===== No Tekla active =========");
+                    //////////try
+                    //////////{
+                    //12/11///    ModInfo = model.GetInfo();
+                    //////////    ok = model.GetConnectionStatus() && ModInfo.ModelName != "";
+                    //////////}
+                    //////////catch { Msg.W("isTeklaActive no model Connection"); }
                     break;
                 }
             }

@@ -81,7 +81,7 @@ namespace TSmatch.Suppliers
                 getSupplier(i);
                 return;
             }
-            Msg.W("No such Supplier(" + _name + ")");
+   //12/11         Msg.W("No such Supplier(" + _name + ")");
         }
 
         private void getSupplier(int n)

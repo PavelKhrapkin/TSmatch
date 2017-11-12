@@ -66,7 +66,7 @@ namespace TSmatch.ProfileUpdate
         public ProfileUpdate(ref List<ElmGr> elmGroups)
         {
             if (PrfTab == null || PrfTab.Count == 0 || elmGroups == null || elmGroups.Count == 0)
-                Msg.F("internal errer");
+//12/11         Msg.F("internal errer");
             foreach (var gr in elmGroups)
             {
                 foreach (var Mark in PrfTab)
@@ -160,7 +160,7 @@ namespace TSmatch.ProfileUpdate
         }
 
         private void error(List<string> pars)
-        { Msg.F("ProfileUpdate Internal error", Profile, pars.Count); }
+        { }//12/11 Msg.F("ProfileUpdate Internal error", Profile, pars.Count); }
 
         // обнаруживает подстроки вида "Б3" или "K3A" и возвращает, если найдено, в type
         private bool PrfSub(string Type, string v, string sufix, out string type)
@@ -181,7 +181,7 @@ namespace TSmatch.ProfileUpdate
                 }
                 typeDig = pars[1];
                 int iTypeDig = Convert.ToInt32(typeDig);
-                if (iTypeDig < 0 || iTypeDig > 5) Msg.F("Wrong Group.Profile", Profile);
+  //12.11              if (iTypeDig < 0 || iTypeDig > 5) Msg.F("Wrong Group.Profile", Profile);
                 break;
             }
             type = Type + typeDig + sufix;

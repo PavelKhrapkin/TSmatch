@@ -52,14 +52,14 @@ namespace TSmatch
         }
         private void load()
         {
-            Dispatcher.Invoke(showDelegate, Msg.S("Splash__Loading_Bootstrap"));
+   //12/11         Dispatcher.Invoke(showDelegate, Msg.S("Splash__Loading_Bootstrap"));
             //           MainWindow.boot = new Boot();
             MainWindow.boot.Init();
 
             //load data
             //7/9            Dispatcher.Invoke(hideDelegate);
-            string msg = Msg.S("Splash__Loading_TSmatchINFO", "TSmatchINFO.xlsx", "Raw.xml");
-            Dispatcher.Invoke(showDelegate, msg);
+ //12/11           string msg = Msg.S("Splash__Loading_TSmatchINFO", "TSmatchINFO.xlsx", "Raw.xml");
+//12/11            Dispatcher.Invoke(showDelegate, msg);
             MainWindow.model = new Mod();
             MainWindow.model = MainWindow.model.sr.SetModel(MainWindow.boot);
 

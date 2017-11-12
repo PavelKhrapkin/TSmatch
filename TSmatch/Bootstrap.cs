@@ -178,7 +178,7 @@ namespace TSmatch.Bootstrap
         {
             string myName = "Bootstrap__resError_";
             var v = errType.ToString();
-            Msg.FF(myName + v, resName);
+            Msg.F(myName + v, resName);
         }
     } // end class Bootsrap
 } // end namespace

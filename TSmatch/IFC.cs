@@ -54,7 +54,7 @@ namespace TSmatch.IFC
         public void init(string _schemaName)
         {
             schemaName = _schemaName;
-            if (string.IsNullOrEmpty(schemaName)) Msg.F("IFC.init: No schema");
+//12/11            if (string.IsNullOrEmpty(schemaName)) Msg.F("IFC.init: No schema");
         }
         public static List<Elms> Read(string dir, string FileName)
         { return Read(Path.Combine(dir, FileName)); }
@@ -63,7 +63,7 @@ namespace TSmatch.IFC
         {
             var manager = new IfcManager.Core.IfcManager();
 
-            if (!FileOp.isFileExist(ifcFileName)) Msg.F("IFC.Read: no file", ifcFileName);
+//12/11            if (!FileOp.isFileExist(ifcFileName)) Msg.F("IFC.Read: no file", ifcFileName);
 
             log.Info("TRACE: Read(\"" + ifcFileName + "\"");
 
@@ -102,7 +102,7 @@ namespace TSmatch.IFC
                                             //..здесь еще надо разобраться с ГОСТ-5781 
                                             //..и присвоить значения элемента mat, prf и др
                         break;
-                    default: Msg.F("IFC error Material Parse", elm.mat);
+//12/11                    default: Msg.F("IFC error Material Parse", elm.mat);
                         break;
                 }
             }
@@ -141,7 +141,7 @@ namespace TSmatch.IFC
         /// </summary>
         internal void CheckIfcGuids(string ifcFile)
         {
-            if (!FileOp.isFileExist(ifcFile)) Msg.F("No Ifc input file", ifcFile);
+//12/11            if (!FileOp.isFileExist(ifcFile)) Msg.F("No Ifc input file", ifcFile);
             List<Elms> elements = new List<Elms>();
             elements = Read(ifcFile);
             throw new NotImplementedException();

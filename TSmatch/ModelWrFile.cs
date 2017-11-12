@@ -63,7 +63,7 @@ namespace TSmatch.Model.WrModelInfo
                     }
                     break;
                 case WrMod.Rules:       // перечень Правил, используемых для обработки модели
-                    if (mod.Rules.Count == 0) Msg.F("Can't write TSmatchINFO.xlsx/Rules");
+   //12/11          if (mod.Rules.Count == 0) Msg.F("Can't write TSmatchINFO.xlsx/Rules");
                     doc.wrDocSetForm("FORM_RuleLine");
                     foreach (var rule in mod.Rules)
                     {

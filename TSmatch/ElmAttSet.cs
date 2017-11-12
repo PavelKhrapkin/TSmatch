@@ -140,7 +140,7 @@ namespace TSmatch.ElmAttSet
             foreach (string id in guids)
             {
                 ElmAttSet elm = elements.Find(x => x.guid == id);
-                if (elm == null) Msg.F("ElmAttSet: Mgroup(wrong guid)", id);
+//12/11                if (elm == null) Msg.F("ElmAttSet: Mgroup(wrong guid)", id);
                 totalWeight += elm.weight;
                 totalVolume += elm.volume;
                 totalPrice += elm.price;

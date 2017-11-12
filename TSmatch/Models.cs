@@ -612,7 +612,7 @@ namespace TSmatch.Model
         /// </summary>
         internal void Exit()
         {
-            if (isChanged && Msg.AskYN("Модель или цены изменились. Запишем изменения в файл?"))
+  //12/11          if (isChanged && Msg.AskYN("Модель или цены изменились. Запишем изменения в файл?"))
             {
                 sr.Save(this);
             }

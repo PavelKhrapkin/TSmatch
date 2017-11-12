@@ -161,7 +161,7 @@ namespace match.FileOp
         public static bool CopyFile(string FrDir, string FileName, string ToDir, bool overwrite = false)
         {
             bool result = false;
-            if (!isFileExist(FrDir, FileName)) Msg.F("ERR_02.2_COPY_NOFILEFROM", FrDir, FileName);
+  //12/11          if (!isFileExist(FrDir, FileName)) Msg.F("ERR_02.2_COPY_NOFILEFROM", FrDir, FileName);
             string From = FrDir + "\\" + FileName;
             string To = ToDir + "\\" + FileName;
             if (isFileExist(ToDir, FileName))
@@ -170,12 +170,12 @@ namespace match.FileOp
                 if (isFileExist(ToDir, sav)) Delete(ToDir, sav);
                 File.Move(To, ToDir + "\\" + sav);
             }
-            try
-            {
-                File.Copy(From, To, overwrite);
-                result = true;
-            }
-            catch (Exception e) { Msg.F("ERR_02.3_FILENOTCOPIED", e, From, To); }
+            ////////////try
+            ////////////{
+            //12/11/////    File.Copy(From, To, overwrite);
+            ////////////    result = true;
+            ////////////}
+            ////////////catch (Exception e) { Msg.F("ERR_02.3_FILENOTCOPIED", e, From, To); }
             return result;
         }
         public static void Delete(string dir, string name)
@@ -220,7 +220,7 @@ namespace match.FileOp
             }
             catch (Exception e)
             {
-                if (Msg.Trace) Msg.I("TRACE_33.1_IsNameRangeExist", e, name);
+   //12/11             if (Msg.Trace) Msg.I("TRACE_33.1_IsNameRangeExist", e, name);
                 result = false;
             }
             return result;

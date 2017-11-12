@@ -62,7 +62,7 @@ namespace TSmatch
         #region --- MainWindow Panels ---
         private void MainWindowLoad()
         {
-            Title = Msg.S("MainWindow__Title");
+ //12/11           Title = Msg.S("MainWindow__Title");
             SetMenuHdrs();
             WrModelInfoPanel();
             WrReportPanel();
@@ -106,13 +106,13 @@ namespace TSmatch
 
         private void WrReportPanel()
         {
-            grMat.Header = Msg.S("WPF_MainWindow_grMat");
-            grPrf.Header = Msg.S("WPF_MainWindow_grPrf");
-            grPrice.Header = Msg.S("WPF_MainWindow_grPrice");
-            grVol.Header = Msg.S("WPF_MainWindow_grVolume");
-            grWgt.Header = Msg.S("WPF_MainWindow_grWeight");
-            grLng.Header = Msg.S("WPF_MainWindow_grLength");
-            grSupl.Header = Msg.S("WPF_MainWindow_grSupplier");
+            //////////////grMat.Header = Msg.S("WPF_MainWindow_grMat");
+            //////////////grPrf.Header = Msg.S("WPF_MainWindow_grPrf");
+            //////////////grPrice.Header = Msg.S("WPF_MainWindow_grPrice");
+            //12/11 //////grVol.Header = Msg.S("WPF_MainWindow_grVolume");
+            //////////////grWgt.Header = Msg.S("WPF_MainWindow_grWeight");
+            //////////////grLng.Header = Msg.S("WPF_MainWindow_grLength");
+            //////////////grSupl.Header = Msg.S("WPF_MainWindow_grSupplier");
             List<gr> items = new List<gr>();
             foreach (var gr in model.elmGroups)
             {
@@ -212,12 +212,12 @@ namespace TSmatch
         #region --- Menu Items ---
         private void SetMenuHdrs()
         {
-            mFile.Header = Msg.S("MainWindow mFile");
-            mSaveAs.Header = Msg.S("MainWindow mSaveAs");
-            mSetting.Header = Msg.S("MainWindow mSetting");
-            mLanguage.Header = Msg.S("MainWindow_mLanguage");
-            mSelect.Header = Msg.S("MainWindow mSelect");
-            mExit.Header = Msg.S("MainWindow mExit");
+            ////////////mFile.Header = Msg.S("MainWindow mFile");
+            ////////////mSaveAs.Header = Msg.S("MainWindow mSaveAs");
+            //12/11/////mSetting.Header = Msg.S("MainWindow mSetting");
+            ////////////mLanguage.Header = Msg.S("MainWindow_mLanguage");
+            ////////////mSelect.Header = Msg.S("MainWindow mSelect");
+            ////////////mExit.Header = Msg.S("MainWindow mExit");
 
             //3/11            MyLng.Header = setHeader("Language", "Язык");           
 
@@ -228,17 +228,17 @@ namespace TSmatch
         private void OnLanguage(object sender, RoutedEventArgs e)
         {
 //3/11/17            mLanguage.Icon = new System.Windows.Controls.Image(Source = new BitmapCacheOption());
-            Msg.AskFOK("Not ready yet");
+//12/11            Msg.AskFOK("Not ready yet");
         }
 
         private void OnSaveAs(object sender, RoutedEventArgs e)
         {
-            Msg.AskFOK("Not ready yet");
+ //12//11           Msg.AskFOK("Not ready yet");
         }
 
         private void OnFontSize(object sender, RoutedEventArgs e)
         {
-            Msg.AskFOK("Not ready yet");
+ //12//11           Msg.AskFOK("Not ready yet");
         }
 
         private void OnPriceCheck(object sender, RoutedEventArgs e)
@@ -264,14 +264,14 @@ namespace TSmatch
 
         private void OnMaterial(object sender, RoutedEventArgs e)
         {
-            Msg.AskFOK("Not ready yeat");
+//12/11            Msg.AskFOK("Not ready yeat");
             //22/5            var wChoice = new WindowSupplierChain();
             //22/5            wChoice.Show();
         }
 
         private void OnProfile(object sender, RoutedEventArgs e)
         {
-            Msg.AskFOK("Not ready yeat");
+ //12/11           Msg.AskFOK("Not ready yeat");
             //22/5            var wChoice = new WindowSupplierChain();
             //22/5            wChoice.Show();
         }
@@ -301,7 +301,7 @@ namespace TSmatch
 
         private void RePrice_button_Click(object sender, RoutedEventArgs e)
         {
-            Msg.AskFOK("MainWindow__RePrice");  //works only as literal, not as a Name(?) - "Пересчет стоимости материалов"
+  //12/11   Msg.AskFOK("MainWindow__RePrice");  //works only as literal, not as a Name(?) - "Пересчет стоимости материалов"
             model.mh.Pricing(ref model);
             model.isChanged = true;
             RePrice.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal
@@ -316,7 +316,7 @@ namespace TSmatch
 
         private void OnAbout(object sender, RoutedEventArgs e)
         {
-            Msg.AskFOK(version);
+ //12/11   Msg.AskFOK(version);
         }
 
         private void OK_button_Click(object sender, RoutedEventArgs e)
@@ -328,7 +328,7 @@ namespace TSmatch
 
         private void MWmsg(string str, params object[] p)
         {
-            string message = Msg.S(str, p);
+   //12/11         string message = Msg.S(str, p);
             Dispatcher.Invoke(new Action(() => { StatusMsg.Text = message; }));
         }
     }

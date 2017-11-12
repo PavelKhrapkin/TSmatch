@@ -226,7 +226,7 @@ namespace TSmatch.Component
                 if (!str.Contains(s)) continue;
                 return str.Substring(s.Length);
             }
-            Msg.F("Rule.strExclude error", str, syns);
+ //12/11    Msg.F("Rule.strExclude error", str, syns);
             return null;
         }
 #if OLD
@@ -337,7 +337,7 @@ namespace TSmatch.Component
             if (!compDP.dpStr.ContainsKey(stype))
             {
                 if (stype == SType.Price) throw new KeyNotFoundException();
-                Msg.W("CompSet wrong LoadDescriptor", stype);
+//12/11         Msg.W("CompSet wrong LoadDescriptor", stype);
                 return string.Empty;
             }
             return compDP.dpStr[stype];

@@ -44,7 +44,7 @@ namespace TSmatch
             {
                 var mod = MainWindow.model;
                 mod.mh.Pricing(ref MainWindow.model);
-                if (!mod.sr.CheckModelIntegrity(mod)) Msg.AskFOK("Model is changed");
+  //12/11       if (!mod.sr.CheckModelIntegrity(mod)) Msg.AskFOK("Model is changed");
                 items = getRuleItems(MainWindow.model, rePrice: true);
             }
             WRules.ItemsSource = items;
@@ -119,7 +119,7 @@ namespace TSmatch
 
         private void RuleDel_click(object sender, RoutedEventArgs e)
         {
-            if (!Msg.AskYN("Really delete rule?")) return;
+//12/11            if (!Msg.AskYN("Really delete rule?")) return;
             Rl sel = (Rl)WRules.SelectedValue;
             foreach (var r in MainWindow.model.Rules)
             {

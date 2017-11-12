@@ -53,7 +53,7 @@ namespace TSmatch
                 suppliers.Add(s);
             }
             Spl oldSupl = items.Find(x => x.SuplName == MainWindow.SuplName);
-            if(oldSupl == null) Msg.F("W_Supplier: No Selected SuplName");
+ //12/11           if(oldSupl == null) Msg.F("W_Supplier: No Selected SuplName");
             int ind = items.IndexOf(oldSupl);
             items[ind].Flag = true;
             log.Info("Supplier.Count=" + suppliers.Count + "\tInitial Supplier =\"" + oldSupl.SuplName + "\"");
@@ -98,20 +98,20 @@ namespace TSmatch
             log.Info("new Supplier selected = \"" + selectedSupl.SuplName + "\"");
 
             var selSupl = suppliers.Find(x => x.Name == selectedSupl.SuplName);
-            if (selSupl == null) Msg.F("Inconsystent W_Supplier");
+ //12/11           if (selSupl == null) Msg.F("Inconsystent W_Supplier");
             var grOLD = MainWindow.currentGroup;
             var grNEW = selSupl.getNEWcs(selSupl, grOLD);
-            if(grNEW == null)
-            {
-                 Msg.AskOK("\"{0}\" не поставляет [{1}, {2}], но Вы можете изменить Правила" +
-                    " и согласовать изменения с проектировщиком."
-                    , selSupl.Name, grOLD.Mat, grOLD.Prf);
-            }
-            else
-            {
-                //////                // пересчитывать вес, объем, стоимость группы; диалог по "тому же" сортаменту
-                ////////22/5                selSupl = selSupl.getTotals();
-            }
+            //////////////if(grNEW == null)
+            //////////////{
+            //////////////     Msg.AskOK("\"{0}\" не поставляет [{1}, {2}], но Вы можете изменить Правила" +
+            //////////////        " и согласовать изменения с проектировщиком."
+            //12/11///////        , selSupl.Name, grOLD.Mat, grOLD.Prf);
+            //////////////}
+            //////////////else
+            //////////////{
+            //////////////    //////                // пересчитывать вес, объем, стоимость группы; диалог по "тому же" сортаменту
+            //////////////    ////////22/5                selSupl = selSupl.getTotals();
+            //////////////}
 #if notReady
             Supl supl = 
             bool csOK = false;
