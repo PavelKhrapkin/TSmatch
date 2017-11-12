@@ -1,11 +1,13 @@
 ﻿/*=======================================================
 * _UT_Service - common service module for all Unit Tests
 * 
-* 10.10.2017 Pavel Khrapkin
+* 12.11.2017 Pavel Khrapkin
 *========================================================
 * History:
 * 2017.10.6  - delegate TryMsg
+* 2017.11.12 - восстанавливаю по частям после инцедента 10.11.17
 */
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Globalization;
 using System.Resources;
@@ -16,43 +18,37 @@ namespace UT_TSmatch
 {
     public class _UT_MsgService : TSmatch.Message.Message
     {
-//8/10        public string msg, errType;
+        public _UT_MsgService(bool inUT = true) { in_UT = inUT; }
 
-        public _UT_MsgService(bool dialog = false) { DDialog = dialog; }
-        public void _NoDialog() { DDialog = false; }
-        public void _YesDialog() { DDialog = true; }
         public int cnt_msgs() { return _messages.Count; }
 
-        public void SetCulture(string culture, bool dialog = false)
+        internal void _W(string str, params object[] p)
         {
-            var newCulture = CultureInfo.GetCultureInfo(culture);
-            _messages.Clear();
-            ResourceSet set = mgr.GetResourceSet(newCulture, true, true);
-            foreach (System.Collections.DictionaryEntry o in set)
+            try { W(str, p); }
+            catch (ArgumentException e)
             {
-                _messages.Add(o.Key as string, o.Value as string);
+                if (e.Message.Substring(0, 7) != "Msg.W: ") Assert.Fail();
             }
-            mgr.ReleaseAllResources();
-            DDialog = dialog;
         }
-
-        public void _txt(string str, params object[] p)
+        internal void _I(string str, params object[] p)
         {
-            try { ttxt(str, p); }
-            catch { }; // (ArgumentException e) when (e.Message == "Message_UT_NoDialog") { };
+            try { I(str, p); }
+            catch (ArgumentException e)
+            {
+                if (e.Message.Substring(0, 7) != "Msg.I: ") Assert.Fail();
+            }
         }
-
-        private string _S(string str, params object[] p)
+        internal void _F(string str, params object[] p)
         {
-            bool d = Dialog;
-            Dialog = true;
-            string s = S(str, p);
-            Dialog = d;
-            return s;
+            try { F(str, p); }
+            catch (ArgumentException e)
+            {
+                if (e.Message.Substring(0, 7) != "Msg.F: ") Assert.Fail();
+            }
         }
 
-        public string GetMsg() { return mmsg; }
-        public string GetErrType() { return eerrType; }
+        public string GetMsg() { return msg; }
+        public string GetErrType() { return errType; }
 
         //           Assert.ThrowsException() -- пока не умею этим пользоваться
 
@@ -70,9 +66,6 @@ namespace UT_TSmatch
 
         }
 
-        public string Msg_S(string str, params object[] p) { return _S(str, p); }
-        public void Msg_W(string str, params object[] p) { _txt(str, p); }
-        public void Msg_F(string str, params object[] p) { _txt(str, p); }
-        public void Msg_I(string str, params object[] p) { _txt(str, p); }
+   
     }
 }
