@@ -1,5 +1,5 @@
 ﻿/*-------------------------------------------
- * WPF Main Windows 1.10.2017 Pavel.Khrapkin
+ * WPF Main Windows 29.11.2017 Pavel.Khrapkin
  * --- History ---
  * 2017.05.15 - restored as TSmatch 1.0.1 after Source Control excident
  * 2017.05.23 - Menu OnPriceCheck
@@ -8,36 +8,25 @@
  * 2017.09.13 - Messages from TSmatchMsg.resx
  * 2017.09.19 - Iso Read button
  * 2017.10.01 - DataGrid support
+ * 2017.11.29 - non-static Message adoption
  * --- Known Issue & ToDos ---
  * - ToDo some kind of progress bar moving on the MainWindow, when Tekla re-draw HighLight.
  */
+using log4net;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Diagnostics;
-
-using log4net;
-using Log = match.Lib.Log;
-using FileOp = match.FileOp.FileOp;
 using Boot = TSmatch.Bootstrap.Bootstrap;
-using Msg = TSmatch.Message.Message;
-//using M = TSmatch.Properties.TSmatchMsg;
-using Mod = TSmatch.Model.Model;
-using Ifc = TSmatch.IFC.IFC;
-using Supl = TSmatch.Suppliers.Supplier;
 using ElmGr = TSmatch.Group.Group;
+using Ifc = TSmatch.IFC.IFC;
+using Log = match.Lib.Log;
+using Mod = TSmatch.Model.Model;
+using Supl = TSmatch.Suppliers.Supplier;
 
 namespace TSmatch
 {
@@ -47,6 +36,7 @@ namespace TSmatch
     public partial class MainWindow : Window
     {
         public static readonly ILog log = LogManager.GetLogger("MainWindow");
+        Message.Message Msg = new Message.Message();
 
         const string VERSION = "TSmatch v1.0.2 6.10.2017";
         public static Boot boot;
@@ -72,7 +62,7 @@ namespace TSmatch
             Title = Msg.S("MainWindow__Title"); //"TSmatch - согласование поставщиков в проекте"
             WrModelInfoPanel();
             WrReportPanel();
-            MWmsg("No Price Groups highlighted");
+            MWmsg("MainWindow msg No Price Groups highlighted");
             if (!boot.isTeklaActive) TeklaRead.IsEnabled = false;
         }
 
@@ -193,14 +183,14 @@ namespace TSmatch
             TotalSupl_weight_volume.Text = String.Format("Общий вес= {0:N1} кг, объем = {1:N1} м3", w, v);
             string sP = string.Format("{0:N2}", p);
             TotalSupl_price.Text = "Цена по этому поставщику " + sP + " руб";
-
-            MWmsg("выделяю группу..");
+            MWmsg("MainWindow msg Group selection");
             elm_groups.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal
                 , new NextPrimeDelegate(HighLighting));
         }
 
         private void SupplierChanged(object sender, SelectionChangedEventArgs e)
         {
+//21/11/17            MWmsg("MainWindow msg Select Supplier");
         }
 
         private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
@@ -268,7 +258,7 @@ namespace TSmatch
         }
         #endregion --- [Read], [RePrice], and [OK] buttons ---
 
-        #region --- [Read], [iso], [RePrice], and [OK] buttons ---
+        #region --- [Read], [ifc], [RePrice], and [OK] buttons ---
         private void OnTeklaRead_button_click(object sender, RoutedEventArgs e)
         {
             MessageBox.Show("Читать?", "TSmatch", MessageBoxButton.OK);
@@ -276,9 +266,9 @@ namespace TSmatch
             model.isChanged = true;
         }
 
-        private void OnIsoRead_button_click(object sender, RoutedEventArgs e)
+        private void OnIfcRead_button_click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Читать ISO?", "TSmatch", MessageBoxButton.OK);
+            MessageBox.Show("Читать Ifc?", "TSmatch", MessageBoxButton.OK);
             model.ifcPath = @"C:\Users\khrapkin\Desktop\Сибур IFC\18.09.17 (3).ifc";
             model.elements = Ifc.Read(model.ifcPath);
             model.isChanged = true;

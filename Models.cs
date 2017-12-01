@@ -51,7 +51,6 @@ using FileOp = match.FileOp.FileOp;
 using Ifc = TSmatch.IFC.IFC;
 using Lib = match.Lib.MatchLib;
 using Log = match.Lib.Log;
-using Msg = TSmatch.Message.Message;
 using Supplier = TSmatch.Suppliers.Supplier;
 using TS = TSmatch.Tekla.Tekla;
 using SR = TSmatch.SaveReport.SavedReport;
@@ -62,6 +61,7 @@ namespace TSmatch.Model
     {
         #region --- Definitions and Constructors
         public static readonly ILog log = LogManager.GetLogger("Model");
+        Message.Message Msg = new Message.Message();
 
         public DateTime date;       // дата и время последнего обновления модели
         public string name;         // название модели
@@ -114,11 +114,13 @@ namespace TSmatch.Model
             if (TS.isTeklaActive()) elements = ts.Read();
             else elements = Ifc.Read(ifcPath);
             string newMD5 = getMD5(elements);
-            if (newMD5 != MD5)
+            string fileRaw = Path.Combine(dir, Decl.RAWXML);
+            if (newMD5 != MD5 || !FileOp.isFileExist(fileRaw))
             {
                 isChanged = true;
                 MD5 = newMD5;
                 date = DateTime.Now;
+                rwXML.XML.WriteToXmlFile(fileRaw, elements);
             }
             return this;
         }

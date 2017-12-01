@@ -1,11 +1,12 @@
 ﻿/*-----------------------------------------------
- * WPF Window W_Rules 21.8.2017 Pavel Khrapkin
+ * WPF Window W_Rules 29.11.2017 Pavel Khrapkin
  * ----------------------------------------------
  * --- History ---
  * 2017.05.25 - written
  * 2017.08.9  - nElms column output
  * 2017.08.20 - ListBox<Rules> calculation
  * 2017.08.21 - Contect menu in ListBox
+ * 2017.11.29 - non-static Message adoption
  * --- Known Issue & ToDos ---
  * - еще нет диалога по допустимости CompSet для выбранного поставщика
  * - не написан диалог по вводу и редактированию текста правила
@@ -14,8 +15,6 @@ using System;
 using System.Collections.Generic;
 using System.Windows;
 using log4net;
-using TSmatch.ElmAttSet;
-using Msg = TSmatch.Message.Message;
 
 namespace TSmatch
 {
@@ -25,6 +24,7 @@ namespace TSmatch
     public partial class W_Rules : Window
     {
         public static readonly ILog log = LogManager.GetLogger("W_Rules");
+        Message.Message Msg = new Message.Message();
 
         public delegate void NextPrimeDelegate();
 

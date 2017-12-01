@@ -37,7 +37,6 @@ using IfcManager.Core;
 
 using FileOp = match.FileOp.FileOp;
 using Lib = match.Lib.MatchLib;
-using Msg = TSmatch.Message.Message;
 using Elms = TSmatch.ElmAttSet.ElmAttSet;
 using ElmAttributes = TSmatch.ElmAttSet;
 using TSmatch.IFC.IfcManager.Core;
@@ -49,6 +48,7 @@ namespace TSmatch.IFC
     {
         
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger("IFC");
+        Message.Message Msg = new Message.Message();
 
         static string schemaName;
         public void init(string _schemaName)
@@ -63,7 +63,7 @@ namespace TSmatch.IFC
         {
             var manager = new IfcManager.Core.IfcManager();
 
-            if (!FileOp.isFileExist(ifcFileName)) Msg.F("IFC.Read: no file", ifcFileName);
+            if (!FileOp.isFileExist(ifcFileName)) { Message.Message Msg = new Message.Message(); Msg.F("IFC.Read: no file", ifcFileName); }
 
             log.Info("TRACE: Read(\"" + ifcFileName + "\"");
 
@@ -102,7 +102,8 @@ namespace TSmatch.IFC
                                             //..здесь еще надо разобраться с ГОСТ-5781 
                                             //..и присвоить значения элемента mat, prf и др
                         break;
-                    default: Msg.F("IFC error Material Parse", elm.mat);
+                    default:
+                        Message.Message Msg = new Message.Message(); Msg.F("IFC error Material Parse", elm.mat);
                         break;
                 }
             }

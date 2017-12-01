@@ -2,10 +2,10 @@
  * Section -- class dealing with the fragment of string related to
  *            some section - f.e. Material, or Price
  *
- * 13.09.2017 Pavel Khrapkin
+ * 28.11.2017 Pavel Khrapkin
  *
  * --- Unit Tests ---
- * 2017.08.8  - UT_Section OK
+ * 2017.11.28  - UT_Section, UT_SecType OK
  *--- History ---
  *  7.03.2017 made from other module fragments
  * 19.03.2017 re-written with SectionTab as a argument of Constructor
@@ -13,6 +13,7 @@
  * 28.03.2017 munli-header Section like "M: Def: body"
  *  8.08.2017 static constructor as a singleton initializator of SectionTab
  * 13.09.2017 cosmetic, multilanguage Msg
+ * 28.11.2017 bug fix - "ед:" not recognozed SecType; UT_SecType re-made without Regex
  * ------ Fields ------
  * type section - recognized enum Section type, f.e. Material, Price etc
  * string body  - text string, contained in Section between ':' and ';' or end
@@ -51,6 +52,9 @@ namespace TSmatch.Section
 
         static Dictionary<string, List<string>> SectionTab = new Dictionary<string, List<string>>();
 
+        public Section() { }
+
+        #region --- Singleton static constructor fill SectionTab Dictionary
         /// <summary>
         /// Singleton static SectionTab initialization
         /// </summary>
@@ -65,10 +69,10 @@ namespace TSmatch.Section
             sub(SType.WeightPerUnit, "WGT", "вес", "w");
             // применение SType.Unit: заголовок для распознавания
             //.. "составных" секций, например, "ед: руб/т" 
-            sub(SType.Unit, "UNT", "ед", "un");
-            sub(SType.UNIT_Vol, "UNT_Vo", "руб*м3", "ст.куб");
-            sub(SType.UNIT_Weight, "UNT_W", "руб*т", "ст*т");
-            sub(SType.UNIT_Length, "UNT_L", "п*метр", "за*м");
+            sub(SType.Unit, "UNT", "eд", "un");
+            sub(SType.UNIT_Vol, "UNT_Vo", "руб/м3", "рублей/м3", "ст.куб");
+            sub(SType.UNIT_Weight, "UNT_W", "руб/т", "рублей/т", "ст/т");
+            sub(SType.UNIT_Length, "UNT_L", "погонный метр", "за м");
             sub(SType.UNIT_Qty, "UNT_Q", "шт", "1");
         }
 
@@ -77,69 +81,50 @@ namespace TSmatch.Section
             List<string> lst = new List<string>();
             foreach (string s in str)
             {
-                string x = "^" + s + ".*? ";
-                lst.Add(Lib.ToLat(x).ToLower().Replace(" ", ""));
+                lst.Add(Lib.ToLat(s).ToLower().Replace(" ", "").Replace(".", "").Replace("/", ""));
             }
             SectionTab.Add(t.ToString(), lst);
         }
+        #endregion --- Singleton static constructor fill SectionTab Dictionary
 
         public Section(string _text, SType stype = SType.NOT_DEFINED)
         {
             string[] sections = Lib.ToLat(_text).ToLower().Replace(" ", "").Split(';');
-            if (stype == SType.NOT_DEFINED)
+            foreach(string str in sections)
             {
-                type = SecType(sections[0]);
-                body = SecBody(sections[0]);
-                refSection = SecRef(sections[0]);
-                return;
-            }
-            foreach (string str in sections)
-            {
-                if (SecType(str) != stype) continue;
-                type = stype;
+                type = SecType(str);
                 body = SecBody(str);
-                return;
+                refSection = SecRef(str);
+                if(type == SType.Unit)
+                {
+                    type = SecType((body + ":").Replace("/", "").Replace(".", ""));
+                    body = string.Empty;
+                }
+                if (stype == SType.NOT_DEFINED || stype == type) return;
             }
             type = SType.NOT_DEFINED;
             body = string.Empty;
         }
 
-        SType SecType(string text)
+        protected SType SecType(string text)
         {
             if (string.IsNullOrEmpty(text) || !text.Contains(':'))
                 return SType.NOT_DEFINED;
             string hdr = text.Substring(0, text.IndexOf(':'));
-            foreach(SType sec in Enum.GetValues(typeof(SType)))
+            hdr = Lib.ToLat(hdr).ToLower().Replace(" ", "");
+            foreach (SType sec in Enum.GetValues(typeof(SType)))
             {
                 if (sec == SType.NOT_DEFINED) continue;
                 List<string> synonyms = SectionTab[sec.ToString()].ToList();
-                foreach (string syn in synonyms)
-                {
-                    if (Regex.IsMatch(hdr, syn + ".*?"))
-                    {
-                        if (sec != SType.Unit) return sec;
-                        else return CompSecType(SecBody(text));
-                    }
-                }
+                var secFound = synonyms.Find(x => 
+                    x.Length > hdr.Length? false:
+                    x == hdr.Substring(0, x.Length));
+                if (secFound != null) return sec;
             }
             return SType.NOT_DEFINED;
         }
 
-        private SType CompSecType(string str)
-        {
-            foreach (SType sec in Enum.GetValues(typeof(SType)))
-            {
-                if (!sec.ToString().Contains("UNIT_")) continue;
-                List<string> synonyms = SectionTab[sec.ToString()].ToList();
-                foreach (string syn in synonyms)
-                {
-                    string t = syn.Replace("*", "(.*)");
-                    Regex tr = new Regex(t);
-                    if (tr.IsMatch(str)) return sec;
-                }
-            }
-            return SType.NOT_DEFINED;
-        }
+ 
 
         string SecBody(string str)
         {
@@ -155,6 +140,22 @@ namespace TSmatch.Section
             return SecType(str.Substring(indx + 1));
         }
 
+#if OLD
+        private SType CompSecType(string str)
+        {
+            foreach (SType sec in Enum.GetValues(typeof(SType)))
+            {
+                if (!sec.ToString().Contains("UNIT_")) continue;
+                List<string> synonyms = SectionTab[sec.ToString()].ToList();
+                foreach (string syn in synonyms)
+                {
+                    string t = syn.Replace("*", "(.*)");
+                    Regex tr = new Regex(t);
+                    if (tr.IsMatch(str)) return sec;
+                }
+            }
+            return SType.NOT_DEFINED;
+        }
         public bool isSectionMatch(string template)
         {
             if(!SectionTab.Any()) Msg.F("SectionTab is empty");
@@ -180,5 +181,6 @@ namespace TSmatch.Section
                 result.Add(new Par(m.Groups[i].Value));
             return result;
         }
+#endif // OLD
     } // end class Section
 } // end namespace TSmatch.Section

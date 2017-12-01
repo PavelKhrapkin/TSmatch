@@ -6,25 +6,14 @@
  * --- Known Issue & ToDos ---
  * - еще нет диалога по допустимости CompSet для выбранного поставщика
  */
+using log4net;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
-
-using log4net;
-using Lib = match.Lib.MatchLib;
 using Decl = TSmatch.Declaration.Declaration;
-using Msg = TSmatch.Message.Message;
 using Docs = TSmatch.Document.Document;
+using Lib = match.Lib.MatchLib;
 using Supl = TSmatch.Suppliers.Supplier;
 
 namespace TSmatch
@@ -35,6 +24,7 @@ namespace TSmatch
     public partial class W_Supplier : Window
     {
         public static readonly ILog log = LogManager.GetLogger("W_Supplier");
+        Message.Message Msg = new Message.Message();
 
         private string selectedSupplier;
         List<Supl> suppliers = new List<Supl>();
@@ -48,8 +38,8 @@ namespace TSmatch
             for (int i = doc.i0; i <= doc.il; i++)
             {
                 Supl s = new Supl(i);
-                if (s == null || string.IsNullOrWhiteSpace(s.name) || string.IsNullOrWhiteSpace(s.City)) continue;
-                items.Add(new Spl(s.name, Lib.ToInt(s.index), s.City, s.street, s.Url));
+                if (s == null || string.IsNullOrWhiteSpace(s.Name) || string.IsNullOrWhiteSpace(s.City)) continue;
+                items.Add(new Spl(s.Name, Lib.ToInt(s.Index), s.City, s.Street, s.Url));
                 suppliers.Add(s);
             }
             Spl oldSupl = items.Find(x => x.SuplName == MainWindow.SuplName);
@@ -97,7 +87,7 @@ namespace TSmatch
             selectedSupplier = selectedSupl.SuplName;
             log.Info("new Supplier selected = \"" + selectedSupl.SuplName + "\"");
 
-            var selSupl = suppliers.Find(x => x.name == selectedSupl.SuplName);
+            var selSupl = suppliers.Find(x => x.Name == selectedSupl.SuplName);
             if (selSupl == null) Msg.F("Inconsystent W_Supplier");
             var grOLD = MainWindow.currentGroup;
             var grNEW = selSupl.getNEWcs(selSupl, grOLD);
@@ -105,7 +95,7 @@ namespace TSmatch
             {
                  Msg.AskOK("\"{0}\" не поставляет [{1}, {2}], но Вы можете изменить Правила" +
                     " и согласовать изменения с проектировщиком."
-                    , selSupl.name, grOLD.Mat, grOLD.Prf);
+                    , selSupl.Name, grOLD.Mat, grOLD.Prf);
             }
             else
             {

@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------
  * TS_OpenAPI -- Interaction with Tekla Structure over Open API
  * 
- * 28.09.2017  Pavel Khrapkin, Alex Bobtsov
+ * 29.11.2017  Pavel Khrapkin, Alex Bobtsov
  *
  *----- ToDo ---------------------------------------------
  * - реализовать интерфейс IAdapterCAD, при этом избавится от static
@@ -28,6 +28,9 @@
  *  7.9.2017 PKh - Read Embed objects
  * 18.9.2017 PKh - private ReadModObj() use
  * 28.9.2017 PKh - 9% acceleration with GetAllReportProperty
+ * 26.10.2017 - HighLight cycle management with hlFlag
+ * 19.11.2017 - HighLight - remove thread management as useless
+ * 29.11.2017 - non-static Message adoption
  * -------------------------------------------
  * public Structure AttSet - set of model component attribuyes, extracted from Tekla by method Read
  *                           AttSet is Comparable, means Sort is applicable, and 
@@ -54,7 +57,6 @@ using Tekla.Structures.Model.Operations;
 //using Tekla.Structures.Drawing;
 
 using Log = match.Lib.Log;
-using Msg = TSmatch.Message.Message;
 using TSM = Tekla.Structures.Model;
 using Elm = TSmatch.ElmAttSet.ElmAttSet;
 using Emb = TSmatch.EmbedAttSet.EmbedAttSet;
@@ -66,6 +68,7 @@ namespace TSmatch.Tekla
     public class Tekla //: IAdapterCAD
     {
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger("Tekla:TS_OpenAPI");
+        Message.Message Msg = new Message.Message();
 
         const string MYNAME = "Tekla.Read v2.3";
 
@@ -96,22 +99,37 @@ namespace TSmatch.Tekla
             ModInfo.ModelName = ModInfo.ModelName.Replace(".db1", "");
  
             dicParts = ReadModObj<TSM.Part>();
-        
-            ArrayList part_string = new ArrayList() { "MATERIAL", "MATERIAL_TYPE", "PROFILE" };
-            ArrayList part_double = new ArrayList() { "LENGTH", "WEIGHT", "VOLUME" };
-            ArrayList part_int = new ArrayList();
-            Hashtable all_val = new Hashtable();
-            
+
+            //20/11/17            ArrayList part_string = new ArrayList() { "MATERIAL", "MATERIAL_TYPE", "PROFILE" };
+            //20/11/17            ArrayList part_double = new ArrayList() { "LENGTH", "WEIGHT", "VOLUME" };
+            //20/11/17            ArrayList part_int = new ArrayList();
+            //20/11/17            Hashtable all_val = new Hashtable();
+
             foreach (var part in dicParts)
             {
                 Elm elm = new Elm();
-                part.Value.GetAllReportProperties(part_string, part_double, part_int, ref all_val);
-                elm.mat = (string)all_val[part_string[0]];
-                elm.mat_type = (string)all_val[part_string[1]];
-                elm.prf = (string)all_val[part_string[2]];
-                elm.length = (double)all_val[part_double[0]];
-                elm.weight = (double)all_val[part_double[1]];
-                elm.volume = (double)all_val[part_double[2]];
+                elm.mat = part.Value.Material.MaterialString;
+                elm.prf = part.Value.Profile.ProfileString;
+                part.Value.GetReportProperty("LENGTH", ref elm.length);
+                part.Value.GetReportProperty("WEIGHT", ref elm.weight);
+                part.Value.GetReportProperty("VOLUME", ref elm.volume);
+                part.Value.GetReportProperty("MATERIAL_TYPE", ref elm.mat_type);
+
+                //////////////////double lng = 0, weight = 0, vol = 0;
+                //////////////////var p = part.Value;
+                //////////////////p.GetReportProperty("LENGTH", ref lng);
+                //////////////////p.GetReportProperty("WEIGHT", ref weight);
+                //////////////////p.GetReportProperty("VOLUME", ref vol);
+                //////////////////elm.volume = vol;
+                //////////////////elm.weight = weight;
+                //////////////////elm.length = lng;
+                //20/11/17                part.Value.GetAllReportProperties(part_string, part_double, part_int, ref all_val);
+                //20/11/17               elm.mat = (string)all_val[part_string[0]];
+                //20/11/17elm.mat_type = (string)all_val[part_string[1]];
+                //20/11/17               elm.prf = (string)all_val[part_string[2]];
+                //20/11/17  elm.length = (double)all_val[part_double[0]];
+                //20/11/17elm.weight = (double)all_val[part_double[1]];
+                //20/11/17elm.volume = (double)all_val[part_double[2]];
                 elm.guid = part.Key;
                 elements.Add(elm);
             }
@@ -226,24 +244,33 @@ namespace TSmatch.Tekla
             int totalCnt = objectList.GetSize();
             return totalCnt;
         }
+
+        #region ---- HighLight ----
         /// <summary>
         /// HeghlightElements(List<Elm>elements, color) - change color of elements in list 
         /// </summary>
         /// <param name="elements"></param>
         /// <param name="color"></param>
+
+        private List<TSM.ModelObject> colorObjects;
+
         public void HighlightElements(Dictionary<string, Elm> els, int color = 1)
         {
+            DateTime t0 = DateTime.Now;
             Log.set("TS_OpenAPI.HighLightElements");
-            var colorObjects = new List<TSM.ModelObject>();
+            colorObjects = new List<TSM.ModelObject>();
             foreach (var elm in els)
             {
                 Identifier id = new Identifier(elm.Key);
                 var obj = model.SelectModelObject(id);
                 colorObjects.Add(obj);
             }
+            DateTime t1 = DateTime.Now;
             var _color = new Color(0.0, 0.0, 1.0);
             ModelObjectVisualization.SetTransparencyForAll(TemporaryTransparency.SEMITRANSPARENT);
             ModelObjectVisualization.SetTemporaryState(colorObjects, _color);
+            DateTime t2 = DateTime.Now;
+            string timing = string.Format("=== HighLight fill colorObject t={0}, Tekla t={1}", t1 - t0, t2 - t1);
             Log.exit();
         }
 
@@ -251,6 +278,7 @@ namespace TSmatch.Tekla
         {
             ModelObjectVisualization.SetTransparencyForAll(TemporaryTransparency.VISIBLE);
         }
+        #endregion ---- HighLight ----
         /*2016.6.21        /// <summary>
                 /// ModAtrMD5() - calculate MD5 of the model read from Tekla in ModAtr
                 /// </summary>
@@ -308,18 +336,20 @@ namespace TSmatch.Tekla
                 if (clsProcess.ProcessName.ToLower().Contains(Tekla.ToLower()))
                 {
                     TSM.Model model = new TSM.Model();
-                    if (!model.GetConnectionStatus()) Msg.W("===== No Tekla active =========");
+                    if (!model.GetConnectionStatus()) goto error;
                     try
                     {
                         ModInfo = model.GetInfo();
                         ok = model.GetConnectionStatus() && ModInfo.ModelName != "";
                     }
-                    catch { Msg.W("isTeklaActive no model Connection"); }
+                    catch { goto error; }
                     break;
                 }
             }
             Log.exit();
             return ok;
+
+            error: throw new Exception("isTeklaActive no model Connection");
         }
         /// <summary>
         /// isTeklaModel(name) -- check if Tekla open with the model name

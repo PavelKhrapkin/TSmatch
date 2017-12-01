@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------------------
  * SavedReport -- class for handle saved reports in TSmatchINFO.xlsx
  * 
- *  10.10.2017 П.Л. Храпкин
+ * 30.11.2017 П.Л. Храпкин
  *  
  *--- Unit Tests ---
  * UT_SR_Msg
@@ -28,6 +28,9 @@
  * 16.08.2017 - SetSavedMod method removed; protected instead of public methods; Recovery audit
  * 20.08.2017 - SavedReport audit: model.dir in TSMatchINFO.xlsx ignored, used one from Boot
  * 10.10.2017 - UT & Msg adotion
+ * 25.10.2017 - error() Msg tune
+ * 20.11.2017 - modified Read to write in file Raw.xls
+ * 29.11.2017 - non-static Message adoption
  *--- Methods: -------------------      
  * SetModel(boot)   - initialize model by reading from TSmatchINFO.xlsx ans Raw.xml or from scratch
  *      private SetModDir(boot) - subset of SetModel(), setup model.dir, name and phase
@@ -117,8 +120,8 @@ namespace TSmatch.SaveReport
             else
             {   // if Tekla not active - get model attributes from TSmatchINFO.xlsx in ModelDir
                 model.dir = boot.ModelDir;
-                if (!FileOp.isDirExist(model.dir)) Msg.FF(me + "No Model Directory", model.dir);
-                if (!Docs.IsDocExists(Decl.TSMATCHINFO_MODELINFO)) Msg.FF(me + "No_TSmatchINFO", model.dir);
+                if (!FileOp.isDirExist(model.dir)) Msg.F(me + "No Model Directory", model.dir);
+                if (!Docs.IsDocExist(Decl.TSMATCHINFO_MODELINFO)) Msg.F(me + "No_TSmatchINFO", model.dir);
                 dINFO = Docs.getDoc(sINFO, fatal: false);
                 if (dINFO == null || dINFO.il < 10 || !FileOp.isDirExist(model.dir)) error();
                 model.name = dINFO.Body.Strng(Decl.MODINFO_NAME_R, 2);
@@ -191,7 +194,7 @@ namespace TSmatch.SaveReport
         /// <param name="mod"></param>
         /// <param name="init"></param>
         /// <returns></returns>
-        protected Mod GetSavedRules(Mod mod, bool init = false)
+        public Mod GetSavedRules(Mod mod, bool init = false)
         {
             Log.set("SR.getSavedRules()");
             model = mod;
@@ -208,7 +211,7 @@ namespace TSmatch.SaveReport
                 for (int i = dRul.i0; i <= dRul.il; i++)
                 {
                     try { model.Rules.Add(new Rule.Rule(i)); }
-                    catch { continue; }
+                    catch {}
                 }
             }
             if (init) foreach (var rule in model.Rules) rule.Init();
@@ -263,15 +266,15 @@ namespace TSmatch.SaveReport
         /// </summary>
         protected void error(bool errRep = false)
         {
-            const string me = "SR__error_";
+            const string me = "SavedReport__error_";
             Log.set("SR.error()");
             log.Info("error() model.errRecover = " + model.errRecover.ToString());
             if (model.errRecover)
             {
-                Msg.AAskFOK(me + "Corrupted saved report TSmatchINFO.xlsx");
+                Msg.AskFOK(me + "Corrupted saved report TSmatchINFO");
                 model.elements = Raw(model);
                 dRep = Docs.getDoc(sRep);
-                if (dRep == null || errRep) Msg.FF(me + "recover impossible");
+                if (dRep == null || errRep) Msg.F(me + "recover impossible");
                 GetSavedReport();
                 Recover(sINFO, RecoverToDo.ResetRep);
                 //21/7           Recover(mod, sRep,  RecoverToDo.ResetRep);
@@ -296,18 +299,18 @@ namespace TSmatch.SaveReport
         public void Recover(string repNm, RecoverToDo to_do)
         {
             Log.set(@"SR.Recover(" + repNm + "\")");
-            if (!CheckModelIntegrity(model)) Msg.AAskFOK("Recovery impossible");
+            if (!CheckModelIntegrity(model)) Msg.AskFOK("Recovery impossible");
             switch (to_do)
             {
                 case RecoverToDo.CreateRep:
-                    Msg.AAskFOK("В каталоге модели нет TSmatchINFO.xlsx/" + repNm + ". Создать?");
+                    Msg.AskFOK("В каталоге модели нет TSmatchINFO.xlsx/" + repNm + ". Создать?");
                     resetDialog = false;
                     Docs.getDoc(repNm, reset: true, create_if_notexist: true);
-                    if (!Docs.IsDocExists(repNm)) Msg.FF("SaveDoc.Recover cannot create ", repNm);
+                    if (!Docs.IsDocExist(repNm)) Msg.F("SaveDoc.Recover cannot create ", repNm);
                     Recover(repNm, RecoverToDo.ResetRep);
                     break;
                 case RecoverToDo.ResetRep:
-                    if (resetDialog) Msg.AAskFOK("Вы действительно намерены переписать TSmatchINFO.xlsx/" + repNm + "?");
+                    if (resetDialog) Msg.AskFOK("Вы действительно намерены переписать TSmatchINFO.xlsx/" + repNm + "?");
                     var w = new WrMod();
                     switch (repNm)
                     {
@@ -335,22 +338,22 @@ namespace TSmatch.SaveReport
         ///</para>
         /// </summary>
         /// <returns>updated list of elements in file and in memory</returns>
-        public List<Elm> Raw(Mod mod, bool write = false)
+        public List<Elm> Raw(Mod mod)
         {
             const string me = "SavedReport__Raw_";
             Log.set("SR.Raw(" + mod.name + ")");
             model = mod;
             List<Elm> elms = new List<Elm>();
-            if (!FileOp.isDirExist(model.dir)) Msg.FF(me + "No model dir", model.dir);
+            if (!FileOp.isDirExist(model.dir)) Msg.F(me + "No model dir", model.dir);
             string file = Path.Combine(model.dir, Decl.RAWXML);
-            if (!write && FileOp.isFileExist(file))
+            if(FileOp.isFileExist(file))
             {                               // Read Raw.xml
                 elms = rwXML.XML.ReadFromXmlFile<List<Elm>>(file);
                 model.date = File.GetLastWriteTime(file);
             }
             else
             {                               // get from CAD and Write or re-Write Raw.xml 
-                Msg.AAskFOK(me + "CAD Read");
+                Msg.AskFOK(me + "CAD Read");
                 model.Read();
                 rwXML.XML.WriteToXmlFile(file, model.elements);
                 elms = model.elements;

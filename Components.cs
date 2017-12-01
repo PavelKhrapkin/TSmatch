@@ -1,7 +1,7 @@
 ﻿/*----------------------------------------------------------------------------
  * Components -- Supplier's price-list load and handling 
  * 
- * 29.08.2017  П.Храпкин
+ * 29.11.2017  П.Храпкин
  *
  * --- Unit Testing ---
  * 2017.07.15 UT_Component_checkComp, UT_Component_rulePar, UT_isOK OK
@@ -13,6 +13,7 @@
  * 24.04.2017 getMatch method updated
  *  9.05.2017 Msg.W in Str() about wrong CompSet Load Description
  *  4.06.2017 IsMatch(..) and ruleRep(pattern, str) made for nest matching
+ * 29.11.2017 Message non-static adoption
  * ---------------------------------------------------------------------------
  *      Methods:
  * getCompSet(name, Supplier) - getCompSet by  its name in Supplier' list
@@ -28,7 +29,6 @@ using System.Collections.Generic;
 using log4net;
 using Lib = match.Lib.MatchLib;
 using Log = match.Lib.Log;
-using Msg = TSmatch.Message.Message;
 using Docs = TSmatch.Document.Document;
 using DP = TSmatch.DPar.DPar;
 using Sec = TSmatch.Section.Section;
@@ -41,6 +41,7 @@ namespace TSmatch.Component
     public class Component
     {
         public static readonly ILog log = LogManager.GetLogger("Component");
+        Message.Message Msg = new Message.Message();
 
         public DP compDP;
 
@@ -219,7 +220,7 @@ namespace TSmatch.Component
             return par;
         }
 
-        private string strExclude(string str, List<string> syns)
+        protected string strExclude(string str, List<string> syns)
         {
             foreach (string s in syns)
             {

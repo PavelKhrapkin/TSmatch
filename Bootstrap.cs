@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------------------
  * Bootstrap - provide initial start of TSmatch, when necessary - startup procedure
  * 
- *  9.10.2017  Pavel Khrapkin
+ *  29.11.2017  Pavel Khrapkin
  *
  *--- History ---
  * 25.3.2016 started 
@@ -24,6 +24,8 @@
  * 12.09.2017 - remove Message.Init and all message related resources handling
  *  6.10.2017 - UT_ for Resource check, cleanup
  *  9.10.2017 - Instance Msg, 
+ * 20.11.2017 - Init(false) after ModelDir, DebugDir and other definitions withot TSmatch.xls load
+ * 29.11.2017 - Non-static Message adoption
  *  * --- Unit Tests ---
  * 2017.10.9  - UT_Boot_ResxError, UT_Bootstrap   OK
  * ---------------------------------------------------------------------------
@@ -72,7 +74,6 @@ namespace TSmatch.Bootstrap
             get { return _TOCdir; }
             private set { _TOCdir = value; }
         }
-        public Docs docTSmatch;
         static string ComponentsDir;        // all price-lists directory
         public string ModelDir = "";        // Model Report catalog
         static string TMPdir = "";          // temporary catalog
@@ -82,6 +83,7 @@ namespace TSmatch.Bootstrap
 
         //------------ Main TSmatch classes --------------------------
         public Message.Message Msg = new Message.Message();
+        public Docs docTSmatch;
         public List<Mod> models;            // CAD model list used in TSmatch, model journal
         public Ifc ifc = new Ifc();         // IFC class reference
         public object classCAD;
@@ -91,11 +93,9 @@ namespace TSmatch.Bootstrap
 
         public void Init(bool init = true)
         {
-            if (!init) return;
             Log.set("Bootstrap");
             desktop_path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
             debug_path = desktop_path;
-            Msg.DDialog = true;
             if (isTeklaActive)
             {   // if Tekla is active - get Path of TSmatch
                 classCAD = new TS();
@@ -111,13 +111,17 @@ namespace TSmatch.Bootstrap
                 ModelDir = desktop_path;
                 classCAD = ifc;
             }
+            DebugDir = Path.Combine(TOCdir, "TSmatch_DebugData");
+            ComponentsDir = TOCdir + @"\База комплектующих";        // all price-lists directory
+
+            if (!init) return;
             CheckResx(Path.Combine(_TOCdir, "TSmatch.xlsx"), Resx.TSmatch_xlsx);
-            //--- initiate Docs with #Templates
-            Dictionary<string, string> Templates = new Dictionary<string, string>
+            //--- initiate Docs with #Templates          
+            Dictionary <string, string> Templates = new Dictionary<string, string>
                     {
                         {"#TOC",    TOCdir },
                         {"#Model",  ModelDir},
-                        {"#Components", TOCdir + @"\База комплектующих"},
+                        {"#Components", ComponentsDir},
                         {"#TMP",    TMPdir},
                         {"#DEBUG",  DebugDir},
                         {"#Macros", macroDir},
@@ -155,7 +159,7 @@ namespace TSmatch.Bootstrap
             switch (type)
             {
                 case ResType.Doc:
-                    if (!Docs.IsDocExists(rName)) resxError(ResErr.NoDoc, rName);
+                    if (!Docs.IsDocExist(rName)) resxError(ResErr.NoDoc, rName);
                     break;
                 case ResType.File:
                     if (!FileOp.isFileExist(rName)) resxError(ResErr.NoFile, rName);
@@ -178,7 +182,7 @@ namespace TSmatch.Bootstrap
         {
             string myName = "Bootstrap__resError_";
             var v = errType.ToString();
-            Msg.FF(myName + v, resName);
+            Msg.F(myName + v, resName);
         }
     } // end class Bootsrap
 } // end namespace

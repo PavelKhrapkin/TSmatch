@@ -1,7 +1,7 @@
 ﻿/*-------------------------------------------------------------------------------------------------------
  * Document -- works with all Documents in the system basing on TOC - Table Of Content
  * 
- * 13.09.2017  Pavel Khrapkin, Alex Pass, Alex Bobtsov
+ * 29.11.2017  Pavel Khrapkin, Alex Pass, Alex Bobtsov
  *
  *--------- History ----------------  
  * 2013-2015 заложена система управления документами на основе TOC и Штампов
@@ -32,6 +32,12 @@
  * 31.07.17 - read XML file into doc.Body -- не работает!
  *  2.08.17 - bug fix on Start; toc is private static reference now; EOLinTOC field removed
  * 13.09.17 - getLanguage method moved here from Messages
+ * 29.11.17 - Uptodate after excident 15.11.17 -- non-static Msg
+ * ---------- TODO 18.11.17
+ * complete re-engineering Document
+ * A) without static
+ * B) with changes in FileOp to open TSmatch if exists
+ * C) without TSmatch.xlsx for TOC, Suppliers, and InitRules
  * -------------------------------------------
  *      METHODS:
  * Start()              - Load from directory TOCdir of TOC all known Document attributes, prepare everithing
@@ -66,12 +72,12 @@ using Decl = TSmatch.Declaration.Declaration;
 using Mtr = match.Matrix.Matr;  // класс для работы с внутренними структурами данных
 using Lib = match.Lib.MatchLib;
 using Log = match.Lib.Log;
-using Msg = TSmatch.Message.Message;
 
 namespace TSmatch.Document
 {
     public class Document
     {
+        Message.Message Msg = new Message.Message();
         private static Dictionary<string, Document> Documents = new Dictionary<string, Document>();   //коллекция Документов
         static Dictionary<string, string> Templates = new Dictionary<string, string>();
         static Document toc;
@@ -233,7 +239,7 @@ namespace TSmatch.Document
 #endif    //for UT_Document.UT_Start only
         #endregion
 
-        public static bool IsDocExists(string name)
+        public static bool IsDocExist(string name = "TOC")
         {
             if (!Documents.ContainsKey(name)) return false;
             Document doc = Documents[name];
@@ -304,10 +310,11 @@ namespace TSmatch.Document
                 doc.isOpen = true;
                 if (doc.type != Decl.TSMATCH) doc.il = doc.Body.iEOL();
             }
-            else if (fatal) Msg.F(err, ex, name);
+            else if (fatal) { Message.Message Msg = new Message.Message(); Msg.F(err, ex, name); }
             Log.exit();
             return doc;
         }
+
         /// <summary>
         /// Reset() - "Reset" of the Document. All contents of the Excel Sheet erased, write Header form
         /// Reset("Now") - write DataTime.Now string in Cell [1,1]
@@ -561,8 +568,8 @@ namespace TSmatch.Document
                     }
                     else
                     {
-                        if (MD5.Length < 20 || EOL == 0) Msg.F("ERR_05.8_saveDoc_NOMD5");
-//2/8/17 removed EOLinTOC                        else { doc.chkSum = MD5; doc.EOLinTOC = EOLinTOC; }
+                        if (MD5.Length < 20 || EOL == 0) { Message.Message Msg = new Message.Message(); Msg.F("ERR_05.8_saveDoc_NOMD5"); }
+                        //2/8/17 removed EOLinTOC                        else { doc.chkSum = MD5; doc.EOLinTOC = EOLinTOC; }
                         else { doc.chkSum = MD5; doc.il = EOLinTOC; }
                     }
                     Mtr tmp = FileOp.getSheetValue(toc.Sheet);
@@ -958,7 +965,7 @@ namespace TSmatch.Document
             internal static Form getFormByName(Document doc, string name)
             {
 
-                if (!isFormExist(doc.forms, name)) Msg.F("Document.wrDoc no form", name, doc.name);
+                if (!isFormExist(doc.forms, name)) { Message.Message Msg = new Message.Message(); Msg.F("Document.wrDoc no form", name, doc.name); }
                 name = Lang(name);
                 return doc.forms.Find(x => x.name == name);
             }

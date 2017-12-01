@@ -1,6 +1,6 @@
 ﻿/*--------------------------------------------------------------------------------------------
  * ProfileUpdate -- Update Group Profiles in accouding Russian GOST
- *  15.08.2017 Pavel Khrapkin
+ *  29.11.2017 Pavel Khrapkin
  *  
  *--- History ---
  *  2.07.2017 code taken from ModHandled code, separated into this class
@@ -8,6 +8,7 @@
  * 16.07.2017 changed logic for profile "Гн." recognition
  * 10.08.2017 TP and TK recognition with new PrfTab filling and logic
  * 15.08.2017 Shape profile IFC_BREP parse written
+ * 29.11.2017 non-static Message adoption
  *--- Unit Tests --- .
  * 2017.08.10 UT_ProfileUpdate_I, UT_ProfileUpdate_U, UT ProfileUpdate_L, 
  *            UT_ProfileUpdate_PL, UT_ProfileUpdate_PK_PP, UT_ProfileUpdate_TP_TK   OK
@@ -21,7 +22,6 @@ using System.Text.RegularExpressions;
 
 using log4net;
 using Lib = match.Lib.MatchLib;
-using Msg = TSmatch.Message.Message;
 using ElmGr = TSmatch.Group.Group;
 using System;
 
@@ -30,6 +30,8 @@ namespace TSmatch.ProfileUpdate
     public class ProfileUpdate
     {
         public static readonly ILog log = LogManager.GetLogger("ProfileUpdate");
+        Message.Message Msg = new Message.Message();
+
         /// <Description>
         /// Этот модуль преобразует строку - профиль группы в соответствие российским ГОСТ,
         /// так, как это делается в среде Russia для Tekla. По сути, это hardcode, он не 

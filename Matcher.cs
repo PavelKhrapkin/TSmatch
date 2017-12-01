@@ -1,7 +1,7 @@
 ﻿/*----------------------------------------------------------------------------------------------
  * Matcher -- module fulfill matching Group of the Elements with CompSet in accrding with Rule
  *
- * 2.10.2017 Pavel Khrapkin
+ * 29.11.2017 Pavel Khrapkin
  *
  *--- History ---
  * 2016 previous editions P.Khrapkin, A.Pass, A.Bobtsov
@@ -9,7 +9,7 @@
  *  3.03.2017 enum ok {Match, NoMatch, NoSection}
  *  7.03.2017 use Section module
  *  4.06.2017 fair and handle Exception in Component when cannot parse Rule or Group
- *  2.10.2017 audit
+ * 25.11.2017 audit: non-static Message adoption
  *  
  *  <ToDo> 2017.03.2 Matcher revision:
  *  - check Shft/F12 all referenced to Mtch
@@ -34,11 +34,8 @@
  * isOKexist(n) - возвращает true, если для группы n уже найдено соответствие в OKs
  */
 using log4net;
-//----- My modules and classes -----------
 using Lib = match.Lib.MatchLib;
 using Mod = TSmatch.Model.Model;
-// 30.11.2016 using Cmp = TSmatch.CompSet.Component.Component;
-using Msg = TSmatch.Message.Message;
 using SType = TSmatch.Section.Section.SType;
 
 namespace TSmatch.Matcher
@@ -46,6 +43,7 @@ namespace TSmatch.Matcher
     public class Mtch
     {
         public static readonly ILog log = LogManager.GetLogger("Matcher");
+        Message.Message Msg = new Message.Message();
 
         public enum OK { Match, NoMatch, NoSection, NoGroup }
 
@@ -77,35 +75,18 @@ namespace TSmatch.Matcher
                 catch { }
                 if (!found) continue;
                 //-- Component is found - fill Price for all Guids elemets
-#if CHECK_MD5
-                if (!OK_MD5()) Msg.AskFOK("corrupted MD5"); 
-#endif
                 ok = OK.Match;
                 string priceStr;
                 try { priceStr = comp.Str(SType.Price); }
                 catch { Msg.F("Match: Bad Price descriptor", _rule.sSupl, _rule.sCS); }
-#if CHECK_MD5
-                if (!OK_MD5()) Msg.AskFOK("corrupted MD5");
-#endif
                 component = comp;
 //29/8                gr.match = this;    //27/3!!
                 rule = _rule;
-#if CHECK_MD5
-                if (!OK_MD5()) Msg.AskFOK("corrupted MD5");
-#endif
                 gr.totalPrice = getPrice(gr, rule.CompSet.csDP, comp.Str(SType.Price));
-#if CHECK_MD5
-                if (!OK_MD5()) Msg.AskFOK("corrupted MD5");
-#endif
+                break;
             }
         }
-#if CHECK_MD5
-        public bool OK_MD5()
-        {
-            string newMD5 = model.getMD5(model.elements);
-            return model.MD5 == newMD5;
-        }
-#endif
+
         /// <summary>
         /// getPrice(gr, csDP, priceStr) - return price made from priceStr in price-list as set in csDP price type 
         /// </summary>
@@ -124,8 +105,9 @@ namespace TSmatch.Matcher
                     case SType.UNIT_Weight: // kg -> tonn
                         if (group.totalWeight == 0) return group.totalVolume * 7850;
                         return group.totalWeight / 1000 * price;
-                    case SType.UNIT_Vol:    // mm3 -> m3
-                        return group.totalVolume / 1000 / 1000 / 1000 * price;
+                    case SType.UNIT_Vol:    // NO mm3 -> m3
+                        return group.totalVolume * price;
+                   //     return group.totalVolume / 1000 / 1000 / 1000 * price;
                     case SType.UNIT_Length:
                         return group.totalLength * price;
                     case SType.UNIT_Qty:

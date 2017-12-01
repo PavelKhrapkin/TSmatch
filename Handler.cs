@@ -17,6 +17,8 @@
  *--- Unit Tests --- 
  * 2017.08.4 UT_Handler.UT_Hndl OK -- 20,4 sec модель "Навес над трибунами" 7128 э-тов
  *           UT_Pricing OK
+ *------- TODO 22.11.2017 -------------------
+ * - пересмотреть Hndl(mod) <--> PriceGg(mod, gr): почему Hndl не вызывает PriceGr?
  * -------------------------------------------------------------------------------
  *      Methods:
  * getGroups()      - groupping of elements of Model by Material and Profile
@@ -28,7 +30,6 @@ using System.Linq;
 
 using log4net;
 using Log = match.Lib.Log;
-using Msg = TSmatch.Message.Message;
 using Elm = TSmatch.ElmAttSet.ElmAttSet;
 using ElmGr = TSmatch.Group.Group;
 using Mod = TSmatch.Model.Model;
@@ -40,7 +41,7 @@ namespace TSmatch.Handler
     public class Handler
     {
         public static readonly ILog log = LogManager.GetLogger("Handler");
-
+        Message.Message Msg = new Message.Message();
         _SR sr = new _SR();
         bool testMode;
 
@@ -112,7 +113,7 @@ namespace TSmatch.Handler
             Log.set("Handler.PriceGr");
             Mtch match = null;
             bool found=false;
-            if (mod.Rules == null || mod.Rules.Count == 0) Msg.F("Handler__PriceGr Rules not Initialized");// mod = sr._GetSavedRules(mod);
+            if (mod.Rules == null || mod.Rules.Count == 0) Msg.F("Handler__PriceGr Rules not Initialized");
             foreach(var rule in mod.Rules)
             {
                 if (gr.SupplierName != string.Empty && gr.SupplierName != rule.sSupl) continue;

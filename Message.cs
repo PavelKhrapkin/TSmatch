@@ -1,10 +1,10 @@
 ﻿/*----------------------------------------------------------------------------
  * Message -- multilanguage message system
  * 
- * 12.11.2017  Pavel Khrapkin
+ * 29.11.2017  Pavel Khrapkin
  *
  *--- Unit Tests ---
- * UT_Message: UT_Init, UT_AskS, UT_W, UT_S, UT_AskOK, UT_AskYN 25.09.2017 OK
+ * UT_Message: UT_Init, UT_SetLanguage, UT_S, UT_W_I_F, UT_AskOK, UT_AskYN 13.11.2017 OK
  * --- History ---
  * Feb-2016 Created
  * 20.3.2016 - Error message Code display even when Message system is not initialysed yet
@@ -19,17 +19,17 @@
  * 8.10.2017 - Instance F,W,I istead of static
  * 25.10.2017 - Exception instead of MessageBox in AskOK. AskYN for UT
  *  3.11.2017 - set Language from Property.Setting or from CultureInfo.CurrentCulture
- * 12.11.2017 - restore to non-static refactored code after excident 10.11
+ * 29.11.2017 - restore after excident 10.11 to non-static branch; bug fix - Setting sLanguage save
  * ---------------------------------------------------------------------------------------
  *      Methods:
- * static Message() - Singleton constructor initiate static msgs Dictionary set
+ * initMessageDic - Singleton constructor initiate static msgs Dictionary set
  * F(Code,..) - Fatal error message output
  * W(Code,..) - Warning message output
  * I(Code,..) - Information Messag
  * S(Code,..) - return string made from Code and ".." arguments to output in WPF
  * AskFOK(text?) - ask text OK-Cancel, with Fatal/Stop at Cancel
  * AskYN(text?)  - ask with text as a prompt, and respont Yes or No
- * AskS(text:)   - request string entry with text as a prompt
+ * AskS(text:)   - request string entry with text as a prompt -- NOT IMPLEMENTED YET
  */
 using log4net;
 using System;
@@ -44,7 +44,7 @@ namespace TSmatch.Message
     public class Message
     {
         public static readonly ILog log = LogManager.GetLogger("Message");
-        protected bool in_UT;   //true - started from Unit Test
+        protected static bool in_UT;   //true - started from Unit Test
 
         /// <summary>
         /// _messages - set of <Message.Key, Message.Value> strings in local culture
@@ -55,7 +55,8 @@ namespace TSmatch.Message
 
         protected string msg, errType;
 
-        public Message() { } // if(__messages.Count == 0) SetLanguage(Properties.Settings.Default.sLanguage); }
+        public Message() { if(_messages.Count == 0) SetLanguage(Properties.Settings.Default.sLanguage); }
+
 
         public void SetLanguage(string sLang)
         {
@@ -71,7 +72,7 @@ namespace TSmatch.Message
             try { msg = knownMsg ? string.Format(_messages[msgcode], p) : string.Format(msgcode, p); }
             catch { msg = knownMsg ? _messages[msgcode] : msgcode; errType = "(!)" + errType; }
             if (!knownMsg) errType = "(*)" + errType;
-            string str= "F";
+            string str = "F";
             switch (type)
             {
                 case Severity.STRING: return;
@@ -79,8 +80,9 @@ namespace TSmatch.Message
                 case Severity.WARNING: str = "W"; break;
                 case Severity.INFO: str = "I"; break;
             }
+            // PKh> To have a look to the MessageBox with the message, add comment to the next 3 lines,
+            //.. which check output to MessageBox
             if (in_UT) throw new ArgumentException("Msg." + str + ": " + msg);
-            // PKh> To have a look to the MessageBox with the message, add comment to the next line, which check doMsgBox
             if (doMsgBox)
                 if (str == "I")
                     MessageBox.Show(msg, errType, MessageBoxButton.OK, MessageBoxImage.Asterisk, reply, MessageBoxOptions.ServiceNotification);
@@ -132,28 +134,39 @@ namespace TSmatch.Message
     /// </summary>
     internal class initMessageDic
     {
-        private Dictionary<string, string> mDic = new Dictionary<string, string>();
+        private static string language;
+        private static Dictionary<string, string> mDic = new Dictionary<string, string>();
 
         public initMessageDic() { }
 
+        static initMessageDic()
+        {
+            language = Properties.Settings.Default.sLanguage;
+            if(string.IsNullOrEmpty(language)) language = CultureInfo.CurrentCulture.Name;
+            setDic();
+        }
+
         internal object get_mesDic(string sLang)
         {
-            if (string.IsNullOrWhiteSpace(sLang))
-            {
-                sLang = CultureInfo.CurrentCulture.Name;
-                Properties.Settings.Default.sLanguage = sLang;
-                Properties.Settings.Default.Save();
-            }
+            if (sLang == language) return mDic;
+            language = sLang;
+            Properties.Settings.Default.sLanguage = sLang;
+            Properties.Settings.Default.Save();
             if (mDic.Count != 0) mDic.Clear();
+            setDic();
+            return mDic;
+        }
+
+        private static void setDic()
+        {
             ResourceManager mgr = Properties.TSmatchMsg.ResourceManager;
-            CultureInfo culture = CultureInfo.GetCultureInfo(sLang);
+            CultureInfo culture = CultureInfo.GetCultureInfo(language);
             ResourceSet set = mgr.GetResourceSet(culture, true, true);
             foreach (System.Collections.DictionaryEntry o in set)
             {
                 mDic.Add(o.Key as string, o.Value as string);
             }
             mgr.ReleaseAllResources();
-            return mDic;
         }
     } //end cass initMessageDic
 } // end namespace

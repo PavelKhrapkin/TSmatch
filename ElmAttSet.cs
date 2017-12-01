@@ -1,7 +1,7 @@
 ﻿/*--------------------------------------------------------------------------------------
  * ElmAttSet -- Definitions of Properties, and their Names of the Elements in the Model 
  * 
- *  15.09.2017  Pavel Khrapkin
+ *  29.11.2017  Pavel Khrapkin
  * 
  * ----- TODO 30.9.2016, 20.07.2017, 18.08.2017 ------
  * - закомментировать неиспользуемые методы группировки (Ctrl/F12 empty)
@@ -21,6 +21,8 @@
  * 18.08.2017 - add Group.compDescription field
  * 29.08.2017 - module Group separated
  * 15.09.2017 - audit & cleanup
+ * 20.11.2017 - removed field ru_prf
+ * 29.11.2017 - Msg adoption
  * -------------------------------------------
  * public class ElmAttSet - set of model component attribuyes, extracted from Tekla or IFC by method Read
  * public class Mgroup    - group elements by Materials
@@ -31,7 +33,6 @@ using System.Collections.Generic;
 using CmpSet = TSmatch.CompSet.CompSet;
 using Ifc = TSmatch.IFC.IfcManager.Core.IfcManager.IfcElement;
 using Lib = match.Lib.MatchLib;
-using Msg = TSmatch.Message.Message;
 using Supl = TSmatch.Suppliers.Supplier;
 
 namespace TSmatch.ElmAttSet
@@ -44,7 +45,6 @@ namespace TSmatch.ElmAttSet
         public string mat = "";
         public string mat_type = "";
         public string prf = "";
-        public string ru_prf = "";
         public double length = 0.0;
         public double weight = 0.0;
         public double volume = 0.0;
@@ -66,7 +66,6 @@ namespace TSmatch.ElmAttSet
             weight = _weight;
             volume = _volume;
             price = _price;
-            ru_prf = _ru_prf;
         }
         public ElmAttSet(Ifc ifc_elm)
         {
@@ -112,6 +111,7 @@ namespace TSmatch.ElmAttSet
     /// </summary>
     public class Mgroup : IComparable<Mgroup>
     {
+        Message.Message Msg = new Message.Message();
         public readonly string mat;
         public readonly List<string> guids;
         public readonly double totalWeight;

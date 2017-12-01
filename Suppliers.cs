@@ -25,7 +25,6 @@ using Decl = TSmatch.Declaration.Declaration;
 using Docs = TSmatch.Document.Document;
 using Gr = TSmatch.Group.Group;
 using Lib = match.Lib.MatchLib;
-using Msg = TSmatch.Message.Message;
 
 namespace TSmatch.Suppliers
 {
@@ -34,6 +33,8 @@ namespace TSmatch.Suppliers
     /// </summary>
     public class Supplier : IComparable<Supplier>
     {
+        Message.Message Msg = new Message.Message();
+
         public DateTime Date;   // Last Update Supplier' Date
         public string Name;
         public string Url;

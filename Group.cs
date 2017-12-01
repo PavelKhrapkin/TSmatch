@@ -1,30 +1,31 @@
 ﻿/*--------------------------------------------------------------------------------------
  * Group -- element group class - creation and some group handiling code 
  * 
- *  31.08.2017  Pavel Khrapkin
+ *  30.11.2017  Pavel Khrapkin
  * 
  *--- Unit Tests ---
- * UT_Group: UT_CheckGroup 31.8.2017 OK
+ * UT_Group: UT_elmGroups, UT_CheckGroup 30.11.2017 OK
  *----- History ------------------------------------------
  * 29.08.2017 - created from ElmAttSet module
  * 31.08.2017 - add field GrType and fill it im CheckGroup()
+ * 29.11.2017 - non-static Message adoption
+ * 30.11.2017 - Msg cosmetics
  * -------------------------------------------
  */
+using log4net;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
-using log4net;
-using Msg = TSmatch.Message.Message;
-using Lib = match.Lib.MatchLib;
 using Elm = TSmatch.ElmAttSet.ElmAttSet;
-using TSmatch.ElmAttSet;
+using Lib = match.Lib.MatchLib;
 
 namespace TSmatch.Group
 {
     public class Group : IComparable<Group>
     {
         public static readonly ILog log = LogManager.GetLogger("Group");
+        Message.Message Msg = new Message.Message();
+        private const string me = "Group.";
 
         public enum GrType { UsualPrice, SpecPrice, NoPrice, Warning }
         public GrType type = GrType.UsualPrice;
@@ -70,7 +71,8 @@ namespace TSmatch.Group
         {
             if (mod == null || mod.elements == null || mod.elements.Count < 1
                 || mod.elmGroups == null || mod.elmGroups.Count < 1
-                || mod.elements.Count != mod.elmGroups.Sum(x => x.guids.Count)) Msg.F("ChechGroup: bad model", mod.name);
+                || mod.elements.Count != mod.elmGroups.Sum(x => x.guids.Count))
+                    Msg.F(me + "ChechGroup bad model", mod.name);
             var _dic = mod.elements.ToDictionary(x => x.guid);
             foreach(var gr in mod.elmGroups)
             {
@@ -84,7 +86,8 @@ namespace TSmatch.Group
                     mod.elmGroups[grIndex].type = GrType.Warning;
                     mod.HighLightElements(elmsDic);
                     if (errFlag) continue;
-                    Msg.W("CheckGroups: various materials in Group", grIndex, gr.Prf, Mat, elm.Value.mat);
+                    Msg.W(me + "CheckGroups various materials in Group"
+                        , grIndex, gr.Prf, Mat, elm.Value.mat);
                     errFlag = true;
                 }
             }
@@ -95,11 +98,6 @@ namespace TSmatch.Group
             int x = mat.CompareTo(gr.mat);
             if (x == 0) x = prf.CompareTo(gr.prf);
             return x;
-        }
-
-        public void Method()
-        {
-            throw new System.NotImplementedException();
         }
     } // end class Group
 } // end namespace 

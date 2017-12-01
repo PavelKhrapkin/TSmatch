@@ -1,7 +1,7 @@
 /*--------------------------------------------
  * FileOp - File System primitives
  * 
- *  13.09.2017  Pavel Khrapkin, Alex Pass
+ *  29.11.2017  Pavel Khrapkin, Alex Pass
  *
  *--- History ---
  * 2013 - 2016 - created
@@ -13,6 +13,8 @@
  * 22.4.2017 - AppQuit() method add
  *  7.5.2017 - fileOpen logic changed with create_if_notexist and fatal flag
  * 13.9.2017 - check _app != null to avoid error message in DisplayAlert and QuitApp
+ *  7.11.2017 - non-static Msg adoption
+ * 29.11.2017 -try non-static FileOP (IsDirExist)
  * -------------------------------------------        
  * fileOpen(dir,name[,create])  - Open or Create file name in dir catalog
  * fileRename(dir, oldName, newName) - rename file in the same Directory
@@ -39,13 +41,13 @@ using System.IO;
 using Excel = Microsoft.Office.Interop.Excel;
 using match.Lib;
 using Mtr = match.Matrix.Matr;
-using Msg = TSmatch.Message.Message;
 using Docs = TSmatch.Document.Document;
 
 namespace match.FileOp
 {
     public class FileOp
     {
+        TSmatch.Message.Message Msg = new TSmatch.Message.Message();
         public static string dirDBs = null;
         private static Excel.Application _app = null;
         private static Excel.Workbook _wb = null;
@@ -90,7 +92,7 @@ namespace match.FileOp
                 }
                 catch (Exception ex)
                 {
-                    if(fatal) Log.FATAL("не открыт файл " + file + "\n сообщение по CATCH= '" + ex);
+                    if (fatal) Log.FATAL("не открыт файл " + file + "\n сообщение по CATCH= '" + ex);
                     Wb = null;
                 }
             }
@@ -147,7 +149,7 @@ namespace match.FileOp
         {
             File.Delete(path);
         }
-        public static void DisplayAlert(bool val) { if(_app != null) _app.DisplayAlerts = val; }
+        public static void DisplayAlert(bool val) { if (_app != null) _app.DisplayAlerts = val; }
         public static void fileSave(Excel.Workbook Wb) { Wb.Save(); }
         /// <summary>
         /// CopyFile(FrDir, FileName, ToDir [,overwrite]) - copy FileName from FrDir to ToDir 
@@ -158,7 +160,7 @@ namespace match.FileOp
         /// <param name="overwrite">obligatory flag - true - allow overwrite</param>
         /// <returns>bool result -- true if copy was succesful</returns>
         /// <history>20.3.2016 PKh</history>
-        public static bool CopyFile(string FrDir, string FileName, string ToDir, bool overwrite = false)
+        public bool CopyFile(string FrDir, string FileName, string ToDir, bool overwrite = false)
         {
             bool result = false;
             if (!isFileExist(FrDir, FileName)) Msg.F("ERR_02.2_COPY_NOFILEFROM", FrDir, FileName);
@@ -188,6 +190,7 @@ namespace match.FileOp
         }
         #endregion
         #region --- isFileExist / isDirExist / isSheetExist / isNamedRangeExist
+        public bool IsDirExist(string path) { return Directory.Exists(path); }
         public static bool isDirExist(string path)
         {
             return Directory.Exists(path);
@@ -220,7 +223,7 @@ namespace match.FileOp
             }
             catch (Exception e)
             {
- //               Msg.I("FileOp__IsNameRangeExist", e, name);
+                //               Msg.I("FileOp__IsNameRangeExist", e, name);
                 result = false;
             }
             return result;

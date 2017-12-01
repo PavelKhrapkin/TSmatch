@@ -1,7 +1,7 @@
 ﻿/*--------------------------------------------------------------------------------------------
  * ModelWrFile : Model -- Write ModelINFO, Report and other documents in file TSmatchINFO.xlsx
  *
- *  18.08.2017 Pavel Khrapkin
+ *  29.11.2017 Pavel Khrapkin
  *
  *--- Unit Tests --- 
  * 2017.08.9 UT_ModelWrFile: UT_sInt, UT_iDbl, UT_sDat OK
@@ -10,6 +10,7 @@
  * 19.07.2017 Lib.timeStr(date) instead of DateTime format- it is strange behavior of Excel fix
  *  9.08.2017 Docs.getDoc(reset:true); use sInt, sDbl, sDat
  * 18.08.2017 Write to Report gr.compDescription string, delete isMatches method
+ * 29.11.2017 non-static Message adoption
  * -------------------------------------------------------------------------------------------
  * Methods:
  * wrModel(mode, model) - write model in ModelINFO, Report, and other tabs of TSmatchINFO.xlsx
@@ -22,13 +23,13 @@ using Log = match.Lib.Log;
 using Lib = match.Lib.MatchLib;
 using Docs = TSmatch.Document.Document;
 using Mod = TSmatch.Model.Model;
-using Msg = TSmatch.Message.Message;
 
 namespace TSmatch.Model.WrModelInfo
 {
     public class ModelWrFile
     {
         public static readonly ILog log = LogManager.GetLogger("ModelWrFile");
+        Message.Message Msg = new Message.Message();
 
         public enum WrMod { ModelINFO, Materials, Suppliers, Rules, Report }
         public void wrModel(WrMod mode, Mod mod)
