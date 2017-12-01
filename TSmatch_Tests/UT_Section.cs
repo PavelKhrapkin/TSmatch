@@ -1,5 +1,5 @@
 ﻿/*=================================
-* Section Unit Test 8.08.2017
+* Section Unit Test 28.11.2017
 *=================================
 */
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -46,36 +46,52 @@ namespace TSmatch.Section.Tests
             Assert.AreEqual(s.type, SType.WeightPerUnit);
             Assert.AreEqual(s.body, "77");
 
+            // test err 24/11/17: err: 
+            s = new Sect("Ед: руб/т");
+            Assert.AreEqual(SType.UNIT_Weight, s.type);
+            Assert.AreEqual("", s.body);
+
+            s = new Sect("Ед: за м ");
+            Assert.AreEqual(SType.UNIT_Length, s.type);
+            Assert.AreEqual("", s.body);
+
+            s = new Sect("Ед: руб/м3 ");
+            Assert.AreEqual(SType.UNIT_Vol, s.type);
+            Assert.AreEqual("", s.body);
+
             s = new Sect("единица: ");
-//8/8/17            Assert.AreEqual(s.type, SType.Unit); //не распознается. Возможно, займусь отдельно
+            Assert.AreEqual(s.type, SType.NOT_DEFINED);
             Assert.AreEqual(s.body, "");
 
             //----- error input text handling -----
             s = new Sect("Цена 2540");   // no ':'
-//8/8/17            Assert.AreEqual(s.type, SType.Price);
-//8/8/17            Assert.AreEqual(s.body, "");
+            Assert.AreEqual(s.type, SType.NOT_DEFINED);
+            Assert.AreEqual(s.body, "цeнa2540");
+            // то есть s.body заполняется, хотя заголовок секции не распознан
 
             s = new Sect("Цена 2540;");
-//8/8/17            Assert.AreEqual(s.type, SType.Price);
-//8/8/17            Assert.AreEqual(s.body, "");
+            Assert.AreEqual(s.type, SType.NOT_DEFINED);
+            Assert.AreEqual(s.body, "цeнa2540");
 
             s = new Sect("; профиль: L");
             Assert.AreEqual(s.type, SType.NOT_DEFINED);
             Assert.AreEqual(s.body, "");
 
-            //--- construtor Section("..;..;", SType) test
-            s = new Sect(";проф: Sec; Mat: n", SType.Profile);
-            Assert.AreEqual(s.type, SType.Profile);
-            Assert.AreEqual(s.body, "sec");
-
+            //--- construtor Section("..;..;", SType) test 
+            //           -> SType.Unit не находим, возвращаем SType.NOT_DEFINED
             s = new Sect(";проф: Sec; Mat: n", SType.Unit);
             Assert.AreEqual(s.type, SType.NOT_DEFINED);
             Assert.AreEqual(s.body, "");
 
-            // performatce test миллион циклов за 14 сек, т.е. на Sect 14 микросекунд
-            int cnt = 1000000;
+            // из строки с секциями Материал и Профиль -> выбор второй секции 
+            s = new Sect("m: c255=c245; пpoфиль: yгoлoк=l *x*;", SType.Profile);
+            Assert.AreEqual("yгoлoк=l*x*", s.body);
+            Assert.AreEqual(SType.Profile, s.type);
+
+            // performatce test 10 000 циклов за < 1 сек, т.е. на Sect 100 микросекунд
+            int cnt = 100000;
             DateTime t0 = DateTime.Now;
-            for(int i=0; i<cnt;i++)
+            for (int i = 0; i < cnt; i++)
             {
                 string hdr = "Prof" + i % 10;
                 string body = " A" + i % 15;
@@ -84,6 +100,30 @@ namespace TSmatch.Section.Tests
             }
             DateTime t1 = DateTime.Now;
             TimeSpan d = t1 - t0;
+        }
+
+        [TestMethod()]
+        // UT_SecType сделат исключительно для укорачивания пути отладки
+        //..по сути, все проверяет UT_Section
+        public void UT_SecType()
+        {
+            var s = new _Section();
+
+            // test 1: "Ед:" -> SType.Unit
+            var st = s._SecType("Ед: руб/т");
+            Assert.AreEqual(SType.Unit, st);
+
+            // test 2: "Объем:" -> SType.Volume
+            st = s._SecType("Объем:");
+            Assert.AreEqual(SType.VolPerUnit, st);
+        }
+    }
+
+    public class _Section : Section 
+    {
+        public SType _SecType(string str)
+        {
+            return SecType(str);
         }
     }
 }

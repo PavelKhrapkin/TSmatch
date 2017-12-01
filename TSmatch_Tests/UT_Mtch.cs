@@ -1,5 +1,5 @@
 ﻿/*=================================
-* Match Unit Test 20.8.2017
+* Match Unit Test 28.11.2017
 *=================================
 */
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -11,50 +11,72 @@ using Mod = TSmatch.Model.Model;
 using SR = TSmatch.SaveReport.SavedReport;
 using MH = TSmatch.Handler.Handler;
 using Elm = TSmatch.ElmAttSet.ElmAttSet;
+using System.Linq;
 
 namespace TSmatch.Matcher.Tests
 {
     [TestClass()]
     public class UT_Matcher
     {
+        Boot boot = new Boot();
+        Mod mod = new Mod();
+
         [TestMethod()]
         public void UT_Mtch()
         {
-            var boot = new Boot();
-            var sr = new _SR();
-            var model = sr.SetModel(boot, initSupl: true);
+            boot.Init();
+            var model = mod.sr.SetModel(boot, initSupl: false);
             Assert.IsTrue(model.elmGroups.Count > 0);
             Assert.IsTrue(model.Rules.Count > 0);
+            var Rules = model.Rules.ToList();
+            var grps = model.elmGroups.ToList();
 
-            foreach (var gr in model.elmGroups)
+            // test 1 Уголок L50x5 -> цена 7 209 руб
+            Rule.Rule rule = Rules.Find(x => x.sCS.Contains("Уголок"));
+            Group.Group gr = grps.Find(x => x.Prf.Contains("L"));
+            if (rule != null && gr != null)
             {
-                Assert.IsTrue(model.Rules.Count > 0);
-#if CHECK_MD5
-                var mtch = new Mtch(model);
-#endif
-                foreach (var rule in model.Rules)
-                {
-                    Assert.IsNotNull(rule.CompSet.Supplier);
-                    Assert.IsTrue(rule.CompSet.Components.Count > 0);
-#if CHECK_MD5
-                    Assert.IsTrue(mtch.OK_MD5());
-#endif
-                    Mtch _match = new Mtch(gr, rule);
-#if CHECK_MD5
-                    Assert.IsTrue(mtch.OK_MD5());
-                    string new_md5 = model.getMD5(model.elements);
-                    Assert.AreEqual(new_md5, model.MD5);
-#endif
-                }
+                rule.Init();
+                var m = new Mtch(gr, rule);
+                Assert.IsTrue(gr.totalPrice > 7000);
+                double rubPerKg = gr.totalPrice / gr.totalWeight;
+                Assert.IsTrue(rubPerKg > 20);
             }
+
+            // test 2 Полоса -30 из Листа ЛСС
+            rule = Rules.Find(x => x.sCS.Contains("Лист"));
+            gr = grps.Find(x => x.Prf.Contains("—"));
+            if (rule != null && gr != null)
+            {
+                rule.Init();
+                var m = new Mtch(gr, rule);
+                Assert.IsTrue(gr.totalPrice > 7000);
+                double rubPerKg = gr.totalPrice / gr.totalWeight;
+                Assert.IsTrue(rubPerKg > 20);
+            }
+
+            // test 3 Бетон
+            rule = Rules.Find(x => x.sCS.Contains("бетон"));
+            gr = grps.Find(x => x.mat.Contains("b"));
+            if (rule != null && gr != null)
+            {
+                rule.Init();
+                var m = new Mtch(gr, rule);
+                Assert.IsTrue(gr.totalPrice > 7000);
+                double rubPerM3 = gr.totalPrice / gr.totalVolume; //.totalWeight;
+                Assert.IsTrue(rubPerM3 > 2000);
+            }
+            //foreach (var gr in model.elmGroups)
+            //{
+            //    Assert.IsTrue(model.Rules.Count > 0);
+            //    foreach (var rule in model.Rules)
+            //    {
+            //        Assert.IsNotNull(rule.CompSet.Supplier);
+            //        Assert.IsTrue(rule.CompSet.Components.Count > 0);
+            //        Mtch _match = new Mtch(gr, rule);
+            //    }
+            //}
             FileOp.AppQuit();
         }
     }
-    class _SR : SR
-    {
-        internal Mod _GetSavedRules(Mod model)
-        {
-            return GetSavedRules(model, init: true);
-        }
-    } // end interface class _SR for access to SavedReport method
 }

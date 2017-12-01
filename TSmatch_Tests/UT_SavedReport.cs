@@ -1,17 +1,14 @@
 ﻿/*=================================
- * Saved Report Unit Test 9.10.2017
+ * Saved Report Unit Test 1.12.2017
  *=================================
  */
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.Linq;
-
+using Boot = TSmatch.Bootstrap.Bootstrap;
 using Decl = TSmatch.Declaration.Declaration;
 using FileOp = match.FileOp.FileOp;
 using Mod = TSmatch.Model.Model;
 using SR = TSmatch.SaveReport.SavedReport;
-using MH = TSmatch.Handler.Handler;
-using Boot = TSmatch.Bootstrap.Bootstrap;
 
 namespace TSmatch.SaveReport.Tests
 {
@@ -22,52 +19,52 @@ namespace TSmatch.SaveReport.Tests
         Boot boot = new Boot();
         Mod model = new Mod();
         UT_TSmatch._UT_MsgService U = new UT_TSmatch._UT_MsgService();
-        //9/10        public Boot boot;
-        //9/10        SR sr;
-        //9/10        MH mh;
-        //9/10        Mod model;
 
         [TestMethod()]
         public void UT_SR_Msg()
         {
             // test 1-en: English Msg.F("Directory doesn't exist")
-            U.SetCulture("en");
+            U.SetLanguage("en");
             string s = sr._SetModDir(boot, 1); 
-            Assert.AreEqual("[SavedReport.SetModelDir]: No \"TSmatchINFO.xlsx\" in model directory \r\nEnsure, that this file is written by TSmatch application, when Tekla is\r\n available, and then put to the Directory, which is known to TSmatch."
+            Assert.AreEqual("No \"TSmatchINFO.xlsx\" in model directory \r\nEnsure, that this file is written by TSmatch application, when Tekla is\r\n available, and then put to the Directory, which is known to TSmatch."
                 , s);
 
             // test 1-ru: Russian Msg.F("Directory doesn't exist")
-            U.SetCulture("ru");
+            U.SetLanguage("ru");
             s = sr._SetModDir(boot, 1);  
-            Assert.AreEqual("[SavedReport.SetModelDir]: В каталоге модели нет файла \"TSmatchINFO.xlsx\".\r\nУбедитесь, что он сохранен приложением TSmatch, когда модель\r\nдоступна в Tekla, а затем помещен в папку, известную TSmatch."
+            Assert.AreEqual("В каталоге модели нет файла \"TSmatchINFO.xlsx\".\r\nУбедитесь, что он сохранен приложением TSmatch, когда модель\r\nдоступна в Tekla, а затем помещен в папку, известную TSmatch."
                 , s);
 
             // test 2-en: English Msg.F("No TSmatchINFO.xlsx")
-            U.SetCulture("en");
+            U.SetLanguage("en");
             s = sr._SetModDir(boot, 2);
-            Assert.AreEqual("[SavedReport.SetModelDir]: \"TSmatchINFO.xlsx\" not found\r\nin directory \"C:\\Windows\""
+            Assert.AreEqual("\"TSmatchINFO.xlsx\" not found\r\nin directory \"C:\\Windows\""
                 , s);
 
             // test 2-ru: Russian Msg.F("No TSmatchINFO.xlsx")
-            U.SetCulture("ru");
+            U.SetLanguage("ru");
             s = sr._SetModDir(boot, 2);  
-            Assert.AreEqual("[SavedReport.SetModelDir]: Отчет по модели \"TSmatchINFO.xlsx\".\r\nне обнаружен в папке \"C:\\Windows\""
+            Assert.AreEqual("Отчет по модели \"TSmatchINFO.xlsx\".\r\nне обнаружен в папке \"C:\\Windows\""
                 , s);
 
             // test 3-en: English
-            U.SetCulture("en");
+            U.SetLanguage("en");
             s = sr._error();
-            Assert.AreEqual("", s);
+            Assert.AreEqual("Saved model report in \"TSmatchINFO.xlsx\" is corrupted.\r\nPlease, try to write it again in TSmatch application, when model in Tecla is available."
+                , s);
 
-            //Assert.AreEqual("[SavedReport.SetModelDir]: No \"TSmatchINFO.xlsx\" in model directory \r\nEnsure, that this file is written by TSmatch application, when Tekla is available",
-            //    Umsg.GetMsg());
+            // test 3-ru: Russian
+            U.SetLanguage("ru");
+            s = sr._error();
+            Assert.AreEqual("Испорчен файл TSmatchINFO.xlsx\r\nПопробуйте записать его заново при выходе из приложения TSmatch"
+                , s);
         }
-#if LATER
+
         [TestMethod()]
-        public void UT_SetModel()
+        public void UT_SetMod_native()
         {
             boot = new Boot(); boot.Init();
-            sr = new SR();
+            var sr = new SR();
 
             model = sr.SetModel(boot);
 
@@ -76,21 +73,37 @@ namespace TSmatch.SaveReport.Tests
             FileOp.AppQuit();
         }
 
-        [TestMethod()]
-        public void UT_SetModDir()
-        {
-            boot = new Boot(); boot.Init();
-            sr = new SR();
-
-            model = sr.SetModel(boot);
-
-            Assert.IsTrue(sr.CheckModelIntegrity(model));
-
-            FileOp.AppQuit();
-        }
 
         [TestMethod()]
         public void UT_CheckModelIntegrity()
+        {
+            boot.Init();
+            model = model.sr.SetModel(boot);
+
+            // test 1: текущий режим TSmatch, 2017/12/1 проверял с Tekla
+
+            bool ok = model.sr.CheckModelIntegrity(model);
+
+            Assert.IsTrue(ok);
+            Assert.IsTrue(model.dir.Length > 0);
+            Assert.IsTrue(FileOp.isDirExist(model.dir));
+            Assert.IsTrue(model.date > Decl.OLD && model.date <= DateTime.Now);
+            Assert.IsTrue(model.pricingDate > Decl.OLD && model.pricingDate <= DateTime.Now);
+            Assert.AreEqual(32, model.MD5.Length);
+            Assert.AreEqual(32, model.pricingMD5.Length);
+            Assert.IsTrue(model.elements.Count > 0);
+            Assert.IsTrue(model.elmGroups.Count > 0);
+
+            // test 2: no Tekla active
+            //boot.isTeklaActive = false;
+            //boot.ModelDir = @"C:\TeklaStructuresModels\2017\Медиа-центр футбольного стадиона";
+            //!! отложил на потом
+
+            FileOp.AppQuit();
+        }
+
+        [TestMethod()]
+        public void UT_CheckModelIntegrity_native()
         {
             boot = new Boot(); boot.Init();
             model = new Mod();
@@ -107,6 +120,19 @@ namespace TSmatch.SaveReport.Tests
             Assert.AreEqual(32, model.pricingMD5.Length);
             Assert.IsTrue(model.elements.Count > 0);
             Assert.IsTrue(model.elmGroups.Count > 0);
+
+            FileOp.AppQuit();
+        }
+#if LATER
+        [TestMethod()]
+        public void UT_SetModel()
+        {
+            boot = new Boot(); boot.Init();
+            sr = new SR();
+
+            model = sr.SetModel(boot);
+
+            Assert.IsTrue(sr.CheckModelIntegrity(model));
 
             FileOp.AppQuit();
         }
@@ -249,8 +275,8 @@ namespace TSmatch.SaveReport.Tests
 
             // test 2:  Msg("No model dir") -- EN
             // -- чтобы посмотреть, как выглядит MessageBox, но с Assert.Fault по Msg.FOK(), используй
-            //U.SetCulture("en", true);
-            U.SetCulture("en");
+            //U.SetLanguage("en", true);
+            U.SetLanguage("en");
             try { mod.sr.Raw(mod); }
             catch (Exception ex) { Assert.AreEqual("Msg.F", ex.Message); }
             Assert.AreEqual("[SavedReport.Raw]:  not found model directory, pointed by\r\n     TSmatchINFO.xlsx, or written in Windows Environment\r\n\r\n\"C:\\ABCDEF\" \r\n\r\nand there is no Tekla active to read and re-create it again. \r\nPlease, try to run TSmatch on PC with Tekla.", 
@@ -258,8 +284,8 @@ namespace TSmatch.SaveReport.Tests
 
             // test 3:  Msg("Raw_CAD_Read") -- EN
             // -- чтобы посмотреть, как выглядит MessageBox, но с Assert.Fault по Msg.FOK(), используй
-            //U.SetCulture("en", true);
-            U.SetCulture("en");
+            //U.SetLanguage("en", true);
+            U.SetLanguage("en");
             mod.dir = @"C:\Windows";
             try { mod.sr.Raw(mod); }
             catch (Exception ex) { Assert.AreEqual("Msg.F", ex.Message); }
@@ -268,8 +294,8 @@ namespace TSmatch.SaveReport.Tests
 
             // test 4:  Msg("Raw_CAD_Read") -- RU
             // -- чтобы посмотреть, как выглядит MessageBox, но с Assert.Fault по Msg.FOK(), используй
-            //U.SetCulture("ru", true);
-            U.SetCulture("ru");
+            //U.SetLanguage("ru", true);
+            U.SetLanguage("ru");
             mod.dir = @"C:\Windows";
             try { mod.sr.Raw(mod); }
             catch (Exception ex) { Assert.AreEqual("Msg.F", ex.Message); }
@@ -376,6 +402,7 @@ namespace TSmatch.SaveReport.Tests
 
         internal string _SetModDir(Boot boot, int testN)
         {
+            const string me = "[SavedReport.SetModelDir]: ";
             string result = string.Empty;
             model = new Mod();
             boot.isTeklaActive = false;
@@ -383,22 +410,24 @@ namespace TSmatch.SaveReport.Tests
             if (testN == 2) boot.ModelDir = @"C:\Windows";
 
             try { SetModDir(boot); }
-            catch (Exception e) { result = __ctch(e); }
+            catch (Exception e) { result = __ctch(e, me); }
             return result;
         }
 
         internal string _error()
         {
+            //"тестирование метода [SavedReport.error] : Saved m
+            const string me = "[SavedReport.error] : ";
             string result = string.Empty;
             model.errRecover = true;
             try { error(); }
-            catch (Exception e) { result = __ctch(e); }
+            catch (Exception e) { result = __ctch(e, me, msgType: "Msg.I"); }
             return result;
         }
 
-        private string __ctch(Exception e)
+        private string __ctch(Exception e, string me, string msgType = "Msg.F")
         {
-            const string prefix = "Msg.F: ";
+            string prefix = msgType + ": " + me;
             if (e.Message.IndexOf(prefix) != 0) Assert.Fail();
             return e.Message.Substring(prefix.Length);
         }

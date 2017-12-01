@@ -1,5 +1,5 @@
 ﻿/*=========================================
-* Model Unit Tekla = TS_OpenAPI 5.10.2017
+* Model Unit Tekla = TS_OpenAPI 24.10.2017
 *=========================================
 */
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -42,6 +42,9 @@ namespace TSmatch.Tekla.Tests
         /// UT_Read - test reading from model in Tekla.
         /// <para>
         /// To check time of read from Tekla, stop after string dt. dt = elapsed time in sec 
+        /// </para>
+        /// <para>
+        /// 2017.10.24 test doesn't works with the other than Tekla-2017i
         /// </para>
         /// </summary>
         [TestMethod()]

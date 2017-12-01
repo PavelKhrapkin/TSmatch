@@ -1,12 +1,15 @@
 ﻿/*=================================
- * Rule Unit Test 21.8.2017
+ * Rule Unit Test 30.11.2017
  *=================================
  *-- ToDo 2017.6.7 пересмотреть старые тесты (OLD 6/6/17) и либо выбросить их совсем, либо обновить
  */
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Linq;
 
+using Boot = TSmatch.Bootstrap.Bootstrap;
 using Mod = TSmatch.Model.Model;
+using Doc = TSmatch.Document.Document;
 using FileOp = match.FileOp.FileOp;
 using SType = TSmatch.Section.Section.SType;
 
@@ -18,12 +21,14 @@ namespace TSmatch.Rule.Tests
     [TestClass()]
     public class UT_Rule
     {
+        Boot boot = new Boot();
+        Mod mod = new Mod();
+
         [TestMethod()]
         public void UT_Rule_Constructor()
         {
-            var boot = new Bootstrap.Bootstrap();
-            var model = new Mod();
-            model.sr.SetModel(boot);
+            boot.Init();
+            mod.sr.SetModel(boot);
 
             Rule rule = new Rule(5);
             Assert.IsNotNull(rule);
@@ -39,23 +44,51 @@ namespace TSmatch.Rule.Tests
         }
 
         [TestMethod()]
+        public void UT_Rule_InitSupplier()
+        {
+            boot.Init();
+            mod.sr.SetModel(boot);
+            Doc dRul = Doc.getDoc("Rules");
+            Assert.IsNotNull(dRul);
+
+            // test 1: Init one Rule
+            Rule r = new Rule(4 + 3);
+            r.Init();
+            var csDP = r.CompSet.csDP;
+            Assert.IsNotNull(csDP);
+            bool b = csDP.dpStr.ContainsKey(SType.UNIT_Weight);
+
+            // test 2: Check if all Rules have CompSet with Section Unit_
+            mod = mod.sr.SetModel(boot, initSupl: true);
+            Assert.IsTrue(mod.Rules.Count > 0);
+            foreach(var rule in mod.Rules)
+            {
+                csDP = rule.CompSet.csDP;
+                bool bw = csDP.dpStr.ContainsKey(SType.UNIT_Weight);
+                bool bv = csDP.dpStr.ContainsKey(SType.UNIT_Vol);
+                Assert.IsTrue(bw || bv);
+            }
+
+            FileOp.AppQuit();
+        }
+
+        [TestMethod()]
         public void UT_Rule_SynParse()
         {
-            var boot = new Bootstrap.Bootstrap();
-            var model = new Mod();
-            model.sr.SetModel(boot);
+            boot.Init();
+            mod = mod.sr.SetModel(boot);
+            var Rules = mod.Rules.ToList();
 
-            Rule rule = new Rule(6);
-            var Syns = rule.synonyms;
-            Assert.AreEqual(2, Syns[SType.Material].Count);
-            if (model.name == "")
+            // test 0: синонимы по материалам M:С235=C245
+            Rule rule = Rules.Find(x => x.text.Contains("c255=c245=c235"));
+            if (rule != null)
             {
-                Assert.AreEqual("c235", Syns[SType.Material][0]);
-                Assert.AreEqual("c245", Syns[SType.Material][1]);
+                var SynsM = rule.synonyms[SType.Material];
+                Assert.IsTrue(SynsM.Count >= 3);
+                Assert.AreEqual("c255", SynsM[0]);
+                Assert.AreEqual("c245", SynsM[1]);
+                Assert.AreEqual("c235", SynsM[2]);
             }
-            Assert.AreEqual(3, Syns[SType.Profile].Count);
-            Assert.AreEqual("пoлocaгopячeкaтaнaя", Syns[SType.Profile][0]);
-            Assert.AreEqual("pl", Syns[SType.Profile][1]);
 
             FileOp.AppQuit();
         }

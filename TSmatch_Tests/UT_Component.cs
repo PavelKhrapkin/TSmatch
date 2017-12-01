@@ -1,19 +1,18 @@
-﻿using TSmatch.Component;
-/*=================================
-* Components Unit Test 21.8.2017
+﻿/*=================================
+* Components Unit Test 1.12.2017
 *=================================
 */
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-
-using FileOp = match.FileOp.FileOp;
 using Boot = TSmatch.Bootstrap.Bootstrap;
 using Docs = TSmatch.Document.Document;
-using Mod = TSmatch.Model.Model;
-using Lib = match.Lib.MatchLib;
-using Mtch = TSmatch.Matcher.Mtch;
 using ElmGr = TSmatch.Group.Group;
+using FileOp = match.FileOp.FileOp;
+using Lib = match.Lib.MatchLib;
+using Mod = TSmatch.Model.Model;
+using Mtch = TSmatch.Matcher.Mtch;
 using SType = TSmatch.Section.Section.SType;
 
 namespace TSmatch.Component.Tests
@@ -23,15 +22,39 @@ namespace TSmatch.Component.Tests
     {
         Boot boot = new Boot();
         Mod model = new Mod();
-
         ElmGr gr = new ElmGr();
         List<ElmGr> inp = new List<ElmGr>();
         Rule.Rule rule = new Rule.Rule();
         Component comp = new Component();
+        UT_TSmatch._UT_MsgService U = new UT_TSmatch._UT_MsgService();
+
+        [TestMethod()]
+        public void UT_comp_InSh_Native()
+        {
+            boot.Init();
+            // test 1 Native: Балка 35 Ш2 СТО АСЧМ 20-93 ст3сп/пс5
+            model = model.sr.SetModel(boot);
+            foreach(var gr in model.elmGroups)
+            {
+                if(!gr.prf.Contains("i") || !gr.prf.Contains("ш") )continue;
+                string rText = string.Empty;
+                foreach(var r in model.Rules)
+                {
+                    if (r.sSupl != "ЛенСпецСталь" || r.sCS != "Двутавр") continue;
+                    rText = r.Text;
+                    r.Init();
+                    Assert.IsTrue(r.CompSet.Components.Count > 5);
+                    var m = new Mtch(gr, r);
+                    Assert.AreEqual("Match", m.ok.ToString());
+                }
+            }
+            exit: FileOp.AppQuit();
+        }
 
         [TestMethod()]
         public void UT_comp_PL_Native()
         {
+            boot.Init();
             // test 1 Native: берем группу, правила и компонент - пластину PL8 из модели
             model = model.sr.SetModel(boot);
             if (model.name != "Chasovnya+lepestok") goto exit;
@@ -326,10 +349,39 @@ namespace TSmatch.Component.Tests
         [TestMethod()]
         public void UT_Str()
         {
+            initComp("");
+
             // test 1: Component not initiated, no DP
-            var comp = new Component();
-            comp.Str(SType.Price);
-            Assert.Fail();
+
+            // заткнуто //////comp.Str(SType.Price);
+            /// 17/11/17 /////Assert.Fail();
+
+            // test 2: Msg.W("CompSet_wrong_LoadDescriptor")
+            string s = sub_Str("en");
+            Assert.AreEqual("CompSet_wrong_LoadDescriptor", s);
+            s = sub_Str("ru");
+            Assert.AreEqual("CompSet_wrong_LoadDescriptor", s);
+        }
+
+        private string sub_Str(string sLang)
+        {
+            U.SetLanguage(sLang);
+            string result = "", prefix = "Msg.W: ";
+            try { comp.Str(SType.Description); }
+            catch (Exception e)
+            {
+                if (e.Message.IndexOf(prefix) == 0)
+                    result = e.Message.Substring(prefix.Length);
+            }
+            return result;
+        }
+
+        [TestMethod()]
+        public void UT_strExclude()
+        {
+            var u = new _UT_Component();
+
+   //         string s = u.
         }
 
         private void initGr(string v, string mat = "C245")
@@ -352,10 +404,17 @@ namespace TSmatch.Component.Tests
 
         private void initComp(string v, string mat = "C245")
         {
+            if(comp.compDP==null) comp.compDP = new DPar.DPar("");
             comp.compDP.dpar.Clear();
             comp.compDP.dpStr.Clear();
-            comp.compDP.Ad(Section.Section.SType.Profile, v);
-            comp.compDP.Ad(Section.Section.SType.Material, mat);
+            comp.compDP.Ad(SType.Profile, v);
+            comp.compDP.Ad(SType.Material, mat);
         }
     }
-}
+
+    public class _UT_Component : Component
+    {
+        public string _strExclude(string str, List<string> syns)
+        { return strExclude(str, syns); }
+    }
+} // end namespace Component.Tests

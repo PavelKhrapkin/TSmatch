@@ -18,17 +18,31 @@ namespace TSmatch.Document.Tests
     [TestClass()]
     public class UT_DocumentTests
     {
+        Boot boot = new Boot();
+
+        [TestMethod()]
+        public void UT_DocMsg()
+        {
+            boot.Init();
+// не написано, отложил на потом!!!!!!!!!!!!!!!!
+            // test 1: getDoc("No File")
+            // test 2: getDoc("No SheetN")
+   //         Assert.Fail();
+
+            FileOp.AppQuit();
+        }
+
         [TestMethod()]
         public void getDoc()
         {
-            Boot boot = new Boot();
+            boot.Init();
 
             // test 1: getDoc() => TOC
             Document toc = Document.getDoc();   // static getDoc()
             Assert.AreEqual(toc.name, "TOC");
 
             //test 2: getDoc(ModelINFO)
-            if (Document.IsDocExists("ModelInfo"))
+            if (Document.IsDocExist("ModelInfo"))
             {
                 Document doc = Document.getDoc("ModelINFO", reset: false);
                 Assert.AreEqual(doc.il > 9, true);
@@ -65,7 +79,7 @@ namespace TSmatch.Document.Tests
         [TestMethod()]
         public void UT_Reset()
         {
-            Boot boot = new Boot();
+            boot.Init();
             Document doc = Document.getDoc("ModelINFO", reset: true, create_if_notexist: true);
 
             Assert.IsNotNull(doc);
@@ -77,28 +91,34 @@ namespace TSmatch.Document.Tests
         [TestMethod()]
         public void UT_isDocExists()
         {
-            Assert.IsFalse(Document.IsDocExists("TOC"));    // до вызова Boot документ ТОС не существует
-            Boot boot = new Boot();
-            Assert.IsTrue(Document.IsDocExists("TOC"));     // поле Boot - OK
-                                                            //31/7            Assert.IsTrue(Document.IsDocExists());
-            Assert.IsFalse(Document.IsDocExists("bla-bla")); // заведомо не существующий документ
+            Assert.IsFalse(Document.IsDocExist("TOC"));    // до вызова Boot документ ТОС не существует
+            boot.Init();
+            Assert.IsTrue(Document.IsDocExist("TOC"));     // поле Boot - OK
+            Assert.IsTrue(Document.IsDocExist());
+            Assert.IsFalse(Document.IsDocExist("bla-bla")); // заведомо не существующий документ
 
-            string name = "ModelINFO";
-            bool ok = Document.IsDocExists(name);
-            if (ok)
-            {
-                Document rep = Document.getDoc("Report", create_if_notexist: false, fatal: false);
-                Assert.IsNotNull(rep);
-            }
+            // test 1: chech if Tab "ModelINFO" exist in current TSmatchINFO.xlsx
+            //         if NOT - check Doc UT_Docunent in UT_Debug.xlsx
+            string sINFO = "ModelINFO";
+            Document rep = Document.getDoc(sINFO, create_if_notexist: false, fatal: false);
+            bool ok = false;
+            if (rep != null) ok = Document.IsDocExist(sINFO);
             else
             {
-                name = "UT_DEBUG";
-                Document doc = Document.getDoc(name, create_if_notexist: true, fatal: false, reset: true);
-                Assert.IsTrue(Document.IsDocExists(name));
-                doc.Close();
-                //31/7                FileOp.Delete(doc.FileDirectory, name + ".xlsx");
-                Assert.IsFalse(Document.IsDocExists(name));
+                string sUTdoc = "UT_Document";
+                Document ut_doc = Document.getDoc(sUTdoc);
+                ok = Document.IsDocExist(sUTdoc);
             }
+
+            Assert.IsTrue(ok);
+
+            // тут не надо делать тест с созданим Документа и его стиранием - 
+            //..'это можно делать в другихUT_Document
+            //Document doc = Document.getDoc(sINFO, create_if_notexist: true, fatal: false, reset: true);
+            //    Assert.IsTrue(Document.IsDocExist(sINFO));
+            //    doc.Close();
+            //    //31/7                FileOp.Delete(doc.FileDirectory, name + ".xlsx");
+            //    Assert.IsFalse(Document.IsDocExist(sINFO))        
 
             FileOp.AppQuit();
         }
@@ -106,8 +126,7 @@ namespace TSmatch.Document.Tests
         [TestMethod()]
         public void UT_Start()
         {
-            Boot boot = new Boot();
-
+            boot.Init();     
             var Documents = Document.__Documents();
             Assert.IsTrue(Documents.Count > 50);
 
@@ -126,7 +145,7 @@ namespace TSmatch.Document.Tests
         [TestMethod()]
         public void UT_EOL()
         {
-            Boot boot = new Boot();
+            boot.Init();
             string sIR = "InitialRules";
 
             var doc = Document.getDoc(sIR);

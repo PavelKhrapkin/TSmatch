@@ -1,5 +1,5 @@
 ﻿/*=================================
-* Message Unit Test 12.11.2017
+* Message Unit Test 29.11.2017
 *=================================
 * History:
 *  8.10.2017 - no static in Message
@@ -9,6 +9,7 @@
 */
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Globalization;
 
 namespace TSmatch.Message.Tests
 {
@@ -37,6 +38,19 @@ namespace TSmatch.Message.Tests
             U.SetLanguage("ru");
             s = U.S("S");
             Assert.AreEqual("Гружу", s);
+
+            //////         // test 4: after bug 29.11.17: save sLanguage in Properties.Setting
+            // не разобрался как читать Properties.Settings
+            // хотя это хорошо описано в http://softwareonastring.com/399/property-settings-default-considered-detrimental-to-unit-testing
+            // и в https://softwareengineering.stackexchange.com/questions/275475/when-and-how-to-apply-application-settings-in-net
+            //
+            //////         U.SetLanguage("en");
+            //////         string vv = Properties.Settings.Default.sLanguage;
+            ////////         string sLang = Properties.      Settings.Default.sLanguage;
+            //////         Assert.AreEqual("en-US", sLang);
+            //////         U.SetLanguage("ru");
+            //////         sLang = CultureInfo.CurrentCulture.Name;
+            //////         Assert.AreEqual("ru-RU", sLang);
         }
 
         [TestMethod()]
@@ -54,7 +68,6 @@ namespace TSmatch.Message.Tests
             s = Msg.S("S");
             Assert.AreEqual("Гружу", s);
         }
-
 
         //[TestMethod()]
         //public void UT_AskS()
@@ -78,7 +91,7 @@ namespace TSmatch.Message.Tests
             s = Msg.S("MainWindow__RePrice");
             Assert.AreEqual(s, "Пересчет стоимости материалов");
 
-            // test 2: вывод неизвестного сообщения
+            // test 2: вывод неизвестного сообщения - параметры игнорируются
             s = Msg.S("тра-ля-ля", "и маленькая тележка");
             Assert.AreEqual("тра-ля-ля", uS(s));
 

@@ -1,5 +1,5 @@
 ﻿/*================================
-* Bootstrap Test 9.10.2017
+* Bootstrap Test 29.11.2017
 *=================================
 */
 using match.FileOp;
@@ -31,7 +31,7 @@ namespace TSmatch.Bootstrap.Tests
         [TestMethod()]
         public void UT_Boot_ResxErr()
         {
-            U.SetCulture("en");
+            U.SetLanguage("en");
 
             // test 0: "en" - English
             string s = boot._rErr(1, "TSmatch.xlsx");   // 1 - ResErr.NoFile - нет ресурсного файла
@@ -47,7 +47,7 @@ namespace TSmatch.Bootstrap.Tests
             Assert.AreEqual("[Bootstrap.resError]: Internal Resource error. Resource \"Something\".", s);
 
             // test 1: "ru" - Russian
-            U.SetCulture("ru");
+            U.SetLanguage("ru");
 
             s = boot._rErr(1, "TSmatch.xlsx");          // 1 - ResErr.NoFile - нет ресурсного файла
             Assert.AreEqual("[Bootstrap.resError]: Не найден файл \"TSmatch.xlsx\"", s);

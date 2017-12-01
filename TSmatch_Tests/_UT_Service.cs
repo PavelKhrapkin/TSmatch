@@ -1,7 +1,7 @@
 ﻿/*=======================================================
 * _UT_Service - common service module for all Unit Tests
 * 
-* 12.11.2017 Pavel Khrapkin
+* 29.11.2017 Pavel Khrapkin
 *========================================================
 * History:
 * 2017.10.6  - delegate TryMsg
@@ -9,10 +9,6 @@
 */
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.Globalization;
-using System.Resources;
-
-//8/10 using Msg = TSmatch.Message.Message;
 
 namespace UT_TSmatch
 {
@@ -50,22 +46,12 @@ namespace UT_TSmatch
         public string GetMsg() { return msg; }
         public string GetErrType() { return errType; }
 
-        //           Assert.ThrowsException() -- пока не умею этим пользоваться
-
-        // try { resxError(ResErr.NoFile, "TSmatch.xlsx"); } catch { } U.GetTxt();
-        // Assert.AreEqual("[Bootstrap.resError]: Не найден файл \"TSmatch.xlsx\"", U.msg);
-
-        //       public delegate string mes(Enum x, string str);
-
         public string Try2(Func<int, string> func, int p1, string p2)
         {
             ////try { func(p1, p2); }
             ////catch { }
             ////GetTxt();
             return msg;
-
         }
-
-   
     }
 }
