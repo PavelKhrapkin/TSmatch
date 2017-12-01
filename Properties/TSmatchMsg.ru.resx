@@ -222,4 +222,20 @@
     <value>[Matcher.Mtch]: Неправильно инициализирован 
 входной аргумент - группа элементов.</value>
   </data>
+	<data name="MainWindow_msg_Group_selection" xml:space="preserve">
+		<value>Выделяю группу..</value>
+	</data>
+	<data name="MainWindow_msg_No_Price_Groups_highlighted" xml:space="preserve">
+		<value>Вначале выделены все группы, по которым еще не подобраны поставщики..</value>
+	</data>
+	<data name="MainWindow_msg_Select_Supplier" xml:space="preserve">
+		<value>Выберите поставщика из выпадающего списка..</value>
+	</data>
+	<data name="Group.CheckGroups_various_materials_in_Group" xml:space="preserve">
+		<value>[Group.CheckGroup]: разные материалы в группе [{0}]
+с профилем "{1}", материалы "{2}" и "{3}"</value>
+	</data>
+	<data name="Group.ChechGroup_bad_model" xml:space="preserve">
+		<value>[Group.CheckGroup]: ошибка списка элементов или списка групп в модели "{0}"</value>
+	</data>
 </root>

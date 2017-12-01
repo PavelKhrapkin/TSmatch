@@ -220,4 +220,20 @@ Please, try to run TSmatch on PC with Tekla.</value>
 	<data name="Matcher__Mtch_Bad_arguments" xml:space="preserve">
     <value>[Matcher.Mtch]: Bad entry argument "group"</value>
   </data>
+	<data name="MainWindow_msg_Group_selection" xml:space="preserve">
+		<value>Group selection..</value>
+	</data>
+	<data name="MainWindow_msg_No_Price_Groups_highlighted" xml:space="preserve">
+		<value>No Price Groups highlighted at the bebinning..</value>
+	</data>
+	<data name="MainWindow_msg_Select_Supplier" xml:space="preserve">
+		<value>Select Supplier from drop-down list..</value>
+	</data>
+	<data name="Group.CheckGroups_various_materials_in_Group" xml:space="preserve">
+		<value>[Group.CheckGroup]: various materials in Group [{0}]
+profile="{1}", materials "{2}", and "{3}"</value>
+	</data>
+	<data name="Group.ChechGroup_bad_model" xml:space="preserve">
+		<value>[Group.CheckGroup]: bad element or group list in model "{0}" </value>
+	</data>
 </root>
