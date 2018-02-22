@@ -61,30 +61,329 @@ namespace TSmatch.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 12.09.2017.
+        ///   Looks up a localized string similar to [Bootstrap]: Internal Resource error. Resource &quot;{0}&quot;..
         /// </summary>
-        internal static string Date {
+        internal static string Bootstrap__Internal_Resource_Error {
             get {
-                return ResourceManager.GetString("Date", resourceCulture);
+                return ResourceManager.GetString("Bootstrap__Internal_Resource_Error", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Match: Bad Price descriptor: no Price section in TSmatch.xlsx/TOC/LoadDescriptor
+        ///   Looks up a localized string similar to [Bootstrap]: No TSmatch Resource Document &quot;{0}&quot;.
+        /// </summary>
+        internal static string Bootstrap__No_Resource_Document {
+            get {
+                return ResourceManager.GetString("Bootstrap__No_Resource_Document", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to [Bootstrap]: No TSmatch Resource file &quot;{0}&quot;.
+        /// </summary>
+        internal static string Bootstrap__No_Resource_File {
+            get {
+                return ResourceManager.GetString("Bootstrap__No_Resource_File", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to [Bootstrap]: Resource &quot;{0}&quot; obsolete. Please, update it!.
+        /// </summary>
+        internal static string Bootstrap__Resourse_Obsolete {
+            get {
+                return ResourceManager.GetString("Bootstrap__Resourse_Obsolete", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to [Component]: Wrong LoadDescriptor  &quot;{0}&quot;. Please, chech TSmatch.xlsx/TOC.
+        /// </summary>
+        internal static string Component__wrong_LoadDescriptor {
+            get {
+                return ResourceManager.GetString("Component__wrong_LoadDescriptor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to [Document]: Reset of the Document &quot;{0}&quot;, which has no HDR form in TOC.
+        /// </summary>
+        internal static string Document__Reset_no_HDR_Form {
+            get {
+                return ResourceManager.GetString("Document__Reset_no_HDR_Form", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to [Document.wrDoc]: No form &quot;{0}&quot; for this Document &quot;{1}&quot;.
+        /// </summary>
+        internal static string Document__wrDoc_no_Form {
+            get {
+                return ResourceManager.GetString("Document__wrDoc_no_Form", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to [Handler.PriceGr]: Rules in Model were not initialyzed.
+        /// </summary>
+        internal static string Handler__PriceGr_Rules_not_Initialized {
+            get {
+                return ResourceManager.GetString("Handler__PriceGr_Rules_not_Initialized", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to .
+        /// </summary>
+        internal static string LanguageFlag {
+            get {
+                return ResourceManager.GetString("LanguageFlag", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Material Price Re-calculation.
+        /// </summary>
+        internal static string MainWindow__RePrice {
+            get {
+                return ResourceManager.GetString("MainWindow__RePrice", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to TSmatch - Building Materials and Suppliers Management.
+        /// </summary>
+        internal static string MainWindow__Title {
+            get {
+                return ResourceManager.GetString("MainWindow__Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to File.
+        /// </summary>
+        internal static string MainWindow_mFile {
+            get {
+                return ResourceManager.GetString("MainWindow_mFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Language.
+        /// </summary>
+        internal static string MainWindow_mLanguage {
+            get {
+                return ResourceManager.GetString("MainWindow_mLanguage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Select.
+        /// </summary>
+        internal static string MainWindow_mSelect {
+            get {
+                return ResourceManager.GetString("MainWindow_mSelect", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Setting.
+        /// </summary>
+        internal static string MainWindow_mSetting {
+            get {
+                return ResourceManager.GetString("MainWindow_mSetting", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to [Matcher.Mtch]: Bad entry argument &quot;group&quot;.
+        /// </summary>
+        internal static string Matcher__Mtch_Bad_arguments {
+            get {
+                return ResourceManager.GetString("Matcher__Mtch_Bad_arguments", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to [Matcher.Mtch]: Bad Price descriptor: no Price section in TSmatch.xlsx/TOC/LoadDescriptor
         ///for &quot;{0}&quot;, &quot;{1}&quot;.
         /// </summary>
-        internal static string Match__Bad_Price_Descriptor {
+        internal static string Matcher__Mtch_Bad_Price_Descriptor {
             get {
-                return ResourceManager.GetString("Match__Bad_Price_Descriptor", resourceCulture);
+                return ResourceManager.GetString("Matcher__Mtch_Bad_Price_Descriptor", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to TSmatch Fatal internal Error in [Message.Init] -- Initialization fault  .
+        ///   Looks up a localized string similar to TSmatch Fatal internal Error in [Message.Init] -- Initialization fault Message System.
         /// </summary>
         internal static string Message__Init_fault {
             get {
                 return ResourceManager.GetString("Message__Init_fault", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Loading.
+        /// </summary>
+        internal static string S {
+            get {
+                return ResourceManager.GetString("S", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to [SavedReport.error] : Saved model report in &quot;TSmatchINFO.xlsx&quot; is corrupted.
+        ///Please, try to write it again in TSmatch application, when model in Tecla is available..
+        /// </summary>
+        internal static string SavedReport__error_Corrupted_saved_report_TSmatchINFO {
+            get {
+                return ResourceManager.GetString("SavedReport__error_Corrupted_saved_report_TSmatchINFO", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to [SavedReport.error] : Saved model is corrupted, and we cannot resore it.
+        ///Try to save it again on exit of TSmatch application..
+        /// </summary>
+        internal static string SavedReport__error_recover_impossible {
+            get {
+                return ResourceManager.GetString("SavedReport__error_recover_impossible", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to [SavedReport.Raw]: File &quot;Raw.xml&quot; is corrupted or unavailable.
+        ///Would you like to read it from CAD once again?.
+        /// </summary>
+        internal static string SavedReport__Raw_CAD_Read {
+            get {
+                return ResourceManager.GetString("SavedReport__Raw_CAD_Read", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to [SavedReport.Raw]:  not found model directory, pointed by
+        ///     TSmatchINFO.xlsx, or written in Windows Environment
+        ///
+        ///&quot;{0}&quot; 
+        ///
+        ///and there is no Tekla active to read and re-create it again. 
+        ///Please, try to run TSmatch on PC with Tekla..
+        /// </summary>
+        internal static string SavedReport__Raw_No_model_dir {
+            get {
+                return ResourceManager.GetString("SavedReport__Raw_No_model_dir", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to [SavedReport.SetModelDir]: No &quot;TSmatchINFO.xlsx&quot; in model directory 
+        ///Ensure, that this file is written by TSmatch application, when Tekla is available.
+        /// </summary>
+        internal static string SavedReport__SetModelDir_No_Model_Directory {
+            get {
+                return ResourceManager.GetString("SavedReport__SetModelDir_No_Model_Directory", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to [SavedReport.SetModelDir]: No model directory
+        ///&quot;{0}&quot; is available.
+        /// </summary>
+        internal static string SavedReport__SetModelDir_No_TSmatchINFO {
+            get {
+                return ResourceManager.GetString("SavedReport__SetModelDir_No_TSmatchINFO", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to [Section]: SectionTab is not initialized.
+        /// </summary>
+        internal static string SectionTab_is_empty {
+            get {
+                return ResourceManager.GetString("SectionTab_is_empty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to [Bootstrap]: Loading file TSmatch.xlsx.
+        /// </summary>
+        internal static string Splash__Loading_Bootstrap {
+            get {
+                return ResourceManager.GetString("Splash__Loading_Bootstrap", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to [SavedReport]: Loading &quot;{0}&quot; and &quot;{1}&quot;..
+        /// </summary>
+        internal static string Splash__Loading_TSmatchINFO {
+            get {
+                return ResourceManager.GetString("Splash__Loading_TSmatchINFO", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Length.
+        /// </summary>
+        internal static string WPF_MainWindow_grLength {
+            get {
+                return ResourceManager.GetString("WPF_MainWindow_grLength", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Material.
+        /// </summary>
+        internal static string WPF_MainWindow_grMat {
+            get {
+                return ResourceManager.GetString("WPF_MainWindow_grMat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Profile.
+        /// </summary>
+        internal static string WPF_MainWindow_grPrf {
+            get {
+                return ResourceManager.GetString("WPF_MainWindow_grPrf", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Price.
+        /// </summary>
+        internal static string WPF_MainWindow_grPrice {
+            get {
+                return ResourceManager.GetString("WPF_MainWindow_grPrice", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Supplier.
+        /// </summary>
+        internal static string WPF_MainWindow_grSupplier {
+            get {
+                return ResourceManager.GetString("WPF_MainWindow_grSupplier", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Volume.
+        /// </summary>
+        internal static string WPF_MainWindow_grVolume {
+            get {
+                return ResourceManager.GetString("WPF_MainWindow_grVolume", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Weight.
+        /// </summary>
+        internal static string WPF_MainWindow_grWeight {
+            get {
+                return ResourceManager.GetString("WPF_MainWindow_grWeight", resourceCulture);
             }
         }
     }

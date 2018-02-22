@@ -215,5 +215,9 @@
   <ItemGroup>
     <Resource Include="ifc.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="enImage.png" />
+    <Resource Include="ruImage.jpg" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
