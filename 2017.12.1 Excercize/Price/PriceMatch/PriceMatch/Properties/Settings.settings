@@ -1,0 +1,18 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="PriceMatch.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="VERSION" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">PriceMatch v0.0.1 22.02.2018</Value>
+    </Setting>
+    <Setting Name="DebugDir" Type="System.String" Scope="User">
+      <Value Profile="(Default)">$DebugDir</Value>
+    </Setting>
+    <Setting Name="TOCdir" Type="System.String" Scope="User">
+      <Value Profile="(Default)">C:\ProgramData\Tekla Structures\2017i\Environments\common\exceldesign</Value>
+    </Setting>
+    <Setting Name="ExcelPriceDir" Type="System.String" Scope="User">
+      <Value Profile="(Default)">База комплектующих</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>

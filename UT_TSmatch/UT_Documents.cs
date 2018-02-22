@@ -1,8 +1,8 @@
 ﻿/*===================================
- *  Saved Report Unit Test 16.08.2017
+ *  Saved Report Unit Test 13.11.2017
  *===================================
  */
- using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using TSmatch.Document;
 using System;
 using System.Collections.Generic;
@@ -18,10 +18,32 @@ namespace TSmatch.Document.Tests
     [TestClass()]
     public class UT_DocumentTests
     {
+        Boot boot = new Boot();
+
+        [TestMethod()]
+        public void UT_Start()
+        {
+            boot.Init();
+
+            var Documents = Document.__Documents();
+            Assert.IsTrue(Documents.Count > 50);
+
+            // test InitialRules
+            string sIR = "InitialRules";
+            Document ir = Documents[sIR];
+            //            ir.
+            Assert.AreEqual(4, ir.i0);
+            Assert.AreEqual(15, ir.il);
+
+            Assert.IsTrue(true);
+
+            FileOp.AppQuit();
+        }
+
         [TestMethod()]
         public void getDoc()
         {
-            Boot boot = new Boot();
+ //13/11           Boot boot = new Boot();
 
             // test 1: getDoc() => TOC
             Document toc = Document.getDoc();   // static getDoc()
@@ -99,26 +121,6 @@ namespace TSmatch.Document.Tests
                 //31/7                FileOp.Delete(doc.FileDirectory, name + ".xlsx");
                 Assert.IsFalse(Document.IsDocExists(name));
             }
-
-            FileOp.AppQuit();
-        }
-
-        [TestMethod()]
-        public void UT_Start()
-        {
-            Boot boot = new Boot();
-
-            var Documents = Document.__Documents();
-            Assert.IsTrue(Documents.Count > 50);
-
-            // test InitialRules
-            string sIR = "InitialRules";
-            Document ir = Documents[sIR];
-            //            ir.
-            Assert.AreEqual(4, ir.i0);
-            Assert.AreEqual(15, ir.il);
-
-            Assert.IsTrue(true);
 
             FileOp.AppQuit();
         }

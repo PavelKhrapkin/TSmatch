@@ -1,7 +1,7 @@
 ﻿/*-------------------------------------------------------------------------------------------------------
  * Document -- works with all Documents in the system basing on TOC - Table Of Content
  * 
- * 13.09.2017  Pavel Khrapkin, Alex Pass, Alex Bobtsov
+ * 13.11.2017  Pavel Khrapkin, Alex Pass, Alex Bobtsov
  *
  *--------- History ----------------  
  * 2013-2015 заложена система управления документами на основе TOC и Штампов
@@ -32,6 +32,7 @@
  * 31.07.17 - read XML file into doc.Body -- не работает!
  *  2.08.17 - bug fix on Start; toc is private static reference now; EOLinTOC field removed
  * 13.09.17 - getLanguage method moved here from Messages
+ * 13.11.17 - Non-static Message adoption
  * -------------------------------------------
  *      METHODS:
  * Start()              - Load from directory TOCdir of TOC all known Document attributes, prepare everithing
@@ -66,12 +67,15 @@ using Decl = TSmatch.Declaration.Declaration;
 using Mtr = match.Matrix.Matr;  // класс для работы с внутренними структурами данных
 using Lib = match.Lib.MatchLib;
 using Log = match.Lib.Log;
-using Msg = TSmatch.Message.Message;
 
 namespace TSmatch.Document
 {
     public class Document
     {
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger("Document");
+        internal Bootstrap.Bootstrap boot;
+        Message.Message Msg;
+
         private static Dictionary<string, Document> Documents = new Dictionary<string, Document>();   //коллекция Документов
         static Dictionary<string, string> Templates = new Dictionary<string, string>();
         static Document toc;
@@ -107,6 +111,9 @@ namespace TSmatch.Document
 
         //        private const int TOC_DIRDBS_COL = 10;  //в первой строке в колонке TOC_DIRDBS_COL записан путь к dirDBs
         //        private const int TOC_LINE = 4;         //строка номер TOL_LINE таблицы ТОС отностися к самому этому документу.
+
+        public Document() { }
+
         public Document(string name)    // конструктор создает пустой Документ с именем name
         { this.name = name; }
         public Document(Document d)     // конструктор - перегрузка для копирования Документа
@@ -128,19 +135,23 @@ namespace TSmatch.Document
 
         #region Start area
         /// <summary>
-        /// Start(TOCdir) - prepare further works with the Documents; setup data from TOC
+        /// Start(boot, Dictionary #Template) - prepare further works with the Documents; setup data from TOC
         /// </summary>
-        /// <param name="FileDir">Directory, Path to TSmatch.xlsx</param>
+        /// <param name="_boot"> - referetne to Bootstrap global data class</param>
+        /// <param name="Dictionary<string,string> Template table of #Template values</param>
         /// <history> 22.1.2016
         /// 12.3.2016 - multilanguage Heders support
         /// 14.3.2016 - Form class support
         /// 19.3.2016 - use EOL method
         /// 30.3.2016 - Start(TOCdir) and getDoc with #template interaction with Bootstrap
         /// 17.4.2016 - tocStart extracted from Start for initial TOC open
+        /// 13.11.2017 - trying to do non-stratic Start
         /// </history>
-        public static void Start(Dictionary<string, string> _Templates)
+        public void Start(Bootstrap.Bootstrap _boot, Dictionary<string, string> _Templates)
         {
             Log.set("Document.Start(#Templates)");
+            boot = _boot;
+            Msg = boot.Msg;
             Templates = _Templates;
             //2/8            Document toc = tocStart(Templates["#TOC"]);
             toc = tocStart(Templates["#TOC"]);
@@ -204,7 +215,7 @@ namespace TSmatch.Document
         }
 
         /// <summary>
-        /// EOL(int tocRow) - setup this Document int numbers EndEOLinTOC, i0, and il - main table borders
+        /// EOL(int tocRow) - setup this Document int valuues i0, and il - main table borders
         /// <para>when TSmatch.xlsx document handled, 'EOL' could be in il TOC column</para>
         /// </summary>
         /// <param name="tocRow">line number of this Document in TOC</param>
@@ -217,7 +228,7 @@ namespace TSmatch.Document
             string str = toc.Body.Strng(tocRow, Decl.DOC_IL);
             if (str == "EOL")
             {
-//12/11         if (type != Decl.TSMATCH) Msg.F("Shouldn't be 'EOL' here in TSmatch/TOC", tocRow);
+                if (type != Decl.TSMATCH) Msg.F("Shouldn't be 'EOL' here in TSmatch/TOC", tocRow);
                 string shN = toc.Body.Strng(tocRow, Decl.DOC_SHEET);
                 Mtr m;
                 if (shN == Decl.DOC_TOC) m = toc.Body;

@@ -1,7 +1,7 @@
 ﻿/*-----------------------------------------------------------------------------------
  * Bootstrap - provide initial start of TSmatch, when necessary - startup procedure
  * 
- *  9.10.2017  Pavel Khrapkin
+ *  13.11.2017  Pavel Khrapkin
  *
  *--- History ---
  * 25.3.2016 started 
@@ -23,7 +23,7 @@
  * 10.09.2017 - MessageBox on top of SplashScreen
  * 12.09.2017 - remove Message.Init and all message related resources handling
  *  6.10.2017 - UT_ for Resource check, cleanup
- *  9.10.2017 - Instance Msg, 
+ * 13.11.2017 - non-static Message adoption 
  *  * --- Unit Tests ---
  * 2017.10.9  - UT_Boot_ResxError, UT_Bootstrap   OK
  * ---------------------------------------------------------------------------
@@ -91,11 +91,14 @@ namespace TSmatch.Bootstrap
 
         public void Init(bool init = true)
         {
-            if (!init) return;
             Log.set("Bootstrap");
+            Msg.SetLanguage("");    // set System Culture
             desktop_path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
             debug_path = desktop_path;
- //12/11           Msg.DDialog = true;
+            TS ts = new TS();
+//13/11            isTeklaActive = ts.IsTeklaActive();
+            if (!init) return;
+
             if (isTeklaActive)
             {   // if Tekla is active - get Path of TSmatch
                 classCAD = new TS();
@@ -123,7 +126,8 @@ namespace TSmatch.Bootstrap
                         {"#Macros", macroDir},
                         {"#Envir",  IFCschema}
                     };
-            Docs.Start(Templates);
+            Docs doc = new Docs();
+            doc.Start(this, Templates);
             docTSmatch = Docs.getDoc();
             //--- iniciate Ifc
             IFCschema = Path.Combine(_TOCdir, @"..\inp\IFC2X3.exp");

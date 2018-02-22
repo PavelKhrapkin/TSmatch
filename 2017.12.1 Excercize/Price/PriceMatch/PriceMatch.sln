@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2027
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PriceMatch", "PriceMatch\PriceMatch.csproj", "{37DFA281-B0D0-44F3-8953-B31AD34EC4FC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UT_PriceMatchTests", "UT_PriceMatchTests\UT_PriceMatchTests.csproj", "{446DA534-7183-4B8C-8C35-C42C26AE341B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{37DFA281-B0D0-44F3-8953-B31AD34EC4FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{37DFA281-B0D0-44F3-8953-B31AD34EC4FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{37DFA281-B0D0-44F3-8953-B31AD34EC4FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{37DFA281-B0D0-44F3-8953-B31AD34EC4FC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{446DA534-7183-4B8C-8C35-C42C26AE341B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{446DA534-7183-4B8C-8C35-C42C26AE341B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{446DA534-7183-4B8C-8C35-C42C26AE341B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{446DA534-7183-4B8C-8C35-C42C26AE341B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B7C64110-01D0-4156-BEB9-EF077AEF811E}
+	EndGlobalSection
+EndGlobal
