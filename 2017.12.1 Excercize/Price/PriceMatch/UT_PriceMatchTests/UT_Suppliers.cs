@@ -1,5 +1,5 @@
 ﻿/* ---------------------------------------------------------
- * UT_Suppliers 2018.02.19 Pavel Khrapkin
+ * UT_Suppliers 2018.02.23 Pavel Khrapkin
  * 
  * Помимо обычного модульного тестирования, используется для
  * заполнения файла Suppliers.xml и SuppliersInit.xmp - 
@@ -31,7 +31,7 @@ namespace PriceMatch.Tests
         Lib Lib;
         Suppliers ss = new Suppliers();
         Supplier supl;
-        SupplierInit ssi;
+        SupplierInit supl_I;
         ProductSet ps;
         psInit psi;
         string path;
@@ -203,7 +203,7 @@ namespace PriceMatch.Tests
             supl.productSets = new List<ProductSet>();
             if (newSupl) AllSupl.Add(supl);
 
-            var supl_I = boot.ssInit.Find(x => x.name == name);
+            supl_I = boot.ssInit.Find(x => x.name == name);
             if(supl_I == null)
             {
                 newSupl_I = true;
@@ -229,6 +229,8 @@ namespace PriceMatch.Tests
             psi.LoadDescriptor = LoadDescr;
             ps.RuleText = rl.ToList();
             ps.Update(psi);
+            supl.productSets.Add(ps);
+            supl_I.pssInit.Add(psi);
         }
 
         [TestMethod()]

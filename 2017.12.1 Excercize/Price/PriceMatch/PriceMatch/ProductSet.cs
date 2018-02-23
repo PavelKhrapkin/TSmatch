@@ -1,7 +1,7 @@
 ﻿/* -----------------------------------------------------------------
  * ProductSet - Set of Products, with their Rules, and PriceList
  * 
- * 22.02.2018 Pavel Khrapkin
+ * 23.02.2018 Pavel Khrapkin
  * 
  * --- History --------
  * 2018.01.09   - exclude Rules, use List<string>RuleText & SectionTab instead
@@ -15,7 +15,7 @@
  * 2018.02.13   - class psInit
  * 2018.02.16   - transfer to PriceMatch
  * 2018.02.18   - add FileName and SheetN fields to psInit, chech IfExist..()
- * 2018.02.22   - SuplName field, Update() methods
+ * 2018.02.23   - SuplName field, Update() methods
  * 
  * UT_ProductSet: UT_Boot, UT_Update, UTsetFields, 
  *                UT_Init_CShars, UT_Init_XML, UT_Init_Excel
@@ -63,10 +63,9 @@ namespace PriceMatch
         public ProductSet(Boot boot) { this.boot = boot; }
         public void Init(Boot boot) { this.boot = boot; }
 
-        public ProductSet Init(string name, Document doc, string date = "")
+        public ProductSet Init(string name, Document doc)
         {
             this.name = name;
-            DateTime.TryParse(date, out this.Date);
             this.doc = doc ?? throw new Exception("No Doc in Excel");
             string ld = doc.LoadDescription;
             var lds = boot.Sect.Parse(ld);
@@ -82,6 +81,7 @@ namespace PriceMatch
                 Products.Add(product);
             }
             RuleText = doc.RuleText;
+            Date = DateTime.Now;
             psMD5 = MD5gen.MD5HashGenerator.GenerateKey(this);
             return this;
         }
@@ -103,7 +103,7 @@ namespace PriceMatch
                 LoadDescription: psi.LoadDescriptor, FirstRow: psi.i0,
                 RuleText: RuleText.ToArray());
             doc = doc.GetDoc(docName);
-            Init(name, doc);
+            Products = Init(name, doc).Products;
             var ss = boot.Suppliers.AllSuppliers;
             Supplier supl = ss.Find(x => x.name == SuplName);
             ProductSet ps = supl.productSets.Find(x => x.name == name);
